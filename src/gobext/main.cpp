@@ -78,8 +78,8 @@ int main(int argc, const char *argv[])
         if(bVerboseOutput)
         {
             std::string strSize = std::to_string(entry.size);
-            std::cout << "  file size:"      << SET_FINFO_LW(14) << std::dec << strSize<< " bytes\n";
             std::cout << "  offset in gob:"  << SET_FINFO_LW((14 - (strSize.size() + 6)) + 11) << std::hex << std::showbase << entry.offset << std::endl;
+            std::cout << "  file size:"      << SET_FINFO_LW(14) << std::dec << strSize<< " bytes\n";
         }
 
         /* Seek to entry offset */

@@ -139,7 +139,7 @@ std::shared_ptr<Material> LoadMaterialFromFile(const std::string& filepath)
 
     if(header.recordCount == 0)
     {
-        std::cerr << "Error MAT's file record count == 0!\n";
+        std::cerr << "Error: MAT file record count == 0!\n";
         return nullptr;
     }
 

@@ -310,8 +310,8 @@ static bool ReplaceMaterialInCndFile(const Material& mat, const std::string& fil
     }
 
     /* Get get patching material pixel data offset and size */
-    std::size_t offMat = 0;
-    std::size_t matSize = 0;
+    std::size_t replMatOff = 0;
+    std::size_t replMatSize = 0;
     for(auto&& matHeader : matHeaders)
     {
         if(matHeader.mipmapCount < 1 || matHeader.texturesPerMipmap < 1)
@@ -331,7 +331,7 @@ static bool ReplaceMaterialInCndFile(const Material& mat, const std::string& fil
         {
             /* Calculate material's mipmap size */
             for(int32_t i = 0; i < matHeader.mipmapCount; i++){
-                matSize += GetMipmapPixelDataSize(matHeader.texturesPerMipmap, matHeader.width, matHeader. height, matHeader.colorInfo.bpp);
+                replMatSize += GetMipmapPixelDataSize(matHeader.texturesPerMipmap, matHeader.width, matHeader. height, matHeader.colorInfo.bpp);
             }
 
             matHeader.width  = mat.width();
@@ -344,11 +344,11 @@ static bool ReplaceMaterialInCndFile(const Material& mat, const std::string& fil
         }
 
         for(int32_t i = 0; i < matHeader.mipmapCount; i++){
-            offMat += GetMipmapPixelDataSize(matHeader.texturesPerMipmap, matHeader.width, matHeader. height, matHeader.colorInfo.bpp);
+            replMatOff += GetMipmapPixelDataSize(matHeader.texturesPerMipmap, matHeader.width, matHeader. height, matHeader.colorInfo.bpp);
         }
     }
 
-    if(offMat >=  nBitmapBufSize || matSize == 0)
+    if(replMatOff >=  nBitmapBufSize || replMatSize == 0)
     {
         std::cerr << "Error cannot replace material in cnd file: material not found!\n";
         return false;
@@ -360,7 +360,7 @@ static bool ReplaceMaterialInCndFile(const Material& mat, const std::string& fil
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /* Open output file stream */
-    std::ofstream ofs(filename + ".tmp", std::ios::out | std::ios::trunc | std::ios::binary);
+    std::ofstream ofs(filename + ".patched", std::ios::out | std::ios::trunc | std::ios::binary);
     if (!ofs.is_open())
     {
         std::cerr << "Error opening cnd file for writing!\n";
@@ -380,13 +380,13 @@ static bool ReplaceMaterialInCndFile(const Material& mat, const std::string& fil
 
         if(!ifs.read(reinterpret_cast<char*>(&buffer[0]), buffer.size()))
         {
-            std::cerr << "Error reading CND file into buffer:" << IosErrorStr(ifs) << "!\n";
+            std::cerr << "Error reading CND file into buffer: " << IosErrorStr(ifs) << "!\n";
             return false;
         }
 
         if(!ofs.write(reinterpret_cast<const char*>(&buffer[0]), buffer.size()))
         {
-            std::cerr << "Error writing buffer to CND file:" << IosErrorStr(ofs) << "!\n";
+            std::cerr << "Error writing buffer to CND file: " << IosErrorStr(ofs) << "!\n";
             return false;
         }
     }
@@ -411,28 +411,37 @@ static bool ReplaceMaterialInCndFile(const Material& mat, const std::string& fil
 // Write material list
     if(!ofs.write(reinterpret_cast<const char*>(&unknown), 4))
     {
-        std::cerr << "Error writing buffer to CND file:" << IosErrorStr(ofs) << "!\n";
+        std::cerr << "Error writing buffer to CND file: " << IosErrorStr(ofs) << "!\n";
         return false;
     }
 
-    /* Write pixel data size */
+    /* Get patching material pixel data size */
+    uint32_t nPatchMatSize = 0;
+    for(int32_t i = 0; i < mat.mipmaps().size(); i++){
+        nPatchMatSize += GetMipmapPixelDataSize(mat.mipmaps().at(i).size(), mat.width(), mat.height(), mat.colorFormat().bpp);
+    }
+
+    /* Calculate new bitmap buffer size */
+    nBitmapBufSize = (nBitmapBufSize - replMatSize) + nPatchMatSize;
+
+    /* Write new pixel data size */
     if(!ofs.write(reinterpret_cast<const char*>(&nBitmapBufSize), 4))
     {
-        std::cerr << "Error writing buffer to CND file:" << IosErrorStr(ofs) << "!\n";
+        std::cerr << "Error writing buffer to CND file: " << IosErrorStr(ofs) << "!\n";
         return false;
     }
 
     /* Write headers */
     if(!ofs.write(reinterpret_cast<const char*>(matHeaders.data()), sizeof(CndMatHeader) * matHeaders.size()))
     {
-        std::cerr << "Error writing material headers to CND file:" << IosErrorStr(ofs) << "!\n";
+        std::cerr << "Error writing material headers to CND file: " << IosErrorStr(ofs) << "!\n";
         return false;
     }
 
     /* Write pixel data until offset of material that's being patched */
-    if(!ofs.write(reinterpret_cast<const char*>(buffer.data()), offMat))
+    if(!ofs.write(reinterpret_cast<const char*>(buffer.data()), replMatOff))
     {
-        std::cerr << "Error writing materials to CND file:" << IosErrorStr(ofs) << "!\n";
+        std::cerr << "Error writing materials to CND file: " << IosErrorStr(ofs) << "!\n";
         return false;
     }
 
@@ -443,16 +452,16 @@ static bool ReplaceMaterialInCndFile(const Material& mat, const std::string& fil
         {
             if(!ofs.write(reinterpret_cast<const char*>(tex.bitmap()->data()), tex.bitmap()->size()))
             {
-                std::cerr << "Error writing new material to CND file:" << IosErrorStr(ofs) << "!\n";
+                std::cerr << "Error writing new material to CND file: " << IosErrorStr(ofs) << "!\n";
                 return false;
             }
         }
     }
 
     /* Write the rest of materials bitmamp data to cnd file */
-    if(!ofs.write(reinterpret_cast<const char*>(&buffer[offMat + matSize]), buffer.size() - (offMat + matSize)))
+    if(!ofs.write(reinterpret_cast<const char*>(&buffer[replMatOff + replMatSize]), buffer.size() - (replMatOff + replMatSize)))
     {
-        std::cerr << "Error writing materials to CND file:" << IosErrorStr(ofs) << "!\n";
+        std::cerr << "Error writing materials to CND file: " << IosErrorStr(ofs) << "!\n";
         return false;
     }
 
@@ -466,19 +475,37 @@ static bool ReplaceMaterialInCndFile(const Material& mat, const std::string& fil
 
         if(!ifs.read(reinterpret_cast<char*>(&buffer[0]), buffer.size()))
         {
-            std::cerr << "Error reading CND file into buffer:" << IosErrorStr(ifs) << "!\n";
+            std::cerr << "Error reading CND file into buffer: " << IosErrorStr(ifs) << "!\n";
             return false;
         }
 
         if(!ofs.write(reinterpret_cast<const char*>(&buffer[0]), buffer.size()))
         {
-            std::cerr << "Error writing buffer to CND file:" << IosErrorStr(ofs) << "!\n";
+            std::cerr << "Error writing buffer to CND file: " << IosErrorStr(ofs) << "!\n";
             return false;
         }
     }
 
+    /* Get patched file size */
+    uint32_t nFileSize = static_cast<uint32_t>(ofs.tellp());
+
+    /* Write file size to the beginning of cnd file*/
+    ofs.seekp(0, std::ios::beg);
+    if(!ofs.write(reinterpret_cast<char*>(&nFileSize), 4))
+    {
+        std::cerr << "Error writing file size to patched CND: " << IosErrorStr(ofs) << "!\n";
+        return false;
+    }
+
+    /* Close IO file stream */
+    ifs.close();
+    ofs.flush();
+    ofs.close();
+
+    /* Rename patched file to original name */
     remove(filename.c_str());
-    std::rename((filename + ".tmp").c_str(), filename.c_str());
+    std::rename((filename + ".patched").c_str(), filename.c_str());
+
     return true;
 }
 

@@ -9,14 +9,14 @@
 #include <vector>
 #include <type_traits>
 
-#if CHAR_BIT != 8
-#error Byte size is not 8 bits!
+#if defined(WIN32) || defined(_WIN32)
+#define OS_WINDOWS 1
 #endif
 
-#if defined(_WIN32) || defined(WIN32)
-    constexpr char PATH_SEP_CH = '\\';
+#ifdef OS_WINDOWS
+    static constexpr char PATH_SEP_CH = '\\';
 #else
-    constexpr char PATH_SEP_CH = '/';
+    static constexpr char PATH_SEP_CH = '/';
 #endif
 
 #ifndef _MSC_VER
@@ -25,11 +25,23 @@
 #define PACKED( class_to_pack ) __pragma( pack(push, 1) ) class_to_pack __pragma( pack(pop) )
 #endif
 
-constexpr size_t BYTE_SIZE = 8;
-using byte_t = uint8_t;
 
-using Bitmap = std::vector<byte_t>;
-using BitmapPtr = std::shared_ptr<std::vector<byte_t>>;
+static_assert(CHAR_BIT == 8, "byte bit count != 8");
+static constexpr std::size_t CHAR_BYTE   = 1;
+static constexpr std::size_t INT8_BYTE   = 1;
+static constexpr std::size_t INT16_BYTE  = 2;
+static constexpr std::size_t INT32_BYTE  = 4;
+static constexpr std::size_t INT64_BYTE  = 8;
+static constexpr std::size_t FLOAT_BYTE  = 4;
+static constexpr std::size_t DOUBLE_BYTE = 8;
+static constexpr std::size_t BYTE_BIT = CHAR_BIT;
+
+using byte_t = uint8_t;
+using ByteArray = std::vector<byte_t>;
+
+using Bitmap = ByteArray;
+using BitmapPtr = std::shared_ptr<Bitmap>;
+
 
 
 template <typename T,
@@ -43,7 +55,7 @@ inline R Abs(T val)
 
 inline uint32_t BBS(uint32_t bits) //Bits byte size
 {
-    return bits / BYTE_SIZE;
+    return bits / BYTE_BIT;
 }
 
 inline uint32_t GetBitmapSize(int32_t width, int32_t height, uint32_t bpp)
@@ -59,7 +71,7 @@ inline uint32_t GetRowSize(int32_t width, uint32_t bpp)
 inline uint32_t GetMipmapPixelDataSize(uint32_t nMipmaps, int32_t width, int32_t height, uint32_t bpp)
 {
     uint32_t size = GetBitmapSize(width, height, bpp);
-    while( 0 < (int32_t) --nMipmaps)
+    while( 0 < static_cast<int32_t>(--nMipmaps))
     {
         width = width >> 1;
         height = height >> 1;
@@ -73,7 +85,7 @@ inline uint32_t RGBMask(uint32_t bitsPerColor, uint32_t colorLeftShift)
     return ((1 << bitsPerColor ) - 1) << colorLeftShift;
 }
 
-std::string GetFileNameFromPath(const std::string& path)
+inline std::string GetFileNameFromPath(const std::string& path)
 {
     std::string name = path;
 
@@ -90,25 +102,26 @@ std::string GetFileNameFromPath(const std::string& path)
     return name;
 }
 
-std::string GetNativePath(std::string path)
+inline std::string GetNativePath(std::string path)
 {
-#if defined(_WIN32) || defined(WIN32)
-    char nnPathSep = '/';
+#ifdef OS_WINDOWS
+    static constexpr char notNativePathSep = '/';
 #else
-    char nnPathSep = '\\';
+    static constexpr char notNativePathSep = '\\';
 #endif
 
-    auto nPos = path.find(nnPathSep);
-    while(std::string::npos != nPos)
-    {
-        path[nPos] = PATH_SEP_CH;
-        nPos = path.find(nnPathSep);
-    }
+    std::replace_if
+    (
+        path.begin(),
+        path.end(),
+        [](char ch) { return ch == notNativePathSep;},
+        PATH_SEP_CH
+    );
 
     return path;
 }
 
-std::string IosErrorStr(const std::ios& ios)
+inline std::string IosErrorStr(const std::ios& ios)
 {
     std::string error = "No error";
     if(ios.eof()){

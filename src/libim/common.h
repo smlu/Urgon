@@ -94,12 +94,31 @@ inline std::string GetFileNameFromPath(const std::string& path)
         name = name.substr(sep + 1, name.size() - sep - 1);
     }
 
+    return name;
+}
+
+inline std::string GetBaseNameFromPath(const std::string& path)
+{
+    std::string name = GetFileNameFromPath(path);
+
     size_t dot = name.find_last_of(".");
     if (dot != std::string::npos) {
         name = name.substr(0, dot);
     }
 
     return name;
+}
+
+inline std::string GetFileExtensionFromPath(const std::string& path)
+{
+    std::string ext = GetFileNameFromPath(path);
+
+    size_t dot = ext.find_last_of(".");
+    if (dot == std::string::npos) {
+        return "";
+    }
+
+    return  ext.substr(dot + 1);
 }
 
 inline std::string GetNativePath(std::string path)

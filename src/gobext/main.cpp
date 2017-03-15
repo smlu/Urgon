@@ -67,7 +67,7 @@ int main(int argc, const char *argv[])
     auto gobDir = LoadGobFromFile(inputFile);
     if(gobDir)
     {
-        outdir += (outdir.empty() ? "" : std::string(&PATH_SEP_CH, 1)) + GetFileNameFromPath(inputFile) + "_GOB" + PATH_SEP_CH;
+        outdir += (outdir.empty() ? "" : std::string(&PATH_SEP_CH, 1)) + GetBaseNameFromPath(inputFile) + "_GOB" + PATH_SEP_CH;
         MKDIR(outdir.c_str());
     }
 

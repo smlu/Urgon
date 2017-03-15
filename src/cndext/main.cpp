@@ -161,7 +161,7 @@ int main(int argc, const char *argv[])
         if(!materials.empty())
         {
             std::cout << "Found materials: " << materials.size()<< std::endl;
-            outdir += (outdir.empty() ? "" : std::string(PATH_SEP_CH,1)) + GetFileNameFromPath(inputFile);
+            outdir += (outdir.empty() ? "" : std::string(PATH_SEP_CH,1)) + GetBaseNameFromPath(inputFile);
             MKDIR(outdir.c_str());
 
             matOutPath = outdir + PATH_SEP_CH + "mat";
@@ -198,7 +198,7 @@ int main(int argc, const char *argv[])
                 if(bConvertMatToBmp)
                 {
                     std::string sufix = (mat.mipmaps().size() < 2) ? ".bmp" : "_" + std::to_string(mmIdx) + ".bmp";
-                    SaveBmpToFile(bmpOutPath + PATH_SEP_CH + GetFileNameFromPath(mat.name())+ sufix, mipmap.at(0).toBmp()); // extract first texture
+                    SaveBmpToFile(bmpOutPath + PATH_SEP_CH + GetBaseNameFromPath(mat.name())+ sufix, mipmap.at(0).toBmp()); // extract first texture
                 }
 
                 mmIdx++;

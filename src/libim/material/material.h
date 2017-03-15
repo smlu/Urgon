@@ -9,7 +9,7 @@
 #include "common.h"
 
 
-using Mipmap = std::vector<Texture>;
+struct Mipmap : public std::vector<Texture>{};
 
 class Material
 {

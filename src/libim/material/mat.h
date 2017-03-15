@@ -26,7 +26,7 @@ struct MatHeader
     int recordCount;        // Number of MAT records
     int mipmapCount;        // Number of mipmaps
 
-    struct ColorFormat colorInfo;
+    ColorFormat colorInfo;
 };
 
 struct MatRecordHeader

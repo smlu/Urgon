@@ -8,8 +8,11 @@
 #include <vector>
 
 #include "common.h"
+#include "io/filestream.h"
 
 constexpr uint16_t BMP_TYPE = 0x4D42;
+
+#ifndef OS_WINDOWS
 enum BV5Compression : uint32_t
 {
     BI_RGB            = 0,
@@ -20,6 +23,7 @@ enum BV5Compression : uint32_t
     BI_PNG            = 5,
     BI_ALPHABITFIELDS = 6
 };
+#endif
 
 PACKED(
 typedef struct {
@@ -44,7 +48,11 @@ typedef struct {
   int32_t         height;
   uint16_t        planes;
   uint16_t        bitCount;
+#ifdef OS_WINDOWS
+  uint32_t        compression;
+#else
   BV5Compression  compression;
+#endif
   uint32_t        sizeImage;
   int32_t         X_PelsPerMeter;
   int32_t         Y_PelsPerMeter;
@@ -73,7 +81,7 @@ typedef struct {
 typedef struct {
     BitmapFileHeader header{};
     BitmapV5Header info{};
-    std::shared_ptr<Bitmap> pixelData;
+    BitmapPtr pixelData;
 } Bmp;
 
 
@@ -119,34 +127,21 @@ typedef struct {
 
 static bool SaveBmpToFile(const std::string& filename, const Bmp& bmp)
 {
-    std::ofstream ofs(filename, std::ios::out | std::ios::binary);
-    if (!ofs.is_open())
+    try
     {
-        std::cerr << "Error opening file stream for saving bmp!\n\n";
+        OutputFileStream ofs(filename);
+        ofs.write(reinterpret_cast<const byte_t*>(&bmp.header), sizeof(bmp.header));
+        ofs.write(reinterpret_cast<const byte_t*>(&bmp.info),   sizeof(bmp.info));
+        ofs.write(reinterpret_cast<const byte_t*>(bmp.pixelData->data()), bmp.pixelData->size());
+
+        ofs.close();
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "An exception was thrwon while writing BMP to file: " << e.what() << "!\n";
         return false;
     }
-
-    if(!ofs.write(reinterpret_cast<const char*>(&bmp.header), sizeof(bmp.header)))
-    {
-        std::cerr << "Error writing bmp file header: " << IosErrorStr(ofs) << "!\n";
-        return false;
-    }
-
-    if(!ofs.write(reinterpret_cast<const char*>(&bmp.info), sizeof(bmp.info)))
-    {
-        std::cerr << "Error writing bmp info header: " << IosErrorStr(ofs) << "!\n";
-        return false;
-    }
-
-    if(!ofs.write(reinterpret_cast<const char*>(&bmp.pixelData->at(0)), bmp.pixelData->size()))
-    {
-        std::cerr << "Error writing bmp bitmap data: " << IosErrorStr(ofs) << "!\n";
-        return false;
-    }
-
-    ofs.flush();
-    ofs.close();
-    return true;
 }
 
 #endif // BMP_H

@@ -1,19 +1,26 @@
 cmake_minimum_required (VERSION 3.6 FATAL_ERROR)
 project (ProjectMarduk CXX)
 
+# Global constants
+set(PM_LIBIM "libim")
+set(PM_LIBCND "libcnd")
+set(PM_GOBEXT "gobext")
+set(PM_CNDEXT "cndext")
+
 # Compiler flags
 set(CMAKE_CXX_STANDARD 14) # c++14
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(MINGW)
-  add_definitions("-mno-ms-bitfields")
+  add_definitions("-mno-ms-bitfields") # TODO: this is bad
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 endif()
 
 set(SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 include_directories ("${SOURCE_DIR}")
 
-# LibIm source
+# LibIM source
 include_directories("${SOURCE_DIR}/libim/")
 file(GLOB_RECURSE
   LIBIM_HEADER_FILES
@@ -40,22 +47,31 @@ file(GLOB_RECURSE
   [FOLLOW_SYMLINKS]
 )
 
-# CND Extractor
-set(CNDEXT_SRC_FILES "${SOURCE_DIR}/cndext/main.cpp")
-add_executable ("cndext"
-    ${CNDEXT_SRC_FILES}
+# LibIM
+add_library(${PM_LIBIM} STATIC
     ${LIBIM_HEADER_FILES}
     ${LIBIM_SRC_FILES}
+)
+set_target_properties(${PM_LIBIM}  PROPERTIES PREFIX  "")
+
+# CND utils 
+add_library(${PM_LIBCND} OBJECT
     ${CMDUTILS_HEADER_FILES}
     ${CMDUTILS_SRC_FILES}
 )
 
+# CND Extractor
+set(CNDEXT_SRC_FILES "${SOURCE_DIR}/cndext/main.cpp")
+add_executable (${PM_CNDEXT}
+    ${CNDEXT_SRC_FILES}
+    $<TARGET_OBJECTS:${PM_LIBCND}>
+)
+target_link_libraries(${PM_CNDEXT} ${PM_LIBIM})
+
 # GOB Extractor
 set(GOBEXT_SRC_FILES "${SOURCE_DIR}/gobext/main.cpp")
-add_executable ("gobext"
+add_executable (${PM_GOBEXT}
     ${GOBEXT_SRC_FILES}
-    ${LIBIM_HEADER_FILES}
-    ${LIBIM_SRC_FILES}
-    ${CMDUTILS_HEADER_FILES}
-    ${CMDUTILS_SRC_FILES}
+    $<TARGET_OBJECTS:${PM_LIBCND}>
 )
+target_link_libraries(${PM_GOBEXT} ${PM_LIBIM})

@@ -1,28 +1,34 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef LIBIM_COMMON_H
+#define LIBIM_COMMON_H
+#include <algorithm>
 #include <cstdint>
-#include <cstring>
+#include <cstdio>
+#include <string>
 #include <climits>
 #include <ios>
 #include <memory>
 #include <string>
 #include <vector>
 #include <type_traits>
+#include <utility>
 
 #if defined(WIN32) || defined(_WIN32)
-#define OS_WINDOWS 1
+#  define OS_WINDOWS 1
+#  include <windows.h>
 #endif
 
-#ifdef OS_WINDOWS
-    static constexpr char PATH_SEP_CH = '\\';
-#else
-    static constexpr char PATH_SEP_CH = '/';
+#if !defined(OS_WINDOWS) || defined(__MINGW32__)
+#  include <sys/stat.h>
+#endif
+
+#ifdef PACKED
+#  undef PACKED
 #endif
 
 #ifndef _MSC_VER
-#define PACKED( class_to_pack ) class_to_pack __attribute__((packed, aligned(1)))
+#  define PACKED( class_to_pack ) class_to_pack __attribute__((packed, aligned(1)))
 #else
-#define PACKED( class_to_pack ) __pragma( pack(push, 1) ) class_to_pack __pragma( pack(pop) )
+#  define PACKED( class_to_pack ) __pragma( pack(push, 1) ) class_to_pack __pragma( pack(pop) )
 #endif
 
 
@@ -42,64 +48,133 @@ using ByteArray = std::vector<byte_t>;
 using Bitmap = ByteArray;
 using BitmapPtr = std::shared_ptr<Bitmap>;
 
+inline BitmapPtr MakeBitmapPtr(std::size_t size) {
+    return std::make_shared<Bitmap>(size);
+}
+
 
 
 template <typename T,
     typename R = std::enable_if_t<std::is_integral<T>::value,
-        typename std::make_unsigned<T>::type>>
-inline R Abs(T val)
+    typename std::make_unsigned<T>::type>>
+inline constexpr R Abs(T val)
 {
     R mask = val >> ((2 << sizeof(val)) - 1);
     return (mask ^ val) - mask;
 }
 
-inline uint32_t BBS(uint32_t bits) //Bits byte size
+inline constexpr uint32_t BBS(uint32_t bits) //Bits byte size
 {
     return bits / BYTE_BIT;
 }
 
-inline uint32_t GetBitmapSize(int32_t width, int32_t height, uint32_t bpp)
+inline constexpr uint32_t GetBitmapSize(int32_t width, int32_t height, uint32_t bpp)
 {
-    return Abs(height) * (Abs(width) * BBS(bpp));
+    return Abs(height * width) * BBS(bpp);
 }
 
-inline uint32_t GetRowSize(int32_t width, uint32_t bpp)
+inline constexpr uint32_t GetRowSize(int32_t width, uint32_t bpp)
 {
     return Abs(width) * BBS(bpp);
 }
 
-inline uint32_t GetMipmapPixelDataSize(uint32_t nMipmaps, int32_t width, int32_t height, uint32_t bpp)
+inline constexpr uint32_t GetMipmapPixelDataSize(std::size_t numTextures, int32_t width, int32_t height, uint32_t bpp)
 {
-    uint32_t size = GetBitmapSize(width, height, bpp);
-    while( 0 < static_cast<int32_t>(--nMipmaps))
+    uint32_t size = 0;
+    while(numTextures --> 0)
     {
-        width = width >> 1;
-        height = height >> 1;
         size += GetBitmapSize(width, height, bpp);
+        width  = width  >> 1;
+        height = height >> 1;
     }
     return size;
 }
 
-inline uint32_t RGBMask(uint32_t bitsPerColor, uint32_t colorLeftShift)
+inline constexpr uint32_t RGBMask(uint32_t bitsPerColor, uint32_t colorLeftShift)
 {
-    return ((1 << bitsPerColor ) - 1) << colorLeftShift;
+    return ((1 << bitsPerColor) - 1) << colorLeftShift;
 }
 
-inline std::string GetFileNameFromPath(const std::string& path)
+inline std::vector<std::string> SplitString(const std::string& string, const std::string& delim)
+{
+    std::vector<std::string> tokens;
+
+    std::size_t prevPos = 0;
+    std::size_t pos = 0;
+
+    while ((pos = string.find(delim, prevPos)) != std::string::npos)
+    {
+        std::string token = string.substr(prevPos, pos - prevPos);
+        tokens.emplace_back(std::move(token));
+        prevPos = ++pos;
+    }
+
+    if(prevPos < string.size()) {
+        tokens.push_back(string.substr(prevPos));
+    }
+
+    return tokens;
+}
+
+inline std::vector<std::string> SplitString(const std::string& string, char delim)
+{
+    return SplitString(string, std::string(1, delim));
+}
+
+inline constexpr char PathSeparator()
+{
+#ifdef OS_WINDOWS
+    return '\\';
+#else
+    return '/';
+#endif
+}
+
+inline constexpr char NoneNativePathSeparator()
+{
+#ifdef OS_WINDOWS
+    return '/';
+#else
+    return '\\';
+#endif
+}
+
+inline bool IsNativePath(const std::string& path)
+{
+    return path.find(NoneNativePathSeparator()) == std::string::npos;
+}
+
+inline std::string GetNativePath(std::string path)
+{
+    std::replace_if
+    (
+        path.begin(),
+        path.end(),
+        [](char ch) { return ch == NoneNativePathSeparator(); },
+        PathSeparator()
+    );
+
+    return path;
+}
+
+inline std::string GetFileName(const std::string& path)
 {
     std::string name = path;
+    if(!IsNativePath(name)) {
+        name = GetNativePath(name);
+    }
 
-    size_t sep = name.find_last_of(PATH_SEP_CH);
-    if (sep != std::string::npos){
+    size_t sep = name.find_last_of(PathSeparator());
+    if (sep != std::string::npos) {
         name = name.substr(sep + 1, name.size() - sep - 1);
     }
 
     return name;
 }
 
-inline std::string GetBaseNameFromPath(const std::string& path)
+inline std::string GetBaseName(const std::string& path)
 {
-    std::string name = GetFileNameFromPath(path);
+    std::string name = GetFileName(path);
 
     size_t dot = name.find_last_of(".");
     if (dot != std::string::npos) {
@@ -109,35 +184,107 @@ inline std::string GetBaseNameFromPath(const std::string& path)
     return name;
 }
 
-inline std::string GetFileExtensionFromPath(const std::string& path)
+inline std::string GetFileExtension(const std::string& path)
 {
-    std::string ext = GetFileNameFromPath(path);
-
-    size_t dot = ext.find_last_of(".");
-    if (dot == std::string::npos) {
+    size_t dotPos = path.find_last_of(".");
+    if (dotPos == std::string::npos) {
         return "";
     }
 
-    return  ext.substr(dot + 1);
+    return  path.substr(dotPos + 1);
 }
 
-inline std::string GetNativePath(std::string path)
+inline bool IsFilePath(const std::string& path)
+{
+    return path.find_last_of(".") != std::string::npos;
+}
+
+inline bool FileExists(const std::string& fileName)
+{
+    if(fileName.empty()) {
+        return false;
+    }
+    else if(!IsNativePath(fileName)) {
+        return FileExists(GetNativePath(fileName));
+    }
+
+    struct stat buffer;
+    return stat(fileName.c_str(), &buffer) == 0;
+}
+
+inline bool DirExists(const std::string& dirPath)
+{
+    if(dirPath.empty()) {
+        return false;
+    }
+    else if(!IsNativePath(dirPath)) {
+        return DirExists(GetNativePath(dirPath));
+    }
+
+#ifdef OS_WINDOWS
+    DWORD dwAttrib = GetFileAttributesA(dirPath.c_str());    
+    return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
+         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+#else
+    struct stat sb;
+    return stat(dirPath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode);
+#endif
+}
+
+inline bool MakeDir(const std::string& dirName)
 {
 #ifdef OS_WINDOWS
-    static constexpr char notNativePathSep = '/';
-#else
-    static constexpr char notNativePathSep = '\\';
+    return CreateDirectoryA(dirName.c_str(), NULL);
+# else
+    return mkdir(dirName.c_str(), 0775) == 0;
 #endif
+}
 
-    std::replace_if
-    (
-        path.begin(),
-        path.end(),
-        [](char ch) { return ch == notNativePathSep;},
-        PATH_SEP_CH
-    );
+static  bool MakePath(const std::string& path, bool createFile = false)
+{
+    if(path.empty()) {
+        return false;
+    }
+    else if(!IsNativePath(path)) {
+        return MakePath(GetNativePath(path));
+    }
 
-    return path;
+    std::string currentPath = path.at(0) == PathSeparator() ? std::string(1, PathSeparator()) : "";
+
+    auto pathParts = SplitString(path, PathSeparator());
+    for(auto&& part : pathParts)
+    {
+        currentPath += std::move(part);
+        if(!IsFilePath(currentPath))
+        {
+            if(!DirExists(currentPath) && !MakeDir(currentPath)) {
+                return false;
+            }
+        }
+        else if(createFile && !FileExists(currentPath)) {
+            // TODO: make file
+            break;
+        }
+
+        currentPath += std::string(1, PathSeparator());
+    }
+
+    return true;
+}
+
+inline bool RemoveFile(const std::string& file)
+{
+    return remove(file.c_str()) == 0;
+}
+
+inline bool RenameFile(const std::string& from, const std::string& to, bool override = true)
+{
+    if(FileExists(to) && !override) {
+        return false;
+    }
+
+    RemoveFile(to);
+    return std::rename(from.c_str(), to.c_str()) == 0;
 }
 
 inline std::string IosErrorStr(const std::ios& ios)
@@ -145,7 +292,8 @@ inline std::string IosErrorStr(const std::ios& ios)
     std::string error = "No error";
     if(ios.eof()){
         error = "End of stream reached";
-    } else if(ios.bad()) {
+    }
+    else if(ios.bad()) {
         error = "I/O stream error!";
     }
     else if(ios.fail()) {
@@ -155,4 +303,4 @@ inline std::string IosErrorStr(const std::ios& ios)
     return error;
 }
 
-#endif // COMMON_H
+#endif // LIBIM_COMMON_H

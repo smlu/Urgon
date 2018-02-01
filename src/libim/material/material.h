@@ -7,6 +7,7 @@
 
 #include "texture.h"
 #include "common.h"
+#include "../io/stream.h"
 
 
 struct Mipmap : public std::vector<Texture>{};
@@ -128,7 +129,7 @@ inline Bitmap::const_iterator CopyMipmapFromBuffer(Mipmap& mipmap, const Bitmap&
 
         /* Init texture bitmap buffer */
         uint32_t bitmapSize = GetBitmapSize(texWidth, texHeight, tex.colorInfo().bpp);
-        auto bitmap = std::make_shared<Bitmap>(bitmapSize);
+        auto bitmap = MakeBitmapPtr(bitmapSize);
 
         /* Copy texture's bitmap from buffer */
         itBitmapEnd = std::next(itBitmapBegin, bitmapSize);
@@ -167,6 +168,23 @@ inline Mipmap MoveMipmapFromBuffer(Bitmap& buffer, uint32_t textureCount, uint32
 
         buffer.erase(buffer.begin(), itBitmapEnd);
         tex.setBitmap(std::move(bitmap));
+        mipmap.emplace_back(std::move(tex));
+    }
+
+    return mipmap;
+}
+
+template<> inline Mipmap Stream::read<Mipmap, uint32_t, uint32_t, uint32_t, const ColorFormat&>(uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo) const
+{
+    Mipmap mipmap;
+    for(uint32_t mmIdx = 0; mmIdx < textureCount; mmIdx++) // Mipmap's textures
+    {
+        /* Calculate texture size according to the mipmap index */
+        uint32_t texWidth  = width >> mmIdx;
+        uint32_t texHeight = height >> mmIdx;
+
+        /* Read Texture */
+        auto tex = this->read<Texture, uint32_t, uint32_t, const ColorFormat&>(texWidth, texHeight, colorInfo);
         mipmap.emplace_back(std::move(tex));
     }
 

@@ -8,6 +8,7 @@
 #include "bmp.h"
 #include "colorformat.h"
 #include "common.h"
+#include "io/stream.h"
 
 class Texture
 {
@@ -136,7 +137,7 @@ public:
 
     Bmp toBmp() const
     {
-        uint32_t matBitdataSize = GetBitmapSize(this->width(), this->height(), m_colorInfo.bpp);
+        uint32_t matBitdataSize = GetBitmapSize(width(), height(), m_colorInfo.bpp);
 
         Bmp bmp;
         bmp.header.type    = BMP_TYPE;
@@ -144,11 +145,11 @@ public:
         bmp.header.size    = bmp.header.offBits + matBitdataSize;
 
         bmp.info.size        = sizeof(BitmapV5Header);
-        bmp.info.width       = this->width();
-        bmp.info.height      = - this->height(); // flip image
+        bmp.info.width       = width();
+        bmp.info.height      = - (height()); // flip image
         bmp.info.planes      = 1;
         bmp.info.bitCount    = m_colorInfo.bpp;
-        bmp.info.compression = m_colorInfo.colorMode ? BI_BITFIELDS : BI_ALPHABITFIELDS;
+        bmp.info.compression = BI_BITFIELDS; //m_colorInfo.colorMode ? BI_BITFIELDS : BI_ALPHABITFIELDS;
         bmp.info.sizeImage   = matBitdataSize;
         bmp.info.redMask     = RGBMask(m_colorInfo.redBPP  , m_colorInfo.RedShl);
         bmp.info.greenMask   = RGBMask(m_colorInfo.greenBPP, m_colorInfo.GreenShl);
@@ -164,8 +165,25 @@ private:
     uint32_t m_height   = 0;
     uint32_t m_rowSize  = 0;
     //uint32_t m_rowWidth = 0; // in jones engine row width is defined as rowSize / Bitdepth in bytes
-    ColorFormat m_colorInfo{};
-    BitmapPtr m_bitmap = nullptr;
+    ColorFormat m_colorInfo;
+    BitmapPtr m_bitmap;
 };
+
+
+/* Stream template specialization */
+template<> inline Texture Stream::read<Texture, uint32_t, uint32_t, const ColorFormat&>(uint32_t width, uint32_t height, const ColorFormat& colorInfo) const
+{
+    Texture tex;
+    tex.setWidth(width)
+       .setHeight(height)
+       .setColorInfo(colorInfo)
+       .setRowSize(GetRowSize(height, tex.colorInfo().bpp));
+
+    /* Read bitmap data from stream */
+    uint32_t bitmapSize = GetBitmapSize(tex.width(), tex.height(), tex.colorInfo().bpp);
+    tex.setBitmap(read<BitmapPtr>(bitmapSize));
+
+    return tex;
+}
 
 #endif // TEXTURE_H

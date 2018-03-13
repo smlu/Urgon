@@ -95,38 +95,9 @@ static constexpr std::array<char, 1216> CopyrightNotice = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-struct CndMatHeader
+CndHeader libim::CND::LoadHeader(const InputStream& istream)
 {
-    char name[64];
-    int width;
-    int height;
-    int mipmapCount;
-    int texturesPerMipmap;
-    struct ColorFormat colorInfo;
-};
-
-
-/* Stream class template functions specialization */
-template<> inline CndHeader Stream::read<CndHeader>() const
-{
-    CndHeader cndHeader;
-    auto nRead = this->readsome(reinterpret_cast<byte_t*>(&cndHeader), sizeof(cndHeader));
-    if(nRead != sizeof(cndHeader)) {
-        throw StreamError("Error reading CndHeader from stream!");
-    }
+    CndHeader cndHeader = istream.read<CndHeader>();
 
     /* Verify file copyright notice  */
     //if(strncmp(cndHeader.copyright, &CND_COPYRIGHT[0], CND_COPYRIGHT.size() - 1))
@@ -140,43 +111,6 @@ template<> inline CndHeader Stream::read<CndHeader>() const
     }
 
     return cndHeader;
-}
-
-template<> inline Stream& Stream::write(const CndHeader& cndHeader)
-{
-    auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(&cndHeader), sizeof(cndHeader));
-    if(nWritten != sizeof(cndHeader)) {
-        throw StreamError("Error writing CndHeader to stream!");
-    }
-
-    return *this;
-}
-
-template<> inline CndMatHeader Stream::read<CndMatHeader>() const
-{
-    CndMatHeader matHeader;
-    auto nRead = this->readsome(reinterpret_cast<byte_t*>(&matHeader), sizeof(matHeader));
-    if(nRead != sizeof(matHeader)) {
-        throw StreamError("Error reading CndMatHeader from stream!");
-    }
-
-    return matHeader;
-}
-
-template<> inline Stream& Stream::write(const CndMatHeader& matHeader)
-{
-    auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(&matHeader), sizeof(matHeader));
-    if(nWritten != sizeof(matHeader)) {
-        throw StreamError("Error writing CndMatHeader to stream!");
-    }
-
-    return *this;
-}
-
-
-CndHeader libim::CND::LoadHeader(InputStream& istream)
-{
-    return istream.read<CndHeader>();
 }
 
 uint32_t libim::CND::GetMatSectionOffset(const CndHeader& header)
@@ -194,7 +128,7 @@ std::vector<Material> libim::CND::LoadMaterials(const InputStream& istream)
         std::vector<Material> materials;
 
         /* Read cnd file header */
-        auto cndHeader = istream.read<CndHeader>();
+        auto cndHeader = LoadHeader(istream);
 
         /* Return if no materials are present in file*/
         if(cndHeader.numMaterials < 1)
@@ -277,7 +211,7 @@ bool libim::CND::ReplaceMaterial(const Material& mat, const std::string& cndFile
         InputFileStream ifstream(cndFile);
 
         /* Read cnd file header */
-        auto cndHeader = ifstream.read<CndHeader>();
+        auto cndHeader = LoadHeader(ifstream);
 
         /* If no materials are present in file, return */
         if(cndHeader.numMaterials < 1)
@@ -416,24 +350,3 @@ bool libim::CND::ReplaceMaterial(const Material& mat, const std::string& cndFile
         return false;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

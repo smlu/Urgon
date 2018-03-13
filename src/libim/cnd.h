@@ -22,7 +22,6 @@
 namespace libim {
 namespace CND {
 
-
 //PACKED(
 struct CndHeader
 {
@@ -66,8 +65,18 @@ struct CndHeader
     uint32_t worldSoundUnknown; // Size of sound data
 };//);
 
+struct CndMatHeader
+{
+    char name[64];
+    int width;
+    int height;
+    int mipmapCount;
+    int texturesPerMipmap;
+    ColorFormat colorInfo;
+};
 
-CndHeader LoadHeader(InputStream& istream);
+
+CndHeader LoadHeader(const InputStream& istream);
 
 uint32_t GetMatSectionOffset(const CndHeader& header);
 std::vector<Material> LoadMaterials(const InputStream& istream);

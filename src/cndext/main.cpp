@@ -30,7 +30,6 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
 
 int main(int argc, const char *argv[])
 {
-
     Options opt(argc, argv);
 
     if(argc < 2 ||

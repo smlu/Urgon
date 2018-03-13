@@ -131,7 +131,7 @@ public:
     /* Write from stream. read stream from offset to the ennd */
     virtual Stream& write(const Stream& istream, std::size_t offset)
     {
-        return write(istream, offset, istream.size() -1);
+        return write(istream, offset, istream.size() - 1);
     }
     
     virtual Stream& write(const Stream& istream, std::size_t offsetBegin, std::size_t offsetEnd)
@@ -200,12 +200,26 @@ protected:
 
 private:
     template <typename T> struct tag {};
-    template <typename T> Stream& _write(const T&, tag<T>&&) = delete;
-    template <typename T> Stream& _write(T&&, tag<T>&&) = delete;
-    template <typename T> T _read(tag<T>&&) const = delete;
+
     template <typename T> T _read(std::size_t lenHint, tag<T>&&) const = delete;
     template <typename T, typename ...Args> T _read(Args&& ..., tag<T>&&) const = delete;
 
+    /* Delete non-POD type version */
+    template <typename T, typename std::enable_if<!std::is_pod<T>::value, int>::type = 0>
+    T _read(tag<T>&&) const = delete;
+
+    template <typename T>
+    typename std::enable_if<!std::is_pod<T>::value, Stream>::type&
+    _write(const T&, tag<T>&&) = delete;
+
+    /* POD type sepcialization */
+    template <typename T, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
+    T _read(tag<T>&&) const;
+
+    template <typename T, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
+    Stream& _write(const T&, tag<T>&&);
+
+    /* std::unique_ptr specialization */
     template <typename T>
     std::unique_ptr<T> _read(tag<std::unique_ptr<T>>&&) const;
 
@@ -215,6 +229,7 @@ private:
     template <typename T>
     Stream& _write(const std::unique_ptr<T>& ptr, tag<std::unique_ptr<T>>&&);
 
+     /* std::shared_ptr specialization */
     template <typename T>
     std::shared_ptr<T> _read(tag<std::shared_ptr<T>>&&) const ;
 
@@ -224,6 +239,7 @@ private:
     template <typename T>
     Stream& _write(const std::shared_ptr<T>& ptr, tag<std::shared_ptr<T>>&&);
 
+     /* std::vector specialization */
     template<typename T, typename A, typename std::enable_if_t<std::is_pod<T>::value, int> = 0>
     std::vector<T, A> _read(std::size_t lenHint, tag<std::vector<T, A>>&&) const;
 
@@ -270,6 +286,28 @@ private:
 
 
 
+template <typename T, typename std::enable_if<std::is_pod<T>::value, int>::type>
+T Stream::_read(tag<T>&&) const
+{
+    T pod;
+    auto nRead = this->readsome(reinterpret_cast<byte_t*>(&pod), sizeof(T));
+    if(nRead != sizeof(T)) {
+          throw StreamError("Error reading POD from stream!");
+    }
+
+    return pod;
+}
+
+template <typename T, typename std::enable_if<std::is_pod<T>::value, int>::type>
+Stream& Stream::_write(const T& pod, tag<T>&&)
+{
+    auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(&pod), sizeof(pod));
+    if(nWritten != sizeof(pod)) {
+        throw StreamError("Error writing POD to stream!");
+    }
+
+    return *this;
+}
 
 template<> inline char Stream::read<char>() const
 {

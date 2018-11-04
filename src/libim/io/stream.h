@@ -173,7 +173,7 @@ public:
         return this->seek(this->size() -1);
     }
 
-    bool eos() const // End of Stream
+    bool atEnd() const // End of Stream
     {
         return tell() >= size();
     }

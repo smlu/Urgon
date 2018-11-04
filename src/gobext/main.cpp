@@ -122,7 +122,7 @@ bool ExtractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outD
             std::size_t offEntryEnd = entry.offset + entry.size;
             std::size_t nWritten = 0;
 
-            while(gobDir->stream->tell() < offEntryEnd && !gobDir->stream->eos())
+            while(gobDir->stream->tell() < offEntryEnd && !gobDir->stream->atEnd())
             {
                 if(gobDir->stream->tell() + buffer.size() >= offEntryEnd) {
                     buffer.resize(offEntryEnd - gobDir->stream->tell());

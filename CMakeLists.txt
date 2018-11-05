@@ -8,7 +8,7 @@ set(PM_GOBEXT "gobext")
 set(PM_CNDEXT "cndext")
 
 # Compiler flags
-set(CMAKE_CXX_STANDARD 14) # c++14
+set(CMAKE_CXX_STANDARD 17) # c++17
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

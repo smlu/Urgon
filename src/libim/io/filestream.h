@@ -22,7 +22,7 @@ public:
     };
 
     explicit FileStream(std::string filePath, Mode mode = ReadWrite);
-    virtual ~FileStream();
+    virtual ~FileStream() override;
 
     virtual void seek(std::size_t position) const override;
     virtual std::size_t size() const override;

@@ -1,5 +1,5 @@
-#ifndef BMP_H
-#define BMP_H
+#ifndef LIBIM_BMP_H
+#define LIBIM_BMP_H
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -144,4 +144,4 @@ static bool SaveBmpToFile(const std::string& filename, const Bmp& bmp)
     }
 }
 
-#endif // BMP_H
+#endif // LIBIM_BMP_H

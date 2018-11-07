@@ -1,5 +1,5 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#ifndef LIBIM_MATERIAL_H
+#define LIBIM_MATERIAL_H
 #include <cstdint>
 #include <string>
 #include <utility>
@@ -191,4 +191,4 @@ template<> inline Mipmap Stream::read<Mipmap, uint32_t, uint32_t, uint32_t, cons
     return mipmap;
 }
 
-#endif // MATERIAL_H
+#endif // LIBIM_MATERIAL_H

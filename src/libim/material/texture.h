@@ -1,5 +1,5 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#ifndef LIBIM_TEXTURE_H
+#define LIBIM_TEXTURE_H
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -186,4 +186,4 @@ template<> inline Texture Stream::read<Texture, uint32_t, uint32_t, const ColorF
     return tex;
 }
 
-#endif // TEXTURE_H
+#endif // LIBIM_TEXTURE_H

@@ -1,5 +1,5 @@
-#ifndef GOB_H
-#define GOB_H
+#ifndef LIBIM_GOB_H
+#define LIBIM_GOB_H
 #include <array>
 #include <cstdint>
 #include <fstream>
@@ -112,4 +112,4 @@ std::shared_ptr<GobFileDirectory> LoadGobFromFile(const std::string& filepath)
     }
 }
 
-#endif // GOB_H
+#endif // LIBIM_GOB_H

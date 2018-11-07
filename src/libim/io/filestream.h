@@ -1,5 +1,5 @@
-#ifndef FILESTREAM_H
-#define FILESTREAM_H
+#ifndef LIBIM_FILESTREAM_H
+#define LIBIM_FILESTREAM_H
 #include "stream.h"
 #include "common.h"
 
@@ -56,4 +56,4 @@ private:
     using FileStream::read;
 };
 
-#endif // FILESTREAM_H
+#endif // LIBIM_FILESTREAM_H

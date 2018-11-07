@@ -49,7 +49,7 @@ int main(int argc, const char *argv[])
 
     bool bVerboseOutput = false;
     if(opt.hasOpt(OPT_VERBOSE_SHORT)){
-        bVerboseOutput = true;;
+        bVerboseOutput = true;
     }
     else if(opt.hasOpt(OPT_VERBOSE)){
         bVerboseOutput = true;

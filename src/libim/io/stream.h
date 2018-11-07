@@ -1,5 +1,5 @@
-#ifndef INPUTSTREAM_H
-#define INPUTSTREAM_H
+#ifndef LIBIM_STREAM_H
+#define LIBIM_STREAM_H
 #include "common.h"
 
 #include <iostream>
@@ -646,4 +646,4 @@ template<> inline std::string Stream::read<std::string>(std::size_t lenHint) con
     return res;
 }
 
-#endif // INPUTSTREAM_H
+#endif // LIBIM_STREAM_H

@@ -19,8 +19,7 @@
 #include "io/filestream.h"
 #include "io/stream.h"
 
-namespace libim {
-namespace CND {
+namespace libim::CND {
 
 //PACKED(
 struct CndHeader

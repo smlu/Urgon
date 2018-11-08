@@ -42,12 +42,14 @@ namespace libim {
 
         std::stringstream ss;
         std::stringstream prefix;
+
+        ss << "[" << level.toString() << "]" << " ";
+        detail::ss_printf(ss, msg.data(), args...);
+        if(level <= LogLevel::Warning)
+        {
 #ifndef NDEBUG
         ss << "file: '" << file << "':" << line << " ";
 #endif
-        ss << "[" << level.toString() << "]" << " ";
-        detail::ss_printf(ss, msg.data(), args...);
-        if(level <= LogLevel::Warning) {
             std::cerr << ss.str() << std::endl;
         } else {
             std::cout << ss.str() << std::endl;

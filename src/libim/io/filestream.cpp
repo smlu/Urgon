@@ -23,7 +23,7 @@
 # include <unistd.h>
 #endif
 
-
+using namespace libim;
 
 std::string GetLastErrorAsString()
 {

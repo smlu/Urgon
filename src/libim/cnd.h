@@ -81,5 +81,5 @@ uint32_t GetMatSectionOffset(const CndHeader& header);
 std::vector<Material> LoadMaterials(const InputStream& istream);
 bool ReplaceMaterial(const Material& mat, const std::string& filename);
 
-}}
+}
 #endif // LIBIM_CND_H

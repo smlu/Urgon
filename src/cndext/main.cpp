@@ -21,6 +21,8 @@
 #define OPT_HELP              "--help"
 #define OPT_HELP_SHORT        "-h"
 
+using namespace libim;
+
 void print_help();
 void PrintMaterialInfo(const Material& mat);
 void PrintMipmapInfo(const Mipmap& mipmap, uint32_t mmIdx);

@@ -17,6 +17,9 @@ static constexpr auto OPT_VERBOSE_SHORT   ("-v");
 static constexpr auto OPT_HELP            ("--help");
 static constexpr auto OPT_HELP_SHORT      ("-h");
 
+
+using namespace libim;
+
 void print_help();
 bool ExtractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outDir, const bool verbose);
 

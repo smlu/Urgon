@@ -2,6 +2,7 @@
 #include <array>
 #include<cstdint>
 
+using namespace libim;
 using namespace libim::CND;
 
 static constexpr uint32_t FileVersion = 3;

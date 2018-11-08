@@ -14,7 +14,9 @@ namespace libim {
 
     constexpr uint16_t BMP_TYPE = 0x4D42;
 
-    #ifndef OS_WINDOWS
+#ifdef OS_WINDOWS
+    using BV5Compression_t = uint32_t;
+#else
     enum BV5Compression : uint32_t
     {
         BI_RGB            = 0,
@@ -25,7 +27,8 @@ namespace libim {
         BI_PNG            = 5,
         BI_ALPHABITFIELDS = 6
     };
-    #endif
+    using BV5Compression_t = BV5Compression;
+#endif
 
     PACKED(
     typedef struct {
@@ -50,11 +53,7 @@ namespace libim {
       int32_t         height;
       uint16_t        planes;
       uint16_t        bitCount;
-    #ifdef OS_WINDOWS
-      uint32_t        compression;
-    #else
-      BV5Compression  compression;
-    #endif
+      BV5Compression_t  compression;
       uint32_t        sizeImage;
       int32_t         X_PelsPerMeter;
       int32_t         Y_PelsPerMeter;

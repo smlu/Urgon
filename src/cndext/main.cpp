@@ -5,6 +5,8 @@
 #include "libim/material/bmp.h"
 #include "libim/material/mat.h"
 #include "libim/cnd.h"
+#include "libim/log/log.h"
+
 #include "cmdutils/options.h"
 
 #define SETW(n, f)  std::right << std::setfill(f) << std::setw(n)
@@ -176,7 +178,7 @@ bool ReplaceMaterial(const std::string& cndFile, std::vector<std::string> matFil
             }
          }
 
-         std::cout << "CND file has been successfully patched!\n";
+         LOG_INFO("CND file has been successfully patched!");
          bSuccess = true;
     }
     else {
@@ -195,7 +197,7 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
     std::string bmpDir;
     if(!materials.empty())
     {
-        std::cout << "Found materials: " << materials.size()<< std::endl;
+        LOG_INFO("Found materials: %", materials.size());
 
         outDir += (outDir.empty() ? "" : "/" ) + GetBaseName(cndFile);
         matDir = outDir + "/" + "mat";
@@ -211,7 +213,7 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
     /* Save extracted materials to files */
     for(const auto& mat : materials)
     {
-        std::cout << "Extracting material: " << mat.name() << std::endl;
+        LOG_INFO("Extracting material: %", mat.name());
 
         std::string matFilePath(matDir + "/" + mat.name());
         if(!SaveMaterialToFile(std::move(matFilePath), mat)) {
@@ -220,7 +222,7 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
 
         if(verbose)
         {
-            std::cout << "  ================== Material Info ===================\n";
+            LOG_VERBOSE("  ================== Material Info ===================");
             PrintMaterialInfo(mat);
         }
 
@@ -254,10 +256,10 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
         }
 
         if(verbose) {
-            std::cout << "  =============== Material Info End =================\n\n\n";
+            LOG_VERBOSE("  =============== Material Info End =================\n\n");
         }
     }
 
-    std::cout << (!verbose ? "\n" : "") << "-----------------------------------------\nTotal materials extracted: " << materials.size() << std::endl << std::endl;
+    LOG_INFO("%-----------------------------------------\nTotal materials extracted: %\n", (!verbose ? "\n" : "") , materials.size());
     return true;
 }

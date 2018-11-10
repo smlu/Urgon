@@ -6,10 +6,10 @@ namespace libim::text {
     struct diagnostic_location
     {
         std::string_view filename;
-        uint32_t first_line;
-        uint32_t first_col;
-        uint32_t last_line;
-        uint32_t last_col;
+        std::size_t first_line;
+        std::size_t first_col;
+        std::size_t last_line;
+        std::size_t last_col;
     };
 }
 

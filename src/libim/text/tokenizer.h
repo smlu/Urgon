@@ -10,16 +10,22 @@
 
 namespace libim::text {
 
-    class Tokenizer final
+    class Tokenizer
     {
     public:
-        Tokenizer(Stream& s);
-        ~Tokenizer();
+        Tokenizer(InputStream& s);
+        virtual ~Tokenizer();
+
+        // Explicitly delete copy and move ctors
+        Tokenizer(const Tokenizer&) = delete;
+        Tokenizer(Tokenizer&&) noexcept = delete;
+        Tokenizer& operator=(const Tokenizer&) = delete;
+        Tokenizer operator=(Tokenizer&&) noexcept = delete;
 
         Token getToken();
         void getToken(Token& out);
 
-        template <typename T> T get_number()
+        template <typename T> T getNumber()
         {
             auto tkn = getToken();
             return tkn.getNumber<T>();
@@ -40,7 +46,7 @@ namespace libim::text {
         void setReportEol(bool report);
         bool reportEol() const;
 
-    private:
+    protected:
         Token cachedTkn_;
         class TokenizerPrivate;
         std::unique_ptr<

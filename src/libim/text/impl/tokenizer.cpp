@@ -8,7 +8,7 @@ using namespace libim;
 using namespace text;
 using namespace std::string_view_literals;
 
-Tokenizer::Tokenizer(Stream& s)
+Tokenizer::Tokenizer(InputStream& s)
 {
     cachedTkn_.location().filename = s.name();
     tkns_ = std::make_unique<TokenizerPrivate>(s);

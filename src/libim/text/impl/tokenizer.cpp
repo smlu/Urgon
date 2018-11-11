@@ -66,7 +66,7 @@ void Tokenizer::getDelimitedString(Token& out, const std::function<bool(char)>& 
 void Tokenizer::assertIdentifier(std::string_view id)
 {
     getToken(cachedTkn_);
-    if(cachedTkn_.type() != Token::Identifier || utils::iequal(cachedTkn_.value(), id))
+    if(cachedTkn_.type() != Token::Identifier || !utils::iequal(cachedTkn_.value(), id))
     {
         LOG_DEBUG("expected '%', found '%'", id, cachedTkn_.value());
         throw TokenizerError("expected identifier"sv, cachedTkn_.location());

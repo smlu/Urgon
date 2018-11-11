@@ -100,7 +100,7 @@ namespace libim::text {
             }
 
             ss >> result;
-            if(!ss.fail()) {
+            if(ss.fail()) {
                 using namespace std::string_view_literals;
                 throw TokenizerError("invalid numeric conversion from string"sv, m_loc);
             }

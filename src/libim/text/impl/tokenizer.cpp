@@ -35,7 +35,7 @@ std::string Tokenizer::getIdentifier()
         throw TokenizerError("expected identifier"sv, cachedTkn_.location());
     }
 
-    return cachedTkn_.value();
+    return std::move(cachedTkn_).value();
 }
 
 std::string Tokenizer::getStringLiteral()
@@ -45,7 +45,7 @@ std::string Tokenizer::getStringLiteral()
         throw TokenizerError("expected string literal"sv, cachedTkn_.location());
     }
 
-    return cachedTkn_.value();
+    return std::move(cachedTkn_).value();
 }
 
 std::string Tokenizer::getSpaceDelimitedString()
@@ -72,7 +72,7 @@ void Tokenizer::assertIdentifier(std::string_view id)
     getToken(cachedTkn_);
     if(cachedTkn_.type() != Token::Identifier || !utils::iequal(cachedTkn_.value(), id))
     {
-        LOG_DEBUG("expected '%', found '%'", id, cachedTkn_.value());
+        LOG_DEBUG("assertIdentifier: expected '%', found '%'", id, cachedTkn_.value());
         throw TokenizerError("expected identifier"sv, cachedTkn_.location());
     }
 }
@@ -82,7 +82,7 @@ void Tokenizer::assertPunctuator(std::string_view punc)
     getToken(cachedTkn_);
     if(cachedTkn_.type() != Token::Punctuator || cachedTkn_.value() != punc)
     {
-        LOG_DEBUG("expected '%', found '%'", punc, cachedTkn_.value());
+        LOG_DEBUG("assertPunctuator: expected '%', found '%'", punc, cachedTkn_.value());
         throw TokenizerError("expected punctuator"sv, cachedTkn_.location());
     }
 }

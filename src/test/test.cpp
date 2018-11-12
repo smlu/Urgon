@@ -1,15 +1,15 @@
 #include "io/filestream.h"
-#include "text/resource_reader.h"
+#include "content/text/text_resource_reader.h"
 #include "utils/utils.h"
 
 
 using namespace libim;
-using namespace libim::text;
+using namespace libim::content::text;
 
 int main([[maybe_unused]]int argc, char** argv)
 {
     InputFileStream s(argv[1]);
-    ResourceReader rr(s);
+    TextResourceReader rr(s);
 
     rr.assertSection("HEADER");
     rr.assertKey("3DO", 2.3f);

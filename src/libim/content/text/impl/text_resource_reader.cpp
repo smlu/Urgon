@@ -1,12 +1,18 @@
-#include "../resource_reader.h"
-#include "resource_literals.h"
+#include "../text_resource_reader.h"
+#include "text_resource_literals.h"
 
 #include <utility>
 
-using namespace libim::text;
+using namespace libim::content::text;
 using namespace std::string_view_literals;
 
-void ResourceReader::readKey(std::string_view key, Token& t)
+void TextResourceReader::assertLabel(std::string_view label)
+{
+    assertIdentifier(label);
+    assertPunctuator(kResLabelPunc);
+}
+
+void TextResourceReader::readKey(std::string_view key, Token& t)
 {
     getSpaceDelimitedString(cachedTkn_);
     if(!utils::iequal(key, cachedTkn_.value()))
@@ -21,7 +27,7 @@ void ResourceReader::readKey(std::string_view key, Token& t)
     setReportEol(bReportEol);
 }
 
-void ResourceReader::assertSection(std::string_view section)
+void TextResourceReader::assertSection(std::string_view section)
 {
     readSection(cachedTkn_);
     if(!utils::iequal(cachedTkn_.value(), section))
@@ -31,14 +37,21 @@ void ResourceReader::assertSection(std::string_view section)
     }
 }
 
-std::string ResourceReader::readSection()
+std::string TextResourceReader::readSection()
 {
     readSection(cachedTkn_);
     return std::move(cachedTkn_).value();
 }
 
-void ResourceReader::readSection(Token& t)
+void TextResourceReader::readSection(Token& t)
 {
     assertLabel(kResSection);
     getToken(t);
+}
+
+std::size_t TextResourceReader::readRowIdx()
+{
+    auto num = getNumber<std::size_t>();
+    assertPunctuator(kResLabelPunc);
+    return num;
 }

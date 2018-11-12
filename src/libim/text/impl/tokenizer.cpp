@@ -87,12 +87,6 @@ void Tokenizer::assertPunctuator(std::string_view punc)
     }
 }
 
-void Tokenizer::assertLabel(std::string_view label)
-{
-    assertIdentifier(label);
-    assertPunctuator(":");
-}
-
 void Tokenizer::assertEndOfFile()
 {
     getToken(cachedTkn_);

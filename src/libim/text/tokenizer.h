@@ -39,7 +39,6 @@ namespace libim::text {
 
         void assertIdentifier(std::string_view id);
         void assertPunctuator(std::string_view punc);
-        void assertLabel(std::string_view label);
         void assertEndOfFile();
 
         void skipToNextLine();

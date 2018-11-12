@@ -1,18 +1,22 @@
 #ifndef LIBIM_RESOURCE_READER_H
 #define LIBIM_RESOURCE_READER_H
-#include "tokenizer.h"
-#include "../log/log.h"
-#include "../utils/utils.h"
+#include "../../text/tokenizer.h"
+#include "../../log/log.h"
+#include "../../utils/utils.h"
 
 #include <functional>
 #include <vector>
 #include <type_traits>
 
-namespace libim::text {
-    class ResourceReader final : public Tokenizer
+namespace libim::content::text {
+    using namespace libim::text;
+
+    class TextResourceReader final : public Tokenizer
     {
     public:
         using Tokenizer::Tokenizer;
+
+        void assertLabel(std::string_view label);
 
         template<typename T>
         void assertKey(std::string_view key, T v)
@@ -58,10 +62,8 @@ namespace libim::text {
 
             for(std::size_t i = 0; i < len; i++)
             {
-                [[maybe_unused]]  const auto j = getNumber<std::size_t>();
-                assert(i == j && "reading list row failed!");
-                assertPunctuator(":");
-
+                [[maybe_unused]]  const auto rowIdx = readRowIdx();
+                assert(i == rowIdx && "reading list row failed!");
                 result.push_back(readRow(*this));
             }
 
@@ -71,6 +73,9 @@ namespace libim::text {
         void assertSection(std::string_view section);
         std::string readSection();
         void readSection(Token& t);
+
+    protected:
+        std::size_t readRowIdx();
     };
 }
 #endif // LIBIM_RESOURCE_READER_H

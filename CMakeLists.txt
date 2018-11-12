@@ -6,6 +6,7 @@ set(PM_LIBIM "libim")
 set(PM_LIBCND "libcnd")
 set(PM_GOBEXT "gobext")
 set(PM_CNDEXT "cndext")
+set(PM_TEST   "test")
 
 # Compiler flags
 set(CMAKE_CXX_STANDARD 17) # c++17
@@ -75,3 +76,12 @@ add_executable (${PM_GOBEXT}
     $<TARGET_OBJECTS:${PM_LIBCND}>
 )
 target_link_libraries(${PM_GOBEXT} ${PM_LIBIM})
+
+# Test exe
+set(TEST_SRC_FILES "${SOURCE_DIR}/test/test.cpp")
+add_executable (${PM_TEST}
+    ${TEST_SRC_FILES}
+    $<TARGET_OBJECTS:${PM_LIBCND}>
+)
+target_link_libraries(${PM_TEST} ${PM_LIBIM})
+

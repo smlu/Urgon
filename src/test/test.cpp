@@ -1,7 +1,9 @@
-#include "io/filestream.h"
-#include "content/text/text_resource_reader.h"
-#include "utils/utils.h"
+#include "libim/io/filestream.h"
+#include "libim/content/text/text_resource_reader.h"
+#include "libim/utils/utils.h"
 
+#include <string>
+#include <vector>
 
 using namespace libim;
 using namespace libim::content::text;

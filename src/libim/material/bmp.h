@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "common.h"
-#include "io/filestream.h"
+#include "../common.h"
+#include "../io/filestream.h"
 
 namespace libim {
 

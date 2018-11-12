@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "texture.h"
-#include "common.h"
+#include "../common.h"
 #include "../io/stream.h"
 
 namespace libim {

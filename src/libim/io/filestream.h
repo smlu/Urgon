@@ -1,7 +1,7 @@
 #ifndef LIBIM_FILESTREAM_H
 #define LIBIM_FILESTREAM_H
 #include "stream.h"
-#include "common.h"
+#include "../common.h"
 
 #include <memory>
 #include <stdexcept>

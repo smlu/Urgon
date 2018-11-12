@@ -1,6 +1,6 @@
 #ifndef LIBIM_STREAM_H
 #define LIBIM_STREAM_H
-#include "common.h"
+#include "../common.h"
 #include "stremerror.h"
 
 #include <assert.h>

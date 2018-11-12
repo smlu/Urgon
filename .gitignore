@@ -7,6 +7,9 @@ cmake_install.cmake
 install_manifest.txt
 CTestTestfile.cmake
 
+# Dolphin
+.directory
+
 # Compiled Object files
 *.slo
 *.lo

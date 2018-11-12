@@ -50,12 +50,16 @@ std::string Tokenizer::getStringLiteral()
 
 std::string Tokenizer::getSpaceDelimitedString()
 {
-    getDelimitedString(cachedTkn_, [](char c) { return isspace(c); });
-    if(cachedTkn_.isEmpty()) {
-        throw TokenizerError("expected string fragment"sv, cachedTkn_.location());
-    }
+    getSpaceDelimitedString(cachedTkn_);
+    return std::move(cachedTkn_).value();
+}
 
-    return cachedTkn_.value();
+void Tokenizer::getSpaceDelimitedString(Token& out)
+{
+    getDelimitedString(out, [](char c) { return isspace(c); });
+    if(out.isEmpty()) {
+        throw TokenizerError("expected string fragment"sv, out.location());
+    }
 }
 
 void Tokenizer::getDelimitedString(Token& out, const std::function<bool(char)>& isDelim)

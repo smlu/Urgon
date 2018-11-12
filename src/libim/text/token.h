@@ -2,7 +2,7 @@
 #define LIBIM_TEXT_TOKEN_H
 #include <string>
 #include <sstream>
-
+#include <type_traits>
 #include "diagnostic_location.h"
 #include "tokenizer_error.h"
 
@@ -83,8 +83,10 @@ namespace libim::text {
         }
 
         template<typename T>
-        T getNumber()
+        T getNumber() const
         {
+            static_assert(std::is_arithmetic_v<T>, "T is not a numeric type");
+
             T result = T(0);
             std::stringstream ss(m_value);
             switch(m_type)

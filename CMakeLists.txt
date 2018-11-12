@@ -22,7 +22,7 @@ set(SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 include_directories ("${SOURCE_DIR}")
 
 # LibIM source
-include_directories("${SOURCE_DIR}/libim/")
+
 file(GLOB_RECURSE
   LIBIM_HEADER_FILES
   "${SOURCE_DIR}/libim/*.h"

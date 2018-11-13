@@ -40,15 +40,21 @@ namespace libim {
     class InputFileStream final : public InputStream, public FileStream
     {
     public:
-        InputFileStream(std::string filePath) : FileStream(std::move(filePath), Read) {}
+        InputFileStream(std::string filePath) :
+            FileStream(std::move(filePath), Read)
+        {}
+
     private:
         using FileStream::write;
     };
 
-    class OutputFileStream final : public FileStream
+    class OutputFileStream final : public OutputStream, public FileStream
     {
     public:
-        OutputFileStream(std::string filePath) : FileStream(std::move(filePath), Write) {}
+        OutputFileStream(std::string filePath) :
+            FileStream(std::move(filePath), Write)
+        {}
+
     private:
         using FileStream::read;
     };

@@ -1,5 +1,6 @@
 #ifndef LIBIM_TOKENIZER_P_H
 #define LIBIM_TOKENIZER_P_H
+#include "schars.h"
 #include "../token.h"
 #include "../tokenizer.h"
 #include "../tokenizer_error.h"
@@ -13,13 +14,6 @@
 using namespace std::string_view_literals;
 
 namespace libim::text {
-    enum SpecialChars : char
-    {
-        ChComment   = '#',
-        ChEol       = '\n',
-        ChEof       = '\0'
-    };
-
     class Tokenizer::TokenizerPrivate
     {
         InputStream& stream_;
@@ -79,12 +73,12 @@ namespace libim::text {
 
         inline static bool isIdentifierLead(char c)
         {
-            return std::isalpha(c) || (c == '_');
+            return std::isalpha(c) || (c == ChIdentifier);
         }
 
         inline static bool isIdentifierChar(char c)
         {
-            return std::isalnum(c) || (c == '_');
+            return std::isalnum(c) || (c == ChIdentifier);
         }
 
         void readDelimitedString(Token& out, const std::function<bool(char)>& isDelim)
@@ -127,7 +121,7 @@ namespace libim::text {
         void readNumericLiteral(Token& out)
         {
             // Check for sign
-            if(current_ch_ == '-' || current_ch_ == '+')
+            if(current_ch_ == ChMinus || current_ch_ == ChPlus)
             {
                 out.append(current_ch_);
                 advance();
@@ -149,7 +143,7 @@ namespace libim::text {
             out.setType(Token::Integer);
             readNumericLiteralIntegerPart(out);
 
-            if(current_ch_ == '.' && std::isdigit(next_ch_))
+            if(current_ch_ == ChDecimalSep && std::isdigit(next_ch_))
             {
                 if(out.isEmpty() || !std::isdigit(out.value().back())) {
                     // Poorly formatted floating point number. Prepend 0.
@@ -168,7 +162,7 @@ namespace libim::text {
                 out.append(current_ch_);
                 advance();
 
-                if(current_ch_ == '+' || current_ch_ == '-')
+                if(current_ch_ == ChMinus || current_ch_ == ChPlus)
                 {
                     out.append(current_ch_);
                     advance();
@@ -208,31 +202,31 @@ namespace libim::text {
                     out.location().last_col  = column_;
                     throw TokenizerError("unexpected new line in string literal"sv, out.location());
                 }
-                else if(current_ch_ == '\"')
+                else if(current_ch_ == ChDblQuote)
                 {
                     out.setType(Token::String);
                     advance();
                     return;
                 }
-                else if(current_ch_ == '\\') // Escape sequence.
+                else if(current_ch_ == ChBackSlash) // Escape sequence.
                 {
                     advance();
                     switch(current_ch_)
                     {
                         case ChEol: break; // Escaped new line
 
-                        case '\'':
-                        case '\"':
-                        case '\\': {
+                        case ChQuote:
+                        case ChDblQuote:
+                        case ChBackSlash: {
                             out.append(current_ch_);
                         } break;
 
                         case 'n': {
-                            out.append('\n');
+                            out.append(ChEol);
                         } break;
 
                         case 't': {
-                            out.append('\t');
+                            out.append(ChTab);
                         } break;
 
                         default:
@@ -264,7 +258,7 @@ namespace libim::text {
                 out.setType(Token::EndOfFile);
                 advance();
             }
-            else if(current_ch_ == '\"') {
+            else if(current_ch_ == ChDblQuote) {
                 readStringLiteral(out);
             }
             else if(isIdentifierLead(current_ch_)) {
@@ -275,10 +269,10 @@ namespace libim::text {
             }
             else if(std::ispunct(current_ch_))
             {
-                if(current_ch_ == '-' && (next_ch_ == '.' || std::isdigit(next_ch_))) {
+                if(current_ch_ == ChMinus && (next_ch_ == ChDecimalSep || std::isdigit(next_ch_))) {
                     readNumericLiteral(out);
                 }
-                else if(current_ch_ == '.' && std::isdigit(next_ch_)) {
+                else if(current_ch_ == ChDecimalSep && std::isdigit(next_ch_)) {
                     readNumericLiteral(out);
                 }
                 else

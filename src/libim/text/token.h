@@ -85,7 +85,7 @@ namespace libim::text {
         template<typename T>
         T getNumber() const
         {
-            static_assert(std::is_arithmetic_v<T>, "T is not a numeric type");
+            static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
 
             T result = T(0);
             std::stringstream ss(m_value);

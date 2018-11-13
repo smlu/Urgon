@@ -54,9 +54,7 @@ namespace libim::content::text {
         template<typename T, typename Lambda>
         std::vector<T> readList(std::string_view expectedName, Lambda&& readRow)
         {
-            assertIdentifier(expectedName);
-
-            auto len = getNumber<std::size_t>();
+            auto len = readKey<std::size_t>(expectedName);
             std::vector<T> result;
             result.reserve(len);
 

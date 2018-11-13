@@ -263,8 +263,6 @@ namespace libim {
         template<typename T, typename A, typename std::enable_if_t<!std::is_pod<T>::value, int> = 0>
         Stream& _write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&);
 
-        /* std::string_view specialization*/
-
     private:
         std::string m_name;
     };
@@ -672,6 +670,12 @@ namespace libim {
         }
 
         return res;
+    }
+
+    template <>
+    inline Stream& Stream::_write(const std::string& str, tag<std::string>&&)
+    {
+        return write(std::string_view(str));
     }
 
     template <>

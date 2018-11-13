@@ -45,7 +45,7 @@ std::string TextResourceReader::readSection()
 
 void TextResourceReader::readSection(Token& t)
 {
-    assertLabel(kResSection);
+    assertLabel(kResSectionTag);
     getToken(t);
 }
 

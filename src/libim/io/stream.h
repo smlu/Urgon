@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -94,7 +95,7 @@ namespace libim {
                 throw StreamError("End of stream");
             }
 
-            return  readsome(data, length);
+            return readsome(data, length);
         }
 
 
@@ -131,14 +132,14 @@ namespace libim {
         virtual Stream& write(const ByteArray& data)
         {
             auto nWritten = write(&data[0], data.size());
-            if(nWritten != data.size()){
+            if(nWritten != data.size()) {
                 throw StreamError("Failed to write data to stream!");
             }
 
             return *this;
         }
 
-        /* Write from stream. read stream from offset to the ennd */
+        /* Write from stream. read stream from offset to the end */
         virtual Stream& write(const Stream& istream, std::size_t offset)
         {
             return write(istream, offset, istream.size() - 1);
@@ -155,7 +156,7 @@ namespace libim {
 
             if((offsetBegin + offsetEnd) > istream.size()) {
                 //TODO: log
-                offsetEnd = (istream.size()) - offsetBegin; // write to the end of istream
+                offsetEnd = (istream.size()) - offsetBegin; // read to the end of istream
             }
 
             //auto cur = istream.tell();
@@ -262,6 +263,8 @@ namespace libim {
         template<typename T, typename A, typename std::enable_if_t<!std::is_pod<T>::value, int> = 0>
         Stream& _write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&);
 
+        /* std::string_view specialization*/
+
     private:
         std::string m_name;
     };
@@ -319,7 +322,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline char Stream::read<char>() const
+    template<>
+    inline char Stream::read<char>() const
     {
         char c;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&c), CHAR_BYTE);
@@ -341,7 +345,8 @@ namespace libim {
     }
 
 
-    template<> inline int8_t Stream::read<int8_t>() const
+    template<>
+    inline int8_t Stream::read<int8_t>() const
     {
         int8_t i8;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&i8), INT8_BYTE);
@@ -362,7 +367,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline uint8_t Stream::read<uint8_t>() const
+    template<>
+    inline uint8_t Stream::read<uint8_t>() const
     {
         uint8_t ui8;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&ui8), INT8_BYTE);
@@ -383,7 +389,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline int16_t Stream::read<int16_t>() const
+    template<>
+    inline int16_t Stream::read<int16_t>() const
     {
         int16_t i16;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&i16), INT16_BYTE);
@@ -404,7 +411,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline uint16_t Stream::read<uint16_t>() const
+    template<>
+    inline uint16_t Stream::read<uint16_t>() const
     {
         uint16_t ui16;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&ui16), INT16_BYTE);
@@ -425,7 +433,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline int32_t Stream::read<int32_t>() const
+    template<>
+    inline int32_t Stream::read<int32_t>() const
     {
         int32_t i32;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&i32), INT32_BYTE);
@@ -446,7 +455,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline uint32_t Stream::read<uint32_t>() const
+    template<>
+    inline uint32_t Stream::read<uint32_t>() const
     {
         uint32_t ui32;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&ui32), INT32_BYTE);
@@ -467,7 +477,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline int64_t Stream::read<int64_t>() const
+    template<>
+    inline int64_t Stream::read<int64_t>() const
     {
         int64_t i64;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&i64), INT64_BYTE);
@@ -488,7 +499,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline uint64_t Stream::read<uint64_t>() const
+    template<>
+    inline uint64_t Stream::read<uint64_t>() const
     {
         uint64_t ui64;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&ui64), INT64_BYTE);
@@ -509,7 +521,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline float Stream::read<float>() const
+    template<>
+    inline float Stream::read<float>() const
     {
         float f;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&f), FLOAT_BYTE);
@@ -530,7 +543,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline double Stream::read<double>() const
+    template<>
+    inline double Stream::read<double>() const
     {
         double d;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&d), DOUBLE_BYTE);
@@ -551,7 +565,8 @@ namespace libim {
         return *this;
     }
 
-    template<> inline bool Stream::read<bool>() const
+    template<>
+    inline bool Stream::read<bool>() const
     {
         return read<uint8_t>() != 0;
     }
@@ -642,7 +657,8 @@ namespace libim {
     }
 
     // std::string
-    template<> inline std::string Stream::read<std::string>(std::size_t lenHint) const
+    template<>
+    inline std::string Stream::read<std::string>(std::size_t lenHint) const
     {
         std::string res(lenHint, '0');
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&res[0]), lenHint * sizeof(std::string::value_type));
@@ -651,10 +667,22 @@ namespace libim {
         }
 
         auto nPos = res.find('\0');
-        if(nPos != std::string::npos && nPos != res.size() - 1)
+        if(nPos != std::string::npos && nPos != res.size() - 1) {
             res.resize(nPos);
+        }
+
         return res;
     }
 
+    template <>
+    inline Stream& Stream::_write(const std::string_view& sv, tag<std::string_view>&&)
+    {
+        const auto nWritten = this->write(reinterpret_cast<const byte_t*>(sv.data()), sv.size());
+        if(nWritten != sv.size()) {
+            throw StreamError("Could not write std::string_view to stream");
+        }
+
+        return *this;
+    }
 }
 #endif // LIBIM_STREAM_H

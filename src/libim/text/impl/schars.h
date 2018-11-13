@@ -14,6 +14,7 @@ namespace libim::text {
         ChMinus       = '-',
         ChPlus        = '+',
         ChQuote       = '\'',
+        ChSpace       = ' ',
         ChTab         = '\t'
     };
 }

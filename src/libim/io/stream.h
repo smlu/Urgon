@@ -46,6 +46,18 @@ namespace libim {
     public:
         virtual ~Stream() = default;
 
+        template<typename T>
+        Stream& operator >> (T& t)
+        {
+            t = read<T>();
+            return *this;
+        }
+
+        template<typename T>
+        Stream& operator << (const T& t) {
+            return write<T>(t);
+        }
+
         template<class T>
         T read() const
         {

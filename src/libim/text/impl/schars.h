@@ -13,6 +13,7 @@ namespace libim::text {
         ChIdentifier  = '_',
         ChMinus       = '-',
         ChPlus        = '+',
+        ChCr          = '\r',
         ChQuote       = '\'',
         ChSpace       = ' ',
         ChTab         = '\t'

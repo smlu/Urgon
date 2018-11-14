@@ -255,7 +255,7 @@ namespace libim::text {
                 out.setType(Token::EndOfFile);
             }
             else if(current_ch_ == ChEol) {
-                out.setType(Token::EndOfFile);
+                out.setType(Token::EndOfLine);
                 advance();
             }
             else if(current_ch_ == ChDblQuote) {

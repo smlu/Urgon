@@ -14,7 +14,7 @@ void TextResourceReader::assertLabel(std::string_view label)
 
 void TextResourceReader::readKey(std::string_view key, Token& t)
 {
-    getSpaceDelimitedString(cachedTkn_);
+    getString(cachedTkn_, key.size());
     if(!utils::iequal(key, cachedTkn_.value()))
     {
         LOG_DEBUG("readNextKey: expected key '%', found '%'", key, cachedTkn_.value());
@@ -23,7 +23,7 @@ void TextResourceReader::readKey(std::string_view key, Token& t)
 
     const bool bReportEol = reportEol();
     setReportEol(true);
-    getSpaceDelimitedString(t);
+    getToken(t);
     setReportEol(bReportEol);
 }
 

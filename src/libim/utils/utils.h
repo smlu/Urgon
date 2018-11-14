@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace libim::utils {
     namespace detail {
@@ -32,6 +33,24 @@ namespace libim::utils {
             std::equal(s1.begin(), s1.end(), s2.begin(), &detail::compareChar)
         );
     }
+
+    template<typename T>
+    inline constexpr auto to_underlying(T t)
+    {
+        static_assert(std::is_enum_v<T>, "T must be enum type");
+        using U = std::underlying_type_t<T>;
+        return static_cast<U>(t);
+    }
+
+    template<typename T, typename = void>
+    struct underlying_type { using type = T; };
+
+    template<typename T>
+    struct underlying_type<T, std::enable_if_t<std::is_enum_v<T>>> {
+        using type = std::underlying_type_t<T>;
+    };
+    template<typename T>
+    using underlying_type_t = typename underlying_type<T>::type;
 }
 
 #endif // LIBIM_UTILS_H

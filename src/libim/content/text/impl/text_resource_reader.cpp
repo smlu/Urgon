@@ -1,5 +1,6 @@
 #include "../text_resource_reader.h"
 #include "text_resource_literals.h"
+#include "../../../text/impl/tokenizer_p.h"
 
 #include <utility>
 
@@ -46,7 +47,7 @@ std::string TextResourceReader::readSection()
 void TextResourceReader::readSection(Token& t)
 {
     assertLabel(kResSectionTag);
-    getToken(t);
+    tp_->readLine(t);
 }
 
 std::size_t TextResourceReader::readRowIdx()

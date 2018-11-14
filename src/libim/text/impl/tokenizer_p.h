@@ -12,11 +12,17 @@
 #include <string_view>
 
 using namespace std::string_view_literals;
-
 namespace libim::text {
+
+    inline bool is_crlf(char c1, char c2)
+    {
+        return c1 == ChCr && c2 == ChEol;
+    }
+
+
     class Tokenizer::TokenizerPrivate
     {
-        InputStream& stream_;
+        InputStream& istream_;
         char current_ch_, next_ch_;
         std::size_t line_   = 1;
         std::size_t column_ = 1;
@@ -24,7 +30,7 @@ namespace libim::text {
 
     public:
         TokenizerPrivate(InputStream& s) :
-            stream_(s)
+            istream_(s)
         {
             current_ch_ = readNextChar();
             next_ch_    = readNextChar();
@@ -32,10 +38,16 @@ namespace libim::text {
 
         inline char readNextChar()
         {
-            while(!stream_.atEnd()) {
-                return stream_.read<char>();
+            while(!istream_.atEnd()) {
+                return istream_.read<char>();
             }
             return ChEof;
+        }
+
+        bool isEol() const
+        {
+            return current_ch_ == ChEol ||
+                   is_crlf(current_ch_, next_ch_);
         }
 
         void advance()
@@ -85,6 +97,13 @@ namespace libim::text {
         {
             readDelimitedString(out, [&](char) {
                 return (len--) == 0;
+            });
+        }
+
+        void readLine(Token& out)
+        {
+            readDelimitedString(out, [&](char) {
+                return isEol();
             });
         }
 

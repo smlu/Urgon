@@ -81,6 +81,13 @@ namespace libim::text {
             return std::isalnum(c) || (c == ChIdentifier);
         }
 
+        void readString(Token& out, std::size_t len)
+        {
+            readDelimitedString(out, [&](char) {
+                return (len--) == 0;
+            });
+        }
+
         void readDelimitedString(Token& out, const std::function<bool(char)>& isDelim)
         {
             skipWhitespace();

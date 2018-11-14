@@ -11,7 +11,7 @@ using namespace std::string_view_literals;
 Tokenizer::Tokenizer(InputStream& s)
 {
     cachedTkn_.location().filename = s.name();
-    tkns_ = std::make_unique<TokenizerPrivate>(s);
+    tp_ = std::make_unique<TokenizerPrivate>(s);
 }
 
 Tokenizer::~Tokenizer()
@@ -25,7 +25,7 @@ Token Tokenizer::getToken()
 
 void Tokenizer::getToken(Token& out)
 {
-    tkns_->readToken(out);
+    tp_->readToken(out);
 }
 
 std::string Tokenizer::getIdentifier()
@@ -64,7 +64,12 @@ void Tokenizer::getSpaceDelimitedString(Token& out)
 
 void Tokenizer::getDelimitedString(Token& out, const std::function<bool(char)>& isDelim)
 {
-    tkns_->readDelimitedString(out, isDelim);
+    tp_->readDelimitedString(out, isDelim);
+}
+
+void Tokenizer::getString(Token& out, std::size_t len)
+{
+    tp_->readString(out, len);
 }
 
 void Tokenizer::assertIdentifier(std::string_view id)
@@ -97,15 +102,15 @@ void Tokenizer::assertEndOfFile()
 
 void Tokenizer::skipToNextLine()
 {
-    tkns_->skipToNextLine();
+    tp_->skipToNextLine();
 }
 
 void Tokenizer::setReportEol(bool report)
 {
-    tkns_->setReportEol(report);
+    tp_->setReportEol(report);
 }
 
 bool Tokenizer::reportEol() const
 {
-    return tkns_->reportEol();
+    return tp_->reportEol();
 }

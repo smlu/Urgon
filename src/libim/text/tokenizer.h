@@ -36,6 +36,7 @@ namespace libim::text {
         std::string getSpaceDelimitedString();
         void getSpaceDelimitedString(Token& out);
         void getDelimitedString(Token& out, const std::function<bool(char)>& isDelim);
+        void getString(Token& out, std::size_t len);
 
         void assertIdentifier(std::string_view id);
         void assertPunctuator(std::string_view punc);
@@ -51,7 +52,7 @@ namespace libim::text {
         class TokenizerPrivate;
         std::unique_ptr<
             TokenizerPrivate
-        > tkns_;
+        > tp_;
     };
 
 }

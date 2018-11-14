@@ -1,6 +1,7 @@
 #ifndef LIBIM_TEXT_RESOURCE_WRITER_H
 #define LIBIM_TEXT_RESOURCE_WRITER_H
 #include "../../io/stream.h"
+#include "../../utils/utils.h"
 
 #include <iomanip>
 #include <sstream>
@@ -18,6 +19,12 @@ namespace libim::content::text {
         TextResourceWriter& operator=(const TextResourceWriter&) = delete;
         TextResourceWriter operator=(TextResourceWriter&&) noexcept = delete;
 
+        template<std::size_t width = 4, typename T>
+        TextResourceWriter& writeFlag(T n)
+        {
+            return writeNumber<16, width>(utils::to_underlying(n));
+        }
+
         TextResourceWriter& indent(std::size_t width, char indch = ' ');
         TextResourceWriter& write(std::string_view text);
         TextResourceWriter& writeCommentLine(std::string_view comment);
@@ -25,18 +32,24 @@ namespace libim::content::text {
 
         template<typename T,
             bool isArithmetic = std::is_arithmetic_v<T>,
-            typename Value = std::conditional_t<isArithmetic, T, std::string_view>
+            bool isEnum       = std::is_enum_v<T>,
+            typename Value = std::conditional_t<isArithmetic || isEnum, T, std::string_view>
         >
         TextResourceWriter& writeKeyValue(std::string_view key, Value value)
         {
             if constexpr(isArithmetic) {
                 return writeKey(key, convertToString(value));
-            } else {
+            } else if constexpr(isEnum)
+            {
+                return writeKey(key,
+                    convertToString<16, 4>(to_underlying(value))
+                );
+            }
+            else {
                 return writeKey(key, value);
             }
         }
 
-        //TextResourceWriter& writeKey(std::string_view key, T numericValue);
         TextResourceWriter& writeLabel(std::string_view name, std::string_view text);
         TextResourceWriter& writeLine(std::string_view line);
 
@@ -71,7 +84,6 @@ namespace libim::content::text {
         static std::string convertToString(T n)
         {
             static_assert(base == 8 || base == 10 || base == 16, "invalid encoding base");
-            static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
             static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
 
             std::stringstream ss;

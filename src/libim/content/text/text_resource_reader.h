@@ -21,11 +21,16 @@ namespace libim::content::text {
         template<typename T>
         void assertKey(std::string_view key, T v)
         {
+            if constexpr (std::is_enum_v<T>){
+                return assertKey(key, utils::to_underlying(v));
+            }
+
             bool bValid = false;
             readKey(key, cachedTkn_);
             if constexpr(std::is_arithmetic_v<T>) {
                 bValid = cachedTkn_.getNumber<T>() == v;
-            } else {
+            }
+             else {
                 bValid = utils::iequal(cachedTkn_.value(), v);
             }
 
@@ -40,9 +45,11 @@ namespace libim::content::text {
         template<typename T>
         T readKey(std::string_view key)
         {
+            using U = utils::underlying_type_t<T>;
+
             readKey(key, cachedTkn_);
-            if constexpr(std::is_arithmetic_v<T>) {
-                return cachedTkn_.getNumber<T>();
+            if constexpr(std::is_arithmetic_v<U>) {
+                return static_cast<T>(cachedTkn_.getNumber<U>());
             } else {
                 return std::move(cachedTkn_).value();
             }
@@ -72,7 +79,7 @@ namespace libim::content::text {
         std::string readSection();
         void readSection(Token& t);
 
-    protected:
+    private:
         std::size_t readRowIdx();
     };
 }

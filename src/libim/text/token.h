@@ -36,6 +36,30 @@ namespace libim::text {
             m_loc(std::move(loc))
         {}
 
+        void append(char c)
+        {
+            m_value.push_back(c);
+        }
+
+        inline void clear()
+        {
+            m_type = Invalid;
+            m_value.clear();
+        }
+
+        bool isEmpty() const
+        {
+            return m_value.empty();
+        }
+
+        inline bool isNumber() const
+        {
+            return m_type ==  Integer   ||
+                   m_type == HexInteger ||
+                   m_type == OctInteger ||
+                   m_type == FloatNumber;
+        }
+
         void setLocation(diagnostic_location loc)
         {
             m_loc = std::move(loc);
@@ -49,6 +73,11 @@ namespace libim::text {
         diagnostic_location& location()
         {
             return m_loc;
+        }
+
+        void reserve(std::size_t len)
+        {
+            m_value.reserve(len);
         }
 
         void setValue(std::string value)
@@ -109,22 +138,6 @@ namespace libim::text {
 
             return result;
          }
-
-        void append(char c)
-        {
-            m_value.push_back(c);
-        }
-
-        bool isEmpty() const
-        {
-            return m_value.empty();
-        }
-
-        inline void clear()
-        {
-            m_type = Invalid;
-            m_value.clear();
-        }
 
     private:
         Type m_type = Invalid;

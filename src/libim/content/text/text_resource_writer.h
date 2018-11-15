@@ -53,7 +53,7 @@ namespace libim::content::text {
         TextResourceWriter& writeLabel(std::string_view name, std::string_view text);
         TextResourceWriter& writeLine(std::string_view line);
 
-        template<typename T, typename Lambda>
+        template<bool writeRowIdxs = true, typename T, typename Lambda>
         TextResourceWriter& writeList(std::string_view name, const std::vector<T>& list, Lambda&& writeRow)
         {
             using ListSizeT = typename std::decay<decltype(list)>::type::size_type;
@@ -62,7 +62,7 @@ namespace libim::content::text {
 
             for(std::size_t i = 0; i < list.size(); i++)
             {
-                startNewRow(i);
+                startNewRow(i, writeRowIdxs);
                 writeRow(*this, i, list.at(i));
                 writeEol();
             }
@@ -113,7 +113,7 @@ namespace libim::content::text {
             return ss.str();
         }
 
-        TextResourceWriter& startNewRow(std::size_t idx);
+        TextResourceWriter& startNewRow(std::size_t idx, bool writeRowIdx);
         TextResourceWriter& writeKey(std::string_view key, std::string_view value);
         TextResourceWriter& writeRowIdx(std::size_t idx);
 

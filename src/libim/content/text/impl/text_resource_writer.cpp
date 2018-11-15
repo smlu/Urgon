@@ -16,9 +16,12 @@ TextResourceWriter& TextResourceWriter::indent(std::size_t width, char indch)
     return write(indent);
 }
 
-TextResourceWriter& TextResourceWriter::startNewRow(std::size_t idx)
+TextResourceWriter& TextResourceWriter::startNewRow(std::size_t idx, bool writeRowIdx)
 {
-    return indent(3).writeRowIdx(idx).indent(3);
+    if(writeRowIdx) {
+        indent(3).writeRowIdx(idx).indent(3);
+    }
+    return *this;
 }
 
 TextResourceWriter& TextResourceWriter::write(std::string_view text)

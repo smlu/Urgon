@@ -4,7 +4,6 @@
 #include "../../log/log.h"
 #include "../../utils/utils.h"
 
-#include <functional>
 #include <vector>
 #include <type_traits>
 
@@ -58,18 +57,24 @@ namespace libim::content::text {
         void readKey(std::string_view key, Token& t);
 
 
-        template<typename T, typename Lambda>
-        std::vector<T> readList(std::string_view expectedName, Lambda&& readRow)
+        template<typename T, bool hasRowIdxs = true, typename Lambda>
+        std::vector<T> readList(std::string_view expectedName, Lambda&& constructor)
         {
             auto len = readKey<std::size_t>(expectedName);
             std::vector<T> result;
             result.reserve(len);
 
-            for(std::size_t i = 0; i < len; i++)
+            for([[maybe_unused]] std::size_t i = 0; i < len; i++)
             {
-                [[maybe_unused]]  const auto rowIdx = readRowIdx();
-                assert(i == rowIdx && "reading list row failed!");
-                result.push_back(readRow(*this));
+                if constexpr (hasRowIdxs)
+                {
+                    [[maybe_unused]]  const auto rowIdx = readRowIdx();
+                    assert(i == rowIdx && "reading list row failed!");
+                }
+
+                T item;
+                constructor(*this, item);
+                result.push_back(std::move(item));
             }
 
             return result;

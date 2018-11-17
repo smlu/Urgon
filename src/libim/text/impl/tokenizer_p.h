@@ -85,12 +85,12 @@ namespace libim::text {
 
         inline static bool isIdentifierLead(char c)
         {
-            return std::isalpha(c) || (c == ChIdentifier);
+            return std::isalpha(c) || (c == ChIdentifier) || (c == ChIdentifier2);
         }
 
         inline static bool isIdentifierChar(char c)
         {
-            return std::isalnum(c) || (c == ChIdentifier);
+            return std::isalnum(c) || (c == ChIdentifier) || (c == ChIdentifier2);
         }
 
         void readString(Token& out, std::size_t len)
@@ -207,7 +207,7 @@ namespace libim::text {
                 do {
                     out.append(current_ch_);
                     advance();
-                } while(isIdentifierChar(current_ch_));
+                } while(isIdentifierChar(current_ch_) || current_ch_ == ChMinus);
             }
         }
 

@@ -56,6 +56,23 @@ namespace libim::content::text {
         template<bool writeRowIdxs = true, typename T, typename Lambda>
         TextResourceWriter& writeList(std::string_view name, const std::vector<T>& list, Lambda&& writeRow)
         {
+            /*TODO: Uncomment when static reflection is available and decltype is avaliable for generic lambdas.
+
+            using LambdaTriats = typename utils::function_traits<Lambda>;
+            static_assert(LambdaTriats::arity == 3, "constructor func must have 3 arguments");
+            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<0>,
+                TextResourceReader&>, "first arg in writeRow must be of a type TextResourceWriter&"
+            );
+
+            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<1>,
+                std::size_t>, "second arg in writeRow must be of a type std::size_t"
+            );
+
+            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<2>,
+                T&>, "third arg in writeRow must be of a type T&"
+            );
+            */
+
             using ListSizeT = typename std::decay<decltype(list)>::type::size_type;
             writeKeyValue<ListSizeT>(name, list.size());
             writeEol();

@@ -56,13 +56,26 @@ namespace libim::content::text {
 
         void readKey(std::string_view key, Token& t);
 
-
         template<typename T, bool hasRowIdxs = true, typename Lambda>
         std::vector<T> readList(std::string_view expectedName, Lambda&& constructor)
         {
+            /*TODO: Uncomment when static reflection is available and decltype is avaliable for generic lambdas.
+
+            using LambdaTriats = typename utils::function_traits<Lambda>;
+            static_assert(LambdaTriats::arity == 2, "constructor func must have 2 arguments");
+            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<0>,
+                TextResourceReader&>, "first arg in constructor must be of a type TextResourceReader&"
+            );
+
+            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<1>,
+                T&>, "second arg in constructor must be of a type T&"
+            );
+            */
+
             auto len = readKey<std::size_t>(expectedName);
             std::vector<T> result;
             result.reserve(len);
+
 
             for([[maybe_unused]] std::size_t i = 0; i < len; i++)
             {

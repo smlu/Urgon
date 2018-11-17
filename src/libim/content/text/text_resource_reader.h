@@ -18,6 +18,13 @@ namespace libim::content::text {
         void assertLabel(std::string_view label);
 
         template<typename T>
+        T readFlags()
+        {
+            using U = utils::underlying_type_t<T>;
+            return static_cast<T>(getNumber<U>());
+        }
+
+        template<typename T>
         void assertKey(std::string_view key, T v)
         {
             if constexpr (std::is_enum_v<T>){

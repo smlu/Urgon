@@ -11,6 +11,7 @@ namespace libim::text {
         ChEol         = '\n',
         ChEof         = '\0',
         ChIdentifier  = '_',
+        ChIdentifier2 = '$',
         ChMinus       = '-',
         ChPlus        = '+',
         ChCr          = '\r',

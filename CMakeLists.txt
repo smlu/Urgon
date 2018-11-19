@@ -55,6 +55,9 @@ add_library(${PM_LIBIM} STATIC
 )
 set_target_properties(${PM_LIBIM}  PROPERTIES PREFIX  "")
 
+# GCC < 9
+target_link_libraries(${PM_LIBIM} PRIVATE $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs>)
+
 # CND utils 
 add_library(${PM_LIBCND} OBJECT
     ${CMDUTILS_HEADER_FILES}

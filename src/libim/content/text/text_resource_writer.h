@@ -19,6 +19,11 @@ namespace libim::content::text {
         TextResourceWriter& operator=(const TextResourceWriter&) = delete;
         TextResourceWriter operator=(TextResourceWriter&&) noexcept = delete;
 
+        std::size_t size() const
+        {
+            return ostream_.size();
+        }
+
         template<std::size_t width = 4, typename T>
         TextResourceWriter& writeFlag(T n)
         {

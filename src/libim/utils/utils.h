@@ -1,6 +1,7 @@
 #ifndef LIBIM_UTILS_H
 #define LIBIM_UTILS_H
 #include <algorithm>
+#include <cmath>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -51,6 +52,13 @@ namespace libim::utils {
     };
     template<typename T>
     using underlying_type_t = typename underlying_type<T>::type;
+
+    template<typename T>
+    inline std::size_t numdigits(T i)
+    {
+        static_assert (std::is_integral_v<T> && std::is_unsigned_v<T>, "T must be unsigned integral type");
+        return i > 0 ? static_cast<std::size_t>(std::log10(i)) + 1 : 1;
+    }
 }
 
 #endif // LIBIM_UTILS_H

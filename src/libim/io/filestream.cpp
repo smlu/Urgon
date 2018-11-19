@@ -1,6 +1,7 @@
 #include "filestream.h"
 #include "../common.h"
 #include <algorithm>
+#include <filesystem>
 
 #ifdef OS_WINDOWS
 #include <windows.h>
@@ -52,9 +53,14 @@ std::string GetLastErrorAsString()
 
 struct FileStream::FileStreamImpl
 {
-
-    FileStreamImpl(std::string fp, Mode mode) : mode(mode), filePath(std::move(fp))
+     FileStreamImpl(std::string fp, bool truncate, Mode mode) :
+        mode(mode),
+        filePath(std::move(fp))
     {
+        if(truncate && mode != Read) {
+            std::filesystem::remove(filePath);
+        }
+
         auto flags = [&]
         {
             switch (mode)
@@ -233,7 +239,13 @@ HANDLE fileHandle = INVALID_HANDLE_VALUE;
 };
 
 FileStream::FileStream(std::string filePath, Mode mode) :
-    m_fs(std::make_shared<FileStreamImpl>(GetNativePath(std::move(filePath)), mode))
+    FileStream(std::move(filePath), false, mode)
+
+{}
+
+FileStream::FileStream(std::string filePath, bool truncate, Mode mode) :
+    m_fs(std::make_shared<FileStreamImpl>(GetNativePath(std::move(filePath)), truncate, mode))
+
 {
     this->setName(GetFileName(m_fs->filePath));
 }

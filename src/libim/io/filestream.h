@@ -19,6 +19,7 @@ namespace libim {
         };
 
         explicit FileStream(std::string filePath, Mode mode = ReadWrite);
+        explicit FileStream(std::string filePath, bool truncate, Mode mode = ReadWrite);
         virtual ~FileStream() override;
 
         virtual void seek(std::size_t position) const override;

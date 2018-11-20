@@ -112,13 +112,18 @@ namespace libim::content::text {
         {
             static_assert(base == 8 || base == 10 || base == 16, "invalid encoding base");
             static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
+            static_assert(!std::is_floating_point_v<T> || base == 10,
+                "floating point can be only represented in base 10"
+            );
 
             std::stringstream ss;
             ss.exceptions(std::ios::failbit);
 
+
             if constexpr(base == 8) {
                 ss << std::oct << std::showbase;
-            } else if constexpr (base == 10) {
+            }
+            else if constexpr (base == 10) {
                 ss << std::dec;
             }
             else
@@ -128,12 +133,13 @@ namespace libim::content::text {
                    << std::hex;
             }
 
-            if constexpr(width != 0)
+            if constexpr(width != 0 || std::is_floating_point_v<T>)
             {
-                ss << std::setw(width)
+                const auto w = width != 0 ? width : 4; // default floating point width = 4
+                ss << std::setw(w)
                    << std::setfill('0')
                    << std::fixed
-                   << std::setprecision(width);
+                   << std::setprecision(w);
             }
 
             ss << n;

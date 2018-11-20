@@ -147,7 +147,7 @@ namespace libim::content::text {
         }
 
         TextResourceWriter& startNewRow(std::size_t idx, bool writeRowIdx);
-        TextResourceWriter& writeKey(std::string_view key, std::string_view value);
+        TextResourceWriter& writeKey(std::string_view key, std::string_view value, std::size_t indent = 1);
         TextResourceWriter& writeRowIdx(std::size_t idx);
 
     private:

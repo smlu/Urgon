@@ -42,9 +42,10 @@ TextResourceWriter& TextResourceWriter::writeEol()
     return *this;
 }
 
-TextResourceWriter& TextResourceWriter::writeKey(std::string_view key, std::string_view value)
+TextResourceWriter& TextResourceWriter::writeKey(std::string_view key, std::string_view value, std::size_t indent)
 {
-    ostream_ << key << ChSpace << value;
+    std::string ind(indent, ChSpace);
+    ostream_ << key << ind << value;
     return writeEol();
 }
 

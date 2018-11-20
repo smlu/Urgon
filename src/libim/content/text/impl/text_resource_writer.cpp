@@ -16,11 +16,15 @@ TextResourceWriter& TextResourceWriter::indent(std::size_t width, char indch)
     return write(indent);
 }
 
-TextResourceWriter& TextResourceWriter::startNewRow(std::size_t idx, bool writeRowIdx)
+TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx, std::size_t indent)
 {
-    if(writeRowIdx) {
-        indent(3).writeRowIdx(idx).indent(3);
-    }
+    auto strIdx = convertToString(idx);
+    auto p = std::minmax(indent, strIdx.size());
+    indent =  (p.second - p.first) + 2;
+
+    this->indent(indent);
+    ostream_ << strIdx << kResLabelPunc;
+
     return *this;
 }
 
@@ -59,12 +63,6 @@ TextResourceWriter& TextResourceWriter::writeLine(std::string_view line)
 {
     ostream_ << line;
     return writeEol();
-}
-
-TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx)
-{
-    ostream_ << convertToString(idx) << kResLabelPunc;
-    return *this;
 }
 
 TextResourceWriter& TextResourceWriter::writeSection(std::string_view section)

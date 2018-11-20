@@ -65,7 +65,7 @@ namespace libim::content::text {
         TextResourceWriter& writeLabel(std::string_view name, std::string_view text);
         TextResourceWriter& writeLine(std::string_view line);
 
-        template<bool writeRowIdxs = true, typename T, typename Lambda>
+        template<typename T, typename Lambda>
         TextResourceWriter& writeList(std::string_view name, const std::vector<T>& list, Lambda&& writeRow)
         {
             /*TODO: Uncomment when static reflection is available and decltype is avaliable for generic lambdas.
@@ -89,9 +89,9 @@ namespace libim::content::text {
             writeKeyValue<ListSizeT>(name, list.size());
             writeEol();
 
-            for(std::size_t i = 0; i < list.size(); i++)
+            const auto list_size = list.size();
+            for(std::size_t i = 0; i < list_size; i++)
             {
-                startNewRow(i, writeRowIdxs);
                 writeRow(*this, i, list.at(i));
                 writeEol();
             }
@@ -106,6 +106,7 @@ namespace libim::content::text {
             return *this;
         }
 
+        TextResourceWriter& writeRowIdx(std::size_t idx, std::size_t indent);
         TextResourceWriter& writeSection(std::string_view section);
 
     private:
@@ -148,9 +149,8 @@ namespace libim::content::text {
             return ss.str();
         }
 
-        TextResourceWriter& startNewRow(std::size_t idx, bool writeRowIdx);
+
         TextResourceWriter& writeKey(std::string_view key, std::string_view value, std::size_t indent = 1);
-        TextResourceWriter& writeRowIdx(std::size_t idx);
 
     private:
         OutputStream& ostream_;

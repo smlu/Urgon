@@ -52,8 +52,8 @@ namespace libim {
     class OutputFileStream final : public OutputStream, public FileStream
     {
     public:
-        OutputFileStream(std::string filePath) :
-            FileStream(std::move(filePath), Write)
+        OutputFileStream(std::string filePath, const bool truncate = false) :
+            FileStream(std::move(filePath), truncate, Write)
         {}
 
     private:

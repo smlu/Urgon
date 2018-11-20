@@ -41,6 +41,7 @@ namespace libim::content::text {
         TextResourceWriter& writeEol();
 
         template<typename T,
+            std::size_t indent = 1,
             bool isArithmetic = std::is_arithmetic_v<T>,
             bool isEnum       = std::is_enum_v<T>,
             typename Value = std::conditional_t<isArithmetic || isEnum, T, std::string_view>
@@ -48,15 +49,16 @@ namespace libim::content::text {
         TextResourceWriter& writeKeyValue(std::string_view key, Value value)
         {
             if constexpr(isArithmetic) {
-                return writeKey(key, convertToString(value));
+                return writeKey(key, convertToString(value), indent);
             } else if constexpr(isEnum)
             {
                 return writeKey(key,
-                    convertToString<16, 4>(to_underlying(value))
+                    convertToString<16, 4>(utils::to_underlying(value)),
+                    indent
                 );
             }
             else {
-                return writeKey(key, value);
+                return writeKey(key, value, indent);
             }
         }
 

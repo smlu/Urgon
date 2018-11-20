@@ -24,6 +24,11 @@ namespace libim::content::text {
             return ostream_.size();
         }
 
+        std::size_t tell() const
+        {
+            return ostream_.tell();
+        }
+
         template<std::size_t width = 4, typename T>
         TextResourceWriter& writeFlag(T n)
         {

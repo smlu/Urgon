@@ -3,11 +3,12 @@
 #include "../../io/stream.h"
 #include "../../utils/utils.h"
 
+#include <cmath>
 #include <iomanip>
 #include <sstream>
 #include <string_view>
-#include <vector>
 #include <type_traits>
+#include <vector>
 
 namespace libim::content::text {
     class TextResourceWriter final
@@ -132,8 +133,19 @@ namespace libim::content::text {
         TextResourceWriter& writeRowIdx(std::size_t idx, std::size_t indent);
         TextResourceWriter& writeSection(std::string_view section);
 
+        template<std::size_t indent = 4, typename T>
+        TextResourceWriter& writeVector(const T& v)
+        {
+            for(const auto e : v)
+            {
+                this->indent(getNumberIndent(indent, e));
+                writeNumber<10, 8>(e);
+            }
+            return *this;
+        }
+
     private:
-        template<std::size_t base = 10, int width = 0, typename T>
+        template<std::size_t base = 10, std::size_t width = 0, typename T>
         static std::string convertToString(T n)
         {
             static_assert(base == 8 || base == 10 || base == 16, "invalid encoding base");

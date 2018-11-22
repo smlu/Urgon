@@ -1,8 +1,10 @@
 #ifndef LIBIM_RESOURCE_READER_H
 #define LIBIM_RESOURCE_READER_H
-#include "../../text/tokenizer.h"
+#include "../../math/abstract_vector.h"
 #include "../../log/log.h"
+#include "../../text/tokenizer.h"
 #include "../../utils/utils.h"
+
 
 #include <vector>
 #include <type_traits>
@@ -16,6 +18,18 @@ namespace libim::content::text {
         using Tokenizer::Tokenizer;
 
         void assertLabel(std::string_view label);
+
+
+
+        template<typename T>
+        T getVector()
+        {
+            typename T::base_type array;
+            for(std::size_t i =0; i < array.size(); i++) {
+                array[i] = getNumber<typename T::value_type>();
+            }
+            return static_cast<T>(array);
+        }
 
         template<typename T>
         T readFlags()

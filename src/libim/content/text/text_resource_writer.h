@@ -19,6 +19,29 @@ namespace libim::content::text {
         TextResourceWriter& operator=(const TextResourceWriter&) = delete;
         TextResourceWriter operator=(TextResourceWriter&&) noexcept = delete;
 
+
+
+        template<typename T>
+        static inline std::size_t getNumberIndent(std::size_t indent, T n)
+        {
+            static_assert(std::is_arithmetic_v<T>, "T must be arithmetic type");
+            indent = indent - (std::signbit(n) ? 1 : 0);
+
+            std::size_t digits = 0ULL;
+            if constexpr(std::is_unsigned_v<T>) {
+                digits = utils::numdigits(static_cast<uint64_t>(n));
+            }
+            else {
+                digits = utils::numdigits(static_cast<uint64_t>(std::abs(n)));
+            }
+
+            if(digits >= indent) {
+                return 1;
+            }
+
+            return indent - digits;
+        }
+
         std::size_t size() const
         {
             return ostream_.size();

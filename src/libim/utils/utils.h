@@ -2,7 +2,9 @@
 #define LIBIM_UTILS_H
 #include <algorithm>
 #include <cmath>
+#include <iomanip>
 #include <string>
+#include <sstream>
 #include <string_view>
 #include <type_traits>
 
@@ -58,6 +60,45 @@ namespace libim::utils {
     {
         static_assert (std::is_integral_v<T> && std::is_unsigned_v<T>, "T must be unsigned integral type");
         return i > 0 ? static_cast<std::size_t>(std::log10(i)) + 1 : 1;
+    }
+
+
+    template<std::size_t base = 10, std::size_t width = 0, typename T>
+    static std::string to_string(T n)
+    {
+        static_assert(base == 8 || base == 10 || base == 16, "invalid encoding base");
+        static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
+        static_assert(!std::is_floating_point_v<T> || base == 10,
+            "floating point can be only represented in base 10"
+        );
+
+        std::stringstream ss;
+        ss.exceptions(std::ios::failbit);
+
+
+        if constexpr(base == 8) {
+            ss << std::oct << std::showbase;
+        }
+        else if constexpr (base == 10) {
+            ss << std::dec;
+        }
+        else
+        {
+            ss << "0x"
+               << std::uppercase
+               << std::hex;
+        }
+
+        if constexpr(width != 0)
+        {
+            ss << std::setw(width)
+               << std::setfill('0')
+               << std::fixed
+               << std::setprecision(width);
+        }
+
+        ss << n;
+        return ss.str();
     }
 }
 

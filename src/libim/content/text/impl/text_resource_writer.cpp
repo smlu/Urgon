@@ -18,7 +18,7 @@ TextResourceWriter& TextResourceWriter::indent(std::size_t width, char indch)
 
 TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx, std::size_t indent)
 {
-    auto strIdx = convertToString(idx);
+    auto strIdx = utils::to_string(idx);
     auto p = std::minmax(indent, strIdx.size());
     indent =  (p.second - p.first) + 2;
 

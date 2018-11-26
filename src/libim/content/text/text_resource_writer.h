@@ -4,7 +4,6 @@
 #include "../../utils/utils.h"
 
 #include <cmath>
-#include <iomanip>
 #include <sstream>
 #include <string_view>
 #include <type_traits>
@@ -54,7 +53,7 @@ namespace libim::content::text {
         }
 
         template<std::size_t width = 4, typename T>
-        TextResourceWriter& writeFlag(T n)
+        TextResourceWriter& writeFlags(T n)
         {
             return writeNumber<16, width>(utils::to_underlying(n));
         }
@@ -73,11 +72,11 @@ namespace libim::content::text {
         TextResourceWriter& writeKeyValue(std::string_view key, Value value)
         {
             if constexpr(isArithmetic) {
-                return writeKey(key, convertToString(value), indent);
+                return writeKey(key, utils::to_string(value), indent);
             } else if constexpr(isEnum)
             {
                 return writeKey(key,
-                    convertToString<16, 4>(utils::to_underlying(value)),
+                    utils::to_string<16, 4>(utils::to_underlying(value)),
                     indent
                 );
             }
@@ -126,7 +125,7 @@ namespace libim::content::text {
         template<std::size_t base = 10, std::size_t width = 0, typename T>
         TextResourceWriter& writeNumber(T n)
         {
-            write(convertToString<base, width, T>(n));
+            write(utils::to_string<base, width, T>(n));
             return *this;
         }
 
@@ -145,46 +144,6 @@ namespace libim::content::text {
         }
 
     private:
-        template<std::size_t base = 10, std::size_t width = 0, typename T>
-        static std::string convertToString(T n)
-        {
-            static_assert(base == 8 || base == 10 || base == 16, "invalid encoding base");
-            static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
-            static_assert(!std::is_floating_point_v<T> || base == 10,
-                "floating point can be only represented in base 10"
-            );
-
-            std::stringstream ss;
-            ss.exceptions(std::ios::failbit);
-
-
-            if constexpr(base == 8) {
-                ss << std::oct << std::showbase;
-            }
-            else if constexpr (base == 10) {
-                ss << std::dec;
-            }
-            else
-            {
-                ss << "0x"
-                   << std::uppercase
-                   << std::hex;
-            }
-
-            if constexpr(width != 0 || std::is_floating_point_v<T>)
-            {
-                const auto w = width != 0 ? width : 4; // default floating point width = 4
-                ss << std::setw(w)
-                   << std::setfill('0')
-                   << std::fixed
-                   << std::setprecision(w);
-            }
-
-            ss << n;
-            return ss.str();
-        }
-
-
         TextResourceWriter& writeKey(std::string_view key, std::string_view value, std::size_t indent = 1);
 
     private:

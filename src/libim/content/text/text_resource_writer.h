@@ -52,10 +52,16 @@ namespace libim::content::text {
             return ostream_.tell();
         }
 
+        template<std::size_t base = 10, std::size_t width = 0, typename T>
+        TextResourceWriter& writeEnum(T n)
+        {
+            return writeNumber<base, width>(utils::to_underlying(n));
+        }
+
         template<std::size_t width = 4, typename T>
         TextResourceWriter& writeFlags(T n)
         {
-            return writeNumber<16, width>(utils::to_underlying(n));
+            return writeEnum<16, width>(n);
         }
 
         TextResourceWriter& indent(std::size_t width, char indch = ' ');

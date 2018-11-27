@@ -7,7 +7,7 @@
 
 namespace libim::content::asset {
 
-    struct Keyframe
+    struct Keyframe final
     {
         // Ref: https://www.massassi.net/jkspecs/
         //     See also sw jk2 atwalk.key
@@ -18,10 +18,12 @@ namespace libim::content::asset {
             RotationChange = 2
         };
 
-        uint32_t number;
-        Flag     flags;
+        float number;
+        Flag  flags;
+
         FVector3 pos;
         FVector3 dpos;
+
         FRotator rot;
         FRotator drot;
     };

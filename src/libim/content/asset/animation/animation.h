@@ -4,6 +4,8 @@
 #include "animation_node.h"
 #include "key_marker.h"
 
+#include "../../text/text_resource_reader.h"
+
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -102,6 +104,8 @@ namespace libim::content::asset {
         {
             return type_;
         }
+
+        static Animation load(text::TextResourceReader& rr);
 
     private:
         Flag     flags_  = Flag::Loop;

@@ -68,5 +68,5 @@ TextResourceWriter& TextResourceWriter::writeLine(std::string_view line)
 TextResourceWriter& TextResourceWriter::writeSection(std::string_view section)
 {
     return writeLine(kResSectionHeader).
-           writeLabel(kResSectionTag, section);
+           writeLabel(kResName_Section, section);
 }

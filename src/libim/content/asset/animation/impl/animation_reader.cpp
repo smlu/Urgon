@@ -25,7 +25,6 @@ void ParseHeader(TextResourceReader& rr, Animation& anim)
 
 void ParseMarkers(TextResourceReader& rr, Animation& anim)
 {
-    rr.assertSection(kResName_Markers);
     auto markers = rr.readList<KeyMarker, false>(kResName_Markers,
     [](TextResourceReader& rr, auto& m){
         m.frame = rr.getNumber<decltype(m.frame)>();

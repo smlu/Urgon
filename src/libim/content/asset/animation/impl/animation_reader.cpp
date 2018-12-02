@@ -60,23 +60,27 @@ void ParseKeyframes(TextResourceReader& rr, Animation& anim)
 }
 
 
-Animation Animation::load(TextResourceReader& rr)
+Animation& Animation::load(TextResourceReader& rr)
 {
-    Animation anim;
-
     rr.assertSection(kResName_Header);
-    ParseHeader(rr, anim);
+    ParseHeader(rr, *this);
 
-    std::string section = rr.readSection();
-    if(section == kResName_Markers)
+    Token t;
+    rr.readSection(t);
+    if(t.value() == kResName_Markers)
     {
-        ParseMarkers(rr, anim);
+        ParseMarkers(rr, *this);
         rr.assertSection(kResName_KfNodes);
-    } else if(section != kResName_KfNodes) {
-        //TODO: throw
+    }
+    else if(t.value() != kResName_KfNodes)
+    {
+        LOG_DEBUG("Animation::load: section expected '%', found '%'", kResName_KfNodes, t.value());
+        throw TokenizerError("expected section: KEYFRAME NODES"sv, t.location());
     }
 
-    ParseKeyframes(rr, anim);
+    ParseKeyframes(rr, *this);
+    return *this;
+}
 
     return anim;
 }

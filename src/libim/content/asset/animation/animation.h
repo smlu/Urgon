@@ -105,7 +105,7 @@ namespace libim::content::asset {
             return type_;
         }
 
-        static Animation load(text::TextResourceReader& rr);
+        Animation& load(text::TextResourceReader& rr);
 
     private:
         Flag     flags_  = Flag::Loop;

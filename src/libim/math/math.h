@@ -10,6 +10,7 @@ namespace libim {
         template<typename F>
         inline constexpr bool cmpf_impl(F f1, F f2, F maxRelDiff)
         {
+            // Ref: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
             static_assert (std::is_floating_point_v<F>, "F must be a floating point");
 
             // Check if the numbers are really close -- needed

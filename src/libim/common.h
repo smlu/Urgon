@@ -5,9 +5,11 @@
 #include <cstdio>
 #include <string>
 #include <climits>
+#include <filesystem>
 #include <ios>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <type_traits>
 #include <utility>
@@ -95,7 +97,7 @@ inline constexpr uint32_t RGBMask(uint32_t bitsPerColor, uint32_t colorLeftShift
     return ((1 << bitsPerColor) - 1) << colorLeftShift;
 }
 
-inline std::vector<std::string> SplitString(const std::string& string, const std::string& delim)
+static std::vector<std::string> SplitString(const std::string& string, const std::string& delim)
 {
     std::vector<std::string> tokens;
 
@@ -199,20 +201,16 @@ inline bool IsFilePath(const std::string& path)
     return path.find_last_of(".") != std::string::npos;
 }
 
-inline bool FileExists(const std::string& fileName)
+inline bool FileExists(const std::filesystem::path& filePath)
 {
-    if(fileName.empty()) {
+    if(filePath.empty()) {
         return false;
     }
-    else if(!IsNativePath(fileName)) {
-        return FileExists(GetNativePath(fileName));
-    }
 
-    struct stat buffer;
-    return stat(fileName.c_str(), &buffer) == 0;
+    return std::filesystem::exists(filePath);
 }
 
-inline bool DirExists(const std::string& dirPath)
+inline bool DirExists(const std::filesystem::path& dirPath)
 {
     if(dirPath.empty()) {
         return false;
@@ -221,26 +219,15 @@ inline bool DirExists(const std::string& dirPath)
         return DirExists(GetNativePath(dirPath));
     }
 
-#ifdef OS_WINDOWS
-    DWORD dwAttrib = GetFileAttributesA(dirPath.c_str());    
-    return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
-         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
-#else
-    struct stat sb;
-    return stat(dirPath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode);
-#endif
+     return std::filesystem::exists(dirPath);
 }
 
-inline bool MakeDir(const std::string& dirName)
+inline bool MakeDir(const std::filesystem::path& dirName)
 {
-#ifdef OS_WINDOWS
-    return CreateDirectoryA(dirName.c_str(), NULL);
-# else
-    return mkdir(dirName.c_str(), 0775) == 0;
-#endif
+    return std::filesystem::create_directory(dirName);
 }
 
-static  bool MakePath(const std::string& path, bool createFile = false)
+static bool MakePath(const std::string& path, bool createFile = false)
 {
     if(path.empty()) {
         return false;
@@ -272,19 +259,27 @@ static  bool MakePath(const std::string& path, bool createFile = false)
     return true;
 }
 
-inline bool RemoveFile(const std::string& file)
+inline bool RemoveFile(const std::filesystem::path& file)
 {
-    return remove(file.c_str()) == 0;
+    return std::filesystem::remove(file);
 }
 
-inline bool RenameFile(const std::string& from, const std::string& to, bool override = true)
+inline bool RenameFile(const std::filesystem::path& from, const std::filesystem::path&& to, bool override = true)
 {
     if(FileExists(to) && !override) {
         return false;
     }
 
     RemoveFile(to);
-    return std::rename(from.c_str(), to.c_str()) == 0;
+
+    try
+    {
+        std::filesystem::rename(from, to);
+        return true;
+    }
+    catch (...) {
+        return false;
+    }
 }
 
 inline std::string IosErrorStr(const std::ios& ios)

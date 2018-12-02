@@ -82,5 +82,7 @@ Animation& Animation::load(TextResourceReader& rr)
     return *this;
 }
 
-    return anim;
+Animation& Animation::load(TextResourceReader&& rr)
+{
+    return load(rr);
 }

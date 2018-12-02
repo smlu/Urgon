@@ -5,6 +5,7 @@
 #include "key_marker.h"
 
 #include "../../text/text_resource_reader.h"
+#include "../../text/text_resource_writer.h"
 
 #include <cstdint>
 #include <string>
@@ -106,6 +107,10 @@ namespace libim::content::asset {
         }
 
         Animation& load(text::TextResourceReader& rr);
+        Animation& load(text::TextResourceReader&& rr);
+
+        Animation& write(text::TextResourceWriter& rw, std::string_view headerComment = "");
+        Animation& write(text::TextResourceWriter&& rw, std::string_view headerComment = "");
 
     private:
         Flag     flags_  = Flag::Loop;

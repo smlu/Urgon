@@ -1,6 +1,7 @@
 #ifndef KEY_MARKER_H
 #define KEY_MARKER_H
 #include <cstdint>
+#include "../../../math/math.h"
 
 
 namespace libim::content::asset {
@@ -25,5 +26,10 @@ namespace libim::content::asset {
         float frame;
         Type type;
     };
+
+
+    constexpr bool operator == (const KeyMarker& k1, const KeyMarker& k2){
+        return cmpf(k1.frame, k2.frame) && k1.type == k2.type;
+    }
 }
 #endif // KEY_MARKER_H

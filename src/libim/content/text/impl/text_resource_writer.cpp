@@ -20,7 +20,7 @@ TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx, std::size_t
 {
     auto strIdx = utils::to_string(idx);
     auto p = std::minmax(indent, strIdx.size());
-    indent =  (p.second - p.first) + 2;
+    indent =  (p.second - p.first) + 3;
 
     this->indent(indent);
     ostream_ << strIdx << kResLabelPunc;
@@ -36,8 +36,13 @@ TextResourceWriter& TextResourceWriter::write(std::string_view text)
 
 TextResourceWriter& TextResourceWriter::writeCommentLine(std::string_view comment)
 {
-    ostream_ << ChComment << ChSpace << comment;
-    return writeEol();
+    if(!comment.empty())
+    {
+        ostream_ << ChComment << ChSpace << comment;
+        writeEol();
+    }
+
+    return *this;
 }
 
 TextResourceWriter& TextResourceWriter::writeEol()

@@ -13,5 +13,10 @@ namespace libim::content::asset {
         std::string meshName;
         std::vector<Keyframe> frames;
     };
+
+    inline constexpr bool operator == (const AnimationNode& n1, const AnimationNode& n2)
+    {
+        return n1.id == n2.id && n1.meshName == n2.meshName && n1.frames == n2.frames;
+    }
 }
 #endif // LIBIM_ANIMATION_NODE_H

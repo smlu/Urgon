@@ -2,9 +2,9 @@
 #include <iostream>
 
 #include "libim/common.h"
-#include "libim/material/bmp.h"
-#include "libim/material/mat.h"
-#include "libim/cnd.h"
+#include "libim/io/filestream.h"
+#include "libim/content/asset/material/bmp.h"
+#include "libim/content/asset/world/impl/serialization/binary/cnd.h"
 #include "libim/log/log.h"
 
 #include "cmdutils/options.h"
@@ -24,6 +24,7 @@
 #define OPT_HELP_SHORT        "-h"
 
 using namespace libim;
+using namespace libim::content::asset;
 
 void print_help();
 void PrintMaterialInfo(const Material& mat);
@@ -170,16 +171,17 @@ bool ReplaceMaterial(const std::string& cndFile, std::vector<std::string> matFil
     bool bSuccess = false;
     if(!matFiles.empty())
     {
-         for(const auto& matFile : matFiles)
-         {
-            auto mat = LoadMaterialFromFile(matFile);
-            if(!mat || !libim::CND::ReplaceMaterial(*mat, cndFile)) {
+        for(const auto& matFile : matFiles)
+        {
+            Material mat;
+            mat.read(InputFileStream(matFile));
+            if(!CND::ReplaceMaterial(mat, cndFile)) {
                 return false;
             }
-         }
+        }
 
-         LOG_INFO("CND file has been successfully patched!");
-         bSuccess = true;
+        LOG_INFO("CND file has been successfully patched!");
+        bSuccess = true;
     }
     else {
         print_help();
@@ -191,7 +193,7 @@ bool ReplaceMaterial(const std::string& cndFile, std::vector<std::string> matFil
 bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool convert, bool verbose)
 {
     InputFileStream ifstream(cndFile);
-    auto materials = libim::CND::LoadMaterials(ifstream);
+    auto materials = CND::ReadMaterials(ifstream);
 
     std::string matDir;
     std::string bmpDir;
@@ -216,9 +218,10 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
         LOG_INFO("Extracting material: %", mat.name());
 
         std::string matFilePath(matDir + "/" + mat.name());
-        if(!SaveMaterialToFile(std::move(matFilePath), mat)) {
+        mat.write(OutputFileStream(std::move(matFilePath)));
+        /*if(!SaveMaterialToFile(std::move(matFilePath), mat)) {
             return false;
-        }
+        }*/
 
         if(verbose)
         {

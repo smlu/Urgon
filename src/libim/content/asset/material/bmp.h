@@ -141,7 +141,7 @@ namespace libim::content::asset {
         }
         catch (const std::exception& e)
         {
-            LOG_ERROR("An exception was thrwon while writing BMP to file:", e.what());
+            LOG_ERROR("An exception was thrwon while writing BMP to file: %", e.what());
             return false;
         }
     }

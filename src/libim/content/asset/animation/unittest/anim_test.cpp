@@ -51,7 +51,7 @@ void test_anim_file(const std::filesystem::path& filePath)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR("Animation unit test failed:", e.what());
+        LOG_ERROR("Animation unit test failed: %", e.what());
         RemoveFile(testFile);
     }
 }

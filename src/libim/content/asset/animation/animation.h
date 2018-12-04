@@ -36,6 +36,16 @@ namespace libim::content::asset {
             // *: Reference taken from https://www.massassi.net/jkspecs/
         };
 
+        void setName(std::string name)
+        {
+            name_ = std::move(name);
+        }
+
+        const std::string& name() const
+        {
+            return name_;
+        }
+
         void setFlags(Flag flags)
         {
             flags_ = flags;
@@ -113,6 +123,7 @@ namespace libim::content::asset {
         Animation& write(text::TextResourceWriter&& rw, std::string_view headerComment = "");
 
     private:
+        std::string name_;
         Flag     flags_  = Flag::Loop;
         Type     type_   = Unknown;
         uint32_t frames_ = 0UL;

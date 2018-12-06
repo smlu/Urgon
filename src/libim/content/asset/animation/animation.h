@@ -106,6 +106,11 @@ namespace libim::content::asset {
             return nodes_;
         }
 
+        std::vector<AnimationNode>& nodes()
+        {
+            return nodes_;
+        }
+
         void setType(Type type)
         {
             type_ = type;

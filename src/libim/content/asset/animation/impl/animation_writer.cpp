@@ -91,15 +91,14 @@ void WriteKeyframes(TextResourceWriter& rw, const Animation& anim)
       });
 }
 
-Animation& Animation::write(TextResourceWriter& rw, std::string_view headerComment)
+void Animation::write(TextResourceWriter& rw, std::string_view headerComment) const
 {
     WriteHeader(rw, *this, headerComment);
     WriteMarkers(rw, *this);
     WriteKeyframes(rw, *this);
-    return *this;
 }
 
-Animation& Animation::write(TextResourceWriter&& rw, std::string_view headerComment)
+void Animation::write(TextResourceWriter&& rw, std::string_view headerComment) const
 {
-    return write(rw, headerComment);
+    write(rw, headerComment);
 }

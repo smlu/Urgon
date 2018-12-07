@@ -124,8 +124,8 @@ namespace libim::content::asset {
         Animation& load(text::TextResourceReader& rr);
         Animation& load(text::TextResourceReader&& rr);
 
-        Animation& write(text::TextResourceWriter& rw, std::string_view headerComment = "");
-        Animation& write(text::TextResourceWriter&& rw, std::string_view headerComment = "");
+        void write(text::TextResourceWriter& rw, std::string_view headerComment = "") const;
+        void write(text::TextResourceWriter&& rw, std::string_view headerComment = "") const;
 
     private:
         std::string name_;

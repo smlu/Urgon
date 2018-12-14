@@ -8,7 +8,9 @@
 #include <vector>
 
 
+#include "../../../../animation/animation.h"
 #include "../../../../material/material.h"
+
 #include "../../../../../../common.h"
 #include "../../../../../../io/stream.h"
 
@@ -67,6 +69,9 @@ namespace libim::content::asset {
         static uint32_t GetMatSectionOffset(const CndHeader& header);
         static std::vector<Material> ReadMaterials(const InputStream& istream);
         static bool ReplaceMaterial(const Material& mat, const std::string& filename);
+
+        static std::size_t GetAnimSectionOffset(const CndHeader& header, const InputStream& istream);
+        static std::vector<Animation> ReadAnimations(const InputStream& istream);
     };
 
 

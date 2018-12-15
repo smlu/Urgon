@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <string>
 #include <string_view>
 
 using namespace libim;

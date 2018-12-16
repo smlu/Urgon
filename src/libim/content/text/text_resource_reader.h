@@ -19,8 +19,6 @@ namespace libim::content::text {
 
         void assertLabel(std::string_view label);
 
-
-
         template<typename T>
         T getVector()
         {

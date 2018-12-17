@@ -23,9 +23,9 @@ namespace libim::content::asset {
         Flag  flags;
 
         FVector3 pos;
-        FVector3 dpos;
-
         FRotator rot;
+
+        FVector3 dpos;
         FRotator drot;
     };
 

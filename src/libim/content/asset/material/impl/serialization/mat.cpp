@@ -62,6 +62,10 @@ Material& Material::read(const InputStream& istream)
             throw StreamError("MAT file record count <= 0");
         }
 
+        if(header.colorInfo.bpp % 8 != 0) {
+            throw StreamError("BPP % 8 != 0");
+        }
+
         /* Read Material records */
         auto records = istream.read<std::vector<MatRecordHeader>>(header.recordCount);
 
@@ -70,7 +74,7 @@ Material& Material::read(const InputStream& istream)
         for(auto& mipmap : mipmaps)
         {
             auto mmHeader = istream.read<MatMipmapHeader>();
-            mipmap = istream.read<Mipmap,uint32_t, uint32_t, uint32_t, const ColorFormat&>(mmHeader.textureCount, mmHeader.width, mmHeader.height, header.colorInfo);
+            mipmap = istream.read<Mipmap, uint32_t, uint32_t, uint32_t, const ColorFormat&>(mmHeader.textureCount, mmHeader.width, mmHeader.height, header.colorInfo);
         }
 
         this->setName(istream.name());//GetFileNameFromPath(filepath) + ".mat");

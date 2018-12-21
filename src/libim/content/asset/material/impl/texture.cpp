@@ -78,10 +78,10 @@ Bmp Texture::toBmp() const
     bmp.info.bitCount    = m_colorInfo.bpp;
     bmp.info.compression = BI_BITFIELDS; //m_colorInfo.colorMode ? BI_BITFIELDS : BI_ALPHABITFIELDS;
     bmp.info.sizeImage   = matBitdataSize;
-    bmp.info.redMask     = RGBMask(m_colorInfo.redBPP  , m_colorInfo.RedShl);
-    bmp.info.greenMask   = RGBMask(m_colorInfo.greenBPP, m_colorInfo.GreenShl);
-    bmp.info.blueMask    = RGBMask(m_colorInfo.blueBPP , m_colorInfo.BlueShl);
-    bmp.info.alphaMask   = RGBMask(m_colorInfo.alphaBPP, m_colorInfo.AlphaShl);
+    bmp.info.redMask     = RGBMask(m_colorInfo.redBPP  , m_colorInfo.redShl);
+    bmp.info.greenMask   = RGBMask(m_colorInfo.greenBPP, m_colorInfo.greenShl);
+    bmp.info.blueMask    = RGBMask(m_colorInfo.blueBPP , m_colorInfo.blueShl);
+    bmp.info.alphaMask   = RGBMask(m_colorInfo.alphaBPP, m_colorInfo.alphaShl);
 
     bmp.pixelData = m_bitmap;
     return bmp;

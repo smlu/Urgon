@@ -12,17 +12,17 @@ namespace libim::content::asset {
         uint32_t greenBPP;
         uint32_t blueBPP ;
 
-        uint32_t RedShl  ;
-        uint32_t GreenShl;
-        uint32_t BlueShl ;
+        uint32_t redShl  ;
+        uint32_t greenShl;
+        uint32_t blueShl ;
 
-        uint32_t RedShr  ;
-        uint32_t GreenShr;
-        uint32_t BlueShr ;
+        uint32_t redShr  ;
+        uint32_t greenShr;
+        uint32_t blueShr ;
 
         uint32_t alphaBPP;
-        uint32_t AlphaShl;
-        uint32_t AlphaShr;
+        uint32_t alphaShl;
+        uint32_t alphaShr;
     };
 
     static constexpr ColorFormat RGB_565   { 1, 16, 5, 6, 5, 11, 5, 0, 3, 2, 3, 0,  0, 0 };

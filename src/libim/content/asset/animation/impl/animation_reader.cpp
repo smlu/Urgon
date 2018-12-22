@@ -60,7 +60,7 @@ void ParseKeyframes(TextResourceReader& rr, Animation& anim)
 }
 
 
-Animation& Animation::load(TextResourceReader& rr)
+Animation& Animation::deserialize(TextResourceReader& rr)
 {
     rr.assertSection(kResName_Header);
     ParseHeader(rr, *this);
@@ -82,7 +82,7 @@ Animation& Animation::load(TextResourceReader& rr)
     return *this;
 }
 
-Animation& Animation::load(TextResourceReader&& rr)
+Animation& Animation::deserialize(TextResourceReader&& rr)
 {
-    return load(rr);
+    return deserialize(rr);
 }

@@ -121,11 +121,11 @@ namespace libim::content::asset {
             return type_;
         }
 
-        Animation& load(text::TextResourceReader& rr);
-        Animation& load(text::TextResourceReader&& rr);
+        Animation& deserialize(text::TextResourceReader& rr);
+        Animation& deserialize(text::TextResourceReader&& rr);
 
-        void write(text::TextResourceWriter& rw, std::string_view headerComment = "") const;
-        void write(text::TextResourceWriter&& rw, std::string_view headerComment = "") const;
+        void serialize(text::TextResourceWriter& rw, std::string_view headerComment = "") const;
+        void serialize(text::TextResourceWriter&& rw, std::string_view headerComment = "") const;
 
     private:
         std::string name_;

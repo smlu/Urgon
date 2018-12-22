@@ -98,7 +98,7 @@ CndHeader CND::LoadHeader(const InputStream& istream)
     /* Verify file copyright notice  */
     //if(strncmp(cndHeader.copyright, &CND_COPYRIGHT[0], CND_COPYRIGHT.size() - 1))
     if(cndHeader.copyright != CopyrightNotice) {
-        throw StreamError("Error bad CND file copyright!");
+        throw StreamError("Error bad CND file copyright");
     }
 
     /* Verify file version */

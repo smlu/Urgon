@@ -45,7 +45,7 @@ namespace libim::content::asset {
     {
         int32_t width;
         int32_t height;
-        int32_t TransparentBool;
+        int32_t transparentBool;
 
         int32_t Unknown1;
         int32_t Unknown2;

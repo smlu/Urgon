@@ -36,6 +36,17 @@ namespace libim::content::asset {
             // *: Reference taken from https://www.massassi.net/jkspecs/
         };
 
+        Animation() = default;
+        Animation(text::TextResourceReader& rr)
+        {
+            deserialize(rr);
+        }
+
+        Animation(text::TextResourceReader&& rr)
+        {
+            deserialize(std::move(rr));
+        }
+
         void setName(std::string name)
         {
             name_ = std::move(name);

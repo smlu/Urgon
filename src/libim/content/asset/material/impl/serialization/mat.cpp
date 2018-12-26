@@ -40,12 +40,12 @@ uint32_t MatTextureBitmapSize(const MatTexture& tex, uint32_t bpp)
 //    }
 //}
 
-Material& Material::read(const InputStream&& istream)
+Material& Material::deserialize(const InputStream&& istream)
 {
-    return read(istream);
+    return deserialize(istream);
 }
 
-Material& Material::read(const InputStream& istream)
+Material& Material::deserialize(const InputStream& istream)
 {
         /* Read header */
         auto header = istream.read<MatHeader>();
@@ -86,12 +86,12 @@ Material& Material::read(const InputStream& istream)
 }
 
 
-bool Material::write(OutputStream&& ostream) const
+bool Material::serialize(OutputStream&& ostream) const
 {
-    return write(ostream);
+    return serialize(ostream);
 }
 
-bool Material::write(OutputStream& ostream) const
+bool Material::serialize(OutputStream& ostream) const
 {
     if(mipmaps().empty() || mipmaps().at(0).empty()) {
         return false;

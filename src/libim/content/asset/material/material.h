@@ -25,10 +25,10 @@ namespace libim::content::asset {
         virtual ~Material() override = default;
 
 
-        Material& read(const InputStream& istream);
-        Material& read(const InputStream&& istream);
-        bool write(OutputStream&& ostream) const;
-        bool write(OutputStream& ostream) const;
+        Material& deserialize(const InputStream& istream);
+        Material& deserialize(const InputStream&& istream);
+        bool serialize(OutputStream&& ostream) const;
+        bool serialize(OutputStream& ostream) const;
 
         Material& setName(const std::string& name)
         {
@@ -125,7 +125,10 @@ namespace libim::content::asset {
 }
 
 namespace libim {
-     template<> content::asset::Mipmap Stream::read<content::asset::Mipmap, uint32_t, uint32_t, uint32_t, const content::asset::ColorFormat&>(uint32_t textureCount, uint32_t width, uint32_t height, const content::asset::ColorFormat& colorInfo) const;
+    template<> content::asset::Mipmap Stream::read<
+        content::asset::Mipmap, uint32_t, uint32_t, uint32_t, const content::asset::ColorFormat&
+    >
+    (uint32_t textureCount, uint32_t width, uint32_t height, const content::asset::ColorFormat& colorInfo) const;
 }
 
 #endif // LIBIM_MATERIAL_H

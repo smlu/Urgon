@@ -18,6 +18,16 @@ namespace libim::content::asset {
     public:
         Material() = default;
         Material(std::string name) : m_name(std::move(name)){}
+        Material(const InputStream& istream)
+        {
+            deserialize(istream);
+        }
+
+        Material(const InputStream&& istream)
+        {
+            deserialize(std::move(istream));
+        }
+
         Material(const Material&) = default;
         Material(Material&&) noexcept = default;
         Material& operator = (const Material&) = default;

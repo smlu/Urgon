@@ -14,6 +14,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "utils/utils.h"
+
 #if defined(WIN32) || defined(_WIN32)
 #  define OS_WINDOWS 1
 #  include <windows.h>
@@ -194,6 +196,21 @@ namespace libim {
         }
 
         return  path.substr(dotPos + 1);
+    }
+
+    inline bool FileExtMatch(const std::filesystem::path& path, std::string_view ext, bool icase = true)
+    {
+        auto pext = path.extension();
+        if (pext.empty() != ext.empty()) {
+            return false;
+        }
+
+        auto svpext = std::string_view(pext.c_str());
+        if (icase) {
+            return utils::iequal(svpext, ext);
+        }
+
+        return svpext == ext;
     }
 
     inline bool IsFilePath(const std::string& path)

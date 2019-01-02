@@ -114,3 +114,8 @@ bool Tokenizer::reportEol() const
 {
     return tp_->reportEol();
 }
+
+const InputStream& Tokenizer::istream() const
+{
+    return tp_->istream();
+}

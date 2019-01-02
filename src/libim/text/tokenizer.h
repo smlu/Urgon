@@ -47,6 +47,8 @@ namespace libim::text {
         void setReportEol(bool report);
         bool reportEol() const;
 
+        const InputStream& istream() const;
+
     protected:
         Token cachedTkn_;
         class TokenizerPrivate;

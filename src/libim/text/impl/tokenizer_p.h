@@ -36,6 +36,11 @@ namespace libim::text {
             next_ch_    = readNextChar();
         }
 
+        inline const InputStream& istream() const
+        {
+            return istream_;
+        }
+
         inline char readNextChar()
         {
             while(!istream_.atEnd()) {

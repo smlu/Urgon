@@ -16,8 +16,8 @@ namespace libim::content::asset {
     class Material final : public Asset
     {
     public:
-        Material() = default;
-        Material(std::string name) : m_name(std::move(name)){}
+        using Asset::Asset;
+
         Material(const InputStream& istream)
         {
             deserialize(istream);
@@ -39,17 +39,6 @@ namespace libim::content::asset {
         Material& deserialize(const InputStream&& istream);
         bool serialize(OutputStream&& ostream) const;
         bool serialize(OutputStream& ostream) const;
-
-        Material& setName(const std::string& name)
-        {
-            m_name = name;
-            return *this;
-        }
-
-        const std::string& name() const
-        {
-            return m_name;
-        }
 
         Material& setWidth(uint32_t width)
         {
@@ -121,7 +110,6 @@ namespace libim::content::asset {
         }
 
     private:
-        std::string m_name;
         uint32_t m_width;
         uint32_t m_height;
         ColorFormat m_colorFormat;

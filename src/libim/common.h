@@ -161,7 +161,7 @@ namespace libim {
         return path;
     }
 
-    inline std::string GetFileName(const std::string& path)
+    inline std::string GetFilename(const std::string& path)
     {
         std::string name = path;
         if(!IsNativePath(name)) {
@@ -178,7 +178,7 @@ namespace libim {
 
     inline std::string GetBaseName(const std::string& path)
     {
-        std::string name = GetFileName(path);
+        std::string name = GetFilename(path);
 
         size_t dot = name.find_last_of(".");
         if (dot != std::string::npos) {

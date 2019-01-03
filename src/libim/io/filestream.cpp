@@ -247,7 +247,7 @@ FileStream::FileStream(std::string filePath, bool truncate, Mode mode) :
     m_fs(std::make_shared<FileStreamImpl>(GetNativePath(std::move(filePath)), truncate, mode))
 
 {
-    this->setName(GetFileName(m_fs->filePath));
+    this->setName(GetFilename(m_fs->filePath));
 }
 
 FileStream::~FileStream()

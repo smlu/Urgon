@@ -36,23 +36,23 @@ void ParseMarkers(TextResourceReader& rr, Animation& anim)
 
 void ParseKeyframes(TextResourceReader& rr, Animation& anim)
 {
-    auto nodes = rr.readList<AnimationNode, false>(kResName_Nodes,
+    auto nodes = rr.readList<KeyNode, false>(kResName_Nodes,
     [&](TextResourceReader& rr, auto& node)
     {
-        node.id = rr.readKey<decltype(node.id)>(kResName_Node);
+        node.num = rr.readKey<decltype(node.num)>(kResName_Node);
         node.meshName = rr.readKey<std::string>(kResName_MeshName);
 
-        node.frames = rr.readList<Keyframe>(kResName_Entries,
-        [](TextResourceReader& rr, auto& frame)
+        node.entries = rr.readList<KeyNodeEntry>(kResName_Entries,
+        [](TextResourceReader& rr, auto& entry)
         {
-            frame.number = rr.getNumber<decltype(frame.number)>();
-            frame.flags  = rr.readFlags<decltype(frame.flags)>();
+            entry.frame = rr.getNumber<decltype(entry.frame)>();
+            entry.flags  = rr.readFlags<decltype(entry.flags)>();
 
-            frame.pos = rr.getVector<FVector3>();
-            frame.rot = rr.getVector<FRotator>();
+            entry.pos = rr.getVector<Vector3f>();
+            entry.rot = rr.getVector<FRotator>();
 
-            frame.dpos = rr.getVector<FVector3>();
-            frame.drot = rr.getVector<FRotator>();
+            entry.dpos = rr.getVector<Vector3f>();
+            entry.drot = rr.getVector<FRotator>();
         });
     });
 
@@ -79,6 +79,7 @@ Animation& Animation::deserialize(TextResourceReader& rr)
     }
 
     ParseKeyframes(rr, *this);
+    this->setName(GetFilename(rr.istream().name()));
     return *this;
 }
 

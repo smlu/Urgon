@@ -1,5 +1,5 @@
-#ifndef LIBIM_KEYFRAME_H
-#define LIBIM_KEYFRAME_H
+#ifndef LIBIM_KEY_NODE_ENTRY_H
+#define LIBIM_KEY_NODE_ENTRY_H
 #include <cstdint>
 
 #include "../../../math/math.h"
@@ -8,7 +8,7 @@
 
 namespace libim::content::asset {
 
-    struct Keyframe final
+    struct KeyNodeEntry final
     {
         // Ref: https://www.massassi.net/jkspecs/
         //     See also sw jk2 atwalk.key
@@ -19,19 +19,19 @@ namespace libim::content::asset {
             RotationChange = 2
         };
 
-        float number;
+        float frame;
         Flag  flags;
 
-        FVector3 pos;
+        Vector3f pos;
         FRotator rot;
 
-        FVector3 dpos;
+        Vector3f dpos;
         FRotator drot;
     };
 
-    inline constexpr bool operator == (const Keyframe& kf1, const Keyframe& kf2)
+    inline constexpr bool operator == (const KeyNodeEntry& kf1, const KeyNodeEntry& kf2)
     {
-        return cmpf(kf1.number, kf2.number) &&
+        return libim::cmpf(kf1.frame, kf2.frame) &&
                kf1.flags == kf2.flags &&
                kf1.pos   == kf2.pos   &&
                kf1.dpos  == kf2.dpos  &&
@@ -39,4 +39,4 @@ namespace libim::content::asset {
                kf1.drot  == kf2.drot;
     }
 }
-#endif // LIBIM_KEYFRAME_H
+#endif // LIBIM_KEY_NODE_ENTRY_H

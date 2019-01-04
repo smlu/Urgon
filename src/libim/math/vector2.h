@@ -36,7 +36,7 @@ namespace libim {
         }
     };
 
-    struct FVector2 : public Vector2<float> {
+    struct Vector2f : public Vector2<float> {
         using Vector2<float>::Vector2;
     };
 

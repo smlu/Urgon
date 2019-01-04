@@ -51,16 +51,16 @@ void WriteKeyframes(TextResourceWriter& rw, const Animation& anim)
     rw.writeSection(kResName_KfNodes)
       .writeEol()
       .writeList(kResName_Nodes, anim.nodes(),
-      [](TextResourceWriter& rw, [[maybe_unused]]auto idx, const AnimationNode& node)
+      [](TextResourceWriter& rw, [[maybe_unused]]auto idx, const KeyNode& node)
       {
 
-          rw.writeKeyValue<decltype(node.id), 4>(kResName_Node, node.id);
+          rw.writeKeyValue<decltype(node.num), 4>(kResName_Node, node.num);
           rw.writeKeyValue<std::string_view>(kResName_MeshName, node.meshName);
 
           // Write frames
-          const auto nFrames = node.frames.size();
-          rw.writeList(kResName_Entries, node.frames,
-          [nFrames](TextResourceWriter& rw, auto idx, const Keyframe& frame)
+          const auto nEntries = node.entries.size();
+          rw.writeList(kResName_Entries, node.entries,
+          [nEntries](TextResourceWriter& rw, auto idx, const KeyNodeEntry& frame)
           {
               if(idx == 0)
               {
@@ -71,9 +71,9 @@ void WriteKeyframes(TextResourceWriter& rw, const Animation& anim)
 
               const auto rowBegin = rw.tell();
 
-              rw.writeRowIdx(idx, utils::numdigits(nFrames));
-              rw.indent(rw.getNumberIndent(9, frame.number));
-              rw.writeNumber(frame.number);
+              rw.writeRowIdx(idx, utils::numdigits(nEntries));
+              rw.indent(rw.getNumberIndent(9, frame.frame));
+              rw.writeNumber(frame.frame);
 
               rw.indent(3);
               rw.writeFlags(frame.flags);

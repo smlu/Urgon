@@ -2,7 +2,7 @@
 #define LIBIM_CND_KEY_STRUCTS_H
 
 #include "../../../../../animation/animation.h"
-#include "../../../../../animation/keyframe.h"
+#include "../../../../../animation/key_node_entry.h"
 #include "../../../../../animation/key_marker.h"
 
 // Ref: https://www.massassi.net/jkspecs/key.htm
@@ -68,7 +68,7 @@ namespace libim::content::asset
     {
         char meshName[64];
         int nodeNum;
-        int numKeyframes;
+        int numEntries;
     };
 }
 

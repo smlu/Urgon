@@ -1,7 +1,7 @@
 #ifndef LIBIM_ANIMATION_H
 #define LIBIM_ANIMATION_H
 #include "../asset.h"
-#include "animation_node.h"
+#include "key_node.h"
 #include "key_marker.h"
 
 #include "../../text/text_resource_reader.h"
@@ -98,17 +98,17 @@ namespace libim::content::asset {
             return markers_;
         }
 
-        void setNodes(std::vector<AnimationNode>nodes)
+        void setNodes(std::vector<KeyNode>nodes)
         {
             nodes_ = std::move(nodes);
         }
 
-        const std::vector<AnimationNode>& nodes() const
+        const std::vector<KeyNode>& nodes() const
         {
             return nodes_;
         }
 
-        std::vector<AnimationNode>& nodes()
+        std::vector<KeyNode>& nodes()
         {
             return nodes_;
         }
@@ -137,7 +137,7 @@ namespace libim::content::asset {
         uint32_t joints_ = 0UL;
 
         std::vector<KeyMarker> markers_;
-        std::vector<AnimationNode> nodes_;
+        std::vector<KeyNode> nodes_;
     };
 }
 #endif // LIBIM_ANIMATION_H

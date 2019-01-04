@@ -46,15 +46,15 @@ namespace libim {
         }
     };
 
-    struct FVector3 : public Vector3<float> {
+    struct Vector3f : public Vector3<float> {
         using Vector3<float>::Vector3;
     };
 
-    struct IntVector3 : public Vector3<int32_t> {
+    struct Vector3i : public Vector3<int32_t> {
         using Vector3<int32_t>::Vector3;
     };
 
-    struct UIntVector3 : public Vector3<uint32_t> {
+    struct Vector3u : public Vector3<uint32_t> {
         using Vector3<uint32_t>::Vector3;
     };
 }

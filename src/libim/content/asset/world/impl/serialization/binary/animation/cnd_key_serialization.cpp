@@ -141,8 +141,8 @@ std::vector<Animation> CND::ReadAnimations(const InputStream& istream)
         {
             auto& node = anim.nodes().at(i);
             node.meshName = GetTrimmedName(nodes.at(i).meshName);
-            node.id = nodes.at(i).nodeNum; // TODO: check bounds
-            node.frames.resize(nodes.at(i).numKeyframes); // TODO: check bounds
+            node.num = nodes.at(i).nodeNum; // TODO: check bounds
+            node.entries.resize(nodes.at(i).numEntries); // TODO: check bounds
         }
     }
 
@@ -151,8 +151,8 @@ std::vector<Animation> CND::ReadAnimations(const InputStream& istream)
     {
         for(auto& node : anim.nodes())
         {
-            std::size_t nToRead = sizeof(Keyframe) * node.frames.size();
-            auto nRead = istream.read(reinterpret_cast<byte_t*>(&node.frames[0]), nToRead);
+            std::size_t nToRead = sizeof(KeyNodeEntry) * node.entries.size();
+            auto nRead = istream.read(reinterpret_cast<byte_t*>(&node.entries[0]), nToRead);
             if(nToRead != nRead) {
                 throw StreamError("Could not read keyframe from CND file stream");
             }

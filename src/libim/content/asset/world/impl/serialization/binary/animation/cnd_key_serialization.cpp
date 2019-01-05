@@ -11,6 +11,7 @@
 
 using namespace libim;
 using namespace libim::content::asset;
+using namespace libim::utils;
 using namespace std::string_view_literals;
 
 template<std::size_t N>
@@ -91,9 +92,9 @@ std::size_t CND::GetAnimSectionOffset(const CndHeader& header, const InputStream
     return FindFirstKey(istream);
 }
 
-std::vector<Animation> CND::ReadAnimations(const InputStream& istream)
+HashMap<Animation> CND::ReadAnimations(const InputStream& istream)
 {
-    std::vector<Animation> animations;
+    HashMap<Animation>  animations;
 
     auto cndHeader = LoadHeader(istream);
 
@@ -113,15 +114,14 @@ std::vector<Animation> CND::ReadAnimations(const InputStream& istream)
     istream.seek(sectionOffset);
 
     // Read anim header list
-    animations.resize(cndHeader.numKeyframes);
+    animations.reserve(cndHeader.numKeyframes);
     auto headerList = istream.read<std::vector<CndKeyHeader>>(cndHeader.numKeyframes);
 
     // Read key markers
-    for(std::size_t i = 0; i < headerList.size(); i++)
+    for(const auto& header : headerList)
     {
-        const auto& header = headerList.at(i);
         auto markers = istream.read<std::vector<KeyMarker>>(header.numMarkers);
-        auto& anim = animations.at(i);
+        Animation anim;
         anim.setName(GetTrimmedName(header.name));
         anim.setFlags(header.flags);
         anim.setType(header.type);
@@ -131,6 +131,8 @@ std::vector<Animation> CND::ReadAnimations(const InputStream& istream)
         anim.setMarkers(std::move(markers));
 
         anim.nodes().resize(header.numNodes); // TODO: check bounds
+
+        animations.pushBack(anim.name(), std::move(anim));
     }
 
     // Read node header list

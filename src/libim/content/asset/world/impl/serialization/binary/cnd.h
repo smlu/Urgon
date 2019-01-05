@@ -13,6 +13,7 @@
 
 #include "../../../../../../common.h"
 #include "../../../../../../io/stream.h"
+#include "../../../../../../utils/hashmap.h"
 
 namespace libim::content::asset {
 
@@ -71,7 +72,7 @@ namespace libim::content::asset {
         static bool ReplaceMaterial(const Material& mat, const std::string& filename);
 
         static std::size_t GetAnimSectionOffset(const CndHeader& header, const InputStream& istream);
-        static std::vector<Animation> ReadAnimations(const InputStream& istream);
+        static utils::HashMap<Animation> ReadAnimations(const InputStream& istream);
     };
 
 

@@ -11,7 +11,7 @@
 
 namespace libim::utils {
 
-    /** Insert ordered list which elements are maped by the key. */
+    /** Sequence ordered list which elements are maped by the key. */
     template<typename T, typename KeyT = std::string>
     class HashMap
     {

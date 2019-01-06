@@ -77,11 +77,10 @@ Material& Material::deserialize(const InputStream& istream)
             mipmap = istream.read<Mipmap, uint32_t, uint32_t, uint32_t, const ColorFormat&>(mmHeader.textureCount, mmHeader.width, mmHeader.height, header.colorInfo);
         }
 
-        this->setName(istream.name());//GetFileNameFromPath(filepath) + ".mat");
+        this->setName(GetFilename(istream.name()));
         this->setSize(mipmaps.at(0).at(0).width(), mipmaps.at(0).at(0).height());
         this->setColorFormat(header.colorInfo);
         this->setMipmaps(std::move(mipmaps));
-
         return *this;
 }
 

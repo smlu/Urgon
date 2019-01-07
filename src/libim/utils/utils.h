@@ -22,6 +22,15 @@ namespace libim::utils {
         }
     }
 
+    template<typename T, template<typename> class U>
+    typename U<T>::iterator copy(typename U<T>::iterator s_begin, std::size_t count, U<T>& dest)
+    {
+        dest.reserve(count);
+        auto s_end = s_begin + count;
+        std::copy(s_begin, s_end, std::back_inserter(dest));
+        return s_end;
+    }
+
     /* Case insensitive comparison of two strings */
     inline bool iequal(const std::string& s1, const std::string& s2)
     {
@@ -99,6 +108,19 @@ namespace libim::utils {
 
         ss << n;
         return ss.str();
+    }
+
+    template<std::size_t N>
+    std::string trim(const char (&str)[N])
+    {
+        std::size_t end = 0;
+        while(end++ < N) {
+            if(str[end] == '\0') {
+                break;
+            }
+        }
+
+        return std::string(str, end);
     }
 }
 

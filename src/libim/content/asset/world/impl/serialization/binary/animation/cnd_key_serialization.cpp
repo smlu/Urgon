@@ -3,6 +3,7 @@
 #include "../material/cnd_mat_header.h"
 #include "../../../../../animation/animation.h"
 #include "../../../../../../../log/log.h"
+#include "../../../../../../../utils/utils.h"
 
 #include <algorithm>
 #include <cctype>
@@ -14,18 +15,6 @@ using namespace libim::content::asset;
 using namespace libim::utils;
 using namespace std::string_view_literals;
 
-template<std::size_t N>
-std::string GetTrimmedName(const char (&str)[N])
-{
-    std::size_t end = 0;
-    while(end++ < N) {
-        if(str[end] == '\0') {
-            break;
-        }
-    }
-
-    return std::string(str, end);
-}
 
 std::size_t FindFirstKey(const InputStream& istream)
 {
@@ -88,9 +77,12 @@ std::size_t CND::GetAnimSectionOffset(const CndHeader& header, const InputStream
     auto matEndOffs =  istream.tell() + nMatHeaderListSize + nMatBitmapSize;
     istream.seek(matEndOffs);
 
-    /* Find the first key in list*/
-    return FindFirstKey(istream);
+    /* Find the first key in the list */
+    auto ofs = FindFirstKey(istream);
+    return (ofs >= 12) ? ofs - 12 : ofs; // move 12 bytes back to the beginning of the keyframes section
 }
+
+
 
 HashMap<Animation> CND::ReadAnimations(const InputStream& istream)
 {
@@ -101,65 +93,61 @@ HashMap<Animation> CND::ReadAnimations(const InputStream& istream)
     /* Return if no materials are present in file*/
     if(cndHeader.numKeyframes < 1)
     {
-        LOG_INFO("CND: No animations found in CND file!");
+        LOG_INFO("CND: No animations found in CND file stream!");
         return animations;
     }
 
     // Move stream to the beginning of the animation section
     auto sectionOffset = GetAnimSectionOffset(cndHeader, istream);
     if(sectionOffset == 0) {
-        throw StreamError("No animation section found in CND file stream");
+        throw StreamError("No keyframes section found in CND file stream");
     }
 
     istream.seek(sectionOffset);
+    auto aNumEntries = istream.read<std::array<uint32_t, 3>>();
 
-    // Read anim header list
-    animations.reserve(cndHeader.numKeyframes);
+    // Read key header list, marker list, key node list and key node entry list
     auto headerList = istream.read<std::vector<CndKeyHeader>>(cndHeader.numKeyframes);
+    auto markerList = istream.read<std::vector<KeyMarker>>(aNumEntries.at(0));
+    auto nodeList   = istream.read<std::vector<CndKeyNode>>(aNumEntries.at(1));
+    auto nodeEntryList = istream.read<std::vector<KeyNodeEntry>>(aNumEntries.at(2));
 
-    // Read key markers
+    auto mIt  = markerList.begin();
+    auto nIt  = nodeList.begin();
+    auto neIt = nodeEntryList.begin();
+    animations.reserve(cndHeader.numKeyframes);
+
     for(const auto& header : headerList)
     {
-        auto markers = istream.read<std::vector<KeyMarker>>(header.numMarkers);
         Animation anim;
-        anim.setName(GetTrimmedName(header.name));
+        anim.setName(utils::trim(header.name));
         anim.setFlags(header.flags);
         anim.setType(header.type);
         anim.setFrames(header.frames);  // TODO: check bounds
         anim.setFps(header.fps);
         anim.setJoints(header.numJoints); // TODO: check bounds
+
+        /* Copy key markers */
+        std::vector<KeyMarker> markers;
+        mIt = utils::copy(mIt, header.numMarkers, markers);
         anim.setMarkers(std::move(markers));
 
+        /* Copy key nodes and it's entries */
         anim.nodes().resize(header.numNodes); // TODO: check bounds
+        for(auto& node : anim.nodes())
+        {
+            node.meshName = utils::trim(nIt->meshName);
+            node.num = nIt->nodeNum;
+            neIt = utils::copy(neIt, nIt->numEntries, node.entries); // TODO: check bounds for nIt->numEntries
+            nIt++;
+        }
 
         animations.pushBack(anim.name(), std::move(anim));
     }
 
-    // Read node header list
-    for(auto& anim : animations)
-    {
-        std::vector<CndKeyNode> nodes = istream.read<std::vector<CndKeyNode>>(anim.nodes().size());
-        for(std::size_t i = 0; i < anim.nodes().size(); i++)
-        {
-            auto& node = anim.nodes().at(i);
-            node.meshName = GetTrimmedName(nodes.at(i).meshName);
-            node.num = nodes.at(i).nodeNum; // TODO: check bounds
-            node.entries.resize(nodes.at(i).numEntries); // TODO: check bounds
-        }
-    }
-
-    // Read keyframes
-    for(auto& anim : animations)
-    {
-        for(auto& node : anim.nodes())
-        {
-            std::size_t nToRead = sizeof(KeyNodeEntry) * node.entries.size();
-            auto nRead = istream.read(reinterpret_cast<byte_t*>(&node.entries[0]), nToRead);
-            if(nToRead != nRead) {
-                throw StreamError("Could not read keyframe from CND file stream");
-            }
-        }
-    }
+    assert(mIt == markerList.end());
+    assert(nIt == nodeList.end());
+    assert(neIt == nodeEntryList.end());
 
     return animations;
 }

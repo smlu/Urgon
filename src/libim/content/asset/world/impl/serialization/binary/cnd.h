@@ -68,7 +68,7 @@ namespace libim::content::asset {
         static CndHeader LoadHeader(const InputStream& istream);
 
         static uint32_t GetMatSectionOffset(const CndHeader& header);
-        static std::vector<Material> ReadMaterials(const InputStream& istream);
+        static utils::HashMap<Material> ReadMaterials(const InputStream& istream);
         static bool ReplaceMaterial(const Material& mat, const std::string& filename);
 
         static std::size_t GetAnimSectionOffset(const CndHeader& header, const InputStream& istream);

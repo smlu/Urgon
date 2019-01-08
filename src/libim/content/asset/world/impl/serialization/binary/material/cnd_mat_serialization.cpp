@@ -1,5 +1,6 @@
 #include "../cnd.h"
 #include "cnd_mat_header.h"
+#include "../../../../../../../log/log.h"
 
 using namespace libim;
 using namespace libim::content::asset;
@@ -13,19 +14,19 @@ uint32_t CND::GetMatSectionOffset(const CndHeader& header)
             4;                         // 4 = unknown 4 bytes
 }
 
-std::vector<Material> CND::ReadMaterials(const InputStream& istream)
+utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
 {
+    utils::HashMap<Material> materials;
+
     try
     {
-        std::vector<Material> materials;
-
         /* Read cnd file header */
         auto cndHeader = LoadHeader(istream);
 
         /* Return if no materials are present in file*/
         if(cndHeader.numMaterials < 1)
         {
-            std::cout << "CND Info: No materials found in CND file!\n";
+            LOG_INFO("CND Info: No materials found in CND file!");
             return materials;
         }
 
@@ -36,7 +37,7 @@ std::vector<Material> CND::ReadMaterials(const InputStream& istream)
         uint32_t nBitmapBuffSize = istream.read<uint32_t>();
         if(nBitmapBuffSize == 0)
         {
-            std::cerr << "CND Warning: Read materials bitmap data size == 0!\n";
+            LOG_WARNING("CND: Read materials bitmap data size == 0!");
             return materials;
         }
 
@@ -51,14 +52,14 @@ std::vector<Material> CND::ReadMaterials(const InputStream& istream)
         {
             if(matHeader.mipmapCount < 1 || matHeader.texturesPerMipmap < 1)
             {
-                std::cerr << "CND Warning: No pixel data found for material: " << matHeader.name << std::endl;
+                LOG_ERROR("CND: No pixel data found for material: %", matHeader.name);
                 continue;
             }
 
             /* Verify material bitdepth */
             if(matHeader.colorInfo.bpp % 8 != 0) // TODO: check for 16 and 32 bbp
             {
-                std::cerr << "CND Error: Cannot extract material " << matHeader.name << " from buffer. Wrong bitdepth size: " <<  matHeader.colorInfo.bpp << std::endl;
+                LOG_ERROR("CND: Cannot extract material % from buffer. Wrong bitdepth size: %", matHeader.name, matHeader.colorInfo.bpp);
                 materials.clear();
                 return materials;
             }
@@ -75,19 +76,19 @@ std::vector<Material> CND::ReadMaterials(const InputStream& istream)
             mat.setColorFormat(matHeader.colorInfo);
             mat.setMipmaps(std::move(mipmaps));
 
-            materials.emplace_back(std::move(mat));
+            materials.pushBack(matHeader.name, std::move(mat));
         }
 
         if(!vecBitmapBuff.empty()) {
-            std::cerr << "CND Warning: Not all bitmap data was copied from buffer!\n";
+            LOG_WARNING("CND: Not all bitmap data was copied from buffer!");
         }
 
         return materials;
     }
     catch(const std::exception& e)
     {
-        std::cerr << "CND Error: An exception was thrown while loading material from CND file stream: " << e.what() << "!\n";
-        return std::vector<Material> ();
+        LOG_ERROR("CND Error: An exception was thrown while loading material from CND file stream: %!", e.what());
+        return materials;
     }
 }
 

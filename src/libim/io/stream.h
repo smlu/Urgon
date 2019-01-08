@@ -251,16 +251,16 @@ namespace libim {
         Stream& _write(const std::shared_ptr<T>& ptr, tag<std::shared_ptr<T>>&&);
 
          /* std::vector specialization */
-        template<typename T, typename A, typename std::enable_if_t<std::is_trivial<T>::value, int> = 0>
+        template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable<T>::value, int> = 0>
         std::vector<T, A> _read(std::size_t lenHint, tag<std::vector<T, A>>&&) const;
 
-        template<typename T, typename A, typename std::enable_if_t<!std::is_trivial<T>::value, int> = 0>
+        template<typename T, typename A, typename std::enable_if_t<!std::is_trivially_copyable<T>::value, int> = 0>
         std::vector<T, A> _read(std::size_t lenHint, tag<std::vector<T, A>>&&) const;
 
-        template<typename T, typename A, typename std::enable_if_t<std::is_trivial<T>::value, int> = 0>
+        template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable<T>::value, int> = 0>
         Stream& _write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&);
 
-        template<typename T, typename A, typename std::enable_if_t<!std::is_trivial<T>::value, int> = 0>
+        template<typename T, typename A, typename std::enable_if_t<!std::is_trivially_copyable<T>::value, int> = 0>
         Stream& _write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&);
 
     private:
@@ -608,7 +608,7 @@ namespace libim {
     }
 
     // std::vector
-    template<typename T, typename A, typename std::enable_if_t<std::is_trivial<T>::value, int>>
+    template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable<T>::value, int>>
     std::vector<T, A> Stream::_read(std::size_t lenHint, tag<std::vector<T, A>>&&) const
     {
         std::vector<T, A> vec(lenHint);
@@ -620,7 +620,7 @@ namespace libim {
         return vec;
     }
 
-    template<typename T, typename A, typename std::enable_if_t<!std::is_trivial<T>::value, int>>
+    template<typename T, typename A, typename std::enable_if_t<!std::is_trivially_copyable<T>::value, int>>
     std::vector<T, A> Stream::_read(std::size_t lenHint, tag<std::vector<T, A>>&&) const
     {
         std::vector<T, A> vec;
@@ -632,7 +632,7 @@ namespace libim {
         return vec;
     }
 
-    template<typename T, typename A, typename std::enable_if_t<std::is_trivial<T>::value, int>>
+    template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable<T>::value, int>>
     Stream& Stream::_write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&)
     {
         const std::size_t nWrite = vec.size() * sizeof(T);
@@ -644,7 +644,7 @@ namespace libim {
         return *this;
     }
 
-    template<typename T, typename A, typename std::enable_if_t<!std::is_trivial<T>::value, int>>
+    template<typename T, typename A, typename std::enable_if_t<!std::is_trivially_copyable<T>::value, int>>
     Stream& Stream::_write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&)
     {
         for(const auto& e : vec) {

@@ -155,15 +155,15 @@ void PrintMipmapInfo(const Mipmap& mipmap, uint32_t mmIdx)
     std::cout << "        Blue:"  << SET_VINFO_LW(7) << tex.colorInfo().blueBPP  << std::endl;
     std::cout << "        Alpha:" << SET_VINFO_LW(6) << tex.colorInfo().alphaBPP << std::endl;
     std::cout << "      Left shift per channel:" << std::endl;
-    std::cout << "        Red:"   << SET_VINFO_LW(8) << tex.colorInfo().RedShl   << std::endl;
-    std::cout << "        Green:" << SET_VINFO_LW(6) << tex.colorInfo().GreenShl << std::endl;
-    std::cout << "        Blue:"  << SET_VINFO_LW(7) << tex.colorInfo().BlueShl  << std::endl;
-    std::cout << "        Alpha:" << SET_VINFO_LW(6) << tex.colorInfo().AlphaShl << std::endl;
+    std::cout << "        Red:"   << SET_VINFO_LW(8) << tex.colorInfo().redShl   << std::endl;
+    std::cout << "        Green:" << SET_VINFO_LW(6) << tex.colorInfo().greenShl << std::endl;
+    std::cout << "        Blue:"  << SET_VINFO_LW(7) << tex.colorInfo().blueShl  << std::endl;
+    std::cout << "        Alpha:" << SET_VINFO_LW(6) << tex.colorInfo().alphaShl << std::endl;
     std::cout << "      Right shift per channel:" << std::endl;
-    std::cout << "        Red:"   << SET_VINFO_LW(8) << tex.colorInfo().RedShr   << std::endl;
-    std::cout << "        Green:" << SET_VINFO_LW(6) << tex.colorInfo().GreenShr << std::endl;
-    std::cout << "        Blue:"  << SET_VINFO_LW(7) << tex.colorInfo().BlueShr  << std::endl;
-    std::cout << "        Alpha:" << SET_VINFO_LW(6) << tex.colorInfo().AlphaShr << std::endl << std::endl;
+    std::cout << "        Red:"   << SET_VINFO_LW(8) << tex.colorInfo().redShr   << std::endl;
+    std::cout << "        Green:" << SET_VINFO_LW(6) << tex.colorInfo().greenShr << std::endl;
+    std::cout << "        Blue:"  << SET_VINFO_LW(7) << tex.colorInfo().blueShr  << std::endl;
+    std::cout << "        Alpha:" << SET_VINFO_LW(6) << tex.colorInfo().alphaShr << std::endl << std::endl;
 }
 
 bool ReplaceMaterial(const std::string& cndFile, std::vector<std::string> matFiles)

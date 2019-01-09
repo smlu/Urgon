@@ -13,7 +13,7 @@ namespace libim::text {
     class Tokenizer
     {
     public:
-        Tokenizer(InputStream& s);
+        Tokenizer(const InputStream& s);
         virtual ~Tokenizer();
 
         // Explicitly delete copy and move ctors

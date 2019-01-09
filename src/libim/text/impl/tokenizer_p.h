@@ -22,14 +22,14 @@ namespace libim::text {
 
     class Tokenizer::TokenizerPrivate
     {
-        InputStream& istream_;
+        const InputStream& istream_;
         char current_ch_, next_ch_;
         std::size_t line_   = 1;
         std::size_t column_ = 1;
         bool report_eol_ = false;
 
     public:
-        TokenizerPrivate(InputStream& s) :
+        TokenizerPrivate(const InputStream& s) :
             istream_(s)
         {
             current_ch_ = readNextChar();

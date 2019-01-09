@@ -82,13 +82,9 @@ std::size_t CND::GetAnimSectionOffset(const CndHeader& header, const InputStream
     return (ofs >= 12) ? ofs - 12 : ofs; // move 12 bytes back to the beginning of the keyframes section
 }
 
-
-
-HashMap<Animation> CND::ReadAnimations(const InputStream& istream)
+HashMap<Animation> CND::ParseSectionKeyframes(const CndHeader& cndHeader, const InputStream& istream)
 {
     HashMap<Animation>  animations;
-
-    auto cndHeader = LoadHeader(istream);
 
     /* Return if no materials are present in file*/
     if(cndHeader.numKeyframes < 1)
@@ -150,4 +146,17 @@ HashMap<Animation> CND::ReadAnimations(const InputStream& istream)
     assert(neIt == nodeEntryList.end());
 
     return animations;
+}
+
+HashMap<Animation> CND::ReadAnimations(const InputStream& istream)
+{
+    auto cndHeader = LoadHeader(istream);
+
+    // Move stream to the beginning of the keyframes section
+    auto sectionOffset = GetAnimSectionOffset(cndHeader, istream);
+    if(sectionOffset == 0) {
+        throw StreamError("No keyframes section found in CND file stream");
+    }
+
+    return ParseSectionKeyframes(cndHeader, istream);
 }

@@ -451,7 +451,7 @@ namespace libim::utils {
 
         reference operator* () const
         {
-            return it_->data;
+            return const_cast<reference>(it_->data);
         }
 
         pointer operator-> () const

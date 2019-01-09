@@ -164,18 +164,18 @@ namespace libim::utils {
         {
             auto it = map_.find(key);
             if(it == map_.end()) {
-                return emplaceBack(key);
+                return *emplaceBack(key).first;
             }
-            return it->data;
+            return it->second->data;
         }
 
         reference operator[](key_rvalue key)
         {
             auto it = map_.find(key);
             if(it == map_.end()) {
-                return emplaceBack(std::move(key));
+                return *emplaceBack(std::move(key)).first;
             }
-            return it->data;
+            return it->second->data;
         }
 
         const_reference operator[](key_const_reference key) const

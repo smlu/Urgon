@@ -14,24 +14,18 @@ uint32_t CND::GetMatSectionOffset(const CndHeader& header)
             4;                         // 4 = unknown 4 bytes
 }
 
-utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
+utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, const InputStream& istream)
 {
     utils::HashMap<Material> materials;
 
     try
     {
-        /* Read cnd file header */
-        auto cndHeader = LoadHeader(istream);
-
         /* Return if no materials are present in file*/
-        if(cndHeader.numMaterials < 1)
+        if(header.numMaterials < 1)
         {
-            LOG_INFO("CND Info: No materials found in CND file!");
+            LOG_INFO("CND Info: No materials found!");
             return materials;
         }
-
-        /* Seek to materials position */
-        istream.seek(GetMatSectionOffset(cndHeader));
 
         /* Read materials pixel data size */
         uint32_t nBitmapBuffSize = istream.read<uint32_t>();
@@ -42,7 +36,7 @@ utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
         }
 
         /* Read material header list from file stream */
-        auto matHeaders = istream.read<std::vector<CndMatHeader>>(cndHeader.numMaterials);
+        auto matHeaders = istream.read<std::vector<CndMatHeader>>(header.numMaterials);
 
         /* Read materials pixel data from file stream */
         Bitmap vecBitmapBuff = istream.read<Bitmap>(nBitmapBuffSize);
@@ -90,6 +84,13 @@ utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
         LOG_ERROR("CND Error: An exception was thrown while loading material from CND file stream: %!", e.what());
         return materials;
     }
+}
+
+utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
+{
+    auto cndHeader = LoadHeader(istream);
+    istream.seek(GetMatSectionOffset(cndHeader));
+    return ParseSectionMaterials(cndHeader, istream);
 }
 
 bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)

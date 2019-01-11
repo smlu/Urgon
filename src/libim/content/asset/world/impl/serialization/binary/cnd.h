@@ -72,7 +72,7 @@ namespace libim::content::asset {
         static utils::HashMap<Material> ReadMaterials(const InputStream& istream);
         static bool ReplaceMaterial(const Material& mat, const std::string& filename);
 
-        static std::size_t GetAnimSectionOffset(const CndHeader& header, const InputStream& istream);
+        static std::size_t GetKeySectionOffset(const CndHeader& header, const InputStream& istream);
         static utils::HashMap<Animation> ParseSectionKeyframes(const CndHeader& cndHeader, const InputStream& istream); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
         static utils::HashMap<Animation> ReadAnimations(const InputStream& istream);
     };

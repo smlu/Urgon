@@ -1,6 +1,7 @@
 #include "../cnd.h"
 #include "cnd_mat_header.h"
 #include "../../../../../../../log/log.h"
+#include <cstring>
 
 using namespace libim;
 using namespace libim::content::asset;
@@ -92,6 +93,47 @@ utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
     istream.seek(GetMatSectionOffset(cndHeader));
     return ParseSectionMaterials(cndHeader, istream);
 }
+
+void CND::WriteSectionMaterials(OutputStream& ostream, const utils::HashMap<Material>& materials)
+{
+    std::vector<CndMatHeader> cndHeaders;
+    cndHeaders.reserve(materials.size());
+
+    Bitmap bitmaps;
+    for(const auto& mat : materials)
+    {
+        CndMatHeader h;
+        strncpy(h.name, mat.name().c_str(), kCndMatNameLen);
+        h.width       = mat.width();
+        h.height      = mat.height();
+        h.colorInfo   = mat.colorFormat();
+        h.mipmapCount = mat.mipmaps().size();
+        h.texturesPerMipmap = mat.mipmaps().at(0).size();
+        cndHeaders.push_back(h);
+
+        const std::size_t sizePixeldata = GetMipmapPixelDataSize(h.texturesPerMipmap, h.width, h.height, h.colorInfo.bpp);
+        bitmaps.reserve(sizePixeldata);
+        for(const auto& mipmap : mat.mipmaps())
+        {
+            for(const auto& tex : mipmap)
+            {
+                const Bitmap& bitmap = *tex.bitmap();
+                bitmaps.insert(bitmaps.end(), bitmap.begin(), bitmap.end());
+            }
+        }
+    }
+
+    /* Write new pixel data size */
+    ostream.write(static_cast<uint32_t>(bitmaps.size())); // TODO: check bounds
+
+    /* Write material headers */
+    ostream.write(cndHeaders);
+
+    /* Write pixeldata of all materials */
+    ostream.write(bitmaps);
+}
+
+
 
 bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
 {

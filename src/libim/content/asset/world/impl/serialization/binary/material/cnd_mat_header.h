@@ -3,9 +3,10 @@
 #include "../../../../../material/colorformat.h"
 
 namespace libim::content::asset {
+    constexpr static std::size_t kCndMatNameLen = 64;
     struct CndMatHeader final
     {
-        char name[64];
+        char name[kCndMatNameLen];
         int width;
         int height;
         int mipmapCount;

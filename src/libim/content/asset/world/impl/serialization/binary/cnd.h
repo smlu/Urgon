@@ -70,6 +70,7 @@ namespace libim::content::asset {
         static uint32_t GetMatSectionOffset(const CndHeader& header);
         static utils::HashMap<Material> ParseSectionMaterials(const CndHeader& header, const InputStream& istream); // Reads materials section. Offset of istream hast to be at beginning of material section.
         static utils::HashMap<Material> ReadMaterials(const InputStream& istream);
+        static void WriteSectionMaterials(OutputStream& ostream, const utils::HashMap<Material>& materials);
         static bool ReplaceMaterial(const Material& mat, const std::string& filename);
 
         static std::size_t GetKeySectionOffset(const CndHeader& header, const InputStream& istream);

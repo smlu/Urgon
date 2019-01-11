@@ -56,19 +56,19 @@ namespace libim::content::asset
         char  name[64];
         Animation::Flag flags;
         Animation::Type  type;
-        int   frames;
-        float fps;
-        int   numMarkers;
-        int   numJoints;
-        int   numNodes;
+        uint32_t frames;
+        float    fps;
+        uint32_t numMarkers;
+        uint32_t numJoints;
+        uint32_t numNodes;
     };
 
 
     struct CndKeyNode final
     {
         char meshName[64];
-        int nodeNum;
-        int numEntries;
+        uint32_t nodeNum;
+        uint32_t numEntries;
     };
 }
 

@@ -389,13 +389,16 @@ namespace libim::utils {
 
         iterator erase_by_idx(Idx idx)
         {
+            auto it = end();
             if(idx < index_.size())
             {
-                auto it = index_.at(idx);
-                map_.erase(it->key);
+                it = index_.at(idx);
+                map_.erase(it.it_->key);
                 index_.erase(index_.begin() + idx);
-                return data_.erase(it);
+                it = data_.erase(it.it_);
             }
+
+            return it;
         }
 
         void reconstruct_map()

@@ -75,6 +75,7 @@ namespace libim::content::asset {
         static std::size_t GetKeySectionOffset(const CndHeader& header, const InputStream& istream);
         static utils::HashMap<Animation> ParseSectionKeyframes(const CndHeader& cndHeader, const InputStream& istream); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
         static utils::HashMap<Animation> ReadAnimations(const InputStream& istream);
+        static void WriteSectionKeyframes(OutputStream& ostream, const utils::HashMap<Animation>& animations);
     };
 
 

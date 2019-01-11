@@ -51,9 +51,10 @@
 
 namespace libim::content::asset
 {
+    constexpr static std::size_t kCndKeyNameLen = 64;
     struct CndKeyHeader final
     {
-        char  name[64];
+        char  name[kCndKeyNameLen];
         Animation::Flag flags;
         Animation::Type  type;
         uint32_t frames;

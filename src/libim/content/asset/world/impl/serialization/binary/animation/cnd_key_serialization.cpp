@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <string>
 #include <string_view>
 
@@ -159,4 +160,63 @@ HashMap<Animation> CND::ReadAnimations(const InputStream& istream)
     }
 
     return ParseSectionKeyframes(cndHeader, istream);
+}
+
+void CND::WriteSectionKeyframes(OutputStream& ostream, const utils::HashMap<Animation>& animations)
+{
+    std::vector<CndKeyHeader> cndHeaders;
+    cndHeaders.reserve(animations.size());
+
+    std::vector<KeyMarker> markers;
+    std::vector<CndKeyNode> nodes;
+    std::vector<KeyNodeEntry> entries;
+    for(const auto& anim : animations)
+    {
+        CndKeyHeader h;
+        strncpy(h.name, anim.name().c_str(), 64);
+        h.flags      = anim.flages();
+        h.type       = anim.type();
+        h.frames     = static_cast<uint32_t>(anim.frames());         // TODO: check bounds
+        h.fps        = anim.fps();
+        h.numMarkers = static_cast<uint32_t>(anim.markers().size()); // TODO: check bounds
+        h.numJoints  = static_cast<uint32_t>(anim.joints());   // TODO: check bounds
+        h.numNodes   = static_cast<uint32_t>(anim.nodes().size());   // TODO: check bounds
+        cndHeaders.push_back(std::move(h));
+
+        /* Copy key markers */
+        assert(anim.markers().size() <= 16 && "anim.markers().size() <= 16 ");
+        markers.reserve(anim.markers().size());
+        std::copy(anim.markers().begin(), anim.markers().end(), std::back_inserter(markers));
+
+        /* Copy key nodes and it's entries */
+        nodes.reserve(anim.nodes().size());
+        for(auto& node : anim.nodes())
+        {
+            CndKeyNode n;
+            strncpy(n.meshName, node.meshName.c_str(), kCndKeyNameLen);
+            n.nodeNum = node.num;
+            n.numEntries = static_cast<uint32_t>(node.entries.size()); // TODO: check bounds
+            nodes.push_back(std::move(n));
+
+            entries.reserve(node.entries.size());
+            std::copy(node.entries.begin(), node.entries.end(), std::back_inserter(entries));
+        }
+    }
+
+    std::array<uint32_t, 3> aSizeEntries {
+        static_cast<uint32_t>(markers.size()),  // TODO: check bounds
+        static_cast<uint32_t>(nodes.size()),    // TODO: check bounds
+        static_cast<uint32_t>(entries.size())   // TODO: check bounds
+    };
+
+    /* Write sizes of key entries */
+    ostream.write(aSizeEntries);
+
+    /* Write key headers */
+    ostream.write(cndHeaders);
+
+    /* Write key entries*/
+    ostream.write(markers);
+    ostream.write(nodes);
+    ostream.write(entries);
 }

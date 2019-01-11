@@ -93,6 +93,7 @@ static constexpr std::array<char, 1216> CopyrightNotice = {
 
 CndHeader CND::LoadHeader(const InputStream& istream)
 {
+    istream.seek(0);
     CndHeader cndHeader = istream.read<CndHeader>();
 
     /* Verify file copyright notice  */

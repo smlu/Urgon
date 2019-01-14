@@ -25,13 +25,16 @@
 
 using namespace libim;
 using namespace libim::content::asset;
+using namespace libim::content::text;
 
+using namespace std::string_literals;
+using namespace std::string_view_literals;
 void print_help();
 void PrintMaterialInfo(const Material& mat);
 void PrintMipmapInfo(const Mipmap& mipmap, uint32_t mmIdx);
 
 bool ReplaceMaterial(const std::string& cndFile, std::vector<std::string> matFiles);
-bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool convert, bool verbose = false);
+bool ExtractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool verbose = false);
 
 int main(int argc, const char *argv[])
 {
@@ -47,9 +50,9 @@ int main(int argc, const char *argv[])
     }
 
     std::string inputFile = opt.unspecified().at(0);
-    if(!FileExists(inputFile)) 
+    if(!FileExists(inputFile))
     {
-        std::cerr << "Error: File \"" << inputFile << "\" does not exists!"; 
+        std::cerr << "Error: File \"" << inputFile << "\" does not exist!";
         return 1;
     }
 
@@ -66,8 +69,8 @@ int main(int argc, const char *argv[])
     const bool patchMats        = opt.hasArg(OPT_MAT_PATCH)     || opt.hasArg(OPT_MAT_PATCH_SHORT);
 
     int result = 0;
-
-    /* Patch */
+    try
+    {
         /* Patch materials */
         if(patchMats)
         {
@@ -82,8 +85,16 @@ int main(int argc, const char *argv[])
                 result = 1;
             }
         }
-    /* Extract materials */
-    else if(!ExtractMaterials(inputFile, std::move(outDir), bConvertMatToBmp, bVerboseOutput)) {
+        /* Extract animations & materials */
+        else if(!ExtractResources(inputFile, std::move(outDir), bConvertMatToBmp, bVerboseOutput)) {
+            result = 1;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR("An exception was encountered during %: %", patchMats ?
+            "a CND file pathing": "the resources extraction", e.what()
+        );
         result = 1;
     }
 
@@ -165,8 +176,7 @@ bool ReplaceMaterial(const std::string& cndFile, std::vector<std::string> matFil
     {
         for(const auto& matFile : matFiles)
         {
-            Material mat;
-            mat.read(InputFileStream(matFile));
+            Material mat{InputFileStream(matFile)};
             if(!CND::ReplaceMaterial(mat, cndFile)) {
                 return false;
             }
@@ -187,17 +197,21 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
     InputFileStream ifstream(cndFile);
     auto materials = CND::ReadMaterials(ifstream);
 
+int32_t ExtractMaterials(const InputStream& istream, std::string outDir, bool convertMaterials , bool verbose)
+{
+    istream.seek(0);
+    auto materials = CND::ReadMaterials(istream);
+
     std::string matDir;
     std::string bmpDir;
-    if(!materials.empty())
+    if(!materials.isEmpty())
     {
         LOG_INFO("Found materials: %", materials.size());
 
-        outDir += (outDir.empty() ? "" : "/" ) + GetBaseName(cndFile);
         matDir = outDir + "/" + "mat";
         MakePath(matDir);
 
-        if(convert)
+        if(convertMaterials)
         {
             bmpDir = outDir + "/" + "bmp";
             MakePath(bmpDir);
@@ -208,9 +222,8 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
     for(const auto& mat : materials)
     {
         LOG_INFO("Extracting material: %", mat.name());
-
         std::string matFilePath(matDir + "/" + mat.name());
-        mat.write(OutputFileStream(std::move(matFilePath)));
+        mat.serialize(OutputFileStream(std::move(matFilePath)));
         /*if(!SaveMaterialToFile(std::move(matFilePath), mat)) {
             return false;
         }*/
@@ -222,7 +235,7 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
         }
 
         /* Print material mipmaps info and convert to bmp */
-        if(convert || verbose)
+        if(convertMaterials || verbose)
         {
             uint32_t mmIdx = 0;
             for(const auto& mipmap : mat.mipmaps())
@@ -232,16 +245,16 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
                 }
 
                 /* Save as bmp */
-                if(convert)
+                if(convertMaterials)
                 {
-                    for(std::size_t texIdx = 0; texIdx < mipmap.size(); texIdx++)
+                    for(std::size_t mipmapIdx = 0; mipmapIdx < mipmap.size(); mipmapIdx++)
                     {
                         const std::string sufix = (mat.mipmaps().size() > 1 ? "_" + std::to_string(mmIdx) : "") + ".bmp";
-                        const std::string infix = mipmap.size() > 1 ? "_" + std::to_string(texIdx) : "";
+                        const std::string infix = mipmap.size() > 1 ? "_" + std::to_string(mipmapIdx) : "";
                         const std::string fileName = bmpDir + "/" + GetBaseName(mat.name()) + infix + sufix;
 
-                        if(!SaveBmpToFile(fileName, mipmap.at(texIdx).toBmp())) {
-                            return false;
+                        if(!SaveBmpToFile(fileName, mipmap.at(mipmapIdx).toBmp())) {
+                            return -1;
                         }
                     }
                 }
@@ -255,6 +268,22 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
         }
     }
 
-    LOG_INFO("%-----------------------------------------\nTotal materials extracted: %\n", (!verbose ? "\n" : "") , materials.size());
+    if(!verbose) {
+        LOG_INFO("");
+    }
+
+    return static_cast<int32_t>(materials.size());
+}
+
+bool ExtractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool verbose)
+{
+    InputFileStream ifstream(cndFile);
+    outDir += (outDir.empty() ? "" : "/" ) + GetBaseName(cndFile);
+
+    auto nExtMatFiles  = ExtractMaterials(ifstream, outDir, convertMaterials, verbose);
+    if(nExtMatFiles < 0) return false;
+
+    LOG_INFO("\n-----------------------------------------");
+    LOG_INFO("Total extracted materials: %", nExtMatFiles);
     return true;
 }

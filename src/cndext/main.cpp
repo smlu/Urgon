@@ -35,11 +35,11 @@ bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool conve
 
 int main(int argc, const char *argv[])
 {
-    Options opt(argc, argv);
 
+    CmdArgs opt(argc, argv);
     if(argc < 2 ||
-       opt.hasOpt(OPT_HELP) ||
-       opt.hasOpt(OPT_HELP_SHORT) ||
+       opt.hasArg(OPT_HELP) ||
+       opt.hasArg(OPT_HELP_SHORT) ||
        opt.unspecified().empty())
     {
         print_help();
@@ -52,44 +52,36 @@ int main(int argc, const char *argv[])
         std::cerr << "Error: File \"" << inputFile << "\" does not exists!"; 
         return 1;
     }
-    
+
     std::string outDir;
-    if(opt.hasOpt(OPT_OTPUT_DIR_SHORT)){
+    if(opt.hasArg(OPT_OTPUT_DIR_SHORT)){
         outDir = opt.arg(OPT_OTPUT_DIR_SHORT);
     }
-    else if(opt.hasOpt(OPT_OTPUT_DIR)){
+    else if(opt.hasArg(OPT_OTPUT_DIR)){
         outDir = opt.arg(OPT_OTPUT_DIR);
     }
 
-    bool bVerboseOutput = false;
-    if(opt.hasOpt(OPT_VERBOSE_SHORT)){
-        bVerboseOutput = true;;
-    }
-    else if(opt.hasOpt(OPT_VERBOSE)){
-        bVerboseOutput = true;
-    }
-
-    bool bConvertMatToBmp = false;
-    if(opt.hasOpt(OPT_CONVERT_MAT) || opt.hasOpt(OPT_CONVERT_MAT_SHORT)){
-        bConvertMatToBmp = true;
-    }
-
+    const bool bVerboseOutput   = opt.hasArg(OPT_VERBOSE_SHORT) || opt.hasArg(OPT_VERBOSE) ;
+    const bool bConvertMatToBmp = opt.hasArg(OPT_CONVERT_MAT)   || opt.hasArg(OPT_CONVERT_MAT_SHORT);
+    const bool patchMats        = opt.hasArg(OPT_MAT_PATCH)     || opt.hasArg(OPT_MAT_PATCH_SHORT);
 
     int result = 0;
 
     /* Patch */
-    if(opt.hasOpt(OPT_MAT_PATCH) || opt.hasOpt(OPT_MAT_PATCH_SHORT))
-    {
-        auto matFiles  = opt.args(OPT_MAT_PATCH);
-        auto matFiles2 = opt.args(OPT_MAT_PATCH_SHORT);
-        matFiles.insert(matFiles.end(),
-                    std::make_move_iterator(matFiles2.begin()),
-                    std::make_move_iterator(matFiles2.end()));
+        /* Patch materials */
+        if(patchMats)
+        {
+            auto matFiles  = opt.args(OPT_MAT_PATCH);
+            auto matFiles2 = opt.args(OPT_MAT_PATCH_SHORT);
+            matFiles.insert(matFiles.end(),
+                std::make_move_iterator(matFiles2.begin()),
+                std::make_move_iterator(matFiles2.end())
+            );
 
-        if(!ReplaceMaterial(inputFile, matFiles)) {
-            result = 1;
+            if(!ReplaceMaterial(inputFile, matFiles)) {
+                result = 1;
+            }
         }
-    }
     /* Extract materials */
     else if(!ExtractMaterials(inputFile, std::move(outDir), bConvertMatToBmp, bVerboseOutput)) {
         result = 1;

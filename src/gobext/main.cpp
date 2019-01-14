@@ -25,10 +25,10 @@ bool ExtractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outD
 
 int main(int argc, const char *argv[])
 {
-    Options opt(argc, argv);
+    CmdArgs opt(argc, argv);
     if(argc < 2 ||
-       opt.hasOpt(OPT_HELP) ||
-       opt.hasOpt(OPT_HELP_SHORT) ||
+       opt.hasArg(OPT_HELP) ||
+       opt.hasArg(OPT_HELP_SHORT) ||
        opt.unspecified().empty())
     {
         print_help();
@@ -43,18 +43,18 @@ int main(int argc, const char *argv[])
     }
     
     std::string outdir;
-    if(opt.hasOpt(OPT_OTPUT_DIR_SHORT)){
+    if(opt.hasArg(OPT_OTPUT_DIR_SHORT)){
         outdir = opt.arg(OPT_OTPUT_DIR_SHORT);
     }
-    else if(opt.hasOpt(OPT_OTPUT_DIR)){
+    else if(opt.hasArg(OPT_OTPUT_DIR)){
         outdir = opt.arg(OPT_OTPUT_DIR);
     }
 
     bool bVerboseOutput = false;
-    if(opt.hasOpt(OPT_VERBOSE_SHORT)){
+    if(opt.hasArg(OPT_VERBOSE_SHORT)){
         bVerboseOutput = true;
     }
-    else if(opt.hasOpt(OPT_VERBOSE)){
+    else if(opt.hasArg(OPT_VERBOSE)){
         bVerboseOutput = true;
     }
 

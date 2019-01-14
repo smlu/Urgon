@@ -1,9 +1,12 @@
 #include <iomanip>
 #include <iostream>
+#include <string>
+#include <string_view>
 
 #include "libim/common.h"
 #include "libim/io/filestream.h"
 #include "libim/content/asset/material/bmp.h"
+#include "libim/content/asset/material/material.h"
 #include "libim/content/asset/world/impl/serialization/binary/cnd.h"
 #include "libim/log/log.h"
 

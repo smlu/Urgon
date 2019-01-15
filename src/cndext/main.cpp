@@ -5,9 +5,11 @@
 
 #include "libim/common.h"
 #include "libim/io/filestream.h"
+#include "libim/content/asset/animation/animation.h"
 #include "libim/content/asset/material/bmp.h"
 #include "libim/content/asset/material/material.h"
 #include "libim/content/asset/world/impl/serialization/binary/cnd.h"
+#include "libim/content/text/text_resource_writer.h"
 #include "libim/log/log.h"
 
 #include "cmdutils/options.h"
@@ -32,6 +34,12 @@ using namespace libim::content::text;
 
 using namespace std::string_literals;
 using namespace std::string_view_literals;
+
+
+static constexpr auto kProgramName    = "cndext"sv;
+static constexpr auto kProgramVersion = "0.2.0"sv;
+
+
 void print_help();
 void PrintMaterialInfo(const Material& mat);
 void PrintMipmapInfo(const Mipmap& mipmap, uint32_t mmIdx);
@@ -106,8 +114,9 @@ int main(int argc, const char *argv[])
 
 void print_help()
 {
-    std::cout << "\nIndiana Jones and The Infernal Machine CND file extractor\n";
-    std::cout << "Extracts or replaces material resources in CND file!\n";
+    std::cout << "\nIndiana Jones and The Infernal Machine CND file extractor v" << kProgramVersion << std::endl;
+    std::cout << "\nExtracts material and animation resources in CND file.\n";
+    std::cout << "Can replace existing material with another material.\n\n\n";
     std::cout << "  Usage: cndext <cnd file> [options] ..." << std::endl << std::endl;
 
     std::cout << "Option        Long option        Meaning\n";
@@ -195,10 +204,37 @@ bool ReplaceMaterial(const std::string& cndFile, std::vector<std::string> matFil
     return bSuccess;
 }
 
-bool ExtractMaterials(const std::string& cndFile, std::string outDir, bool convert, bool verbose)
+std::size_t ExtractAnimations(const InputStream& istream, const std::string& outDir)
 {
-    InputFileStream ifstream(cndFile);
-    auto materials = CND::ReadMaterials(ifstream);
+    istream.seek(0);
+    auto vecAnimations = CND::ReadAnimations(istream);
+
+    std::string keyDir;
+    if(!vecAnimations.isEmpty())
+    {
+        LOG_INFO("Found animations: %", vecAnimations.size());
+        keyDir = outDir + "/" + "key";
+        MakePath(keyDir);
+    }
+
+    /* Save extracted animations to file */
+    const std::string keyHeaderComment = [&]() {
+        return "Extracted from CND file '"s + istream.name() + "' with " +
+            std::string(kProgramName) + " v" + std::string(kProgramVersion);
+    }();
+
+    for(const auto& key : vecAnimations)
+    {
+        LOG_INFO("Extracting animation: %", key.name());
+
+        std::string keyFilePath(keyDir + "/" + key.name());
+        OutputFileStream ofs(std::move(keyFilePath));
+        key.serialize(TextResourceWriter(ofs), keyHeaderComment);
+    }
+
+    LOG_INFO("");
+    return vecAnimations.size();
+}
 
 int32_t ExtractMaterials(const InputStream& istream, std::string outDir, bool convertMaterials , bool verbose)
 {
@@ -283,10 +319,12 @@ bool ExtractResources(const std::string& cndFile, std::string outDir, bool conve
     InputFileStream ifstream(cndFile);
     outDir += (outDir.empty() ? "" : "/" ) + GetBaseName(cndFile);
 
+    auto nExtAnimFiles = ExtractAnimations(ifstream, outDir);
     auto nExtMatFiles  = ExtractMaterials(ifstream, outDir, convertMaterials, verbose);
     if(nExtMatFiles < 0) return false;
 
     LOG_INFO("\n-----------------------------------------");
+    LOG_INFO("Total extracted animations: %", nExtAnimFiles);
     LOG_INFO("Total extracted materials: %", nExtMatFiles);
     return true;
 }

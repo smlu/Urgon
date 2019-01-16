@@ -14,7 +14,6 @@
 #include "../../../../../../common.h"
 #include "../../../../../../io/stream.h"
 #include "../../../../../../math/vector2.h"
-#include "../../../../../../math/vector3.h"
 #include "../../../../../../utils/hashmap.h"
 
 namespace libim::content::asset {
@@ -30,8 +29,8 @@ namespace libim::content::asset {
         float    worldGravity;
         float    ceilingSky_Z;
         float    horizonDistance;
-        float    horizonSkyOffset[2]; // x,y
-        float    ceilingSkyOffset[2]; // x,y
+        Vector2f horizonSkyOffset; // x,y
+        Vector2f ceilingSkyOffset; // x,y
         float    LOD_Distances[4];
         struct {
             int32_t enabled;
@@ -39,17 +38,23 @@ namespace libim::content::asset {
             float startDepth;
             float endDepth;
         } fog;
+
         uint32_t numSounds;
+
         uint32_t numMaterials;
         uint32_t sizeMaterials;
-        uint32_t aMaterials;       // 32-bit void*
-        uint32_t apMatArray;       // 32-bit pointer to pointer
+        uint32_t aMaterials;          // 32-bit void*
+        uint32_t apMatArray;          // 32-bit pointer to pointer
+
         uint32_t numVertices;
-        uint32_t aVerticies;       // 32-bit pointer Vector3f*
+        uint32_t aVerticies;          // 32-bit pointer Vector3f*
+
         uint32_t unknown28;
         uint32_t unknown29;
+
         uint32_t numTexVertices;
-        uint32_t aTexVerticies;    // 32-bit pointer Vector2f*
+        uint32_t aTexVerticies;       // 32-bit pointer Vector2f*
+
         uint32_t unknown32;
         uint32_t unknown33;
         uint32_t unknown34;
@@ -58,37 +63,48 @@ namespace libim::content::asset {
         uint32_t unknown37;
 
         uint32_t numSectors;
-        uint32_t aSectors;         // 32-bit pointer
+        uint32_t aSectors;            // 32-bit pointer
+
         uint32_t numAiClasses;
         uint32_t sizeAiClasses;
-        uint32_t aAiClasses;      // 32-bit pointer
+        uint32_t aAiClasses;          // 32-bit pointer
+
         uint32_t numModels;
         uint32_t sizeModels;
-        uint32_t aModels;         // 32-bit pointer
+        uint32_t aModels;             // 32-bit pointer
+
         uint32_t numSprites;
         uint32_t sizeSprites;
-        uint32_t aSprites;        // 32-bit pointer
+        uint32_t aSprites;            // 32-bit pointer
+
         uint32_t numKeyframes;
         uint32_t sizeKeyframes;
-        uint32_t aKeyframes;      // 32-bit pointer
+        uint32_t aKeyframes;          // 32-bit pointer
+
         uint32_t numPuppets;
         uint32_t sizePuppets;
-        uint32_t aPuppets;        // 32-bit pointer
+        uint32_t aPuppets;            // 32-bit pointer
+
         uint32_t numSoundClasses;
         uint32_t sizeSoundClasses;
-        uint32_t aSoundClasses;    // 32-bit pointer
+        uint32_t aSoundClasses;       // 32-bit pointer
+
         uint32_t numCogScripts;
         uint32_t sizeCogScripts;
-        uint32_t aCogScripts;      // 32-bit pointer
+        uint32_t aCogScripts;         // 32-bit pointer
+
         uint32_t numCogs;
         uint32_t sizeCogs;
-        uint32_t aCogs;              // 32-bit pointer
+        uint32_t aCogs;               // 32-bit pointer
+
         uint32_t numThingTemplates;
         uint32_t sizeThingTemplates;
         uint32_t aThingTemplates;     // 32-bit pointer
+
         uint32_t numThings;
         uint32_t sizeThings;
         uint32_t aThings;             // 32-bit pointer
+
         uint32_t pvsSize;
         uint32_t aPvs;                // 32-bit pointer (struct of 16 * int)
     };//);

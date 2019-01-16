@@ -1,12 +1,17 @@
 cmake_minimum_required (VERSION 3.6 FATAL_ERROR)
-project (ProjectMarduk CXX)
+project(
+    ProjectMarduk
+    LANGUAGES CXX
+    VERSION 0.2.0
+)
 
 # Global constants
-set(PM_LIBIM "libim")
-set(PM_LIBCND "libcnd")
-set(PM_GOBEXT "gobext")
-set(PM_CNDEXT "cndext")
-set(PM_TEST   "test")
+set(PM_LIBIM   "libim")
+set(PM_LIBCND  "libcnd")
+set(PM_GOBEXT  "gobext")
+set(PM_CNDEXT  "cndext")
+set(PM_CNDTOOL "cndtool")
+set(PM_TEST    "test")
 
 # Compiler flags
 set(CMAKE_CXX_STANDARD 17) # c++17
@@ -71,6 +76,18 @@ add_executable (${PM_CNDEXT}
     $<TARGET_OBJECTS:${PM_LIBCND}>
 )
 target_link_libraries(${PM_CNDEXT} ${PM_LIBIM})
+
+# CND tool
+set(CNDTOOL_SRC_FILES
+    "${SOURCE_DIR}/cndtool/main.cpp"
+    "${SOURCE_DIR}/cndtool/cndtoolargs.h"
+    "${SOURCE_DIR}/cndtool/patch.h"
+)
+add_executable (${PM_CNDTOOL}
+    ${CNDTOOL_SRC_FILES}
+    $<TARGET_OBJECTS:${PM_LIBCND}>
+)
+target_link_libraries(${PM_CNDTOOL} ${PM_LIBIM})
 
 # GOB Extractor
 set(GOBEXT_SRC_FILES "${SOURCE_DIR}/gobext/main.cpp")

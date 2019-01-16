@@ -216,18 +216,18 @@ namespace libim {
         template <typename T, typename ...Args> T _read(Args&& ..., tag<T>&&) const = delete;
 
         /* Delete non-POD type version */
-        template <typename T, typename std::enable_if<!std::is_pod<T>::value, int>::type = 0>
+        template <typename T, typename std::enable_if<!std::is_trivially_copyable<T>::value, int>::type = 0>
         T _read(tag<T>&&) const = delete;
 
         template <typename T>
-        typename std::enable_if<!std::is_pod<T>::value, Stream>::type&
+        typename std::enable_if<!std::is_trivially_copyable<T>::value, Stream>::type&
         _write(const T&, tag<T>&&) = delete;
 
         /* POD type sepcialization */
-        template <typename T, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
+        template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type = 0>
         T _read(tag<T>&&) const;
 
-        template <typename T, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
+        template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type = 0>
         Stream& _write(const T&, tag<T>&&);
 
         /* std::unique_ptr specialization */
@@ -297,7 +297,7 @@ namespace libim {
 
 
 
-    template <typename T, typename std::enable_if<std::is_pod<T>::value, int>::type>
+    template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type>
     T Stream::_read(tag<T>&&) const
     {
         T pod;
@@ -309,7 +309,7 @@ namespace libim {
         return pod;
     }
 
-    template <typename T, typename std::enable_if<std::is_pod<T>::value, int>::type>
+    template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type>
     Stream& Stream::_write(const T& pod, tag<T>&&)
     {
         auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(&pod), sizeof(pod));

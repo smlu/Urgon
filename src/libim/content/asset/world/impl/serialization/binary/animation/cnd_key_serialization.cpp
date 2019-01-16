@@ -66,16 +66,16 @@ std::size_t FindFirstKey(const InputStream& istream)
 std::size_t CND::GetKeySectionOffset(const CndHeader& header, const InputStream& istream)
 {
     /* Seek to the beginning of material list */
-    istream.seek(GetMatSectionOffset(header));
+    istream.seek(GetMatSectionOffset(istream));
 
     /* Calculate material header list size */
-    auto nMatHeaderListSize = sizeof(CndMatHeader) * header.numMaterials;
+    std::size_t nMatHeaderListSize = sizeof(CndMatHeader) * header.numMaterials;
 
     /* Read materials pixel data size */
-    uint32_t nMatBitmapSize = istream.read<uint32_t>();
+    std::size_t nMatBitmapSize = istream.read<uint32_t>();
 
     /* Seek to the end of material list */
-    auto matEndOffs =  istream.tell() + nMatHeaderListSize + nMatBitmapSize;
+    std::size_t matEndOffs =  istream.tell() + nMatHeaderListSize + nMatBitmapSize;
     istream.seek(matEndOffs);
 
     /* Find the first key in the list */

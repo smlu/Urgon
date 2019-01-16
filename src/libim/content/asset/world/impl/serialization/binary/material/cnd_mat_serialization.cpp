@@ -7,12 +7,21 @@ using namespace libim;
 using namespace libim::content::asset;
 
 
-uint32_t CND::GetMatSectionOffset(const CndHeader& header)
+std::size_t CND::GetMatSectionOffset(const InputStream& istream)
 {
-    return sizeof(CndHeader) +
+    istream.seek(sizeof(CndHeader));
+    std::size_t numSoundHeaders = istream.read<uint32_t>();
+    std::size_t sizeSoundData   = istream.read<uint32_t>();
+    constexpr std::size_t sizeNexFileIdField = sizeof(uint32_t);
+
+    return istream.tell() +
+           numSoundHeaders * 48 +
+           sizeSoundData +
+           sizeNexFileIdField;
+   /* return sizeof(CndHeader) +
             header.worldSoundUnknown + // worldSoundUnknown = sound data size;
             48 * header.worldSounds  + // size of sound file header struct * number of sound files in cnd file
-            4;                         // 4 = unknown 4 bytes
+            4;                         // 4 = unknown 4 bytes*/
 }
 
 utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, const InputStream& istream)
@@ -90,7 +99,7 @@ utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, con
 utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
 {
     auto cndHeader = LoadHeader(istream);
-    istream.seek(GetMatSectionOffset(cndHeader));
+    istream.seek(GetMatSectionOffset(istream));
     return ParseSectionMaterials(cndHeader, istream);
 }
 
@@ -160,7 +169,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /* Seek to material header list */
-        const auto matListOffset = GetMatSectionOffset(cndHeader);
+        const auto matListOffset = GetMatSectionOffset(ifstream);
         ifstream.seek(matListOffset);
 
         /* Read size of raw data of all materials */

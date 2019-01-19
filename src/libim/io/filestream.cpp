@@ -250,6 +250,14 @@ FileStream::FileStream(std::string filePath, bool truncate, Mode mode) :
     this->setName(GetFilename(m_fs->filePath));
 }
 
+FileStream::FileStream(const std::filesystem::path& filePath, Mode mode) :
+    FileStream(filePath.string(), mode)
+{}
+
+FileStream::FileStream(const std::filesystem::path& filePath, bool truncate, Mode mode) :
+    FileStream(filePath.string(), truncate, mode)
+{}
+
 FileStream::~FileStream()
 {}
 

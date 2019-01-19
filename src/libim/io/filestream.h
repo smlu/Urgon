@@ -4,6 +4,7 @@
 #include "../common.h"
 
 #include <memory>
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 
@@ -20,6 +21,8 @@ namespace libim {
 
         explicit FileStream(std::string filePath, Mode mode = ReadWrite);
         explicit FileStream(std::string filePath, bool truncate, Mode mode = ReadWrite);
+        explicit FileStream(const std::filesystem::path& filePath, Mode mode = ReadWrite);
+        explicit FileStream(const std::filesystem::path& filePath, bool truncate, Mode mode = ReadWrite);
         virtual ~FileStream() override;
 
         virtual void seek(std::size_t position) const override;
@@ -41,8 +44,12 @@ namespace libim {
     class InputFileStream final : public InputStream, public FileStream
     {
     public:
-        InputFileStream(std::string filePath) :
+        explicit InputFileStream(std::string filePath) :
             FileStream(std::move(filePath), Read)
+        {}
+
+        InputFileStream(const std::filesystem::path& filePath) :
+            FileStream(filePath, Read)
         {}
 
     private:
@@ -52,8 +59,12 @@ namespace libim {
     class OutputFileStream final : public OutputStream, public FileStream
     {
     public:
-        OutputFileStream(std::string filePath, const bool truncate = false) :
+        explicit OutputFileStream(std::string filePath, const bool truncate = false) :
             FileStream(std::move(filePath), truncate, Write)
+        {}
+
+        OutputFileStream(const std::filesystem::path& filePath, const bool truncate = false) :
+            FileStream(filePath, truncate, Write)
         {}
 
     private:

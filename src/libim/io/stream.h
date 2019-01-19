@@ -300,10 +300,10 @@ namespace libim {
     template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type>
     T Stream::_read(tag<T>&&) const
     {
-        T pod;
-        auto nRead = this->readsome(reinterpret_cast<byte_t*>(&pod), sizeof(T));
-        if(nRead != sizeof(T)) {
-              throw StreamError("Error reading POD from stream!");
+        typename std::decay<T>::type pod{};
+        auto nRead = this->readsome(reinterpret_cast<byte_t*>(std::addressof(pod)), sizeof(pod));
+        if(nRead != sizeof(pod)) {
+            throw StreamError("Error reading trivially copyable type T from stream!");
         }
 
         return pod;

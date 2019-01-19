@@ -39,5 +39,5 @@ CTestTestfile.cmake
 *.exe
 
 # QtCreator
-CMakeLists.txt.user*
+*.user*
 *.autosave

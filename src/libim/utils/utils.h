@@ -1,6 +1,7 @@
 #ifndef LIBIM_UTILS_H
 #define LIBIM_UTILS_H
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <iomanip>
 #include <string>
@@ -22,8 +23,8 @@ namespace libim::utils {
         }
     }
 
-    template<typename T, template<typename> class U>
-    typename U<T>::iterator copy(typename U<T>::iterator s_begin, std::size_t count, U<T>& dest)
+    template<typename T>
+    typename T::iterator copy(typename T::iterator s_begin, std::size_t count, T& dest)
     {
         dest.reserve(count);
         auto s_end = s_begin + count;

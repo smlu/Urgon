@@ -18,7 +18,8 @@
 
 #if defined(WIN32) || defined(_WIN32)
 #  define OS_WINDOWS 1
-#  include <windows.h>
+#  define NOMINMAX
+#  include <Windows.h>
 #endif
 
 #if !defined(OS_WINDOWS) || defined(__MINGW32__)
@@ -200,12 +201,12 @@ namespace libim {
 
     inline bool FileExtMatch(const std::filesystem::path& path, std::string_view ext, bool icase = true)
     {
-        auto pext = path.extension();
+        auto pext = path.extension().string();
         if (pext.empty() != ext.empty()) {
             return false;
         }
 
-        auto svpext = std::string_view(pext.c_str());
+        const std::string_view svpext(pext);
         if (icase) {
             return utils::iequal(svpext, ext);
         }
@@ -232,8 +233,8 @@ namespace libim {
         if(dirPath.empty()) {
             return false;
         }
-        else if(!IsNativePath(dirPath)) {
-            return DirExists(GetNativePath(dirPath));
+        else if(!IsNativePath(dirPath.string())) {
+            return DirExists(GetNativePath(dirPath.string()));
         }
 
          return std::filesystem::exists(dirPath);

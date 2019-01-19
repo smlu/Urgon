@@ -173,13 +173,13 @@ void CND::WriteSectionKeyframes(OutputStream& ostream, const utils::HashMap<Anim
     for(const auto& anim : animations)
     {
         CndKeyHeader h;
-        strncpy(h.name, anim.name().c_str(), 64);
+        strncpy_s(h.name, kCndKeyNameLen, anim.name().c_str(), kCndKeyNameLen);
         h.flags      = anim.flages();
         h.type       = anim.type();
         h.frames     = static_cast<uint32_t>(anim.frames());         // TODO: check bounds
         h.fps        = anim.fps();
         h.numMarkers = static_cast<uint32_t>(anim.markers().size()); // TODO: check bounds
-        h.numJoints  = static_cast<uint32_t>(anim.joints());   // TODO: check bounds
+        h.numJoints  = static_cast<uint32_t>(anim.joints());         // TODO: check bounds
         h.numNodes   = static_cast<uint32_t>(anim.nodes().size());   // TODO: check bounds
         cndHeaders.push_back(std::move(h));
 
@@ -193,7 +193,7 @@ void CND::WriteSectionKeyframes(OutputStream& ostream, const utils::HashMap<Anim
         for(auto& node : anim.nodes())
         {
             CndKeyNode n;
-            strncpy(n.meshName, node.meshName.c_str(), kCndKeyNameLen);
+            strncpy_s(n.meshName, kCndKeyNameLen, node.meshName.c_str(), kCndKeyNameLen);
             n.nodeNum = node.num;
             n.numEntries = static_cast<uint32_t>(node.entries.size()); // TODO: check bounds
             nodes.push_back(std::move(n));

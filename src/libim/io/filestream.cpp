@@ -4,7 +4,7 @@
 #include <filesystem>
 
 #ifdef OS_WINDOWS
-#include <windows.h>
+#include <Windows.h>
 #include <locale>
 #include <codecvt>
 #include <string>
@@ -37,7 +37,7 @@ std::string GetLastErrorAsString()
 
     LPSTR messageBuffer = nullptr;
     size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                 NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+                                 nullptr, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPSTR>(&messageBuffer), 0, nullptr);
 
     message = std::string(messageBuffer, size);
 
@@ -66,9 +66,9 @@ struct FileStream::FileStreamImpl
             switch (mode)
             {
             #ifdef OS_WINDOWS
-            case Read:      return (int)GENERIC_READ;
-            case Write:     return (int)GENERIC_WRITE;
-            case ReadWrite: return (int)(GENERIC_WRITE | GENERIC_READ);
+            case Read:      return static_cast<int>(GENERIC_READ);
+            case Write:     return static_cast<int>(GENERIC_WRITE);
+            case ReadWrite: return static_cast<int>(GENERIC_WRITE | GENERIC_READ);
             #else
             case Read:      return O_RDONLY;
             case Write:     return O_WRONLY | O_CREAT;
@@ -87,14 +87,16 @@ struct FileStream::FileStreamImpl
         
         /* Open file */
         #if _WIN32_WINNT >= _WIN32_WINNT_WIN8
+
         std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
         std::wstring wPath = converter.from_bytes(filePath.c_str());
 
         fileHandle = CreateFile2(wPath.c_str(), 
-                        flags, 
+                        static_cast<DWORD>(flags),
                         FILE_SHARE_READ, 
                         (flags == GENERIC_READ ? OPEN_EXISTING : OPEN_ALWAYS),
-                        NULL);
+                        nullptr);
         #else
         fileHandle = CreateFileA(filePath.c_str(),
                         flags,
@@ -110,7 +112,7 @@ struct FileStream::FileStreamImpl
         }
 
         /* Get file size */
-        LARGE_INTEGER lSize {0};
+        LARGE_INTEGER lSize {{0}};
         if(!GetFileSizeEx(fileHandle, &lSize)) {
             throw FileStreamError("Error getting the file size: " + GetLastErrorAsString());
         }
@@ -142,7 +144,7 @@ struct FileStream::FileStreamImpl
     {
         ssize_t nRead = 0;
     #ifdef OS_WINDOWS
-        if(!ReadFile(fileHandle, reinterpret_cast<LPVOID>(data), (DWORD)length, (LPDWORD)&nRead, NULL)) {
+        if(!ReadFile(fileHandle, reinterpret_cast<LPVOID>(data), static_cast<DWORD>(length), reinterpret_cast<LPDWORD>(&nRead), nullptr)) {
     #else
         nRead = ::read(fd, data, length);
         if(nRead == -1) {

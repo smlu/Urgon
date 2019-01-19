@@ -108,6 +108,8 @@ namespace libim {
         }
 
 
+
+
     //    template<class T>
     //    Stream& write(T&& data)
     //    {
@@ -321,9 +323,9 @@ namespace libim {
     template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type>
     Stream& Stream::_write(const T& pod, tag<T>&&)
     {
-        auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(&pod), sizeof(pod));
+        auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(std::addressof(pod)), sizeof(pod));
         if(nWritten != sizeof(pod)) {
-            throw StreamError("Error writing POD to stream!");
+            throw StreamError("Error writing trivially copyable type T to stream!");
         }
 
         return *this;

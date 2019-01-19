@@ -41,6 +41,12 @@ namespace libim {
         std::shared_ptr<FileStreamImpl> m_fs;
     };
 
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4250)
+#endif
+
     class InputFileStream final : public InputStream, public FileStream
     {
     public:
@@ -71,5 +77,9 @@ namespace libim {
         using FileStream::read;
     };
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif // LIBIM_FILESTREAM_H

@@ -112,7 +112,7 @@ void CND::WriteSectionMaterials(OutputStream& ostream, const utils::HashMap<Mate
     for(const auto& mat : materials)
     {
         CndMatHeader h;
-        strncpy(h.name, mat.name().c_str(), kCndMatNameLen);
+        strncpy_s(h.name, kCndMatNameLen, mat.name().c_str(), kCndMatNameLen);
         h.width       = mat.width();
         h.height      = mat.height();
         h.colorInfo   = mat.colorFormat();

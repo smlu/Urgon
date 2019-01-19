@@ -18,10 +18,23 @@ set(CMAKE_CXX_STANDARD 17) # c++17
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(MINGW)
+# CFlags
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /sdl")
+    add_definitions("-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING=1")
+    if(${MSVC_VERSION} GREATER_EQUAL 1914)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /diagnostics:caret")
+    endif()
+elseif(MINGW)
   add_definitions("-mno-ms-bitfields") # TODO: this is bad
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fPIC -pipe -static")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fPIC -pipe -static")
+elseif(NOT WIN32)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fPIC -pipe -static")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fPIC -pipe -static")
 endif()
+
 
 set(SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 include_directories ("${SOURCE_DIR}")

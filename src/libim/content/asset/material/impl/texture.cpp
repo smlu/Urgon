@@ -73,7 +73,7 @@ Bmp Texture::toBmp() const
 
     bmp.info.size        = sizeof(BitmapV5Header);
     bmp.info.width       = width();
-    bmp.info.height      = - (height()); // flip image
+    bmp.info.height      = - static_cast<int32_t>(height()); // flip image
     bmp.info.planes      = 1;
     bmp.info.bitCount    = m_colorInfo.bpp;
     bmp.info.compression = BI_BITFIELDS; //m_colorInfo.colorMode ? BI_BITFIELDS : BI_ALPHABITFIELDS;

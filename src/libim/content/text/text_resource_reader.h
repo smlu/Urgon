@@ -5,7 +5,7 @@
 #include "../../text/tokenizer.h"
 #include "../../utils/utils.h"
 
-
+#include <cstdint>
 #include <vector>
 #include <type_traits>
 
@@ -96,7 +96,7 @@ namespace libim::content::text {
             result.reserve(len);
 
 
-            for([[maybe_unused]] std::size_t i = 0; i < len; i++)
+            for(/*[[maybe_unused]] MSVC 17 doesn't like this */std::size_t i = 0; i < len; i++)
             {
                 if constexpr (hasRowIdxs)
                 {

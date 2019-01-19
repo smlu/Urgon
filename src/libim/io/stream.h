@@ -65,6 +65,15 @@ namespace libim {
             return _read(tag<T>{});
         }
 
+        template<class T>
+        T peek() const
+        {
+            auto offs = tell();
+            auto v = _read(tag<T>{});
+            seek(offs);
+            return v;
+        }
+
         /*template<class T>
         T read(std::size_t lenHint) const
         {

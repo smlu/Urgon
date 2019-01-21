@@ -127,6 +127,7 @@ namespace libim {
         Stream& write(uint64_t ui64);
         Stream& write(float f);
         Stream& write(double d);
+        Stream& write(bool b);
 
         template<class T, typename std::enable_if_t<!IsStreamType<T>, int> = 0>
         Stream& write(const T& data)
@@ -578,6 +579,11 @@ namespace libim {
     inline bool Stream::read<bool>() const
     {
         return read<uint8_t>() != 0;
+    }
+
+    inline Stream& Stream::write(bool b)
+    {
+        return write<uint8_t>(static_cast<uint8_t>(b));
     }
 
     // std::uniqe_ptr

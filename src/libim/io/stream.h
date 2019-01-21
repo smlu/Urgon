@@ -56,7 +56,7 @@ namespace libim {
 
         template<typename T>
         Stream& operator << (const T& t) {
-            return write<T>(t);
+            return write(t);
         }
 
         template<class T>

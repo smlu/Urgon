@@ -193,7 +193,7 @@ namespace libim {
 
         virtual void seekEnd() const
         {
-            return this->seek(this->size() -1);
+            return this->seek(this->size());
         }
 
         bool atEnd() const // End of Stream

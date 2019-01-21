@@ -1,5 +1,5 @@
-#include "filestream.h"
-#include "../common.h"
+#include "../filestream.h"
+#include "../../common.h"
 #include <algorithm>
 #include <filesystem>
 
@@ -61,25 +61,28 @@ struct FileStream::FileStreamImpl
             std::filesystem::remove(filePath);
         }
 
-        auto flags = [&]
+        auto flags = [&]()
         {
             switch (mode)
             {
             #ifdef OS_WINDOWS
-            case Read:      return static_cast<int>(GENERIC_READ);
-            case Write:     return static_cast<int>(GENERIC_WRITE);
-            case ReadWrite: return static_cast<int>(GENERIC_WRITE | GENERIC_READ);
+            case Read:      return GENERIC_READ;
+            case Write:     return static_cast<DWORD>(GENERIC_WRITE);
+            case ReadWrite: return static_cast<DWORD>(GENERIC_WRITE | GENERIC_READ);
+            default:
+                return static_cast<DWORD>(-1);
             #else
             case Read:      return O_RDONLY;
             case Write:     return O_WRONLY | O_CREAT;
             case ReadWrite: return O_RDWR   | O_CREAT;
-            #endif
             default:
                 return -1;
+            #endif
+
             }
         }();
 
-        if(flags == -1) {
+        if(flags == static_cast<decltype(flags)>(-1)) {
             throw FileStreamError("Unknown file open mode!");
         }
 
@@ -92,19 +95,21 @@ struct FileStream::FileStreamImpl
 
         std::wstring wPath = converter.from_bytes(filePath.c_str());
 
-        fileHandle = CreateFile2(wPath.c_str(), 
-                        static_cast<DWORD>(flags),
-                        FILE_SHARE_READ, 
-                        (flags == GENERIC_READ ? OPEN_EXISTING : OPEN_ALWAYS),
-                        nullptr);
+        fileHandle = CreateFile2(
+                         wPath.c_str(),
+                         flags,
+                         FILE_SHARE_READ,
+                         (flags == GENERIC_READ ? OPEN_EXISTING : OPEN_ALWAYS),
+                         nullptr);
         #else
-        fileHandle = CreateFileA(filePath.c_str(),
-                        flags,
-                        FILE_SHARE_READ, 
-                        NULL, 
-                        (flags == GENERIC_READ ? OPEN_EXISTING : OPEN_ALWAYS), 
-                        FILE_ATTRIBUTE_NORMAL, 
-                        NULL);
+        fileHandle = CreateFileA(
+                         filePath.c_str(),
+                         flags,
+                         FILE_SHARE_READ,
+                         NULL,
+                         (flags == GENERIC_READ ? OPEN_EXISTING : OPEN_ALWAYS),
+                         FILE_ATTRIBUTE_NORMAL,
+                         NULL);
         #endif
 
         if (fileHandle == INVALID_HANDLE_VALUE) {
@@ -112,7 +117,7 @@ struct FileStream::FileStreamImpl
         }
 
         /* Get file size */
-        LARGE_INTEGER lSize {{0}};
+        LARGE_INTEGER lSize {{0, 0}};
         if(!GetFileSizeEx(fileHandle, &lSize)) {
             throw FileStreamError("Error getting the file size: " + GetLastErrorAsString());
         }
@@ -160,7 +165,12 @@ struct FileStream::FileStreamImpl
     {
         ssize_t nWritten = 0;
     #ifdef OS_WINDOWS
-        if(!WriteFile(fileHandle, reinterpret_cast<LPCVOID>(data), (DWORD)length, (LPDWORD)&nWritten, NULL)) {
+        if(!WriteFile(
+                fileHandle,
+                reinterpret_cast<LPCVOID>(data),
+                static_cast<DWORD>(length),
+                reinterpret_cast<LPDWORD>(&nWritten),
+                nullptr)){
     #else
         nWritten = ::write(fd, data, length);
         if(nWritten == -1) {

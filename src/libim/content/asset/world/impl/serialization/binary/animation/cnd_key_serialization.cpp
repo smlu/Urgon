@@ -173,7 +173,10 @@ void CND::WriteSectionKeyframes(OutputStream& ostream, const utils::HashMap<Anim
     for(const auto& anim : animations)
     {
         CndKeyHeader h;
-        strncpy_s(h.name, kCndKeyNameLen, anim.name().c_str(), kCndKeyNameLen);
+        if(!utils::strcpy(h.name, anim.name())) {
+            throw StreamError("Too long animation name to copy to CndKeyHeader.name field!");
+        }
+
         h.flags      = anim.flages();
         h.type       = anim.type();
         h.frames     = static_cast<uint32_t>(anim.frames());         // TODO: check bounds
@@ -193,7 +196,10 @@ void CND::WriteSectionKeyframes(OutputStream& ostream, const utils::HashMap<Anim
         for(auto& node : anim.nodes())
         {
             CndKeyNode n;
-            strncpy_s(n.meshName, kCndKeyNameLen, node.meshName.c_str(), kCndKeyNameLen);
+            if(!utils::strcpy(n.meshName, node.meshName)) {
+                throw StreamError("Too long mesh name to copy to CndKeyNode.name field!");
+            }
+
             n.nodeNum = node.num;
             n.numEntries = static_cast<uint32_t>(node.entries.size()); // TODO: check bounds
             nodes.push_back(std::move(n));

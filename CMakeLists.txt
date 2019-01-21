@@ -35,6 +35,9 @@ elseif(NOT WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fPIC -pipe -static")
 endif()
 
+add_definitions("-D__STDC_WANT_LIB_EXT1__=1")
+
+
 
 set(SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 include_directories ("${SOURCE_DIR}")

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <cstring>
 #include <iomanip>
 #include <string>
 #include <sstream>
@@ -109,6 +110,20 @@ namespace libim::utils {
 
         ss << n;
         return ss.str();
+    }
+
+    template<std::size_t N>
+    bool strcpy(char (&dest)[N], std::string_view src)
+    {
+        if(N < src.size()) {
+            return false;
+        }
+
+#if defined(__STDC_LIB_EXT1__) || defined(_MSC_VER)
+        return std::strncpy_s(dest, N, src.data(), src.size()) != nullptr;
+#else
+        return std::strncpy(dest, src.data(), src.size()) == 0;
+#endif
     }
 
     template<std::size_t N>

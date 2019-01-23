@@ -18,8 +18,12 @@ TextResourceWriter& TextResourceWriter::indent(std::size_t width, char indch)
 
 TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx, std::size_t indent)
 {
-    auto strIdx = utils::to_string(idx);
-    auto p = std::minmax(indent, strIdx.size());
+    const auto strIdx = utils::to_string(idx);
+    const auto strIdxLen =  strIdx.size(); // Note: Do not change this!
+                                           //       clang7 and gcc 8 try to optimize out strIdx.size()
+                                           //       in std::minmax which then returns garbage
+
+    auto p = std::minmax(indent, strIdxLen);
     indent =  (p.second - p.first) + 3;
 
     this->indent(indent);

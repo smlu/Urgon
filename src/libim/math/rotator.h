@@ -10,15 +10,15 @@ namespace libim {
     struct Rotator :
         public AbstractVector<T, 3, rotation_vector_tag>
     {
-        using _PT = AbstractVector<T, 3, rotation_vector_tag>;
-        using _PT::AbstractVector;
+        using Base_ = AbstractVector<T, 3, rotation_vector_tag>;
+        using AbstractVector<T, 3, rotation_vector_tag>::AbstractVector;
 
         constexpr inline Rotator(T pich, T roll, T yaw) noexcept :
-            _PT{ pich, roll, yaw }
+            Base_{ pich, roll, yaw }
         {}
 
         explicit constexpr inline Rotator(std::array<T, 3> a) noexcept :
-            _PT{std::move(a)}
+            Base_{std::move(a)}
         {}
 
         inline T roll() const

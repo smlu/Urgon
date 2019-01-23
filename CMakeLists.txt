@@ -38,7 +38,6 @@ endif()
 add_definitions("-D__STDC_WANT_LIB_EXT1__=1")
 
 
-
 set(SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 include_directories ("${SOURCE_DIR}")
 
@@ -77,7 +76,10 @@ add_library(${PM_LIBIM} STATIC
 set_target_properties(${PM_LIBIM}  PROPERTIES PREFIX  "")
 
 # GCC < 9
-target_link_libraries(${PM_LIBIM} PRIVATE $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs>)
+target_link_libraries(${PM_LIBIM} PUBLIC
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs>
+    $<$<AND:$<CXX_COMPILER_ID:Clang>>:stdc++fs>
+)
 
 # CND utils 
 add_library(${PM_LIBCND} OBJECT

@@ -59,6 +59,11 @@ namespace libim {
             return write(t);
         }
 
+        void advance(std::size_t n) const
+        {
+            seek(tell() + n);
+        }
+
         template<class T>
         T read() const
         {

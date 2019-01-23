@@ -52,7 +52,7 @@ namespace libim::utils {
 
 
         HashMap() = default;
-        HashMap(HashMap&&) noexcept = default;
+        HashMap(HashMap&&) = default;
         HashMap& operator = (HashMap&&) noexcept = default;
 
         HashMap(const HashMap& rhs) : data_(rhs.data_)

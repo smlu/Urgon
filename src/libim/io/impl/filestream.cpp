@@ -1,7 +1,11 @@
 #include "../filestream.h"
+#include "../binarystream.h"
 #include "../../common.h"
+
 #include <algorithm>
+#include <array>
 #include <filesystem>
+#include <iterator>
 
 #ifdef OS_WINDOWS
 #include <Windows.h>
@@ -25,6 +29,53 @@
 #endif
 
 using namespace libim;
+
+constexpr std::size_t kBufferSize = 4096;
+
+template<std::size_t BufferSize>
+struct IOBuffer final : public std::array<byte_t, BufferSize>
+{
+    using Base_ = std::array<byte_t, BufferSize>;
+
+    IOBuffer()
+    {
+        reset();
+    }
+
+    std::size_t write(const byte_t* data, std::size_t size)
+    {
+        std::size_t nWrite = std::distance(pos_, Base_::end()); // TODO: safe cast
+        if(size < nWrite) {
+            nWrite = size;
+        }
+        pos_ = std::copy(data, data + nWrite, pos_);
+        return nWrite;
+    }
+
+    std::size_t size() const noexcept
+    {
+        return std::distance(Base_::cbegin(), typename Base_::const_iterator(pos_)); // TODO: safe cast
+    }
+
+    std::size_t capacity() const noexcept
+    {
+        return Base_::max_size();
+    }
+
+    bool hasData() const
+    {
+        return pos_ != Base_::begin();
+    }
+
+    void reset()
+    {
+        pos_ = Base_::begin();
+    }
+
+private:
+    typename Base_::iterator pos_;
+};
+
 
 std::string GetLastErrorAsString()
 {
@@ -161,33 +212,86 @@ struct FileStream::FileStreamImpl
         return static_cast<std::size_t>(nRead);
     }
 
-    std::size_t write(const byte_t* data, std::size_t length)
+
+    std::size_t flush()
     {
         ssize_t nWritten = 0;
-    #ifdef OS_WINDOWS
-        if(!WriteFile(
-                fileHandle,
-                reinterpret_cast<LPCVOID>(data),
-                static_cast<DWORD>(length),
-                reinterpret_cast<LPDWORD>(&nWritten),
-                nullptr)){
-    #else
-        nWritten = ::write(fd, data, length);
-        if(nWritten == -1) {
-    #endif
-            throw FileStreamError("Failed to write data to file: " + GetLastErrorAsString());
+        if((mode == Write || mode == ReadWrite) && buffer_.hasData())
+        {
+        #ifdef OS_WINDOWS
+            if(!WriteFile(
+                    fileHandle,
+                    reinterpret_cast<LPCVOID>(buffer_.data()),
+                    static_cast<DWORD>(buffer_.size()),
+                    reinterpret_cast<LPDWORD>(&nWritten),
+                    nullptr)){
+        #else
+            nWritten = ::write(fd, buffer_.data(), buffer_.size());
+            if(nWritten == -1) {
+        #endif
+                throw FileStreamError("Failed to write data to file: " + GetLastErrorAsString());
+            }
+
+            buffer_.reset();
         }
 
-        currentOffset += nWritten;
+        return nWritten;
+    }
+
+    std::size_t write(const byte_t* data, std::size_t length)
+    {
+        std::size_t nTotalWritten = 0;
+        do
+        {
+            std::size_t nWritten = buffer_.write(data, length - nTotalWritten);
+            if(nWritten < length)
+            {
+                auto nFlushed = flush();
+                if(nFlushed < nWritten) {
+                    return nFlushed;
+                }
+            }
+
+            nTotalWritten += nWritten;
+            data += nWritten;
+        }
+        while(nTotalWritten < length);
+
+        currentOffset += nTotalWritten;
         if(currentOffset > fileSize) {
             fileSize = currentOffset;
         }
 
-        return static_cast<std::size_t>(nWritten);
+        return nTotalWritten;
+
+
+//       ssize_t nWritten;
+//    #ifdef OS_WINDOWS
+//        if(!WriteFile(
+//                fileHandle,
+//                reinterpret_cast<LPCVOID>(data),
+//                static_cast<DWORD>(length),
+//                reinterpret_cast<LPDWORD>(&nWritten),
+//                nullptr)){
+//    #else
+//        nWritten = ::write(fd, data, length);
+//        if(nWritten == -1) {
+//    #endif
+//            throw FileStreamError("Failed to write data to file: " + GetLastErrorAsString());
+//        }
+
+//        currentOffset += nWritten;
+//        if(currentOffset > fileSize) {
+//            fileSize = currentOffset;
+//        }
+
+//        return static_cast<std::size_t>(nWritten);
+
     }
 
     void seek(std::size_t position) const
     {
+        const_cast<FileStreamImpl*>(this)->flush();
     #ifdef OS_WINDOWS
         LARGE_INTEGER li;
         li.QuadPart = position;
@@ -208,6 +312,8 @@ struct FileStream::FileStreamImpl
 
     void close()
     {
+        flush();
+
 #ifdef OS_WINDOWS
         if(fileHandle != INVALID_HANDLE_VALUE)
         {
@@ -236,10 +342,14 @@ struct FileStream::FileStreamImpl
         close();
     }
 
+
     Mode mode;
     std::string filePath;
     mutable std::size_t fileSize = 0;
     mutable std::size_t currentOffset = 0;
+
+private:
+    IOBuffer<kBufferSize> buffer_;
 
 #ifdef OS_WINDOWS
 HANDLE fileHandle = INVALID_HANDLE_VALUE;

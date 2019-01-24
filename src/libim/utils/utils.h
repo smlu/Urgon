@@ -12,7 +12,7 @@
 
 namespace libim::utils {
     namespace detail {
-        inline bool compareChar(char c1, char c2)
+        inline bool compare_char(char c1, char c2)
         {
             if(c1 == c2) {
                 return true;
@@ -34,22 +34,22 @@ namespace libim::utils {
     }
 
     /* Case insensitive comparison of two strings */
-    inline bool iequal(const std::string& s1, const std::string& s2)
+    [[nodiscard]] inline bool iequal(const std::string& s1, const std::string& s2)
     {
         return ((s1.size() == s2.size()) &&
-            std::equal(s1.begin(), s1.end(), s2.begin(), &detail::compareChar)
+            std::equal(s1.begin(), s1.end(), s2.begin(), &detail::compare_char)
         );
     }
 
-    inline bool iequal(std::string_view s1, std::string_view s2)
+    [[nodiscard]] inline bool iequal(std::string_view s1, std::string_view s2)
     {
         return ((s1.size() == s2.size()) &&
-            std::equal(s1.begin(), s1.end(), s2.begin(), &detail::compareChar)
+            std::equal(s1.begin(), s1.end(), s2.begin(), &detail::compare_char)
         );
     }
 
     template<typename T>
-    inline constexpr auto to_underlying(T t)
+    [[nodiscard]] inline constexpr auto to_underlying(T t)
     {
         static_assert(std::is_enum_v<T>, "T must be enum type");
         using U = std::underlying_type_t<T>;
@@ -67,7 +67,7 @@ namespace libim::utils {
     using underlying_type_t = typename underlying_type<T>::type;
 
     template<typename T>
-    inline std::size_t numdigits(T i)
+    [[nodiscard]] inline std::size_t numdigits(T i)
     {
         static_assert (std::is_integral_v<T> && std::is_unsigned_v<T>, "T must be unsigned integral type");
         return i > 0 ? static_cast<std::size_t>(std::log10(i)) + 1 : 1;
@@ -75,7 +75,7 @@ namespace libim::utils {
 
 
     template<std::size_t base = 10, std::size_t width = 0, typename T>
-    static std::string to_string(T n)
+    [[nodiscard]] static std::string to_string(T n)
     {
         static_assert(base == 8 || base == 10 || base == 16, "invalid encoding base");
         static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
@@ -127,7 +127,7 @@ namespace libim::utils {
     }
 
     template<std::size_t N>
-    std::string trim(const char (&str)[N])
+    [[nodiscard]] std::string trim(const char (&str)[N])
     {
         std::size_t end = 0;
         while(end++ < N) {

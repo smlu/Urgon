@@ -1,5 +1,6 @@
-#include "../cnd.h"
 #include "cnd_mat_header.h"
+#include "../cnd.h"
+#include "../sound/cnd_sound_header.h"
 #include "../../../../../../../log/log.h"
 #include <cstring>
 
@@ -15,7 +16,7 @@ std::size_t CND::GetMatSectionOffset(const InputStream& istream)
     constexpr std::size_t sizeNexFileIdField = sizeof(uint32_t);
 
     return istream.tell() +
-           numSoundHeaders * 48 +
+           numSoundHeaders * sizeof(CndSoundHeader) +
            sizeSoundData +
            sizeNexFileIdField;
    /* return sizeof(CndHeader) +

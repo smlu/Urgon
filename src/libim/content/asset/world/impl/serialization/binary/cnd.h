@@ -10,6 +10,7 @@
 
 #include "../../../../animation/animation.h"
 #include "../../../../material/material.h"
+#include "../../../../../audio/impl/soundbank_instance.h"
 
 #include "../../../../../../common.h"
 #include "../../../../../../io/stream.h"
@@ -113,6 +114,16 @@ namespace libim::content::asset {
     struct CND final
     {
         static CndHeader LoadHeader(const InputStream& istream);
+
+        /**
+        * Parses sounds section.
+        * Offset of istream hast to be at the beginning of sound section.
+        *
+        * @param Reference to the SoundBankInstance
+        * @param Const reference to the InputStream
+        * @return Returns last sound file ID nonce
+        */
+        static uint32_t ParseSectionSounds(audio::impl::SoundBankInstance& sbInstance, const InputStream& istream);
 
         static std::size_t GetMatSectionOffset(const InputStream& istream);
         static utils::HashMap<Material> ParseSectionMaterials(const CndHeader& header, const InputStream& istream); // Reads materials section. Offset of istream hast to be at beginning of material section.

@@ -9,6 +9,7 @@
 #include "libim/content/asset/material/bmp.h"
 #include "libim/content/asset/material/material.h"
 #include "libim/content/asset/world/impl/serialization/binary/cnd.h"
+#include "libim/content/audio/soundbank.h"
 #include "libim/content/text/text_resource_writer.h"
 #include "libim/log/log.h"
 
@@ -20,6 +21,7 @@
 
 
 using namespace libim;
+using namespace libim::content::audio;
 using namespace libim::content::asset;
 using namespace libim::content::text;
 
@@ -51,8 +53,14 @@ constexpr static auto optOutputDir         =  "--output-dir"sv;
 constexpr static auto optOutputDirShort    = "-o"sv;
 constexpr static auto optReplace           = "--replace"sv;
 constexpr static auto optReplaceShort      = "-r"sv;
+constexpr static auto optSounds            =  "--sounds"sv;
 constexpr static auto optVerbose           = "--verbose"sv;
 constexpr static auto optVerboseShort      = "-v"sv;
+
+
+constexpr static auto kFailed  = "FAILED"sv;
+constexpr static auto kSuccess = "SUCCESS"sv;
+
 
 bool HasOptVerbose(const CndToolArgs& args)
 {
@@ -74,8 +82,9 @@ int ExecCmd(std::string_view cmd, const CndToolArgs& args);
 
 int ExecCmdExtract(const CndToolArgs& args);
 bool ExtractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool verbose = false);
-std::size_t ExtractAnimations(const InputStream& istream, const std::string& outDir);
+int32_t ExtractAnimations(const InputStream& istream, const std::string& outDir, bool verbose);
 int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials , bool verbose);
+int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, bool verbose);
 
 int ExecCmdAdd(std::string_view scmd, const CndToolArgs& args);
 int ExecCmdAddAnimation(const CndToolArgs& args);
@@ -98,7 +107,7 @@ bool ExecCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
         return false;
     }
 
-    std::cout << "Patching CND file...\n";
+    std::cout << "Patching CND file... "  << std::flush;
 
     std::vector<ResourceT> newAssets;
     newAssets.reserve(args.unspecified().size());
@@ -159,7 +168,7 @@ bool ExecCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
         }
 
         const bool success = cndWriteAssets(cndFile, mapAssets);
-        std::cout << (success ? "SUCCESS" : "FAILED") << std::endl;
+        std::cout << (success ? kSuccess : kFailed) << std::endl;
         return success;
     }
     catch (const std::exception& e)
@@ -185,7 +194,7 @@ bool ExecCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndW
 
     try
     {
-        std::cout << "Patching CND file...\n";
+        std::cout << "Patching CND file... " << std::flush;
         InputFileStream ifstream(cndFile);
         auto mapAssets = cndReadAssets(ifstream);
         ifstream.close();
@@ -202,7 +211,7 @@ bool ExecCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndW
         }
 
         const bool success = cndWriteAssets(cndFile, mapAssets);
-        std::cout << (success ? "SUCCESS" : "FAILED") << std::endl;
+        std::cout << (success ? kSuccess : kFailed) << std::endl;
         return success;
     }
     catch (const std::exception& e)
@@ -216,7 +225,7 @@ bool ExecCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndW
 
 int main(int argc, const char *argv[])
 {
-    std::cout << "\nIndiana Jones and the Infernal Machine CND atool v" << kProgramVersion << std::endl;
+    std::cout << "\nIndiana Jones and the Infernal Machine CND file tool v" << kProgramVersion << std::endl;
     CndToolArgs args(argc, argv);
     if(argc < 2 ||
        args.cmd().empty())
@@ -283,7 +292,7 @@ void PrintHelp(std::string_view cmd, std::string_view subcmd)
     }
     else if(cmd == cmdExtract)
     {
-        std::cout << "Extract materials and animations from CND file." << std::endl << std::endl;
+        std::cout << "Extract resources from CND file." << std::endl << std::endl;
         std::cout << "  Usage: cndtool extract [options] <cnd-file-path>" << std::endl << std::endl;
         std::cout << "Options:        Long options:        Description:\n";
         std::cout << "  " << optConvertToBmpShort << SETW(19, ' ') << optConvertToBmp << SETW(51, ' ') << "Convert extracted materials to bmp\n";
@@ -296,7 +305,8 @@ void PrintHelp(std::string_view cmd, std::string_view subcmd)
         std::cout << "  Usage: cndtool list [options] <cnd-file-path>" << std::endl << std::endl;
         std::cout << "Options:              Description:\n";
         std::cout << "  " << optAnimations << SETW(52, ' ') << "List only animation resources in cnd file\n";
-        std::cout << "  " << optMaterials  << SETW(53, ' ') << "List only materials resources in cnd file\n";
+        std::cout << "  " << optMaterials  << SETW(52, ' ') << "List only material resources in cnd file\n";
+        std::cout << "  " << optSounds     << SETW(52, ' ') << "List only sound resources in cnd file\n";
     }
     else if (cmd == cmdRemove)
     {
@@ -407,9 +417,10 @@ int ExecCmdList(const CndToolArgs& args)
 
     bool listAnim = args.hasArg(optAnimations);
     bool listMat  = args.hasArg(optMaterials);
+    bool listSnd  = args.hasArg(optSounds);
 
-    if(!listAnim && !listMat) {
-        listAnim = listMat = true;
+    if(!listAnim && !listMat && !listSnd) {
+        listAnim = listMat = listSnd = true;
     }
 
     auto printList = [](const auto& l) {
@@ -434,6 +445,23 @@ int ExecCmdList(const CndToolArgs& args)
         printList(mats);
     }
 
+    if(listSnd)
+    {
+        SoundBank sb(1);
+        sb.importBank(0, istream);
+        auto& sounds = sb.getSounds(0);
+
+        std::cout << "Sounds:\n";
+        std::size_t i = 0;
+        for(const auto& p : sounds)
+        {
+            std::cout << "  " << i++ << ": " << p.first << std::endl;
+                      //<< SETW(38 - p.first.size(), ' ')
+                      //<< " | fileId: " << p.second.id() << " idx: " << p.second.idx() << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
     return 1;
 }
 
@@ -453,6 +481,9 @@ int ExecCmdExtract(const CndToolArgs& args)
     else if(args.hasArg(optOutputDir)){
         outDir = args.arg(optOutputDir);
     }
+    else {
+        outDir += GetBaseName(inputFile);
+    }
 
     const bool bVerboseOutput   = args.hasArg(optVerboseShort) || args.hasArg(optVerbose) ;
     const bool bConvertMatToBmp = args.hasArg(optConvertToBmpShort) || args.hasArg(optConvertToBmp);
@@ -460,7 +491,7 @@ int ExecCmdExtract(const CndToolArgs& args)
     int result = 0;
     try
     {
-        /* Extract animations & materials */
+        /* Extract animations, materials & sounds */
         if(!ExtractResources(inputFile, std::move(outDir), bConvertMatToBmp, bVerboseOutput)) {
             result = 1;
         }
@@ -477,58 +508,85 @@ int ExecCmdExtract(const CndToolArgs& args)
 bool ExtractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool verbose)
 {
     InputFileStream ifstream(cndFile);
-    outDir += (outDir.empty() ? "" : "/" ) + GetBaseName(cndFile);
 
-    auto nExtAnimFiles = ExtractAnimations(ifstream, outDir);
+    auto nExtAnimFiles = ExtractAnimations(ifstream, outDir, verbose);
+    if(nExtAnimFiles < 0) return false;
+
     auto nExtMatFiles  = ExtractMaterials(ifstream, outDir, convertMaterials, verbose);
     if(nExtMatFiles < 0) return false;
 
-    std::cout << "\n-----------------------------------------\n";
+    auto nExtSndFiles = ExtractSounds(ifstream, outDir, verbose);
+    if(nExtSndFiles < 0) return false;
+
+
+    std::cout << "\n-------------------------------------\n";
     std::cout << "Total extracted animations: " << nExtAnimFiles << std::endl;
-    std::cout << "Total extracted materials: " << nExtMatFiles << std::endl;
+    std::cout << "Total extracted materials:  " << nExtMatFiles << std::endl;
+    std::cout << "Total extracted sounds:     " << nExtSndFiles << std::endl;
     return true;
 }
 
-std::size_t ExtractAnimations(const InputStream& istream, const std::string& outDir)
+int32_t ExtractAnimations(const InputStream& istream, const std::string& outDir, bool verbose)
 {
-    auto mapAnimations = CND::ReadAnimations(istream);
-
-    std::string keyDir;
-    if(!mapAnimations.isEmpty())
+    try
     {
-        std::cout << "Found animations: " << mapAnimations.size() << std::endl;
-        keyDir = outDir + "/" + "key";
-        MakePath(keyDir);
+        std::cout << "Extracting animations... " << std::flush;
+        auto mapAnimations = CND::ReadAnimations(istream);
+
+        std::string keyDir;
+        if(!mapAnimations.isEmpty())
+        {
+            if(verbose) {
+                std::cout << "\nFound: " << mapAnimations.size() << std::endl;
+            }
+
+            keyDir = outDir + "/" + "key";
+            MakePath(keyDir);
+        }
+
+        /* Save extracted animations to file */
+        const std::string keyHeaderComment = [&]() {
+            return "Extracted from CND file '"s + istream.name() + "' with " +
+                std::string(kProgramName) + " v" + std::string(kProgramVersion);
+        }();
+
+        for(const auto& key : mapAnimations)
+        {
+            if(verbose){
+                std::cout << "Extracting animation: " << key.name() << std::endl;
+            }
+
+            std::string keyFilePath(keyDir + "/" + key.name());
+            OutputFileStream ofs(std::move(keyFilePath));
+            key.serialize(TextResourceWriter(ofs), keyHeaderComment);
+        }
+
+        std::cout << kSuccess << std::endl;
+        return static_cast<int32_t>(mapAnimations.size());
+
     }
-
-    /* Save extracted animations to file */
-    const std::string keyHeaderComment = [&]() {
-        return "Extracted from CND file '"s + istream.name() + "' with " +
-            std::string(kProgramName) + " v" + std::string(kProgramVersion);
-    }();
-
-    for(const auto& key : mapAnimations)
+    catch (const std::exception& e)
     {
-        std::cout << "Extracting animation: " << key.name() << std::endl;
-
-        std::string keyFilePath(keyDir + "/" + key.name());
-        OutputFileStream ofs(std::move(keyFilePath));
-        key.serialize(TextResourceWriter(ofs), keyHeaderComment);
+        std::cout << kFailed << std::endl;
+        if(verbose){
+            std::cerr << "An exception was encountered while extracting animations, e=" << e.what() << std::endl;
+        }
+        return -1;
     }
-
-    std::cout << std::endl;
-    return mapAnimations.size();
 }
 
-int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials , bool verbose)
+int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials, bool verbose)
 {
+    std::cout << "Extracting materials... " << std::flush;
     auto materials = CND::ReadMaterials(istream);
 
     std::string matDir;
     std::string bmpDir;
     if(!materials.isEmpty())
     {
-        std:: cout << "Found materials: " << materials.size() << std::endl;
+        if(verbose) {
+            std:: cout << " Found: " << materials.size() << std::endl;
+        }
 
         matDir = outDir + "/" + "mat";
         MakePath(matDir);
@@ -543,12 +601,12 @@ int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, 
     /* Save extracted materials to files */
     for(const auto& mat : materials)
     {
-        std::cout << "Extracting material: " <<  mat.name() << std::endl;
+        if(verbose) {
+            std::cout << "Extracting material: " <<  mat.name() << std::endl;
+        }
+
         std::string matFilePath(matDir + "/" + mat.name());
         mat.serialize(OutputFileStream(std::move(matFilePath)));
-        /*if(!SaveMaterialToFile(std::move(matFilePath), mat)) {
-            return false;
-        }*/
 
         if(verbose)
         {
@@ -575,7 +633,9 @@ int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, 
                         const std::string infix = mipmap.size() > 1 ? "_" + std::to_string(mipmapIdx) : "";
                         const std::string fileName = bmpDir + "/" + GetBaseName(mat.name()) + infix + sufix;
 
-                        if(!SaveBmpToFile(fileName, mipmap.at(mipmapIdx).toBmp())) {
+                        if(!SaveBmpToFile(fileName, mipmap.at(mipmapIdx).toBmp()))
+                        {
+                            std::cout << kFailed << std::endl;
                             return -1;
                         }
                     }
@@ -591,10 +651,55 @@ int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, 
     }
 
     if(!verbose) {
-        std::cout << std::endl;
+        std::cout << kSuccess << std::endl;
     }
 
     return static_cast<int32_t>(materials.size());
+}
+
+int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, bool verbose)
+{
+    try
+    {
+        std::cout << "Extracting sounds... " << std::flush;
+        SoundBank sb(2);
+        sb.importBank(0, istream);
+        auto& sounds = sb.getSounds(0);
+
+        std::filesystem::path outPath;
+        if(!sounds.empty())
+        {
+            if(verbose) {
+                std::cout << "\nFound: " << sounds.size() << std::endl;
+            }
+
+            outPath = outDir+ (outDir.empty() ? "" : "/" ) + "sound";
+            MakeDir(outPath);
+        }
+
+        for (const auto& pair : sounds)
+        {
+            if(verbose) {
+                std::cout << "Extracting sound: " << pair.first << std::endl;
+            }
+
+            OutputFileStream ofs(outPath.append(pair.first));
+            pair.second.serialize(ofs);
+
+            outPath = outPath.parent_path();
+        }
+
+        std::cout << kSuccess << std::endl;
+        return static_cast<int32_t>(sounds.size());
+    }
+    catch (const std::exception& e)
+    {
+        std::cout << kFailed << std::endl;
+        if(verbose) {
+            std::cerr << "An exception was encountered while extracting sounds from CND, e=" << e.what() << std::endl;
+        }
+        return -1;
+    }
 }
 
 int ExecCmdRemove(std::string_view scmd, const CndToolArgs& args)

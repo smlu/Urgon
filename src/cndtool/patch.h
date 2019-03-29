@@ -101,7 +101,7 @@ bool PatchCndAnimations(const std::string& cndFile, const utils::HashMap<Animati
                 sizeof(KeyNodeEntry) * aOldNumEntries.at(2);
 
 
-        ofstream.write(ifstream, endOffsKeySection);
+        ofstream.write(ifstream, /*offset=*/endOffsKeySection);
 
         /* Write new file size to the beginning of the output cnd file*/
         ofstream.seekBegin();

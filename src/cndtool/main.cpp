@@ -159,8 +159,8 @@ bool ExecCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
         {
             if(mapAssets.contains(asset.name()) && !HasOptReplace(args))
             {
-                std::cerr << "ERROR: Resource '" << asset.name() << "' already exists in CND file and no '--replace' option was provided!\n";
-                std::cerr << "       CND file was not modified.\n\n";
+                std::cerr << "\nERROR: Resource '" << asset.name() << "' already exists in CND file and no '--replace' option was provided.\n";
+                std::cerr << "       CND file was not modified!\n\n";
                 return 1;
             }
 

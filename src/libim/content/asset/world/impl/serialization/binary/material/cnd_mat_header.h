@@ -7,7 +7,7 @@ namespace libim::content::asset {
     constexpr static std::size_t kCndMatNameLen = kCndMaxNameLen;
     struct CndMatHeader final
     {
-        char name[kCndMatNameLen];
+        char name[kCndMatNameLen] = {0};
         int width;
         int height;
         int mipmapCount;

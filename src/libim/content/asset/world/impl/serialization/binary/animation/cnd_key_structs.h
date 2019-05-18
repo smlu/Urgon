@@ -56,7 +56,7 @@ namespace libim::content::asset
 
     struct CndKeyHeader final
     {
-        char  name[kCndKeyNameLen];
+        char name[kCndKeyNameLen] = {0};
         Animation::Flag flags;
         Animation::Type  type;
         uint32_t frames;
@@ -69,7 +69,7 @@ namespace libim::content::asset
 
     struct CndKeyNode final
     {
-        char meshName[64];
+        char meshName[64] = {0};
         uint32_t nodeNum;
         uint32_t numEntries;
     };

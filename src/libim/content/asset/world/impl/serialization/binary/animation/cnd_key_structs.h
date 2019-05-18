@@ -1,6 +1,7 @@
 #ifndef LIBIM_CND_KEY_STRUCTS_H
 #define LIBIM_CND_KEY_STRUCTS_H
 
+#include "../cnd.h"
 #include "../../../../../animation/animation.h"
 #include "../../../../../animation/key_node_entry.h"
 #include "../../../../../animation/key_marker.h"
@@ -51,7 +52,8 @@
 
 namespace libim::content::asset
 {
-    constexpr static std::size_t kCndKeyNameLen = 64;
+    constexpr static std::size_t kCndKeyNameLen    = kCndMaxNameLen;
+
     struct CndKeyHeader final
     {
         char  name[kCndKeyNameLen];

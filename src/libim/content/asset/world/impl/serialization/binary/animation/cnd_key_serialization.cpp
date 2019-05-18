@@ -187,7 +187,10 @@ void CND::WriteSectionKeyframes(OutputStream& ostream, const utils::HashMap<Anim
         cndHeaders.push_back(std::move(h));
 
         /* Copy key markers */
-        assert(anim.markers().size() <= 16 && "anim.markers().size() <= 16 ");
+        if(anim.markers().size() > kCndMaxKeyMarkers) {
+            throw StreamError("Num key markers > 16!");
+        }
+
         markers.reserve(anim.markers().size());
         std::copy(anim.markers().begin(), anim.markers().end(), std::back_inserter(markers));
 

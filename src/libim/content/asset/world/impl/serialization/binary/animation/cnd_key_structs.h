@@ -53,6 +53,7 @@
 namespace libim::content::asset
 {
     constexpr static std::size_t kCndKeyNameLen    = kCndMaxNameLen;
+    constexpr static std::size_t kCndMaxKeyMarkers = 16;
 
     struct CndKeyHeader final
     {

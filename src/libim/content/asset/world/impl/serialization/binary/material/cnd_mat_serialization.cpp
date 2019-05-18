@@ -34,7 +34,7 @@ utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, con
         /* Return if no materials are present in file*/
         if(header.numMaterials < 1)
         {
-            LOG_INFO("CND Info: No materials found!");
+            LOG_INFO("CND::ParseSectionMaterials(): No materials found!");
             return materials;
         }
 
@@ -42,7 +42,7 @@ utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, con
         uint32_t nBitmapBuffSize = istream.read<uint32_t>();
         if(nBitmapBuffSize == 0)
         {
-            LOG_WARNING("CND: Read materials bitmap data size == 0!");
+            LOG_DEBUG("CND::ParseSectionMaterials(): bitmap data size == 0!");
             return materials;
         }
 
@@ -57,14 +57,14 @@ utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, con
         {
             if(matHeader.mipmapCount < 1 || matHeader.texturesPerMipmap < 1)
             {
-                LOG_ERROR("CND: No pixel data found for material: %", matHeader.name);
+                LOG_DEBUG("CND::ParseSectionMaterials(): No pixel data found for material: %", matHeader.name);
                 continue;
             }
 
             /* Verify material bitdepth */
             if(matHeader.colorInfo.bpp % 8 != 0) // TODO: check for 16 and 32 bbp
             {
-                LOG_ERROR("CND: Cannot extract material % from buffer. Wrong bitdepth size: %", matHeader.name, matHeader.colorInfo.bpp);
+                LOG_ERROR("CND::ParseSectionMaterials(): Cannot extract material % from buffer. Wrong bitdepth size: %", matHeader.name, matHeader.colorInfo.bpp);
                 materials.clear();
                 return materials;
             }
@@ -85,7 +85,7 @@ utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, con
         }
 
         if(!vecBitmapBuff.empty()) {
-            LOG_WARNING("CND: Not all bitmap data was copied from buffer!");
+            LOG_WARNING("CND::ParseSectionMaterials(): Not all bitmap data was copied from buffer!");
         }
 
         return materials;

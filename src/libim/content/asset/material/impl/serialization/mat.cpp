@@ -47,41 +47,42 @@ Material& Material::deserialize(const InputStream&& istream)
 
 Material& Material::deserialize(const InputStream& istream)
 {
-        /* Read header */
-        auto header = istream.read<MatHeader>();
+    /* Read header */
+    auto header = istream.read<MatHeader>();
 
-        if(header.type != MAT_MIPMAP_TYPE) {
-            throw StreamError("MAT file contains no mipmaps");
-        }
+    if(header.type != MAT_MIPMAP_TYPE) {
+        throw StreamError("MAT file contains no mipmaps");
+    }
 
-        if(header.recordCount != header.mipmapCount) {
-            throw StreamError("Cannot read older version of MAT file");
-        }
+    if(header.recordCount != header.mipmapCount) {
+        throw StreamError("Cannot read older version of MAT file");
+    }
 
-        if(header.recordCount <= 0) {
-            throw StreamError("MAT file record count <= 0");
-        }
+    if(header.recordCount <= 0) {
+        throw StreamError("MAT file record count <= 0");
+    }
 
-        if(header.colorInfo.bpp % 8 != 0) {
-            throw StreamError("BPP % 8 != 0");
-        }
+    if(header.colorInfo.bpp % 8 != 0) {
+        throw StreamError("BPP % 8 != 0");
+    }
 
-        /* Read Material records */
-        auto records = istream.read<std::vector<MatRecordHeader>>(header.recordCount);
+    /* Read Material records */
+    auto records = istream.read<std::vector<MatRecordHeader>>(header.recordCount);
 
-        /* Read mipmaps */
-        std::vector<Mipmap> mipmaps(static_cast<std::size_t>(header.mipmapCount));
-        for(auto& mipmap : mipmaps)
-        {
-            auto mmHeader = istream.read<MatMipmapHeader>();
-            mipmap = istream.read<Mipmap, uint32_t, uint32_t, uint32_t, const ColorFormat&>(mmHeader.textureCount, mmHeader.width, mmHeader.height, header.colorInfo);
-        }
+    /* Read mipmaps */
+    std::vector<Mipmap> mipmaps(static_cast<std::size_t>(header.mipmapCount));
+    for(auto& mipmap : mipmaps)
+    {
+        auto mmHeader = istream.read<MatMipmapHeader>();
+        mipmap = istream.read<Mipmap, uint32_t, uint32_t, uint32_t, const ColorFormat&>(
+                    mmHeader.textureCount, mmHeader.width, mmHeader.height, header.colorInfo);
+    }
 
-        this->setName(GetFilename(istream.name()));
-        this->setSize(mipmaps.at(0).at(0).width(), mipmaps.at(0).at(0).height());
-        this->setColorFormat(header.colorInfo);
-        this->setMipmaps(std::move(mipmaps));
-        return *this;
+    this->setName(GetFilename(istream.name()));
+    this->setSize(mipmaps.at(0).at(0).width(), mipmaps.at(0).at(0).height());
+    this->setColorFormat(header.colorInfo);
+    this->setMipmaps(std::move(mipmaps));
+    return *this;
 }
 
 

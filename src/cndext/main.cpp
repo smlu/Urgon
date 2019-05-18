@@ -141,15 +141,18 @@ void PrintMipmapInfo(const Mipmap& mipmap, uint32_t mmIdx)
     std::string colorMode;
     switch (tex.colorInfo().colorMode)
     {
-    case 1:
-        colorMode = "RGB_565";
-        break;
-    case 2:
-        colorMode = "RGB_4444";
-        break;
-    default:
-        colorMode = "Unknown";
-        break;
+        case ColorMode::Indexed:
+            colorMode = "Indexed";
+            break;
+        case ColorMode::RGB:
+            colorMode = "RGB";
+            break;
+        case ColorMode::RGBA:
+            colorMode = "RGBA";
+            break;
+        default:
+            colorMode = "Unknown";
+            break;
     }
 
     std::cout << "    ------------------ Mipmap Info -----------------\n";

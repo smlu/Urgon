@@ -18,13 +18,14 @@
 #include "../../../../../../utils/hashmap.h"
 
 namespace libim::content::asset {
+    static constexpr std::size_t kCndMaxNameLen = 64;
 
     //PACKED(
     struct CndHeader
     {
         uint32_t fileSize;
         std::array<char, 1216> copyright;
-        std::array<char, 64>   filePath;
+        std::array<char, kCndMaxNameLen>   filePath;
         uint32_t type;               // 0xD = container type (jones3dstatic.cnd), 0xC = game world
         uint32_t version;
         float    worldGravity;

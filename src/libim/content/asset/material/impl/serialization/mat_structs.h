@@ -33,12 +33,12 @@ namespace libim::content::asset {
         int32_t Unknown2;
         int32_t Unknown3;
 
-        int32_t Unknown4;
+        int32_t Unknown4;        // float(1.0) => 0x803F0000
 
         int32_t Unknown5;
-        int32_t Unknown6;
-        int32_t Unknown7;
-        int32_t Unknown8;
+        int32_t Unknown6;       // 4, 9 (gen_4red.mat), 0x0169F4B4 (jonsescomic_sans_ms14.mat), 5 (splashdemo_6.mat)
+        int32_t Unknown7;       // 4, 0x0051F8F8 (gen_4red.mat), 0x0169FC3E (jonsescomic_sans_ms14.mat), 5 (splashdemo_6.mat)
+        int32_t mipmapIdx;      // Coresponding mipmap index num
     };
 
     struct MatMipmapHeader

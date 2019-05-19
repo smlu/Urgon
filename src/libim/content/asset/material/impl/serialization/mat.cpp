@@ -62,6 +62,11 @@ Material& Material::deserialize(const InputStream& istream)
         throw StreamError("MAT file record count <= 0");
     }
 
+    if(header.colorInfo.colorMode < ColorMode::RGB ||
+       header.colorInfo.colorMode > ColorMode::RGBA) {
+        throw StreamError("Invalid color mode");
+    }
+
     if(header.colorInfo.bpp % 8 != 0) {
         throw StreamError("BPP % 8 != 0");
     }

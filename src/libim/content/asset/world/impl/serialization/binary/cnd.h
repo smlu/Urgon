@@ -7,10 +7,11 @@
 #include <utility>
 #include <vector>
 
-
+#include "georesource/cnd_georesource.h"
 #include "../../../../animation/animation.h"
-#include "../../../../material/material.h"
 #include "../../../../../audio/impl/soundbank_instance.h"
+#include "../../../../material/material.h"
+
 
 #include "../../../../../../common.h"
 #include "../../../../../../io/stream.h"
@@ -59,10 +60,12 @@ namespace libim::content::asset {
 
         uint32_t unknown32;
         uint32_t unknown33;
-        uint32_t unknown34;
-        uint32_t unknown35;
-        uint32_t unknown36;
-        uint32_t unknown37;
+
+        uint32_t numAdjoins;
+        uint32_t aAdjoins;            // 32-bit pointer
+
+        uint32_t numSurfaces;
+        uint32_t aSurfaces;           // 32-bit pointer
 
         uint32_t numSectors;
         uint32_t aSectors;            // 32-bit pointer
@@ -131,6 +134,10 @@ namespace libim::content::asset {
         static utils::HashMap<Material> ReadMaterials(const InputStream& istream);
         static void WriteSectionMaterials(OutputStream& ostream, const utils::HashMap<Material>& materials);
         static bool ReplaceMaterial(const Material& mat, const std::string& filename);
+
+        static std::size_t GetOffset_Georesource(const CndHeader& header, const InputStream& istream);
+        static Georesource ParseSection_Georesource(const CndHeader& cndHeader, const InputStream& istream);
+        static Georesource ReadGeoresource(const InputStream& istream);
 
         static std::size_t GetKeySectionOffset(const CndHeader& header, const InputStream& istream);
         static utils::HashMap<Animation> ParseSectionKeyframes(const CndHeader& cndHeader, const InputStream& istream); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.

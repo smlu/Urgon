@@ -42,7 +42,7 @@ utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, con
         uint32_t nBitmapBuffSize = istream.read<uint32_t>();
         if(nBitmapBuffSize == 0)
         {
-            LOG_DEBUG("CND::ParseSectionMaterials(): bitmap data size == 0!");
+            LOG_ERROR("CND::ParseSectionMaterials(): bitmap data size == 0!");
             return materials;
         }
 

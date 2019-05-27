@@ -19,11 +19,11 @@ void WriteHeader(TextResourceWriter& rw, const Animation& anim, std::string_view
 
     rw.writeSection(kResName_Header)
       .writeEol()
-      .writeKeyValue<decltype(anim.flages()), 2>(kResName_Flags, anim.flages())
-      .writeKeyValue<decltype(anim.type()), 3>(kResName_Type, anim.type())
-      .writeKeyValue<uint32_t>(kResName_Frames, anim.frames())
-      .writeKeyValue<std::string, 4>(kResName_Fps, utils::to_string<10,3>(anim.fps()))
-      .writeKeyValue<uint32_t>(kResName_Joints, anim.joints())
+      .writeKeyValue(kResName_Flags, anim.flages(), 2)
+      .writeKeyValue(kResName_Type, anim.type(), 3)
+      .writeKeyValue(kResName_Frames, anim.frames())
+      .writeKeyValue(kResName_Fps, utils::to_string<10,3>(anim.fps()), 4)
+      .writeKeyValue(kResName_Joints, anim.joints())
       .writeEol()
       .writeEol();
 }
@@ -54,8 +54,8 @@ void WriteKeyframes(TextResourceWriter& rw, const Animation& anim)
       [](TextResourceWriter& rw, [[maybe_unused]]auto idx, const KeyNode& node)
       {
 
-          rw.writeKeyValue<decltype(node.num), 4>(kResName_Node, node.num);
-          rw.writeKeyValue<std::string_view>(kResName_MeshName, node.meshName);
+          rw.writeKeyValue(kResName_Node, node.num, 4);
+          rw.writeKeyValue(kResName_MeshName, node.meshName);
 
           // Write frames
           const auto nEntries = node.entries.size();
@@ -80,13 +80,13 @@ void WriteKeyframes(TextResourceWriter& rw, const Animation& anim)
 
               const auto placementIndent = rw.tell() - rowBegin;
 
-              rw.writeVector<vecIndent>(frame.pos);
-              rw.writeVector<vecIndent>(frame.rot);
+              rw.writeVector(frame.pos, vecIndent);
+              rw.writeVector(frame.rot, vecIndent);
 
               rw.writeEol().indent(placementIndent);
 
-              rw.writeVector<vecIndent>(frame.dpos);
-              rw.writeVector<vecIndent>(frame.drot);
+              rw.writeVector(frame.dpos, vecIndent);
+              rw.writeVector(frame.drot, vecIndent);
           });
       });
 }

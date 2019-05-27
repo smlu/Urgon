@@ -1,5 +1,6 @@
 #ifndef LIBIM_TEXT_RESOURCE_WRITER_H
 #define LIBIM_TEXT_RESOURCE_WRITER_H
+#include "../../math/abstract_vector.h"
 #include "../../io/stream.h"
 #include "../../utils/utils.h"
 
@@ -69,26 +70,25 @@ namespace libim::content::text {
         TextResourceWriter& writeCommentLine(std::string_view comment);
         TextResourceWriter& writeEol();
 
+        TextResourceWriter& writeKeyValue(std::string_view key, std::string_view value, std::size_t indent = 1);
+
         template<typename T,
-            std::size_t indent = 1,
             bool isArithmetic = std::is_arithmetic_v<T>,
-            bool isEnum       = std::is_enum_v<T>,
-            typename Value = std::conditional_t<isArithmetic || isEnum, T, std::string_view>
+            typename = std::enable_if_t<isArithmetic || std::is_enum_v<T>>
         >
-        TextResourceWriter& writeKeyValue(std::string_view key, Value value)
+        TextResourceWriter& writeKeyValue(std::string_view key, T value, std::size_t indent = 1)
         {
             if constexpr(isArithmetic) {
-                return writeKey(key, utils::to_string(value), indent);
-            } else if constexpr(isEnum)
+                return writeKeyValue(key, utils::to_string(value), indent);
+            }
+            else
             {
-                return writeKey(key,
+                return writeKeyValue(key,
                     utils::to_string<16, 4>(utils::to_underlying(value)),
                     indent
                 );
             }
-            else {
-                return writeKey(key, value, indent);
-            }
+        }
         }
 
         TextResourceWriter& writeLabel(std::string_view name, std::string_view text);
@@ -138,8 +138,8 @@ namespace libim::content::text {
         TextResourceWriter& writeRowIdx(std::size_t idx, std::size_t indent);
         TextResourceWriter& writeSection(std::string_view section);
 
-        template<std::size_t indent = 4, typename T>
-        TextResourceWriter& writeVector(const T& v)
+        template<typename T, std::size_t S, typename Tag>
+        TextResourceWriter& writeVector(const AbstractVector<T, S, Tag>& v, std::size_t indent = 4)
         {
             for(const auto e : v)
             {
@@ -149,8 +149,6 @@ namespace libim::content::text {
             return *this;
         }
 
-    private:
-        TextResourceWriter& writeKey(std::string_view key, std::string_view value, std::size_t indent = 1);
 
     private:
         OutputStream& ostream_;

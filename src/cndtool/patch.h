@@ -3,9 +3,9 @@
 #include <string>
 
 #include "libim/content/asset/material/material.h"
-#include "libim/content/asset/world/impl/serialization/binary/cnd.h"
-#include "libim/content/asset/world/impl/serialization/binary/animation/cnd_key_structs.h"
-#include "libim/content/asset/world/impl/serialization/binary/material/cnd_mat_header.h"
+#include "libim/content/asset/world/impl/serialization/cnd/cnd.h"
+#include "libim/content/asset/world/impl/serialization/cnd/animation/cnd_key_structs.h"
+#include "libim/content/asset/world/impl/serialization/cnd/material/cnd_mat_header.h"
 #include "libim/utils/hashmap.h"
 #include "libim/io/stream.h"
 

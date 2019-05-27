@@ -32,11 +32,13 @@ uint32_t CND::ParseSectionSounds(SoundBankInstance& sbInstance, const InputStrea
         sbInstance.sounds.reserve(nSounds);
         for(const auto& h : vecHeaders)
         {
-            Sound s(sbInstance.ptrData,
-                    h.dirNameOffset,
-                    h.fileNameOffset,
-                    h.dataOffset,
-                    h.dataSize
+            Sound s
+            (
+                sbInstance.ptrData,
+                h.dirNameOffset,
+                h.fileNameOffset,
+                h.dataOffset,
+                h.dataSize
             );
 
             s.setId(h.fileID);

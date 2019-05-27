@@ -1,7 +1,7 @@
 #include "../soundbank.h"
 #include "../soundbank_error.h"
 #include "soundbank_instance.h"
-#include "../../asset/world/impl/serialization/binary/cnd.h"
+#include "../../asset/world/impl/serialization/cnd/cnd.h"
 #include "../../../common.h"
 #include "../../../utils/utils.h"
 

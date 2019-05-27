@@ -16,6 +16,7 @@
 #include "../../../../../../common.h"
 #include "../../../../../../io/stream.h"
 #include "../../../../../../math/vector2.h"
+#include "../../../../../../math/vector4.h"
 #include "../../../../../../utils/hashmap.h"
 
 namespace libim::content::asset {
@@ -34,7 +35,7 @@ namespace libim::content::asset {
         float    horizonDistance;
         Vector2f horizonSkyOffset; // x,y
         Vector2f ceilingSkyOffset; // x,y
-        float    LOD_Distances[4];
+        Vector4f   LOD_Distances;
         struct {
             int32_t enabled;
             float color[4]; //rgba
@@ -121,7 +122,7 @@ namespace libim::content::asset {
 
         /**
         * Parses sounds section.
-        * Offset of istream hast to be at the beginning of sound section.
+        * Offset of istream has to be at the beginning of sound section.
         *
         * @param Reference to the SoundBankInstance
         * @param Const reference to the InputStream

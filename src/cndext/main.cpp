@@ -8,7 +8,7 @@
 #include "libim/content/asset/animation/animation.h"
 #include "libim/content/asset/material/bmp.h"
 #include "libim/content/asset/material/material.h"
-#include "libim/content/asset/world/impl/serialization/binary/cnd.h"
+#include "libim/content/asset/world/impl/serialization/cnd/cnd.h"
 #include "libim/content/text/text_resource_writer.h"
 #include "libim/log/log.h"
 

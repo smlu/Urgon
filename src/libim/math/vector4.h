@@ -56,15 +56,15 @@ namespace libim {
         }
     };
 
-    struct FVector4 : public Vector4<float> {
+    struct Vector4f : public Vector4<float> {
         using Vector4<float>::Vector4;
     };
 
-    struct IntVector4 : public Vector4<int32_t> {
+    struct Vector4i : public Vector4<int32_t> {
         using Vector4<int32_t>::Vector4;
     };
 
-    struct UIntVector4 : public Vector4<uint32_t> {
+    struct Vector4u : public Vector4<uint32_t> {
         using Vector4<uint32_t>::Vector4;
     };
 }

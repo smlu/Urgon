@@ -37,6 +37,7 @@ namespace libim::text {
         void getSpaceDelimitedString(Token& out);
         void getDelimitedString(Token& out, const std::function<bool(char)>& isDelim);
         void getString(Token& out, std::size_t len);
+        std::string getString(std::size_t len);
 
         void assertIdentifier(std::string_view id);
         void assertPunctuator(std::string_view punc);

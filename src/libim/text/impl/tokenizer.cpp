@@ -72,6 +72,12 @@ void Tokenizer::getString(Token& out, std::size_t len)
     tp_->readString(out, len);
 }
 
+std::string Tokenizer::getString(std::size_t len)
+{
+    tp_->readString(cachedTkn_, len);
+    return std::move(cachedTkn_).value();
+}
+
 void Tokenizer::assertIdentifier(std::string_view id)
 {
     getToken(cachedTkn_);

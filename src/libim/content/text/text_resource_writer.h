@@ -128,10 +128,10 @@ namespace libim::content::text {
             return *this;
         }
 
-        template<std::size_t base = 10, std::size_t width = 0, typename T>
+        template<std::size_t base = 10, std::size_t precision = 0, typename T>
         TextResourceWriter& writeNumber(T n)
         {
-            write(utils::to_string<base, width, T>(n));
+            write(utils::to_string<base, precision, T>(n));
             return *this;
         }
 

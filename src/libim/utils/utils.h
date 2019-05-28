@@ -74,7 +74,7 @@ namespace libim::utils {
     }
 
 
-    template<std::size_t base = 10, std::size_t width = 0, typename T>
+    template<std::size_t base = 10, std::size_t precision = 0, typename T>
     [[nodiscard]] static std::string to_string(T n)
     {
         static_assert(base == 8 || base == 10 || base == 16, "invalid encoding base");
@@ -100,12 +100,12 @@ namespace libim::utils {
                << std::hex;
         }
 
-        if constexpr(width != 0)
+        if constexpr(precision != 0)
         {
-            ss << std::setw(width)
+            ss << std::setw(precision)
                << std::setfill('0')
                << std::fixed
-               << std::setprecision(width);
+               << std::setprecision(precision);
         }
 
         ss << n;

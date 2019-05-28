@@ -144,7 +144,7 @@ namespace libim::content::text {
         }
 
         TextResourceWriter& writeRowIdx(std::size_t idx, std::size_t indent);
-        TextResourceWriter& writeSection(std::string_view section);
+        TextResourceWriter& writeSection(std::string_view section, bool overline = true);
 
         template<typename T, std::size_t S, typename Tag>
         TextResourceWriter& writeVector(const AbstractVector<T, S, Tag>& v, std::size_t indent = 4)

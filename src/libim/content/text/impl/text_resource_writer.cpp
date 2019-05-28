@@ -74,8 +74,10 @@ TextResourceWriter& TextResourceWriter::writeLine(std::string_view line)
     return writeEol();
 }
 
-TextResourceWriter& TextResourceWriter::writeSection(std::string_view section)
+TextResourceWriter& TextResourceWriter::writeSection(std::string_view section, bool overline)
 {
-    return writeLine(kResSectionHeader).
-           writeLabel(kResName_Section, section);
+    if(overline) {
+        writeLine(kResSectionHeader);
+    }
+    return writeLabel(kResName_Section, section);
 }

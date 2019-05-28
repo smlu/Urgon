@@ -124,8 +124,8 @@ struct FileStream::FileStreamImpl
                 return static_cast<DWORD>(-1);
             #else
             case Read:      return O_RDONLY;
-            case Write:     return O_WRONLY | O_CREAT;
-            case ReadWrite: return O_RDWR   | O_CREAT;
+            case Write:     return O_WRONLY | O_CREAT | O_TRUNC;
+            case ReadWrite: return O_RDWR   | O_CREAT | O_TRUNC;
             default:
                 return -1;
             #endif

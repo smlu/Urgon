@@ -79,7 +79,8 @@ namespace libim::content::text {
         TextResourceWriter& writeKeyValue(std::string_view key, T value, std::size_t indent = 1)
         {
             if constexpr(isArithmetic) {
-                return writeKeyValue(key, utils::to_string(value), indent);
+                constexpr std::size_t p = std::is_floating_point_v<T> ? 6 : 0;
+                return writeKeyValue(key, utils::to_string<10, p>(value), indent);
             }
             else
             {

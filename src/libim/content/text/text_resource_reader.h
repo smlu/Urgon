@@ -20,7 +20,7 @@ namespace libim::content::text {
         void assertLabel(std::string_view label);
 
         template<typename T>
-        T getVector()
+        T readVector()
         {
             typename T::base_type array;
             for(std::size_t i =0; i < array.size(); i++) {

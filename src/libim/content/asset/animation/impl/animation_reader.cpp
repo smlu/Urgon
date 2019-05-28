@@ -46,13 +46,13 @@ void ParseKeyframes(TextResourceReader& rr, Animation& anim)
         [](TextResourceReader& rr, auto& entry)
         {
             entry.frame = rr.getNumber<decltype(entry.frame)>();
-            entry.flags  = rr.readFlags<decltype(entry.flags)>();
+            entry.flags = rr.readFlags<decltype(entry.flags)>();
 
-            entry.pos = rr.getVector<Vector3f>();
-            entry.rot = rr.getVector<FRotator>();
+            entry.pos   = rr.readVector<Vector3f>();
+            entry.rot   = rr.readVector<FRotator>();
 
-            entry.dpos = rr.getVector<Vector3f>();
-            entry.drot = rr.getVector<FRotator>();
+            entry.dpos  = rr.readVector<Vector3f>();
+            entry.drot  = rr.readVector<FRotator>();
         });
     });
 

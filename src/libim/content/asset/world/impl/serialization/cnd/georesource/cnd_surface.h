@@ -4,17 +4,11 @@
 #include <vector>
 #include <tuple>
 
+#include "../../../../../../../math/color.h"
 #include "../../../../../../../math/vector3.h"
 
 namespace libim::content::asset {
 
-    struct RGBA
-    {
-        float Read;
-        float Green;
-        float Blue;
-        float Alpha;
-    };
 
     struct CndSurfaceHeader
     {
@@ -23,8 +17,8 @@ namespace libim::content::asset {
         int32_t faceflags;
         int32_t geoMode;
         int32_t lightMode;
-        int32_t adjoinIdx;      // -1, if no surface adjoin
-        RGBA color;             // surface color
+        int32_t adjoinIdx;  // -1, if no surface adjoin
+        Color color;        // surface color
         Vector3f normal;
         uint32_t numVerts;
     };
@@ -33,11 +27,11 @@ namespace libim::content::asset {
     {
         int vertIdx;
         int texIdx;
-        RGBA color; // vertices color
+        Color color; // vertices color
     };
 
     struct CndSurface : public CndSurfaceHeader {
-        std::vector<std::tuple<int, int, RGBA>> verts; // vert idx, tex idx, vert color
+        std::vector<std::tuple<int, int, Color>> verts; // vert idx, tex idx, vert color
     };
 
 

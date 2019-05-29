@@ -15,6 +15,7 @@
 
 #include "../../../../../../common.h"
 #include "../../../../../../io/stream.h"
+#include "../../../../../../math/color.h"
 #include "../../../../../../math/vector2.h"
 #include "../../../../../../math/vector4.h"
 #include "../../../../../../utils/hashmap.h"
@@ -35,10 +36,10 @@ namespace libim::content::asset {
         float    horizonDistance;
         Vector2f horizonSkyOffset; // x,y
         Vector2f ceilingSkyOffset; // x,y
-        Vector4f   LOD_Distances;
+        Vector4f LOD_Distances;
         struct {
             int32_t enabled;
-            float color[4]; //rgba
+            Color color;
             float startDepth;
             float endDepth;
         } fog;

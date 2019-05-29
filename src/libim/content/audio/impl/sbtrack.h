@@ -1,5 +1,5 @@
-#ifndef LIBIM_SOUNDBANK_INSTANCE_H
-#define LIBIM_SOUNDBANK_INSTANCE_H
+#ifndef LIBIM_SBTRACK_H
+#define LIBIM_SBTRACK_H
 #include "../soundbank.h"
 
 #include <memory>
@@ -7,10 +7,10 @@
 
 
 namespace libim::content::audio::impl {
-    struct SoundBankInstance
+    struct SbTrack
     {
         std::unordered_map<std::string, Sound> sounds;
         std::shared_ptr<ByteArray> ptrData;
     };
 }
-#endif // LIBIM_SOUNDBANK_INSTANCE_H
+#endif // LIBIM_SBTRACK_H

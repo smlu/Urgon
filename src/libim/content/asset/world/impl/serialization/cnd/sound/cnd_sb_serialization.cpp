@@ -9,14 +9,14 @@ using namespace libim::content::asset;
 using namespace libim::content::audio;
 using namespace libim::content::audio::impl;
 
-uint32_t CND::ParseSectionSounds(SoundBankInstance& sbInstance, const InputStream& istream)
+uint32_t CND::ParseSectionSounds(SbTrack& track, const InputStream& istream)
 {
     uint32_t nonce = 0;
 
     try
     {
-        sbInstance.sounds.clear();
-        sbInstance.ptrData.reset();
+        track.sounds.clear();
+        track.ptrData.reset();
 
         if(istream.tell() != sizeof(CndHeader)){
             istream.seek(sizeof(CndHeader));
@@ -25,16 +25,16 @@ uint32_t CND::ParseSectionSounds(SoundBankInstance& sbInstance, const InputStrea
         std::size_t nSounds = istream.read<uint32_t>();
         std::size_t nSoundDataSize = istream.read<uint32_t>();
 
-        auto vecHeaders    = istream.read<std::vector<CndSoundHeader>>(nSounds);
-        sbInstance.ptrData = istream.read<decltype(sbInstance.ptrData)>(nSoundDataSize);
+        auto vecHeaders = istream.read<std::vector<CndSoundHeader>>(nSounds);
+        track.ptrData   = istream.read<decltype(track.ptrData)>(nSoundDataSize);
 
         /* Read and convert sound headers */
-        sbInstance.sounds.reserve(nSounds);
+        track.sounds.reserve(nSounds);
         for(const auto& h : vecHeaders)
         {
             Sound s
             (
-                sbInstance.ptrData,
+                track.ptrData,
                 h.dirNameOffset,
                 h.fileNameOffset,
                 h.dataOffset,
@@ -49,7 +49,7 @@ uint32_t CND::ParseSectionSounds(SoundBankInstance& sbInstance, const InputStrea
             s.setIndyWVFormat(h.isIndyWVFormat);
 
             std::string name(s.name());
-            auto r = sbInstance.sounds.emplace(name, std::move(s));
+            auto r = track.sounds.emplace(name, std::move(s));
             if(!r.second)
             {
                 LOG_ERROR("CND Error: Soundbank already contains sound file: '%'!", name);

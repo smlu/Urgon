@@ -1,6 +1,6 @@
 #include "../soundbank.h"
 #include "../soundbank_error.h"
-#include "soundbank_instance.h"
+#include "sbtrack.h"
 #include "../../asset/world/impl/serialization/cnd/cnd.h"
 #include "../../../common.h"
 #include "../../../utils/utils.h"
@@ -15,7 +15,7 @@ using namespace std::string_view_literals;
 struct SoundBank::SoundBankImpl
 {
     uint32_t nonceFileId = 0;
-    std::vector<SoundBankInstance> vecInstances;
+    std::vector<SbTrack> vecTracks;
 
     uint32_t getNextFileId()
     {
@@ -30,11 +30,11 @@ struct SoundBank::SoundBankImpl
 };
 
 
-SoundBank::SoundBank(std::size_t nInstances)
+SoundBank::SoundBank(std::size_t nTracks)
 {
     ptrImpl_ = std::make_unique<SoundBankImpl>();
-    ptrImpl_->vecInstances.reserve(nInstances);
-    ptrImpl_->vecInstances.resize(nInstances);
+   // ptrImpl_->vecTracks.reserve(nTracks);
+    ptrImpl_->vecTracks.resize(nTracks);
 }
 
 SoundBank::~SoundBank()
@@ -42,28 +42,28 @@ SoundBank::~SoundBank()
 
 std::size_t SoundBank::count() const
 {
-    return ptrImpl_->vecInstances.size();
+    return ptrImpl_->vecTracks.size();
 }
 
-const std::unordered_map<std::string, Sound>& SoundBank::getSounds(std::size_t instanceIdx) const
+const std::unordered_map<std::string, Sound>& SoundBank::getTrack(std::size_t trackIdx) const
 {
-    if(instanceIdx >= ptrImpl_->vecInstances.size()) {
-        throw SoundBankError("instanceIdx out of range!");
+    if(trackIdx >= ptrImpl_->vecTracks.size()) {
+        throw SoundBankError("trackIdx out of range!");
     }
-    return ptrImpl_->vecInstances.at(instanceIdx).sounds;
+    return ptrImpl_->vecTracks.at(trackIdx).sounds;
 }
 
-bool SoundBank::importBank(std::size_t instanceIdx, const InputStream& istream)
+bool SoundBank::importTrack(std::size_t trackIdx, const InputStream& istream)
 {
-    if(instanceIdx >= ptrImpl_->vecInstances.size()) {
-        throw SoundBankError("instanceIdx out of range!");
+    if(trackIdx >= ptrImpl_->vecTracks.size()) {
+        throw SoundBankError("trackIdx out of range!");
     }
 
-    auto& inst = ptrImpl_->vecInstances.at(instanceIdx);
+    auto& track = ptrImpl_->vecTracks.at(trackIdx);
     if(FileExtMatch(istream.name(), ".cnd"sv))
     {
-        auto nonce = CND::ParseSectionSounds(inst, istream);
-        if(nonce == 0 && !inst.sounds.empty()) {
+        auto nonce = CND::ParseSectionSounds(track, istream);
+        if(nonce == 0 && !track.sounds.empty()) {
             return false;
         }
 

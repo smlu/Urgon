@@ -448,8 +448,8 @@ int ExecCmdList(const CndToolArgs& args)
     if(listSnd)
     {
         SoundBank sb(1);
-        sb.importBank(0, istream);
-        auto& sounds = sb.getSounds(0);
+        sb.importTrack(0, istream);
+        auto& sounds = sb.getTrack(0);
 
         std::cout << "Sounds:\n";
         std::size_t i = 0;
@@ -663,8 +663,8 @@ int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, boo
     {
         std::cout << "Extracting sounds... " << std::flush;
         SoundBank sb(2);
-        sb.importBank(0, istream);
-        auto& sounds = sb.getSounds(0);
+        sb.importTrack(0, istream);
+        auto& sounds = sb.getTrack(0);
 
         std::filesystem::path outPath;
         if(!sounds.empty())

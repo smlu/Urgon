@@ -11,8 +11,10 @@ namespace libim {
     struct AbstractVector : public std::array<T, S>
     {
         using base_type = std::array<T, S>;
+        using tag_type  = Tag;
 
         static_assert(std::is_arithmetic_v<T>, "T must be arithmetic type!");
+
         constexpr void set(std::size_t idx, T v)
         {
             this->at(idx) = v;
@@ -56,5 +58,27 @@ namespace libim {
     {
         return !(v1 == v2);
     }
+
+
+
+    namespace detail {
+        template<typename, typename = void>
+        struct isVector : std::false_type {};
+
+        template<typename T>
+        struct isVector<T,
+                std::void_t<
+                    typename T::value_type,
+                    typename T::size_type,
+                    typename T::tag_type,
+                    decltype(T::size())>>
+            : std::is_base_of<
+                AbstractVector<typename T::value_type, T::size(), typename T::tag_type>,
+                T
+        > {};
+    }
+
+    template <typename T>
+    constexpr bool isVector = detail::isVector<T>::value;
 }
 #endif // LIBIM_ABSTRACT_VECTOR_H

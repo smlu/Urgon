@@ -19,37 +19,22 @@ namespace libim::content::text {
 
         void assertLabel(std::string_view label);
 
-        template<typename T>
-        T readVector()
-        {
-            typename T::base_type array;
-            for(std::size_t i =0; i < array.size(); i++) {
-                array[i] = getNumber<typename T::value_type>();
-            }
-            return static_cast<T>(array);
-        }
+        void assertKey(std::string_view key);
 
-        template<typename T>
-        T readFlags()
+        template<typename T, typename DT = std::decay_t<T>>
+        void assertKeyValue(std::string_view key, DT v)
         {
-            using U = utils::underlying_type_t<T>;
-            return static_cast<T>(getNumber<U>());
-        }
-
-        template<typename T>
-        void assertKey(std::string_view key, T v)
-        {
-            if constexpr (std::is_enum_v<T>){
-                return assertKey(key, utils::to_underlying(v));
+            if constexpr (std::is_enum_v<DT>){
+                return assertKeyValue(key, utils::to_underlying(v));
             }
 
             bool bValid = false;
-            readKey(key, cachedTkn_);
-            if constexpr(std::is_arithmetic_v<T>) {
-                bValid = cachedTkn_.getNumber<T>() == v;
+            auto rv = readKey<DT>();
+            if constexpr(isVector<DT> || std::is_arithmetic_v<DT>) {
+                bValid = (v = rv);
             }
-             else {
-                bValid = utils::iequal(cachedTkn_.value(), v);
+            else {
+                bValid = utils::iequal(rv, v);
             }
 
             if(!bValid)
@@ -60,23 +45,41 @@ namespace libim::content::text {
             }
         }
 
-        template<typename T>
-        T readKey(std::string_view key)
-        {
-            using U = utils::underlying_type_t<T>;
+        void assertSection(std::string_view section);
 
-            readKey(key, cachedTkn_);
-            if constexpr(std::is_arithmetic_v<U>) {
-                return static_cast<T>(cachedTkn_.getNumber<U>());
-            } else {
-                return std::move(cachedTkn_).value();
+        template<typename T, typename DT = typename std::decay_t<T>>
+        DT readFlags()
+        {
+            static_assert(std::is_enum_v<DT>, "T must be an enum type");
+
+            using U = utils::underlying_type_t<DT>;
+            return static_cast<DT>(getNumber<U>());
+        }
+
+        template<typename T, typename DT = std::decay_t<T>>
+        DT readKey(std::string_view key)
+        {
+            using U = utils::underlying_type_t<DT>;
+            if constexpr(isVector<DT>)
+            {
+                assertKey(key);
+                return readVector<DT>();
+            }
+            else
+            {
+                readKey(key, cachedTkn_);
+                if constexpr(std::is_arithmetic_v<U>) {
+                    return static_cast<DT>(cachedTkn_.getNumber<U>());
+                } else {
+                    return std::move(cachedTkn_).value();
+                }
             }
         }
 
         void readKey(std::string_view key, Token& t);
 
-        template<typename T, bool hasRowIdxs = true, typename Lambda>
-        std::vector<T> readList(std::string_view expectedName, Lambda&& constructor)
+        template<typename T, bool hasRowIdxs = true, typename Lambda, typename DT = std::decay_t<T>>
+        std::vector<DT> readList(std::string_view expectedName, Lambda&& constructor)
         {
             /*TODO: Uncomment when static reflection is available and decltype is avaliable for generic lambdas.
 
@@ -92,7 +95,7 @@ namespace libim::content::text {
             */
 
             auto len = readKey<std::size_t>(expectedName);
-            std::vector<T> result;
+            std::vector<DT> result;
             result.reserve(len);
 
 
@@ -112,7 +115,20 @@ namespace libim::content::text {
             return result;
         }
 
-        void assertSection(std::string_view section);
+        template<typename T, typename DT = typename std::decay_t<T>>
+        DT readVector()
+        {
+            static_assert (isVector<DT> &&
+                           std::is_default_constructible_v<DT>, "T must be derivative of type AbstractVector and default constructable");
+
+            DT result;
+            for(typename DT::size_type i = 0; i < result.size(); i++) {
+                result[i] = getNumber<typename DT::value_type>();
+            }
+            return result;
+        }
+
+
         std::string readSection();
         void readSection(Token& t);
 

@@ -15,17 +15,22 @@ void TextResourceReader::assertLabel(std::string_view label)
 
 void TextResourceReader::readKey(std::string_view key, Token& t)
 {
-    getString(cachedTkn_, key.size());
-    if(!utils::iequal(key, cachedTkn_.value()))
-    {
-        LOG_DEBUG("readNextKey: expected key '%', found '%'", key, cachedTkn_.value());
-        throw TokenizerError("invalid key"sv, cachedTkn_.location());
-    }
+    assertKey(key);
 
     const bool bReportEol = reportEol();
     setReportEol(true);
     getToken(t);
     setReportEol(bReportEol);
+}
+
+void TextResourceReader::assertKey(std::string_view key)
+{
+    getString(cachedTkn_, key.size());
+    if(!utils::iequal(key, cachedTkn_.value()))
+    {
+        LOG_DEBUG("assertKey: expected key '%', found '%'", key, cachedTkn_.value());
+        throw TokenizerError("invalid key"sv, cachedTkn_.location());
+    }
 }
 
 void TextResourceReader::assertSection(std::string_view section)

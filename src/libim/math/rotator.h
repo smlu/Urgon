@@ -11,14 +11,14 @@ namespace libim {
         public AbstractVector<T, 3, rotation_vector_tag>
     {
         using Base_ = AbstractVector<T, 3, rotation_vector_tag>;
-        using AbstractVector<T, 3, rotation_vector_tag>::AbstractVector;
+        using Base_::AbstractVector;
 
         constexpr inline Rotator(T pich, T roll, T yaw) noexcept :
             Base_{ pich, roll, yaw }
         {}
 
         explicit constexpr inline Rotator(std::array<T, 3> a) noexcept :
-            Base_{std::move(a)}
+            Base_{ std::move(a) }
         {}
 
         inline T roll() const

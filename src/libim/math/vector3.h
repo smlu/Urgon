@@ -12,7 +12,7 @@ namespace libim {
         {}
 
         explicit constexpr inline Vector3(std::array<T, 3> a) noexcept :
-            Vector<T, 3>{std::move(a)}
+            Vector<T, 3>{ std::move(a) }
         {}
 
         constexpr inline T x() const

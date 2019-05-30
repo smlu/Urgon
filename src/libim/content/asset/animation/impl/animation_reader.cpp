@@ -39,7 +39,7 @@ void ParseKeyframes(TextResourceReader& rr, Animation& anim)
     auto nodes = rr.readList<KeyNode, false>(kResName_Nodes,
     [&](TextResourceReader& rr, auto& node)
     {
-        node.num = rr.readKey<decltype(node.num)>(kResName_Node);
+        node.num      = rr.readKey<decltype(node.num)>(kResName_Node);
         node.meshName = rr.readKey<std::string>(kResName_MeshName);
 
         node.entries = rr.readList<KeyNodeEntry>(kResName_Entries,

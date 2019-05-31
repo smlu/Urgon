@@ -100,9 +100,13 @@ namespace libim::text {
 
         void readString(Token& out, std::size_t len)
         {
-            readDelimitedString(out, [&](char) {
+            readDelimitedString(out, [len](char) mutable {
                 return (len--) == 0;
             });
+
+            if(out.value().size() != len){
+                throw TokenizerError("unexpected end of file in sized string"sv, out.location());
+            }
         }
 
         void readLine(Token& out)
@@ -120,7 +124,7 @@ namespace libim::text {
             out.location().first_line = line_;
             out.location().first_col  = column_;
 
-            while(!isDelim(current_ch_))
+            while(!isDelim(current_ch_) && !istream_.atEnd())
             {
                 out.append(current_ch_);
                 advance();

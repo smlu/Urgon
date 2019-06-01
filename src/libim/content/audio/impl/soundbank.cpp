@@ -45,7 +45,7 @@ std::size_t SoundBank::count() const
     return ptrImpl_->vecTracks.size();
 }
 
-const std::unordered_map<std::string, Sound>& SoundBank::getTrack(std::size_t trackIdx) const
+const utils::HashMap<Sound>& SoundBank::getTrack(std::size_t trackIdx) const
 {
     if(trackIdx >= ptrImpl_->vecTracks.size()) {
         throw SoundBankError("trackIdx out of range!");
@@ -63,7 +63,9 @@ bool SoundBank::importTrack(std::size_t trackIdx, const InputStream& istream)
     if(FileExtMatch(istream.name(), ".cnd"sv))
     {
         auto nonce = CND::ParseSectionSounds(track, istream);
-        if(nonce == 0 && !track.sounds.empty()) {
+        LOG_DEBUG("Imported % sounds to track: %", track.sounds.size(), trackIdx);
+
+        if(nonce == 0 && !track.sounds.isEmpty()) {
             return false;
         }
 

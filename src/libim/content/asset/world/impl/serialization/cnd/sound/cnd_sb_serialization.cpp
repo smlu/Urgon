@@ -32,8 +32,7 @@ uint32_t CND::ParseSectionSounds(SbTrack& track, const InputStream& istream)
         track.sounds.reserve(nSounds);
         for(const auto& h : vecHeaders)
         {
-            Sound s
-            (
+            Sound s (
                 track.ptrData,
                 h.dirNameOffset,
                 h.fileNameOffset,
@@ -49,7 +48,7 @@ uint32_t CND::ParseSectionSounds(SbTrack& track, const InputStream& istream)
             s.setIndyWVFormat(h.isIndyWVFormat);
 
             std::string name(s.name());
-            auto r = track.sounds.emplace(name, std::move(s));
+            auto r = track.sounds.pushBack(name, std::move(s));
             if(!r.second)
             {
                 LOG_ERROR("CND Error: Soundbank already contains sound file: '%'!", name);

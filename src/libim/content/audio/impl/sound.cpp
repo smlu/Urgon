@@ -68,8 +68,6 @@ bool Sound::serialize(OutputStream&& ostream) const
 
 bool Sound::serialize(OutputStream& ostream) const
 {
-
-
     WavHeader wavHeader;
     wavHeader.fmt.size          = 16;
     wavHeader.fmt.audioFormat   = AudioFormat::LPCM;
@@ -105,7 +103,7 @@ ByteArray Sound::data() const
     auto itBegin = ptrData->begin() + dataOffset_; //TODO: safe cast
     auto itEnd = itBegin + dataSize_; //TODO: safe cast
     if(isIndyWVFormat_) {
-        bytes= IndyVW::Inflate(InputBinaryStream(*ptrData, itBegin, itEnd));
+        bytes = IndyVW::Inflate(InputBinaryStream(*ptrData, itBegin, itEnd));
     }
     else
     {

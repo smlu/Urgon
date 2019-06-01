@@ -2,6 +2,7 @@
 #define LIBIM_TEXT_RESOURCE_WRITER_H
 #include "../../math/abstract_vector.h"
 #include "../../io/stream.h"
+#include "../../utils/traits.h"
 #include "../../utils/utils.h"
 
 #include <cmath>
@@ -104,8 +105,11 @@ namespace libim::content::text {
         TextResourceWriter& writeLabel(std::string_view name, std::string_view text);
         TextResourceWriter& writeLine(std::string_view line);
 
-        template<typename T, typename Lambda>
-        TextResourceWriter& writeList(std::string_view name, const std::vector<T>& list, Lambda&& writeRow)
+        template<bool writeListSize = true,
+                 typename Container,
+                 typename Lambda,
+                 class = utils::requires_container<Container>>
+        TextResourceWriter& writeList([[maybe_unused]] std::string_view name, const Container& list, Lambda&& writeRow)
         {
             /*TODO: Uncomment when static reflection is available and decltype is avaliable for generic lambdas.
 
@@ -124,21 +128,36 @@ namespace libim::content::text {
             );
             */
 
-            using ListSizeT = typename std::decay<decltype(list)>::type::size_type;
-            writeKeyValue<ListSizeT>(name, list.size());
-            writeEol();
-
-            const auto list_size = list.size();
-            for(std::size_t i = 0; i < list_size; i++)
+            if constexpr (writeListSize)
             {
-                writeRow(*this, i, list.at(i));
+                using ListSizeT = typename Container::size_type;
+                writeKeyValue<ListSizeT>(name, list.size());
+                writeEol();
+            }
+
+
+            for(auto[i, v] : utils::enumerate(list))
+            {
+                writeRow(*this, i, v);
+                writeEol();
+            }
+
+            if constexpr (!writeListSize)
+            {
+                write("end");
                 writeEol();
             }
 
             return *this;
         }
 
-        template<std::size_t base = 10, std::size_t precision = 0, typename T>
+        template<typename Container,
+                 typename Lambda,
+                 class = utils::requires_container<Container>>
+        TextResourceWriter& writeList(const Container& list, Lambda&& rowWriter) {
+            return writeList<false>("", list, std::forward<Lambda>(rowWriter));
+        }
+
         TextResourceWriter& writeNumber(T n)
         {
             write(utils::to_string<base, precision, T>(n));

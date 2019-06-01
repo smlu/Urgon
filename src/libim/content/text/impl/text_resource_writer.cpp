@@ -24,16 +24,20 @@ TextResourceWriter& TextResourceWriter::indent(std::size_t width)
 TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx, std::size_t indent)
 {
     const auto strIdx = utils::to_string(idx);
-    const auto strIdxLen =  strIdx.size(); // Note: Do not change this!
-                                           //       clang7 and gcc 8 try to optimize out strIdx.size()
-                                           //       in std::minmax which then returns garbage
 
-    auto p = std::minmax(indent, strIdxLen);
-    indent =  (p.second - p.first) + 3;
+    if(indent > 0)
+    {
+        const auto strIdxLen =  strIdx.size(); // Note: Do not change this!
+                                               //       clang7 and gcc 8 try to optimize out strIdx.size()
+                                               //       in std::minmax which then returns garbage
+        auto p = std::minmax(indent, strIdxLen);
+        indent =  (p.second - p.first);
 
-    this->indent(indent);
+        this->indent(indent);
+
+    }
+
     ostream_ << strIdx << kResLabelPunc;
-
     return *this;
 }
 

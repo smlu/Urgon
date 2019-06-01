@@ -71,7 +71,7 @@ void WriteKeyframes(TextResourceWriter& rw, const Animation& anim)
 
               const auto rowBegin = rw.tell();
 
-              rw.writeRowIdx(idx, utils::numdigits(nEntries));
+              rw.writeRowIdx(idx, utils::numdigits(nEntries) + 2);
               rw.indent(rw.getNumberIndent(9, frame.frame));
               rw.writeNumber(frame.frame);
 

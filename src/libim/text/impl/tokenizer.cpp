@@ -17,7 +17,7 @@ Tokenizer::Tokenizer(const InputStream& s)
 Tokenizer::~Tokenizer()
 {}
 
-Token Tokenizer::getToken()
+const Token& Tokenizer::getToken()
 {
     getToken(cachedTkn_);
     return cachedTkn_;

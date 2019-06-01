@@ -22,7 +22,7 @@ namespace libim::text {
         Tokenizer& operator=(const Tokenizer&) = delete;
         Tokenizer operator=(Tokenizer&&) noexcept = delete;
 
-        Token getToken();
+        const Token& getToken();
         void getToken(Token& out);
 
         template <typename T> T getNumber()

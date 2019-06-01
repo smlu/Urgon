@@ -16,6 +16,11 @@ TextResourceWriter& TextResourceWriter::indent(std::size_t width, char indch)
     return write(indent);
 }
 
+TextResourceWriter& TextResourceWriter::indent(std::size_t width)
+{
+    return indent(width, indch_);
+}
+
 TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx, std::size_t indent)
 {
     const auto strIdx = utils::to_string(idx);

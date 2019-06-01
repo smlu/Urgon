@@ -28,7 +28,7 @@ namespace libim::content::text {
             static_assert(std::is_arithmetic_v<T>, "T must be arithmetic type");
             indent = indent - (std::signbit(n) ? 1 : 0);
 
-            std::size_t digits = 0ULL;
+            std::size_t digits = 0;
             if constexpr(std::is_unsigned_v<T>) {
                 digits = utils::numdigits(static_cast<uint64_t>(n));
             }
@@ -65,7 +65,8 @@ namespace libim::content::text {
             return writeEnum<16, width>(n);
         }
 
-        TextResourceWriter& indent(std::size_t width, char indch = ' ');
+        TextResourceWriter& indent(std::size_t width, char indch);
+        TextResourceWriter& indent(std::size_t width);
         TextResourceWriter& write(std::string_view text);
         TextResourceWriter& writeCommentLine(std::string_view comment);
         TextResourceWriter& writeEol();
@@ -158,9 +159,19 @@ namespace libim::content::text {
             return *this;
         }
 
+        void setIndentCh(char ch)
+        {
+            indch_ = ch;
+        }
+
+        char indentCh() const
+        {
+            return indch_;
+        }
 
     private:
         OutputStream& ostream_;
+        char indch_ = ' ';
     };
 }
 #endif // LIBIM_TEXT_RESOURCE_WRITER_H

@@ -35,7 +35,8 @@ namespace libim::utils {
         template<typename> friend class HashMapIterator;
 
     public:
-        using Idx = std::size_t;
+        using size_type = std::size_t;
+        using Idx = size_type;
 
         using key_type = KeyT;
         using key_reference = key_type&;
@@ -44,6 +45,7 @@ namespace libim::utils {
         using value_type = T;
         using reference = value_type&;
         using const_reference =  const value_type&;
+
 
         using iterator = HashMapIterator<typename DataContainer::iterator>;
         using const_iterator = HashMapIterator<typename DataContainer::const_iterator>;
@@ -364,12 +366,12 @@ namespace libim::utils {
             return data_.empty();
         }
 
-        inline std::size_t size() const
+        inline size_type size() const
         {
             return data_.size();
         }
 
-        void reserve(std::size_t n)
+        void reserve(size_type n)
         {
             map_.reserve(n);
         }

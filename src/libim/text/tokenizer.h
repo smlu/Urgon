@@ -25,6 +25,9 @@ namespace libim::text {
         const Token& getToken();
         void getToken(Token& out);
 
+        const Token& peekToken();
+        void peekToken(Token& out);
+
         template <typename T> T getNumber()
         {
             auto tkn = getToken();

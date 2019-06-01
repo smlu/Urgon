@@ -28,6 +28,17 @@ void Tokenizer::getToken(Token& out)
     tp_->readToken(out);
 }
 
+const Token& Tokenizer::peekToken()
+{
+    peekToken(cachedTkn_);
+    return cachedTkn_;
+}
+
+void Tokenizer::peekToken(Token& out)
+{
+    tp_->peakToken(out);
+}
+
 std::string Tokenizer::getIdentifier()
 {
     getToken(cachedTkn_);

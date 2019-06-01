@@ -278,6 +278,23 @@ namespace libim::text {
             }
         }
 
+        void peakToken(Token& out)
+        {
+            const auto pos = istream_.tell();
+            const auto cch = current_ch_;
+            const auto nch = next_ch_;
+            const auto lin = line_;
+            const auto col = column_;
+
+            readToken(out);
+
+            istream_.seek(pos);
+            current_ch_ = cch;
+            next_ch_    = nch;
+            line_       = lin;
+            column_     = col;
+        }
+
         void readToken(Token& out)
         {
             skipWhitespace();
@@ -334,7 +351,7 @@ namespace libim::text {
 
         void skipToNextLine()
         {
-            while(current_ch_ != ChEol && current_ch_ != ChEof) {
+            while(current_ch_ != ChEol && !istream_.atEnd()) {
                advance();
             }
         }

@@ -32,6 +32,8 @@ using namespace libim;
 
 constexpr std::size_t kBufferSize = 4096;
 
+#define MAX_WRITE_FILE_SIZE 1'000'000'000 // 1GB
+
 template<std::size_t BufferSize>
 struct IOBuffer final : public std::array<byte_t, BufferSize>
 {
@@ -254,6 +256,12 @@ struct FileStream::FileStreamImpl
 
             nTotalWritten += nWritten;
             data += nWritten;
+
+#ifdef MAX_WRITE_FILE_SIZE
+            if( currentOffset + nTotalWritten >= MAX_WRITE_FILE_SIZE) {
+                throw FileStreamError("Wrote to max file size limit");
+            }
+#endif
         }
         while(nTotalWritten < length);
 

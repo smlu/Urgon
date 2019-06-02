@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace libim::text {
 
@@ -28,10 +29,11 @@ namespace libim::text {
         const Token& peekToken();
         void peekToken(Token& out);
 
-        template <typename T> T getNumber()
+        template <typename T, typename DT = std::decay_t<T>>
+        DT getNumber()
         {
             auto tkn = getToken();
-            return tkn.getNumber<T>();
+            return tkn.getNumber<DT>();
         }
 
         std::string getIdentifier();

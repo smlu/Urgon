@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <type_traits>
+
 #include "diagnostic_location.h"
 #include "tokenizer_error.h"
 
@@ -54,7 +55,7 @@ namespace libim::text {
 
         inline bool isNumber() const
         {
-            return m_type ==  Integer   ||
+            return m_type == Integer    ||
                    m_type == HexInteger ||
                    m_type == OctInteger ||
                    m_type == FloatNumber;
@@ -111,12 +112,12 @@ namespace libim::text {
             return m_type;
         }
 
-        template<typename T>
-        T getNumber() const
+        template<typename T, typename DT = std::decay_t<T>>
+        DT getNumber() const
         {
-            static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
+            static_assert(std::is_arithmetic_v<DT>, "T is not a arithmetic type");
 
-            T result = T(0);
+            DT result = DT(0);
             std::stringstream ss(m_value);
             switch(m_type)
             {

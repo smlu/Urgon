@@ -453,9 +453,9 @@ int ExecCmdList(const CndToolArgs& args)
 
         std::cout << "Sounds:\n";
         std::size_t i = 0;
-        for(const auto& p : sounds)
+        for(const auto& s : sounds)
         {
-            std::cout << "  " << i++ << ": " << p.first << std::endl;
+            std::cout << "  " << i++ << ": " << s.name() << std::endl;
                       //<< SETW(38 - p.first.size(), ' ')
                       //<< " | fileId: " << p.second.id() << " idx: " << p.second.idx() << std::endl;
         }
@@ -667,7 +667,7 @@ int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, boo
         auto& sounds = sb.getTrack(0);
 
         std::filesystem::path outPath;
-        if(!sounds.empty())
+        if(!sounds.isEmpty())
         {
             if(verbose) {
                 std::cout << "\nFound: " << sounds.size() << std::endl;
@@ -677,14 +677,14 @@ int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, boo
             MakeDir(outPath);
         }
 
-        for (const auto& pair : sounds)
+        for (const auto& s : sounds)
         {
             if(verbose) {
-                std::cout << "Extracting sound: " << pair.first << std::endl;
+                std::cout << "Extracting sound: " << s.name() << std::endl;
             }
 
-            OutputFileStream ofs(outPath.append(pair.first));
-            pair.second.serialize(ofs);
+            OutputFileStream ofs(outPath.append(s.name()));
+            s.serialize(ofs);
 
             outPath = outPath.parent_path();
         }

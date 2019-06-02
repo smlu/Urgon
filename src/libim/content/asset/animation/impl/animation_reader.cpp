@@ -25,7 +25,7 @@ void ParseHeader(TextResourceReader& rr, Animation& anim)
 
 void ParseMarkers(TextResourceReader& rr, Animation& anim)
 {
-    auto markers = rr.readList<KeyMarker, false>(kResName_Markers,
+    auto markers = rr.readList<std::vector<KeyMarker>, false>(kResName_Markers,
     [](TextResourceReader& rr, auto& m){
         m.frame = rr.getNumber<decltype(m.frame)>();
         m.type  = rr.readFlags<decltype(m.type)>();
@@ -36,13 +36,13 @@ void ParseMarkers(TextResourceReader& rr, Animation& anim)
 
 void ParseKeyframes(TextResourceReader& rr, Animation& anim)
 {
-    auto nodes = rr.readList<KeyNode, false>(kResName_Nodes,
+    auto nodes = rr.readList<std::vector<KeyNode>, false>(kResName_Nodes,
     [&](TextResourceReader& rr, auto& node)
     {
         node.num      = rr.readKey<decltype(node.num)>(kResName_Node);
         node.meshName = rr.readKey<std::string>(kResName_MeshName);
 
-        node.entries = rr.readList<KeyNodeEntry>(kResName_Entries,
+        node.entries = rr.readList<std::vector<KeyNodeEntry>>(kResName_Entries,
         [](TextResourceReader& rr, auto& entry)
         {
             entry.frame = rr.getNumber<decltype(entry.frame)>();

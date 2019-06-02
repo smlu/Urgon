@@ -3,6 +3,7 @@
 #include "../../math/abstract_vector.h"
 #include "../../log/log.h"
 #include "../../text/tokenizer.h"
+#include "../../utils/traits.h"
 #include "../../utils/utils.h"
 
 #include <cstdint>
@@ -78,9 +79,16 @@ namespace libim::content::text {
 
         void readKey(std::string_view key, Token& t);
 
-        template<typename T, bool hasRowIdxs = true, typename Lambda, typename DT = std::decay_t<T>>
-        std::vector<DT> readList(std::string_view expectedName, Lambda&& constructor)
+        template<typename Container,
+                 bool hasRowIdxs = true,
+                 bool hasListSize = true,
+                 typename Lambda,
+                 typename = utils::requires_container<Container>>
+        Container readList(std::string_view expectedName, Lambda&& constructor)
         {
+            static_assert(utils::has_mf_push_back<Container> ||
+                          utils::has_no_pos_mf_insert<Container>, "Container doesn't support any valid insertion function!");
+
             /*TODO: Uncomment when static reflection is available and decltype is avaliable for generic lambdas.
 
             using LambdaTriats = typename utils::function_traits<Lambda>;
@@ -94,25 +102,76 @@ namespace libim::content::text {
             );
             */
 
-            auto len = readKey<std::size_t>(expectedName);
-            std::vector<DT> result;
-            result.reserve(len);
+            auto reserve = []([[maybe_unused]]auto& c, [[maybe_unused]] typename Container::size_type r ){
+                if constexpr(utils::has_mf_reserve<Container>) {
+                    c.reserve(r);
+                }
+            };
+
+            auto append = [](auto& c, auto&& v){
+                if constexpr(utils::has_mf_push_back<Container>) {
+                    c.push_back(std::move(v));
+                }
+                else {
+                    c.insert(std::move(v));
+                }
+            };
+
+            Container result;
+            [[maybe_unused]] std::size_t i = 0;
+            std::function<bool()> isAtEnd;
+
+            if constexpr(hasListSize)
+            {
+                auto len = readKey<std::size_t>(expectedName);
+                reserve(result, len);
+                isAtEnd = [&]() { return i >= len; };
+            }
+            else
+            {
+                result.reserve(100);
+                isAtEnd = [&]() {
+                    if (peekToken().value() == std::string_view("end"))
+                    {
+                        getToken();
+                        return true;
+                    }
+                    return false;
+                };
+            }
 
 
-            for(/*[[maybe_unused]] MSVC 17 doesn't like this */std::size_t i = 0; i < len; i++)
+            while(!isAtEnd())
+            //for(std::size_t i = 0; i < len; i++)
             {
                 if constexpr (hasRowIdxs)
                 {
-                    [[maybe_unused]]  const auto rowIdx = readRowIdx();
-                    assert(i == rowIdx && "reading list row failed!");
+                    [[maybe_unused]] const auto rowIdx = readRowIdx();
+                    assert(i == rowIdx && "i == rowIdx!");
                 }
 
-                T item;
+                if constexpr(!hasListSize && utils::has_mf_capacity<Container>)
+                {
+                    if(result.capacity() < 10) {
+                        reserve(result, 100);
+                    }
+                }
+
+                typename Container::value_type item;
                 constructor(*this, item);
-                result.push_back(std::move(item));
+                append(result, std::move(item));
+                i++;
             }
 
             return result;
+        }
+
+        template<typename Container,
+                 bool hasRowIdxs = true,
+                 typename Lambda,
+                 class = utils::requires_container<Container>>
+        Container readList(Lambda&& rowReader) {
+            return readList<Container, hasRowIdxs, false>("", std::forward<Lambda>(rowReader));
         }
 
         template<typename T, typename DT = typename std::decay_t<T>>

@@ -158,9 +158,14 @@ namespace libim::content::text {
             return writeList<false>("", list, std::forward<Lambda>(rowWriter));
         }
 
+        template<std::size_t base = 10,
+                 std::size_t precision = 0,
+                 typename T,
+                 typename DT = std::decay_t<T>>
         TextResourceWriter& writeNumber(T n)
         {
-            write(utils::to_string<base, precision, T>(n));
+            static_assert (std::is_arithmetic_v<DT>, "T must be an arithmetic type!");
+            write(utils::to_string<base, precision, DT>(n));
             return *this;
         }
 

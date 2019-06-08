@@ -30,7 +30,7 @@ using namespace std::string_view_literals;
 
 
 static constexpr auto kProgramName    = "cndtool"sv;
-static constexpr auto kProgramVersion = "0.3.0"sv;
+static constexpr auto kProgramVersion = "0.3.1"sv;
 
 static constexpr auto extKey = ".key"sv;
 static constexpr auto extMat = ".mat"sv;

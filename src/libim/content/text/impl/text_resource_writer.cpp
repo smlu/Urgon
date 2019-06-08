@@ -66,14 +66,15 @@ TextResourceWriter& TextResourceWriter::writeEol()
 
 TextResourceWriter& TextResourceWriter::writeKeyValue(std::string_view key, std::string_view value, std::size_t indent)
 {
-    std::string ind(indent, ChSpace);
-    ostream_ << key << ind << value;
+    write(key);
+    this->indent(indent);
+    write(value);
     return writeEol();
 }
 
 TextResourceWriter& TextResourceWriter::writeLabel(std::string_view name, std::string_view text)
 {
-    ostream_ << name << kResLabelPunc << ChSpace << text;
+    ostream_ << name << kResLabelPunc << indch_ << text;
     return writeEol();
 }
 

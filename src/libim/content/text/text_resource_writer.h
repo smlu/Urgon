@@ -94,7 +94,7 @@ namespace libim::content::text {
         }
 
         template<typename T, std::size_t S, typename Tag>
-        TextResourceWriter& writeKeyValue(std::string_view key, const AbstractVector<T, S, Tag>& v, std::size_t indent = 1)
+        TextResourceWriter& writeKeyValue(std::string_view key, const AbstractVector<T, S, Tag>& v, std::size_t indent = 0)
         {
             write(key);
             this->indent(indent);

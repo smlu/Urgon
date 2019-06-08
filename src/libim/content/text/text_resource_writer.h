@@ -1,6 +1,7 @@
 #ifndef LIBIM_TEXT_RESOURCE_WRITER_H
 #define LIBIM_TEXT_RESOURCE_WRITER_H
 #include "../../math/abstract_vector.h"
+#include "../../math/box.h"
 #include "../../io/stream.h"
 #include "../../utils/traits.h"
 #include "../../utils/utils.h"
@@ -101,6 +102,17 @@ namespace libim::content::text {
             writeVector(v, 1);
             return writeEol();
         }
+
+        template<typename T, std::size_t N>
+        TextResourceWriter& writeKeyValue(std::string_view key, const Box<T, N>& box, std::size_t indent = 0)
+        {
+            write(key);
+            this->indent(indent);
+            writeVector(box.v0, 1);
+            writeVector(box.v0, 1);
+            return writeEol();
+        }
+
 
         TextResourceWriter& writeLabel(std::string_view name, std::string_view text);
         TextResourceWriter& writeLine(std::string_view line);

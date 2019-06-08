@@ -191,7 +191,6 @@ namespace libim::content::text {
         std::string readSection();
         void readSection(Token& t);
 
-    private:
         std::size_t readRowIdx();
     };
 }

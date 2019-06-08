@@ -11,6 +11,17 @@
 #include <tuple>
 #include <type_traits>
 
+
+#define CONCATENATE_DIRECT(s1, s2) s1##s2
+#define CONCATENATE(s1, s2) CONCATENATE_DIRECT(s1, s2)
+
+// Annonymous variable
+#ifdef _MSC_VER
+# define ANOVAR(str) CONCATENATE(str, __COUNTER__)
+#else
+# define ANOVAR(str) CONCATENATE(str, __LINE__)
+#endif
+
 namespace libim::utils {
     namespace detail {
         inline bool compare_char(char c1, char c2)
@@ -52,11 +63,36 @@ namespace libim::utils {
     } // detail
 
 
+    template <typename Lambda>
+    [[nodiscard]] auto at_scope_exit(Lambda&& callback)
+    {
+        struct at_exit_scope_t
+        {
+            at_exit_scope_t(Lambda&& cb) :
+                cb_(std::forward<Lambda>(cb)) {}
+            ~at_exit_scope_t() {
+               cb_();
+            }
+        private:
+            Lambda&& cb_;
+        };
+
+        return at_exit_scope_t { std::forward<Lambda>(callback) };
+    }
+
+    #ifdef AT_SCOPE_EXIT
+    #  error macro AT_SCOPE_EXIT already defined
+    #endif
+
+    #define AT_SCOPE_EXIT(...) \
+        const auto ANOVAR(sexit_) = utils::at_scope_exit(__VA_ARGS__)
+
+
 
     template <typename T,
               typename TIter = decltype(std::begin(std::declval<T>())),
               typename = decltype(std::end(std::declval<T>()))>
-    constexpr auto enumerate(T && iterable)
+    constexpr auto enumerate(T&& iterable)
     {
         struct iterator
         {

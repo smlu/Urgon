@@ -121,5 +121,7 @@ add_executable (${PM_TEST}
     ${TEST_SRC_FILES}
     $<TARGET_OBJECTS:${PM_LIBCND}>
 )
+
+target_compile_definitions(${PM_TEST} PRIVATE "-DSRC_ROOT=\"${SOURCE_DIR}\"")
 target_link_libraries(${PM_TEST} ${PM_LIBIM})
 

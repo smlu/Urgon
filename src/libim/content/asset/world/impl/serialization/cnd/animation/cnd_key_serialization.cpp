@@ -65,6 +65,10 @@ std::size_t FindFirstKey(const InputStream& istream)
 
 std::size_t CND::GetKeySectionOffset(const CndHeader& header, const InputStream& istream)
 {
+    AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
+        istream.seek(off);
+    });
+
     /* Seek to the beginning of material list */
     istream.seek(GetMatSectionOffset(istream));
 
@@ -94,13 +98,6 @@ HashMap<Animation> CND::ParseSectionKeyframes(const CndHeader& cndHeader, const 
         return animations;
     }
 
-    // Move stream to the beginning of the animation section
-    auto sectionOffset = GetKeySectionOffset(cndHeader, istream);
-    if(sectionOffset == 0) {
-        throw StreamError("No keyframes section found in CND file stream");
-    }
-
-    istream.seek(sectionOffset);
     auto aNumEntries = istream.read<std::array<uint32_t, 3>>();
 
     // Read key header list, marker list, key node list and key node entry list
@@ -159,6 +156,7 @@ HashMap<Animation> CND::ReadAnimations(const InputStream& istream)
         throw StreamError("No keyframes section found in CND file stream");
     }
 
+    istream.seek(sectionOffset);
     return ParseSectionKeyframes(cndHeader, istream);
 }
 

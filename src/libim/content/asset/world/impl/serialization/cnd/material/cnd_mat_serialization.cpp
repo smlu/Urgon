@@ -10,6 +10,10 @@ using namespace libim::content::asset;
 
 std::size_t CND::GetMatSectionOffset(const InputStream& istream)
 {
+    AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
+        istream.seek(off);
+    });
+
     istream.seek(sizeof(CndHeader));
     std::size_t numSoundHeaders = istream.read<uint32_t>();
     std::size_t sizeSoundData   = istream.read<uint32_t>();
@@ -71,8 +75,15 @@ utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, con
 
             /* Read mipmaps from buffer */
             std::vector<Mipmap> mipmaps(matHeader.mipmapCount);
-            for(auto&& mipmap : mipmaps) {
-                mipmap = MoveMipmapFromBuffer(vecBitmapBuff, matHeader.texturesPerMipmap, matHeader.width, matHeader.height, matHeader.colorInfo);
+            for(auto&& mipmap : mipmaps)
+            {
+                mipmap = MoveMipmapFromBuffer(
+                    vecBitmapBuff,
+                    matHeader.texturesPerMipmap,
+                    matHeader.width,
+                    matHeader.height,
+                    matHeader.colorInfo
+                );
             }
 
             /* Init new material */

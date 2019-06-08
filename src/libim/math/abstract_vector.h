@@ -26,6 +26,18 @@ namespace libim {
         {
             return S;
         }
+
+        constexpr inline bool isZero() const
+        {
+            for (const auto& e : *this)
+            {
+                if (e != T(0)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     };
 
     template<typename T, std::size_t S, typename Tag>

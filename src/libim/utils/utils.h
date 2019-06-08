@@ -23,7 +23,33 @@ namespace libim::utils {
             }
             return false;
         }
-    }
+
+
+        [[nodiscard]] inline std::string trim(const char* str, std::size_t len)
+        {
+            std::size_t end = 0;
+            while(end++ < len) {
+                if(str[end] == '\0') {
+                    break;
+                }
+            }
+
+            return std::string(str, end);
+        }
+
+        inline bool strcpy(char* dest, std::size_t d_size, const std::string_view src)
+        {
+            if(d_size < src.size()) {
+                return false;
+            }
+
+        #if defined(__STDC_LIB_EXT1__) || defined(_MSC_VER)
+            return strncpy_s(dest, d_size, src.data(), src.size()) == 0;
+        #else
+            return std::strncpy(dest, src.data(), d_size) != nullptr;
+        #endif
+        }
+    } // detail
 
 
 
@@ -40,12 +66,14 @@ namespace libim::utils {
             void operator ++ () { ++i; ++iter; }
             auto operator * () const { return std::tie(i, *iter); }
         };
+
         struct iterable_wrapper
         {
             T iterable;
             auto begin() { return iterator{ 0, std::begin(iterable) }; }
             auto end() { return iterator{ 0, std::end(iterable) }; }
         };
+
         return iterable_wrapper{ std::forward<T>(iterable) };
     }
 
@@ -58,6 +86,7 @@ namespace libim::utils {
         std::copy(s_begin, s_end, std::back_inserter(dest));
         return s_end;
     }
+
 
     /* Case insensitive comparison of two strings */
     [[nodiscard]] inline bool iequal(const std::string& s1, const std::string& s2)
@@ -73,6 +102,7 @@ namespace libim::utils {
             std::equal(s1.begin(), s1.end(), s2.begin(), &detail::compare_char)
         );
     }
+
 
     template<typename T>
     [[nodiscard]] inline constexpr auto to_underlying(T t)
@@ -91,6 +121,7 @@ namespace libim::utils {
     };
     template<typename T>
     using underlying_type_t = typename underlying_type<T>::type;
+
 
     template<typename T>
     [[nodiscard]] inline std::size_t numdigits(T i)
@@ -138,31 +169,30 @@ namespace libim::utils {
         return ss.str();
     }
 
-    template<std::size_t N>
-    bool strcpy(char (&dest)[N], std::string_view src)
-    {
-        if(N < src.size()) {
-            return false;
-        }
 
-#if defined(__STDC_LIB_EXT1__) || defined(_MSC_VER)
-        return strncpy_s(dest, N, src.data(), src.size()) == 0;
-#else
-        return std::strncpy(dest, src.data(), src.size()) != nullptr;
-#endif
+    template<std::size_t N>
+    inline bool strcpy(char (&dest)[N], const std::string_view src)
+    {
+        return detail::strcpy(dest, N, src);
     }
 
     template<std::size_t N>
-    [[nodiscard]] std::string trim(const char (&str)[N])
+    inline bool strcpy(std::array<char, N>& dest, const std::string_view src)
     {
-        std::size_t end = 0;
-        while(end++ < N) {
-            if(str[end] == '\0') {
-                break;
-            }
-        }
+        return detail::strcpy(dest.data(), N, src);
+    }
 
-        return std::string(str, end);
+
+    template<std::size_t N>
+    [[nodiscard]] inline std::string trim(const char (&str)[N])
+    {
+        return detail::trim(str, N);
+    }
+
+    template<std::size_t N>
+    [[nodiscard]] inline std::string trim(const std::array<char, N>& str)
+    {
+        return detail::trim(str.data(), N);
     }
 }
 

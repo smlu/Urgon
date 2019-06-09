@@ -3,24 +3,23 @@
 #include <cstdint>
 #include <vector>
 #include <tuple>
-
+#include "../../../../surface.h"
 #include "../../../../../../../math/color.h"
 #include "../../../../../../../math/vector3.h"
 
 namespace libim::content::asset {
 
-
     struct CndSurfaceHeader
     {
         int32_t materialIdx; // -1, if no surface material
-        int32_t surfflags;
-        int32_t faceflags;
-        int32_t geoMode;
-        int32_t lightMode;
-        int32_t adjoinIdx;  // -1, if no surface adjoin
-        Color color;        // surface color
-        Vector3f normal;
-        uint32_t numVerts;
+        Surface::SurfaceFlag surfflags;
+        Face::Flag faceflags;
+        GeoMode    geoMode;
+        LightMode  lightMode;
+        int32_t    adjoinIdx;  // -1, if no surface adjoin
+        Color      color;      // surface color
+        Vector3f   normal;
+        uint32_t   numVerts;
     };
 
     struct CndSurfaceVerts
@@ -29,11 +28,6 @@ namespace libim::content::asset {
         int texIdx;
         Color color; // vertices color
     };
-
-    struct CndSurface : public CndSurfaceHeader {
-        std::vector<std::tuple<int, int, Color>> verts; // vert idx, tex idx, vert color
-    };
-
 
 
     /* Jones3d surface struct

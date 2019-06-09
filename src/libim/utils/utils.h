@@ -66,7 +66,7 @@ namespace libim::utils {
     template <typename Lambda>
     [[nodiscard]] auto at_scope_exit(Lambda&& callback)
     {
-        struct at_exit_scope_t
+        struct at_exit_scope_t final
         {
             at_exit_scope_t(Lambda&& cb) :
                 cb_(std::forward<Lambda>(cb)) {}
@@ -74,7 +74,7 @@ namespace libim::utils {
                cb_();
             }
         private:
-            Lambda&& cb_;
+            Lambda cb_;
         };
 
         return at_exit_scope_t { std::forward<Lambda>(callback) };

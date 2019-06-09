@@ -173,7 +173,7 @@ namespace libim::utils {
         static_assert(base == 8 || base == 10 || base == 16, "invalid encoding base");
         static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
         static_assert(!std::is_floating_point_v<T> || base == 10,
-            "floating point can be only represented in base 10"
+            "floating point can only be represented in base 10"
         );
 
         std::stringstream ss;

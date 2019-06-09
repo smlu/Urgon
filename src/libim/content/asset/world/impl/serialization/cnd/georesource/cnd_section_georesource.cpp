@@ -1,8 +1,11 @@
 #include "../cnd.h"
 #include "../material/cnd_mat_header.h"
+
 #include "cnd_adjoin.h"
-#include "cnd_georesource.h"
 #include "cnd_surface.h"
+#include "../../world_ser_common.h"
+
+
 
 using namespace libim;
 using namespace libim::content::asset;
@@ -10,6 +13,10 @@ using namespace libim::content::asset;
 
 std::size_t CND::GetOffset_Georesource(const CndHeader& header, const InputStream& istream)
 {
+    AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
+        istream.seek(off);
+    });
+
    const auto matSectionOffset = GetMatSectionOffset(istream);
    istream.seek(matSectionOffset);
 
@@ -29,7 +36,18 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
     Georesource geores;
     geores.verts    = istream.read<std::vector<Vector3f>>(cndHeader.numVertices);
     geores.texVerts = istream.read<std::vector<Vector2f>>(cndHeader.numTexVertices);
-    geores.adjoints = istream.read<std::vector<CndSurfaceAdjoin>>(cndHeader.numAdjoins);
+    auto adjoints   = istream.read<std::vector<CndSurfaceAdjoin>>(cndHeader.numAdjoins);
+
+    geores.adjoints.reserve(adjoints.size());
+    for (const auto& a : adjoints)
+    {
+        geores.adjoints.push_back({
+            a.flags,
+            make_optional_idx(a.mirror),
+            std::nullopt,
+            a.distance
+        });
+    }
 
     /* Note: After reading adjoin list, jones3d goes over every cnd adjoin and initializes the list of SurfaceAdjoint structs.
             Besides fields flags and distance it sets a pointer in the SurfaceAdjoint instead of mirror number.
@@ -79,15 +97,24 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
 
      auto itVerts = vecSurfVerts.begin();
      geores.surfaces.reserve(cndHeader.numSurfaces);
-     for(auto& h : vecSurfHeaders)
+     for(const auto& h : vecSurfHeaders)
      {
-         CndSurface s{h};
-         s.verts.resize(s.numVerts);
+         Surface s;
+         s.matIdx    = make_optional_idx(h.materialIdx);
+         s.surflags  = h.surfflags;
+         s.flags     = h.faceflags;
+         s.geoMode   = h.geoMode;
+         s.lightMode = h.lightMode;
+         s.adjoinIdx = make_optional_idx(h.adjoinIdx);
+         s.color     = h.color;
+         s.normal    = h.normal;
+
+         s.verts.resize(h.numVerts);
          for(auto& v : s.verts)
          {
-             std::get<0>(v) = itVerts->vertIdx;
-             std::get<1>(v) = itVerts->texIdx;
-             std::get<2>(v) = std::move(itVerts->color);
+             v.vertIdx   = itVerts->vertIdx; // TODO: safe cast
+             v.texIdx    = make_optional_idx(itVerts->texIdx);
+             v.intensity = std::move(itVerts->color);
              ++itVerts;
          }
 

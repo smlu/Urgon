@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include "georesource/cnd_georesource.h"
+#include "../../../georesource.h"
 #include "../../../../animation/animation.h"
 #include "../../../../../audio/impl/sbtrack.h"
 #include "../../../../material/material.h"

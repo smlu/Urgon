@@ -75,20 +75,36 @@ namespace libim::content::text {
 
         TextResourceWriter& writeKeyValue(std::string_view key, std::string_view value, std::size_t indent = 1);
 
-        template<typename T,
+        template<std::size_t precision = 0,
+            typename T,
             bool isArithmetic = std::is_arithmetic_v<T>,
             typename = std::enable_if_t<isArithmetic || std::is_enum_v<T>>
         >
         TextResourceWriter& writeKeyValue(std::string_view key, T value, std::size_t indent = 1)
         {
+            constexpr std::size_t p = [&](){
+                // Set default precision for float and enum type
+                if constexpr(precision == 0 &&
+                    (std::is_floating_point_v<T> || std::is_enum_v<T>))
+                {
+                    if constexpr (std::is_floating_point_v<T>) {
+                        return std::size_t(6);
+                    }
+                    else {
+                        return std::size_t(4);
+                    }
+                }
+                return precision;
+            }();
+
+
             if constexpr(isArithmetic) {
-                constexpr std::size_t p = std::is_floating_point_v<T> ? 6 : 0;
                 return writeKeyValue(key, utils::to_string<10, p>(value), indent);
             }
             else
             {
                 return writeKeyValue(key,
-                    utils::to_string<16, 4>(utils::to_underlying(value)),
+                    utils::to_string<16, p>(utils::to_underlying(value)),
                     indent
                 );
             }

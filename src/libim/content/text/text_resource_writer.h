@@ -134,6 +134,7 @@ namespace libim::content::text {
         TextResourceWriter& writeLine(std::string_view line);
 
         template<bool writeListSize = true,
+                 bool lbAfterSize = true,
                  typename Container,
                  typename Lambda,
                  class = utils::requires_container<Container>>
@@ -158,9 +159,10 @@ namespace libim::content::text {
 
             if constexpr (writeListSize)
             {
-                using ListSizeT = typename Container::size_type;
-                writeKeyValue<ListSizeT>(name, list.size());
-                writeEol();
+                writeKeyValue(name, list.size());
+                if constexpr(lbAfterSize) {
+                    writeEol();
+                }
             }
 
 

@@ -52,7 +52,8 @@
 
 namespace libim::content::asset
 {
-    constexpr static std::size_t kCndKeyNameLen    = kCndMaxNameLen;
+    constexpr static std::size_t kCndKeyNameLen   = kCndMaxNameLen;
+    constexpr static std::size_t kCndMeshNameLen  = kCndMaxNameLen;
     constexpr static std::size_t kCndMaxKeyMarkers = 16;
 
     struct CndKeyHeader final
@@ -70,7 +71,7 @@ namespace libim::content::asset
 
     struct CndKeyNode final
     {
-        char meshName[64] = {0};
+        char meshName[kCndMeshNameLen] = {0};
         uint32_t nodeNum;
         uint32_t numEntries;
     };

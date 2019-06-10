@@ -15,6 +15,10 @@ namespace libim {
 
         static_assert(std::is_arithmetic_v<T>, "T must be arithmetic type!");
 
+        using base_type::array;
+        constexpr AbstractVector() : base_type{ 0 } {}
+        constexpr AbstractVector(base_type a) : base_type(std::move(a)) {}
+
         constexpr void set(std::size_t idx, T v)
         {
             this->at(idx) = v;
@@ -72,7 +76,7 @@ namespace libim {
     }
 
 
-
+    // Vector trait
     namespace detail {
         template<typename, typename = void>
         struct isVector : std::false_type {};

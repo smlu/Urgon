@@ -18,6 +18,8 @@ namespace libim {
         friend T get_size(const Box<G, S>&);
 
     public:
+        using value_type = T;
+
         Vector<T, N> v0, v1;
 
         constexpr Box() {}
@@ -133,6 +135,27 @@ namespace libim {
         static_assert(m < n, "box dimension out of bounds");
         return std::get<m>(box.v1) - std::get<m>(box.v0);
     }
+
+
+    // Box trait
+    namespace detail {
+        template<typename, typename = void>
+        struct isBox : std::false_type {};
+
+        template<typename T>
+        struct isBox<T,
+                std::void_t<
+                    typename T::value_type,
+                    decltype(std::declval<T>().v0),
+                    decltype(std::declval<T>().v1)>>
+            : std::is_base_of<
+                Box<typename T::value_type, decltype(std::declval<T>().v0)::size()>,
+                T
+        > {};
+    }
+
+    template <typename T>
+    constexpr bool isBox = detail::isBox<T>::value;
 }
 
 #endif // LIBIM_BOX_H

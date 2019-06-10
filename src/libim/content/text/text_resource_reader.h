@@ -2,6 +2,8 @@
 #define LIBIM_RESOURCE_READER_H
 #include "../../math/abstract_vector.h"
 #include "../../log/log.h"
+#include "../../math/abstract_vector.h"
+#include "../../math/box.h"
 #include "../../text/tokenizer.h"
 #include "../../utils/traits.h"
 #include "../../utils/utils.h"
@@ -78,6 +80,7 @@ namespace libim::content::text {
         }
 
         void readKey(std::string_view key, Token& t);
+
 
         template<typename Container,
                  bool hasRowIdxs = true,
@@ -184,6 +187,18 @@ namespace libim::content::text {
             for(typename DT::size_type i = 0; i < result.size(); i++) {
                 result[i] = getNumber<typename DT::value_type>();
             }
+            return result;
+        }
+
+
+        template<typename B, typename DB = typename std::decay_t<B>>
+        DB readBox()
+        {
+            static_assert (isBox<DB>, "B must be of type Box");
+
+            DB result;
+            result.v0 = readVector<decltype(result.v0)>();
+            result.v1 = readVector<decltype(result.v1)>();
             return result;
         }
 

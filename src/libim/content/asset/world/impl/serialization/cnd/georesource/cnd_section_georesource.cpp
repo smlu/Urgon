@@ -128,4 +128,57 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
 }
 
 
+void WriteSection_Georesource(OutputStream& ostream, const Georesource& geores)
+{
+    // Write verteices and tex vertices
+    ostream.write(geores.verts);
+    ostream.write(geores.texVerts);
+
+    // Write adjoins
+    std::vector<CndSurfaceAdjoin> cadjons;
+    cadjons.reserve(geores.adjoints.size());
+    for(const auto& a : geores.adjoints)
+    {
+        cadjons.push_back({
+            a.flags,
+            from_optional_idx(a.mirrorIdx),
+            a.distance,
+        });
+    }
+
+    ostream.write(cadjons);
+
+    // Write surfaces
+    std::vector<CndSurfaceHeader> surfheaders;
+    surfheaders.reserve(geores.surfaces.size());
+    std::vector<CndSurfaceVerts> vecSurfVerts;
+    for(const auto& s : geores.surfaces)
+    {
+        CndSurfaceHeader h;
+        h.materialIdx = from_optional_idx(s.matIdx);
+        h.surfflags   = s.surflags;
+        h.faceflags   = s.flags;
+        h.geoMode     = s.geoMode;
+        h.lightMode   = s.lightMode;
+        h.adjoinIdx   = from_optional_idx(s.adjoinIdx);
+        h.color       = s.color;
+        h.normal      = s.normal;
+        surfheaders.push_back(std::move(h));
+
+        vecSurfVerts.reserve(s.verts.size());
+        for(const auto& v : s.verts)
+        {
+            vecSurfVerts.push_back({
+                v.vertIdx, // TODO: safe cast
+                from_optional_idx(v.texIdx),
+                v.intensity
+            });
+        }
+    }
+
+    ostream.write(surfheaders);
+    ostream.write<int32_t>(vecSurfVerts.size()); // TODO: safe cast
+    ostream.write(vecSurfVerts);
+}
+
 

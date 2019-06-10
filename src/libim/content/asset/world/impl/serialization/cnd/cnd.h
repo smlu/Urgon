@@ -140,6 +140,7 @@ namespace libim::content::asset {
         static std::size_t GetOffset_Georesource(const CndHeader& header, const InputStream& istream);
         static Georesource ParseSection_Georesource(const CndHeader& cndHeader, const InputStream& istream);
         static Georesource ReadGeoresource(const InputStream& istream);
+        static void WriteSection_Georesource(OutputStream& ostream, const Georesource& geores);
 
         static std::size_t GetKeySectionOffset(const CndHeader& header, const InputStream& istream);
         static utils::HashMap<Animation> ParseSectionKeyframes(const CndHeader& cndHeader, const InputStream& istream); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.

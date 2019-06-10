@@ -24,8 +24,8 @@ namespace libim::content::asset {
 
     struct CndSurfaceVerts
     {
-        int vertIdx;
-        int texIdx;
+        int32_t vertIdx;
+        int32_t texIdx;
         Color color; // vertices color
     };
 

@@ -8,7 +8,6 @@ namespace libim::content::text {
 
     static constexpr auto kResLabelPunc     = ":"sv;
     static constexpr auto kResSectionHeader  = "###############"sv;
-    static constexpr auto kResName_Copyright = "COPYRIGHT"sv;
     static constexpr auto kResName_Entries   = "ENTRIES"sv;
     static constexpr auto kResName_Flags     = "FLAGS"sv;
     static constexpr auto kResName_Frames    = "FRAMES"sv;

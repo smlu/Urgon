@@ -86,11 +86,11 @@ bool PatchCndAnimations(const std::string& cndFile, const utils::HashMap<Animati
         OutputFileStream ofstream(patchedCndFile);
 
         /* Copy input cnd file to output stream until materials section */
-        const auto keySectionOffset = CND::GetKeySectionOffset(cndHeader, ifstream);
+        const auto keySectionOffset = CND::GetOffset_Keyframes(ifstream, cndHeader);
         ofstream.write(ifstream, 0, keySectionOffset);
 
         /* Write new materials section */
-        CND::WriteSectionKeyframes(ofstream, animations);
+        CND::WriteSection_Keyframes(ofstream, animations);
 
         /* Write the rest of inputted cnd file to the output */
         auto aOldNumEntries = ifstream.read<std::array<uint32_t, 3>>();

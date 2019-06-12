@@ -210,7 +210,7 @@ bool ReplaceMaterial(const std::string& cndFile, std::vector<std::string> matFil
 std::size_t ExtractAnimations(const InputStream& istream, const std::string& outDir)
 {
     istream.seek(0);
-    auto vecAnimations = CND::ReadAnimations(istream);
+    auto vecAnimations = CND::ReadKeyframes(istream);
 
     std::string keyDir;
     if(!vecAnimations.isEmpty())

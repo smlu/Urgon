@@ -379,7 +379,7 @@ int ExecCmdAddAnimation(const CndToolArgs& args)
             return Animation(TextResourceReader(istream));
         },
         [](const auto& istream){
-            return CND::ReadAnimations(istream);
+            return CND::ReadKeyframes(istream);
         },
         [](const auto& cndFile, const auto& animations){
             return PatchCndAnimations(cndFile, animations);
@@ -433,7 +433,7 @@ int ExecCmdList(const CndToolArgs& args)
     InputFileStream istream(cndFile);
     if(listAnim)
     {
-        auto anims = CND::ReadAnimations(istream);
+        auto anims = CND::ReadKeyframes(istream);
         std::cout << "Animations:\n";
         printList(anims);
     }
@@ -531,7 +531,7 @@ int32_t ExtractAnimations(const InputStream& istream, const std::string& outDir,
     try
     {
         std::cout << "Extracting animations... " << std::flush;
-        auto mapAnimations = CND::ReadAnimations(istream);
+        auto mapAnimations = CND::ReadKeyframes(istream);
 
         std::string keyDir;
         if(!mapAnimations.isEmpty())
@@ -726,7 +726,7 @@ int ExecCmdRemoveAnimation(const CndToolArgs& args)
 {
     bool success = ExecCmdRemoveAssets<Animation>(args,
         [](const auto& istream){
-            return CND::ReadAnimations(istream);
+            return CND::ReadKeyframes(istream);
         },
         [](const auto& cndFile, const auto& animations){
             return PatchCndAnimations(cndFile, animations);

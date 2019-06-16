@@ -119,6 +119,8 @@ namespace libim::content::asset {
 
     struct CND final
     {
+        using ResourceName = std::array<char, kCndMaxNameLen>;
+
         static CndHeader LoadHeader(const InputStream& istream);
 
         /**
@@ -146,6 +148,41 @@ namespace libim::content::asset {
         static std::vector<Sector> ParseSection_Sectors(const InputStream& istream, const CndHeader& header);
         static std::vector<Sector> ReadSectors(const InputStream& istream);
         static void WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>& sectors);
+
+        static std::size_t GetOffset_AiClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ParseSection_AiClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ReadAiClass(const InputStream& istream);
+        static void WriteSection_AiClass(OutputStream& ostream, const std::vector<std::string>& aiclasses);
+
+        static std::size_t GetOffset_Models(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ParseSection_Models(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ReadModels(const InputStream& istream);
+        static void WriteSection_Models(OutputStream& ostream, const std::vector<std::string>& models);
+
+        static std::size_t GetOffset_Sprites(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ParseSection_Sprites(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ReadSprites(const InputStream& istream);
+        static void WriteSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites);
+
+        static std::size_t GetOffset_Keyframes(const InputStream& istream, const CndHeader& header);
+        static utils::HashMap<Animation> ParseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
+        static utils::HashMap<Animation> ReadKeyframes(const InputStream& istream);
+        static void WriteSection_Keyframes(OutputStream& ostream, const utils::HashMap<Animation>& animations);
+
+        static std::size_t GetOffset_AnimClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ParseSection_AnimClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ReadAnimClass(const InputStream& istream);
+        static void WriteSection_AnimClass(OutputStream& ostream, const std::vector<std::string>& animclasses);
+
+        static std::size_t GetOffset_SoundClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ParseSection_SoundClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ReadSoundClass(const InputStream& istream);
+        static void WriteSection_SoundClass(OutputStream& ostream, const std::vector<std::string>& sndclasses);
+
+        static std::size_t GetOffset_CogScripts(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ParseSection_CogScripts(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> ReadCogScripts(const InputStream& istream);
+        static void WriteSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts);
     };
 
 

@@ -11,8 +11,101 @@
 #include <functional>
 #include <string_view>
 
+
 using namespace std::string_view_literals;
 namespace libim::text {
+
+    // TODO BufferedRead should be used by InputFileStream insted of TokenizerPrivate
+    template<std::size_t N>
+    class BufferedRead : public InputStream
+    {
+    public:
+        BufferedRead(const InputStream& istream) : istream_(istream)
+        {
+            refillBuffer();
+        }
+
+        virtual void seek(std::size_t position) const override
+        {
+            if((istream_.tell() < position) || position < (istream_.tell() - end_))
+            {
+                istream_.seek(position);
+                refillBuffer();
+            }
+            else
+            {
+                auto[p, q] = std::minmax(istream_.tell() - position, end_);
+                pos_ = q - p;
+            }
+        }
+
+        virtual std::size_t size() const override
+        {
+            return istream_.size();
+        }
+
+        virtual std::size_t tell() const override
+        {
+            return istream_.tell() - (end_ - pos_);
+        }
+
+        virtual bool canRead() const override
+        {
+            return istream_.canRead();
+        }
+
+        virtual bool canWrite() const override
+        {
+            return istream_.canWrite();
+        }
+
+    private:
+        virtual std::size_t readsome(byte_t* data, std::size_t length) const override
+        {
+            std::size_t  totalRead = 0;
+            while(length)
+            {
+                std::size_t nRead = end_ - pos_;
+                if(nRead == 0)
+                {
+                    refillBuffer();
+                    nRead = end_ - pos_;
+                    if(nRead == 0)
+                        return totalRead;
+                }
+                if (nRead > length) nRead = length;
+                std::copy(buffer_.begin() + pos_, buffer_.begin() + pos_+ nRead, data);
+
+                pos_ += nRead;
+                length -= nRead;
+                data += nRead;
+                totalRead += nRead;
+            }
+
+            return totalRead;
+        }
+
+        virtual std::size_t writesome(const byte_t* , std::size_t ) override { return 0;}
+
+        void refillBuffer() const
+        {
+            std::size_t nRead = buffer_.size();
+            if(istream_.size() - istream_.tell() < nRead) {
+                nRead = istream_.size() - istream_.tell();
+            }
+            nRead = istream_.read(const_cast<byte_t*>(buffer_.data()), nRead);
+            pos_ = 0;
+            end_ = nRead;
+        }
+
+    private:
+        const InputStream& istream_;
+        mutable std::size_t pos_ = 0;
+        mutable std::size_t end_ = 0;
+        std::array<byte_t, N> buffer_;
+    };
+
+
 
     inline bool is_crlf(char c1, char c2)
     {
@@ -22,7 +115,7 @@ namespace libim::text {
 
     class Tokenizer::TokenizerPrivate
     {
-        const InputStream& istream_;
+        BufferedRead<4096> istream_;
         char current_ch_, next_ch_;
         std::size_t line_   = 1;
         std::size_t column_ = 1;
@@ -100,6 +193,7 @@ namespace libim::text {
 
         void readString(Token& out, std::size_t len)
         {
+            out.reserve(64);
             readDelimitedString(out, [len](char) mutable {
                 return (len--) == 0;
             });
@@ -111,6 +205,7 @@ namespace libim::text {
 
         void readLine(Token& out)
         {
+            out.reserve(64);
             readDelimitedString(out, [&](char) {
                 return isEol();
             });
@@ -118,6 +213,7 @@ namespace libim::text {
 
         void readDelimitedString(Token& out, const std::function<bool(char)>& isDelim)
         {
+            out.reserve(64);
             skipWhitespace();
 
             out.clear();
@@ -137,6 +233,7 @@ namespace libim::text {
 
         void readNumericLiteralHexPart(Token& out)
         {
+            out.reserve(64);
             while(std::isxdigit(current_ch_))
             {
                 out.append(current_ch_);
@@ -146,6 +243,7 @@ namespace libim::text {
 
         void readNumericLiteralIntegerPart(Token& out)
         {
+            out.reserve(64);
             while(std::isdigit(current_ch_))
             {
                 out.append(current_ch_);
@@ -155,6 +253,7 @@ namespace libim::text {
 
         void readNumericLiteral(Token& out)
         {
+            out.reserve(64);
             // Check for sign
             if(current_ch_ == ChMinus || current_ch_ == ChPlus)
             {
@@ -210,6 +309,7 @@ namespace libim::text {
 
         void readIdentifier(Token& out)
         {
+            out.reserve(64);
             if(isIdentifierLead(current_ch_))
             {
                 out.setType(Token::Identifier);
@@ -222,6 +322,7 @@ namespace libim::text {
 
         void readStringLiteral(Token& out)
         {
+            out.reserve(64);
             while(true)
             {
                 advance();
@@ -280,6 +381,7 @@ namespace libim::text {
 
         void peakToken(Token& out)
         {
+            out.reserve(64);
             const auto pos = istream_.tell();
             const auto cch = current_ch_;
             const auto nch = next_ch_;
@@ -297,6 +399,7 @@ namespace libim::text {
 
         void readToken(Token& out)
         {
+            out.reserve(64);
             skipWhitespace();
 
             out.clear();

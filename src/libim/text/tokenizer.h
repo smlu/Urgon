@@ -23,25 +23,24 @@ namespace libim::text {
         Tokenizer& operator=(const Tokenizer&) = delete;
         Tokenizer operator=(Tokenizer&&) noexcept = delete;
 
-        const Token& getToken();
-        void getToken(Token& out);
+        const Token& currentToken() const;
+        const Token& getNextToken();
+        const Token& peekNextToken();
 
-        const Token& peekToken();
-        void peekToken(Token& out);
 
         template <typename T, typename DT = std::decay_t<T>>
         DT getNumber()
         {
-            auto tkn = getToken();
+            auto tkn = getNextToken();
             return tkn.getNumber<DT>();
         }
 
         std::string getIdentifier();
         std::string getStringLiteral();
         std::string getSpaceDelimitedString();
-        void getSpaceDelimitedString(Token& out);
-        void getDelimitedString(Token& out, const std::function<bool(char)>& isDelim);
-        void getString(Token& out, std::size_t len);
+        std::string getDelimitedString(const std::function<bool(char)>& isDelim);
+
+
         std::string getString(std::size_t len);
 
         void assertIdentifier(std::string_view id);
@@ -54,6 +53,13 @@ namespace libim::text {
         bool reportEol() const;
 
         const InputStream& istream() const;
+
+    protected:
+        void getNextToken(Token& out);
+        void peekNextToken(Token& out);
+        void getSpaceDelimitedString(Token& out);
+        void getDelimitedString(Token& out, const std::function<bool(char)>& isDelim);
+        void getString(Token& out, std::size_t len);
 
     protected:
         Token cachedTkn_;

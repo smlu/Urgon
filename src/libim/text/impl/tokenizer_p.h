@@ -379,7 +379,7 @@ namespace libim::text {
             }
         }
 
-        void peakToken(Token& out)
+        void peekNextToken(Token& out)
         {
             out.reserve(64);
             const auto pos = istream_.tell();

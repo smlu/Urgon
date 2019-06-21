@@ -65,17 +65,16 @@ Animation& Animation::deserialize(TextResourceReader& rr)
     rr.assertSection(kResName_Header);
     ParseHeader(rr, *this);
 
-    Token t;
-    rr.readSection(t);
-    if(t.value() == kResName_Markers)
+    auto section = rr.readSection();
+    if(section == kResName_Markers)
     {
         ParseMarkers(rr, *this);
         rr.assertSection(kResName_KfNodes);
     }
-    else if(t.value() != kResName_KfNodes)
+    else if(section != kResName_KfNodes)
     {
-        LOG_DEBUG("Animation::load: section expected '%', found '%'", kResName_KfNodes, t.value());
-        throw TokenizerError("expected section: KEYFRAME NODES"sv, t.location());
+        LOG_DEBUG("Animation::load: section expected '%', found '%'", kResName_KfNodes, section);
+        throw TokenizerError("expected section: KEYFRAME NODES"sv, rr.currentToken().location());
     }
 
     ParseKeyframes(rr, *this);

@@ -17,31 +17,36 @@ Tokenizer::Tokenizer(const InputStream& s)
 Tokenizer::~Tokenizer()
 {}
 
-const Token& Tokenizer::getToken()
+const Token& Tokenizer::currentToken() const
 {
-    getToken(cachedTkn_);
     return cachedTkn_;
 }
 
-void Tokenizer::getToken(Token& out)
+const Token& Tokenizer::getNextToken()
+{
+    getNextToken(cachedTkn_);
+    return cachedTkn_;
+}
+
+void Tokenizer::getNextToken(Token& out)
 {
     tp_->readToken(out);
 }
 
-const Token& Tokenizer::peekToken()
+const Token& Tokenizer::peekNextToken()
 {
-    peekToken(cachedTkn_);
+    peekNextToken(cachedTkn_);
     return cachedTkn_;
 }
 
-void Tokenizer::peekToken(Token& out)
+void Tokenizer::peekNextToken(Token& out)
 {
-    tp_->peakToken(out);
+    tp_->peekNextToken(out);
 }
 
 std::string Tokenizer::getIdentifier()
 {
-    getToken(cachedTkn_);
+    getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::Identifier) {
         throw TokenizerError("expected identifier"sv, cachedTkn_.location());
     }
@@ -51,7 +56,7 @@ std::string Tokenizer::getIdentifier()
 
 std::string Tokenizer::getStringLiteral()
 {
-    getToken(cachedTkn_);
+    getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::String) {
         throw TokenizerError("expected string literal"sv, cachedTkn_.location());
     }
@@ -73,6 +78,12 @@ void Tokenizer::getSpaceDelimitedString(Token& out)
     }
 }
 
+std::string Tokenizer::getDelimitedString(const std::function<bool(char)>& isDelim)
+{
+    getDelimitedString(cachedTkn_, isDelim);
+    return cachedTkn_.value();
+}
+
 void Tokenizer::getDelimitedString(Token& out, const std::function<bool(char)>& isDelim)
 {
     tp_->readDelimitedString(out, isDelim);
@@ -91,7 +102,7 @@ std::string Tokenizer::getString(std::size_t len)
 
 void Tokenizer::assertIdentifier(std::string_view id)
 {
-    getToken(cachedTkn_);
+    getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::Identifier || !utils::iequal(cachedTkn_.value(), id))
     {
         LOG_DEBUG("assertIdentifier: expected '%', found '%'", id, cachedTkn_.value());
@@ -101,7 +112,7 @@ void Tokenizer::assertIdentifier(std::string_view id)
 
 void Tokenizer::assertPunctuator(std::string_view punc)
 {
-    getToken(cachedTkn_);
+    getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::Punctuator || cachedTkn_.value() != punc)
     {
         LOG_DEBUG("assertPunctuator: expected '%', found '%'", punc, cachedTkn_.value());
@@ -111,7 +122,7 @@ void Tokenizer::assertPunctuator(std::string_view punc)
 
 void Tokenizer::assertEndOfFile()
 {
-    getToken(cachedTkn_);
+    getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::EndOfFile) {
         throw TokenizerError("expected end of file"sv, cachedTkn_.location());
     }

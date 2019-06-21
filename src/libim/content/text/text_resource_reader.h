@@ -134,9 +134,9 @@ namespace libim::content::text {
             {
                 result.reserve(100);
                 isAtEnd = [&]() {
-                    if (peekToken().value() == std::string_view("end"))
+                    if (peekNextToken().value() == std::string_view("end"))
                     {
-                        getToken();
+                        getNextToken();
                         return true;
                     }
                     return false;
@@ -204,9 +204,10 @@ namespace libim::content::text {
 
 
         std::string readSection();
-        void readSection(Token& t);
-
         std::size_t readRowIdx();
+
+    private:
+        void readSection(Token& t);
     };
 }
 #endif // LIBIM_RESOURCE_READER_H

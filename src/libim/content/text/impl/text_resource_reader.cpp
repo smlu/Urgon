@@ -19,7 +19,7 @@ void TextResourceReader::readKey(std::string_view key, Token& t)
 
     const bool bReportEol = reportEol();
     setReportEol(true);
-    getToken(t);
+    getNextToken(t);
     setReportEol(bReportEol);
 }
 

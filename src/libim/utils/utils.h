@@ -85,7 +85,7 @@ namespace libim::utils {
     #endif
 
     #define AT_SCOPE_EXIT(...) \
-        const auto ANOVAR(sexit_) = utils::at_scope_exit(__VA_ARGS__)
+        const auto ANOVAR(sexit_) = libim::utils::at_scope_exit(__VA_ARGS__)
 
 
 

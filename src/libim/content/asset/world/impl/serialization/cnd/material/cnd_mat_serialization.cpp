@@ -6,6 +6,7 @@
 
 using namespace libim;
 using namespace libim::content::asset;
+using namespace libim::utils;
 
 
 std::size_t CND::GetMatSectionOffset(const InputStream& istream)
@@ -29,10 +30,9 @@ std::size_t CND::GetMatSectionOffset(const InputStream& istream)
             4;                         // 4 = unknown 4 bytes*/
 }
 
-utils::HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, const InputStream& istream)
+HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, const InputStream& istream)
 {
-    utils::HashMap<Material> materials;
-
+    HashMap<Material> materials;
     try
     {
         /* Return if no materials are present in file*/

@@ -48,7 +48,7 @@ namespace libim {
         if(level <= LogLevel::Warning)
         {
 #ifndef NDEBUG
-        ss << "file: '" << file << "':" << line << " ";
+        ss << "\nfile: '" << file << "':" << line << " ";
 #endif
             std::cerr << ss.str() << std::endl;
         } else {

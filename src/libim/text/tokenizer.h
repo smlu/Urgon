@@ -37,11 +37,11 @@ namespace libim::text {
 
         std::string getIdentifier();
         std::string getStringLiteral();
-        std::string getSpaceDelimitedString();
-        std::string getDelimitedString(const std::function<bool(char)>& isDelim);
+        const std::string& getSpaceDelimitedString();
+        const std::string& getDelimitedString(const std::function<bool(char)>& isDelim);
 
 
-        std::string getString(std::size_t len);
+        const std::string& getString(std::size_t len);
 
         void assertIdentifier(std::string_view id);
         void assertPunctuator(std::string_view punc);

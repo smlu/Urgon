@@ -64,10 +64,10 @@ std::string Tokenizer::getStringLiteral()
     return std::move(cachedTkn_).value();
 }
 
-std::string Tokenizer::getSpaceDelimitedString()
+const std::string& Tokenizer::getSpaceDelimitedString()
 {
     getSpaceDelimitedString(cachedTkn_);
-    return std::move(cachedTkn_).value();
+    return cachedTkn_.value();
 }
 
 void Tokenizer::getSpaceDelimitedString(Token& out)
@@ -78,7 +78,7 @@ void Tokenizer::getSpaceDelimitedString(Token& out)
     }
 }
 
-std::string Tokenizer::getDelimitedString(const std::function<bool(char)>& isDelim)
+const std::string& Tokenizer::getDelimitedString(const std::function<bool(char)>& isDelim)
 {
     getDelimitedString(cachedTkn_, isDelim);
     return cachedTkn_.value();
@@ -94,10 +94,10 @@ void Tokenizer::getString(Token& out, std::size_t len)
     tp_->readString(out, len);
 }
 
-std::string Tokenizer::getString(std::size_t len)
+const std::string& Tokenizer::getString(std::size_t len)
 {
     tp_->readString(cachedTkn_, len);
-    return std::move(cachedTkn_).value();
+    return cachedTkn_.value();
 }
 
 void Tokenizer::assertIdentifier(std::string_view id)

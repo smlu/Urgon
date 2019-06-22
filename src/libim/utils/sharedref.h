@@ -57,7 +57,7 @@ namespace libim::utils {
 
         T* operator->() const
         {
-            return *ptr_;
+            return ptr_.get();
         }
 
         void swap(std::shared_ptr<DT>& r) noexcept

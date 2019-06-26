@@ -95,12 +95,14 @@ namespace libim::content::text {
             /*TODO: Uncomment when static reflection is available and decltype is avaliable for generic lambdas.
 
             using LambdaTriats = typename utils::function_traits<Lambda>;
-            static_assert(LambdaTriats::arity == 2, "constructor func must have 2 arguments");
+            static_assert(LambdaTriats::arity == 2, "constructor func must have at least 2 arguments");
             static_assert(std::is_same_v<typename LambdaTriats::template arg_t<0>,
                 TextResourceReader&>, "first arg in constructor must be of a type TextResourceReader&"
             );
-
-            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<1>,
+            // Note: Constructor can be of arguments: (TextResourceReader&, std::size_t rowIdx, T& type) or
+            //                                        (TextResourceReader&, T& type)
+            // TODO: check if constructor func has 2 or 3 arguments
+            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<1> or typename LambdaTriats::template arg_t<2>,
                 T&>, "second arg in constructor must be of a type T&"
             );
             */
@@ -121,14 +123,14 @@ namespace libim::content::text {
             };
 
             Container result;
-            [[maybe_unused]] std::size_t i = 0;
+            [[maybe_unused]] std::size_t rowIdx = 0;
             std::function<bool()> isAtEnd;
 
             if constexpr(hasListSize)
             {
                 auto len = readKey<std::size_t>(expectedName);
                 reserve(result, len);
-                isAtEnd = [&]() { return i >= len; };
+                isAtEnd = [&]() { return rowIdx >= len; };
             }
             else
             {
@@ -149,8 +151,8 @@ namespace libim::content::text {
             {
                 if constexpr (hasRowIdxs)
                 {
-                    [[maybe_unused]] const auto rowIdx = readRowIdx();
-                    assert(i == rowIdx && "i == rowIdx!");
+                    [[maybe_unused]] const auto rrowIdx = readRowIdx();
+                    assert(rowIdx == rrowIdx && "rowIdx == rrowIdx!");
                 }
 
                 if constexpr(!hasListSize && utils::has_mf_capacity<Container>)
@@ -161,9 +163,9 @@ namespace libim::content::text {
                 }
 
                 typename Container::value_type item;
-                constructor(*this, item);
+                constructor(*this, rowIdx, item);
                 append(result, std::move(item));
-                i++;
+                rowIdx++;
             }
 
             return result;

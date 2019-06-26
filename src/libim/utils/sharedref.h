@@ -31,6 +31,12 @@ namespace libim::utils {
             ptr_ = std::make_shared<DT>(std::move(v));
         }
 
+        template<typename... Args>
+        SharedRef(Args&& ... args)
+        {
+            ptr_ = std::make_shared<DT>(std::forward<Args>(args)...);
+        }
+
         SharedRef(std::shared_ptr<DT> ptr)
         {
             if(!ptr) {

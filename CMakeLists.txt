@@ -7,7 +7,7 @@ project(
 
 # Global constants
 set(PM_LIBIM   "libim")
-set(PM_LIBCND  "libcnd")
+set(PM_LIBCMD  "libcmd")
 set(PM_GOBEXT  "gobext")
 set(PM_CNDEXT  "cndext")
 set(PM_CNDTOOL "cndtool")
@@ -82,16 +82,17 @@ target_link_libraries(${PM_LIBIM} PUBLIC
 )
 
 # CND utils 
-add_library(${PM_LIBCND} OBJECT
+add_library(${PM_LIBCMD} OBJECT
     ${CMDUTILS_HEADER_FILES}
     ${CMDUTILS_SRC_FILES}
 )
+set_target_properties(${PM_LIBCMD} PROPERTIES LINKER_LANGUAGE CXX)
 
 # CND Extractor
 set(CNDEXT_SRC_FILES "${SOURCE_DIR}/cndext/main.cpp")
 add_executable (${PM_CNDEXT}
     ${CNDEXT_SRC_FILES}
-    $<TARGET_OBJECTS:${PM_LIBCND}>
+    $<TARGET_OBJECTS:${PM_LIBCMD}>
 )
 target_link_libraries(${PM_CNDEXT} ${PM_LIBIM})
 
@@ -103,7 +104,7 @@ set(CNDTOOL_SRC_FILES
 )
 add_executable (${PM_CNDTOOL}
     ${CNDTOOL_SRC_FILES}
-    $<TARGET_OBJECTS:${PM_LIBCND}>
+    $<TARGET_OBJECTS:${PM_LIBCMD}>
 )
 target_link_libraries(${PM_CNDTOOL} ${PM_LIBIM})
 
@@ -111,7 +112,7 @@ target_link_libraries(${PM_CNDTOOL} ${PM_LIBIM})
 set(GOBEXT_SRC_FILES "${SOURCE_DIR}/gobext/main.cpp")
 add_executable (${PM_GOBEXT}
     ${GOBEXT_SRC_FILES}
-    $<TARGET_OBJECTS:${PM_LIBCND}>
+    $<TARGET_OBJECTS:${PM_LIBCMD}>
 )
 target_link_libraries(${PM_GOBEXT} ${PM_LIBIM})
 
@@ -119,7 +120,7 @@ target_link_libraries(${PM_GOBEXT} ${PM_LIBIM})
 set(TEST_SRC_FILES "${SOURCE_DIR}/test/test.cpp")
 add_executable (${PM_TEST}
     ${TEST_SRC_FILES}
-    $<TARGET_OBJECTS:${PM_LIBCND}>
+    $<TARGET_OBJECTS:${PM_LIBCMD}>
 )
 
 target_compile_definitions(${PM_TEST} PRIVATE "-DSRC_ROOT=\"${SOURCE_DIR}\"")

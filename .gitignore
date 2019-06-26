@@ -41,3 +41,7 @@ CTestTestfile.cmake
 # QtCreator
 *.user*
 *.autosave
+
+# Visual Studio
+.vs
+CMakeSettings.json

@@ -97,7 +97,7 @@ namespace libim {
             const std::size_t nRead = read(&data[0], size);
 
             if(nRead != size) {
-                throw StreamError("Error while reading stream!");
+                throw StreamError("Error while reading stream");
             }
 
             return data;
@@ -150,7 +150,7 @@ namespace libim {
         {
             auto nWritten = write(&data[0], data.size());
             if(nWritten != data.size()) {
-                throw StreamError("Failed to write data to stream!");
+                throw StreamError("Failed to write data to stream");
             }
 
             return *this;
@@ -306,7 +306,7 @@ namespace libim {
     ////    stream.
     ////    const auto nWritten = this->write(reinterpret_cast<const byte_t*>(&c), CHAR_BYTE);
     ////    if(nWritten != CHAR_BYTE) {
-    ////        throw StreamError("Could not write char to stream!");
+    ////        throw StreamError("Could not write char to stream");
     ////    }
 
     //    return *this;
@@ -320,7 +320,7 @@ namespace libim {
         typename std::decay<T>::type pod{};
         auto nRead = this->readsome(reinterpret_cast<byte_t*>(std::addressof(pod)), sizeof(pod));
         if(nRead != sizeof(pod)) {
-            throw StreamError("Error reading trivially copyable type T from stream!");
+            throw StreamError("Error reading trivially copyable type T from stream");
         }
 
         return pod;
@@ -331,7 +331,7 @@ namespace libim {
     {
         auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(std::addressof(pod)), sizeof(pod));
         if(nWritten != sizeof(pod)) {
-            throw StreamError("Error writing trivially copyable type T to stream!");
+            throw StreamError("Error writing trivially copyable type T to stream");
         }
 
         return *this;
@@ -343,7 +343,7 @@ namespace libim {
         char c;
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&c), CHAR_BYTE);
         if(nRead != CHAR_BYTE) {
-            throw StreamError("Could not read char from stream!");
+            throw StreamError("Could not read char from stream");
         }
 
         return c;
@@ -353,7 +353,7 @@ namespace libim {
     {
         const auto nWritten = this->write(reinterpret_cast<const byte_t*>(&c), CHAR_BYTE);
         if(nWritten != CHAR_BYTE) {
-            throw StreamError("Could not write char to stream!");
+            throw StreamError("Could not write char to stream");
         }
 
         return *this;

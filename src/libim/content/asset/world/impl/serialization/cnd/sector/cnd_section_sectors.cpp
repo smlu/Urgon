@@ -40,6 +40,7 @@ std::vector<Sector> CND::ParseSection_Sectors(const InputStream& istream, const 
     for(const auto& h : headers)
     {
         Sector s;
+        s.id    = std::size(sectors);
         s.flags = h.flags;
         s.tint  = h.tint;
 
@@ -115,7 +116,7 @@ void CND::WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>&
         if(s.ambientSound)
         {
             if(!utils::strcpy(h.ambientSound, s.ambientSound->sound)) {
-                throw StreamError("Too long sound name to copy to CndSectorHeader.ambientSound field!");
+                throw StreamError("Too long sound name to copy to CndSectorHeader.ambientSound field");
             }
 
             h.ambientSoundVolume = s.ambientSound->volume;

@@ -36,7 +36,7 @@ void WriteResourceList(OutputStream& ostream, std::vector<std::string> list)
     {
         CND::ResourceName aName;
         if(!utils::strcpy(aName, name)) {
-            throw StreamError("Too long resource name to write to CND stream!");
+            throw StreamError("Too long resource name to write to CND stream");
         }
         return aName;
     });

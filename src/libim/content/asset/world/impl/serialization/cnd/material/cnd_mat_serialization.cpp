@@ -126,7 +126,7 @@ void CND::WriteSectionMaterials(OutputStream& ostream, const utils::HashMap<Mate
         CndMatHeader h;
 
         if(!utils::strcpy(h.name, mat.name())) {
-            throw StreamError("Too long material name to copy to CndMatHeader.name field!");
+            throw StreamError("Too long material name to copy to CndMatHeader.name field");
         }
 
         h.width       = mat.width();

@@ -107,7 +107,7 @@ void CND::WriteSection_Keyframes(OutputStream& ostream, const utils::HashMap<Ani
     {
         CndKeyHeader h;
         if(!utils::strcpy(h.name, anim.name())) {
-            throw StreamError("Too long animation name to copy to CndKeyHeader.name field!");
+            throw StreamError("Too long animation name to copy to CndKeyHeader.name field");
         }
 
         h.flags      = anim.flages();
@@ -121,7 +121,7 @@ void CND::WriteSection_Keyframes(OutputStream& ostream, const utils::HashMap<Ani
 
         /* Copy key markers */
         if(anim.markers().size() > kCndMaxKeyMarkers) {
-            throw StreamError("Num key markers > 16!");
+            throw StreamError("Num key markers > 16");
         }
 
         markers.reserve(anim.markers().size());
@@ -133,7 +133,7 @@ void CND::WriteSection_Keyframes(OutputStream& ostream, const utils::HashMap<Ani
         {
             CndKeyNode n;
             if(!utils::strcpy(n.meshName, node.meshName)) {
-                throw StreamError("Too long mesh name to copy to CndKeyNode.name field!");
+                throw StreamError("Too long mesh name to copy to CndKeyNode.name field");
             }
 
             n.nodeNum = node.num;

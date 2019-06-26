@@ -472,7 +472,8 @@ namespace libim::text {
                 advance();
                 return true;
             }
-            else if(current_ch_ == ChComment) // Skip comment line
+            else if(current_ch_ == ChComment || // Skip comment line
+                   (current_ch_ == ChComment2  && next_ch_ == ChComment2))
             {
                 skipToNextLine();
                 return true;

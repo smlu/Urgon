@@ -6,6 +6,7 @@ namespace libim::text {
     {
         ChBackSlash   = '\\',
         ChComment     = '#',
+        ChComment2    = '/',
         ChDblQuote    = '\"',
         ChDecimalSep  = '.',
         ChEol         = '\n',

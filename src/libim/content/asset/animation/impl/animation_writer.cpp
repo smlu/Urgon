@@ -37,7 +37,7 @@ void WriteMarkers(TextResourceWriter& rw, const Animation& anim)
     rw.writeSection(kResName_Markers)
       .writeEol()
       .writeList(kResName_Markers, anim.markers(),
-      [](TextResourceWriter& rw, [[maybe_unused]]auto idx, const auto& marker){
+      [](TextResourceWriter& rw, auto /*idx*/, const auto& marker){
            rw.writeNumber<10,6>(marker.frame)
              .indent(1)
              .writeEnum(marker.type);
@@ -51,7 +51,7 @@ void WriteKeyframes(TextResourceWriter& rw, const Animation& anim)
     rw.writeSection(kResName_KfNodes)
       .writeEol()
       .writeList(kResName_Nodes, anim.nodes(),
-      [](TextResourceWriter& rw, [[maybe_unused]]auto idx, const KeyNode& node)
+      [](TextResourceWriter& rw, auto /*idx*/, const KeyNode& node)
       {
 
           rw.writeKeyValue(kResName_Node, node.num, 4);

@@ -10,6 +10,7 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 
 
 #define CONCATENATE_DIRECT(s1, s2) s1##s2
@@ -34,7 +35,6 @@ namespace libim::utils {
             }
             return false;
         }
-
 
         [[nodiscard]] inline std::string trim(const char* str, std::size_t len)
         {
@@ -62,6 +62,10 @@ namespace libim::utils {
         }
     } // detail
 
+
+    // Helper type for the visitor
+    template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 
     template <typename Lambda>
     [[nodiscard]] auto at_scope_exit(Lambda&& callback)
@@ -100,7 +104,8 @@ namespace libim::utils {
             TIter iter;
             bool operator != (const iterator & other) const { return iter != other.iter; }
             void operator ++ () { ++i; ++iter; }
-            auto operator * () const { return std::tie(i, *iter); }
+            auto operator * () const { return std::tie(std::as_const(i), std::as_const(*iter)); }
+            auto operator * () { return std::tie(std::as_const(i), *iter); }
         };
 
         struct iterable_wrapper
@@ -108,9 +113,20 @@ namespace libim::utils {
             T iterable;
             auto begin() { return iterator{ 0, std::begin(iterable) }; }
             auto end() { return iterator{ 0, std::end(iterable) }; }
+            auto begin() const { return iterator{ 0, std::begin(iterable) }; }
+            auto end() const { return iterator{ 0, std::end(iterable) }; }
         };
 
         return iterable_wrapper{ std::forward<T>(iterable) };
+    }
+
+    template<typename T>
+    constexpr auto cenumerate(T&& iterable)
+    {
+        return enumerate<std::add_const_t<T>,
+                decltype(std::cbegin(std::declval<T>()))>(
+                    std::forward<std::add_const_t<T>>(iterable)
+        );
     }
 
 

@@ -1,8 +1,12 @@
 #ifndef LIBIM_ABSTRACT_VECTOR_H
 #define LIBIM_ABSTRACT_VECTOR_H
 #include <array>
+#include <sstream>
+#include <string>
 #include <type_traits>
+
 #include "math.h"
+#include "../utils/utils.h"
 
 
 namespace libim {
@@ -42,6 +46,58 @@ namespace libim {
 
             return true;
         }
+
+        std::string toString() const
+        {
+            std::string ss;
+            ss.reserve(
+                S * 10  + /* S * max float num char len */
+                (S - 1) + /* S - 1 fwd. slashes */
+                2         /* 2 parentheses */
+            );
+
+            ss.push_back('(');
+            for(auto e : *this)
+            {
+                ss.append(utils::to_string<10, 6>(e));
+                ss.push_back('/');
+            }
+            ss.back() = ')';
+            return ss;
+        }
+
+        static AbstractVector fromString(std::string_view str)
+        {
+            std::istringstream istream;
+            istream.exceptions(std::ios::failbit);
+            istream.rdbuf()->pubsetbuf(const_cast<char*>(str.data()), str.size()); // TODO: safe cast
+
+            char ch;
+            istream >> ch;
+            if( ch != '(' ) {
+                throw std::ios_base::failure("Found invalid char while converting string to AbstractVector, expected char '('");
+            }
+
+            AbstractVector res;
+            for(auto[ idx, e ] : utils::enumerate(res))
+            {
+                istream >> e;
+                istream >> ch;
+
+                if( idx >= (res.size() - 1) )
+                {
+                    if( ch != ')' ) {
+                        throw std::ios_base::failure("Found invalid char while converting string to AbstractVector, expected char ')'");
+                    }
+                }
+                else if( ch != '/' ) {
+                    throw std::ios_base::failure("Found invalid char while converting string to AbstractVector, expected char '/'");
+                }
+            }
+
+            return res;
+        }
+
     };
 
     template<typename T, std::size_t S, typename Tag>

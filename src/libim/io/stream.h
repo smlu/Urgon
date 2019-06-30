@@ -45,6 +45,8 @@ namespace libim {
     class Stream
     {
     public:
+        Stream(const Stream&) = delete;
+        Stream(Stream&&) = delete;
         virtual ~Stream() = default;
 
         template<typename T>
@@ -217,12 +219,13 @@ namespace libim {
             m_name = std::move(name);
         }
 
-        const std::string& name() const
+        virtual const std::string& name() const
         {
             return m_name;
         }
 
     protected:
+        Stream() = default;
         virtual std::size_t readsome(byte_t* data, std::size_t length) const = 0;
         virtual std::size_t writesome(const byte_t* data, std::size_t length) = 0;
 

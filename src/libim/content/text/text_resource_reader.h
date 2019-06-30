@@ -134,7 +134,7 @@ namespace libim::content::text {
             }
             else
             {
-                result.reserve(100);
+                reserve(result, 256);
                 isAtEnd = [&]() {
                     if (peekNextToken().value() == std::string_view("end"))
                     {
@@ -158,7 +158,7 @@ namespace libim::content::text {
                 if constexpr(!hasListSize && utils::has_mf_capacity<Container>)
                 {
                     if(result.capacity() < 10) {
-                        reserve(result, 100);
+                        reserve(result, 256);
                     }
                 }
 

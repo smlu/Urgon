@@ -31,9 +31,11 @@ namespace libim::content::asset {
             Dirt                     = 0x80000,
             VeryDeepWater            = 0x100000
         };
-
+        using Id = std::size_t;
+        Id id;
         SurfaceFlag surflags;
         std::optional<std::size_t> adjoinIdx;
+        std::vector<Color> vecIntensities;
     };
 
 

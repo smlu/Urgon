@@ -4,11 +4,13 @@
 #include "cnd_adjoin.h"
 #include "cnd_surface.h"
 #include "../../world_ser_common.h"
+#include "../../../../../../../utils/utils.h"
 
 
 
 using namespace libim;
 using namespace libim::content::asset;
+using namespace libim::utils;
 
 
 std::size_t CND::GetOffset_Georesource(const CndHeader& header, const InputStream& istream)
@@ -100,6 +102,7 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
      for(const auto& h : vecSurfHeaders)
      {
          Surface s;
+         s.id        = std::size(geores.surfaces);
          s.matIdx    = make_optional_idx(h.materialIdx);
          s.surflags  = h.surfflags;
          s.flags     = h.faceflags;
@@ -110,11 +113,12 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
          s.normal    = h.normal;
 
          s.verts.resize(h.numVerts);
+         s.vecIntensities.reserve(h.numVerts);
          for(auto& v : s.verts)
          {
              v.vertIdx   = itVerts->vertIdx; // TODO: safe cast
              v.texIdx    = make_optional_idx(itVerts->texIdx);
-             v.intensity = std::move(itVerts->color);
+             s.vecIntensities.push_back(std::move(itVerts->color));
              ++itVerts;
          }
 
@@ -166,12 +170,12 @@ void WriteSection_Georesource(OutputStream& ostream, const Georesource& geores)
         surfheaders.push_back(std::move(h));
 
         vecSurfVerts.reserve(s.verts.size());
-        for(const auto& v : s.verts)
+        for(auto[idx, v] : cenumerate(s.verts))
         {
             vecSurfVerts.push_back({
-                v.vertIdx, // TODO: safe cast
+                static_cast<uint32_t>(v.vertIdx), // TODO: safe cast
                 from_optional_idx(v.texIdx),
-                v.intensity
+                s.vecIntensities.at(idx)
             });
         }
     }

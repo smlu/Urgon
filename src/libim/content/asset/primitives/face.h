@@ -26,7 +26,6 @@ namespace libim::content::asset {
         {
             std::size_t vertIdx;
             std::optional<std::size_t> texIdx;
-            Color intensity;
         };
 
         Flag flags;

@@ -39,6 +39,11 @@ namespace libim::text {
             }
         }
 
+        virtual const std::string& name() const override
+        {
+            return istream_.name();
+        }
+
         virtual std::size_t size() const override
         {
             return istream_.size();

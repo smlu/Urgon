@@ -37,7 +37,7 @@ namespace libim::text {
 
         std::string getIdentifier();
         std::string getStringLiteral();
-        const std::string& getSpaceDelimitedString();
+        const std::string& getSpaceDelimitedString(bool throwIfEmpty = true);
         const std::string& getDelimitedString(const std::function<bool(char)>& isDelim);
 
 
@@ -57,7 +57,7 @@ namespace libim::text {
     protected:
         void getNextToken(Token& out);
         void peekNextToken(Token& out);
-        void getSpaceDelimitedString(Token& out);
+        void getSpaceDelimitedString(Token& out, bool throwIfEmpty = true);
         void getDelimitedString(Token& out, const std::function<bool(char)>& isDelim);
         void getString(Token& out, std::size_t len);
 

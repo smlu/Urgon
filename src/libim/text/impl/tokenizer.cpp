@@ -64,16 +64,16 @@ std::string Tokenizer::getStringLiteral()
     return std::move(cachedTkn_).value();
 }
 
-const std::string& Tokenizer::getSpaceDelimitedString()
+const std::string& Tokenizer::getSpaceDelimitedString(bool throwIfEmpty)
 {
-    getSpaceDelimitedString(cachedTkn_);
+    getSpaceDelimitedString(cachedTkn_, throwIfEmpty);
     return cachedTkn_.value();
 }
 
-void Tokenizer::getSpaceDelimitedString(Token& out)
+void Tokenizer::getSpaceDelimitedString(Token& out, bool throwIfEmpty)
 {
     getDelimitedString(out, [](char c) { return isspace(c); });
-    if(out.isEmpty()) {
+    if(throwIfEmpty && out.isEmpty()) {
         throw TokenizerError("expected string fragment"sv, out.location());
     }
 }

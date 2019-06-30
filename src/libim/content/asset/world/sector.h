@@ -28,6 +28,9 @@ namespace libim::content::asset {
             ShownOnAutoMap  = 0x4000
         };
 
+        using Id = std::size_t;
+        Id id;
+
         Flag flags;
         ColorRgb tint;
 

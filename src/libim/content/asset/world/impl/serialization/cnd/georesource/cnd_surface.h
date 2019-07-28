@@ -53,7 +53,7 @@ namespace libim::content::asset {
           int *aVertIdxs;
           int *aTexIdxs;
           SithMaterial *pMaterial;
-          int unknown8;
+          int matCelIdx; // the idx of texture in material to use
           int unknown9;
           int unknown10;
           RGBA color;

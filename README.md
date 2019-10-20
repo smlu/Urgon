@@ -9,7 +9,7 @@ To edit `mat` material files use gimp plugin: [gimp-ijim](https://github.com/sml
   1. Extract to any directory the `.zip` file downloaded from the [Releases](https://github.com/smlu/ProjectMarduk/releases) page .
   2. Run terminal window. (On windows use `cmd.exe`)
   3. In the opened terminal window change current directory to the root directory of extracted files.  
-     **Windows example**
+     **Windows example**  
      If extracted files are located in `C:\Users\<username>\Desktop\imtools` you would type into terminal window:  
         ``` 
      cd "C:\Users\<username>\Desktop\imtools"

@@ -13,9 +13,9 @@ using namespace libim::content::asset;
 
 static constexpr uint32_t FileVersion = 3;
 
-std::vector<std::string> ReadResourceList(const InputStream&  istream, std::size_t size)
+std::vector<std::string> ReadResourceList(const InputStream& istream, std::size_t size)
 {
-    auto rlist = istream.read<std::vector<CND::ResourceName>>(size);
+    auto rlist = istream.read<std::vector<ResourceName>>(size);
 
     std::vector<std::string> res;
     res.reserve(rlist.size());
@@ -26,16 +26,17 @@ std::vector<std::string> ReadResourceList(const InputStream&  istream, std::size
     return res;
 }
 
-void WriteResourceList(OutputStream& ostream, std::vector<std::string> list)
+template<template<typename, typename ...> class List, typename T, typename ...Args, typename Lambda>
+void WriteResourceList(OutputStream& ostream, const List<T, Args...>& list, Lambda&& nameExtractor)
 {
-    std::vector<CND::ResourceName> wlist;
+    std::vector<ResourceName> wlist;
     wlist.reserve(list.size());
 
     std::transform(list.begin(), list.end(), std::back_insert_iterator(wlist),
-    [](const auto& name)
+    [&](const T& e)
     {
-        CND::ResourceName aName;
-        if(!utils::strcpy(aName, name)) {
+        ResourceName aName;
+        if(!utils::strcpy(aName, nameExtractor(e))) {
             throw StreamError("Too long resource name to write to CND stream");
         }
         return aName;

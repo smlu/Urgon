@@ -52,13 +52,11 @@
 
 namespace libim::content::asset
 {
-    constexpr static std::size_t kCndKeyNameLen   = kCndMaxNameLen;
-    constexpr static std::size_t kCndMeshNameLen  = kCndMaxNameLen;
     constexpr static std::size_t kCndMaxKeyMarkers = 16;
 
     struct CndKeyHeader final
     {
-        char name[kCndKeyNameLen] = {0};
+        ResourceName name;
         Animation::Flag flags;
         Animation::Type  type;
         uint32_t frames;
@@ -68,10 +66,9 @@ namespace libim::content::asset
         uint32_t numNodes;
     };
 
-
     struct CndKeyNode final
     {
-        char meshName[kCndMeshNameLen] = {0};
+        ResourceName meshName;
         uint32_t nodeNum;
         uint32_t numEntries;
     };

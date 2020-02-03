@@ -1,11 +1,11 @@
 #ifndef LIBIM_CND_SECTOR_H
 #define LIBIM_CND_SECTOR_H
-#include <cstdint>
+#include "../cndstring.h"
 #include "../../../../sector.h"
+#include <cstdint>
 
 namespace libim::content::asset {
-
-    struct CndSectorHeader
+    struct CndSectorHeader final
     {
         Sector::Flag flags;
         Color    ambientLight;
@@ -16,7 +16,7 @@ namespace libim::content::asset {
         Vector2f avgLightFalloff;
         Box3f    collideBox;
         Box3f    boundBox;
-        std::array<char, 64> ambientSound = {0};
+        ResourceName ambientSound; // The name of sound file
         float    ambientSoundVolume;
         Vector3f center;
         float    radius;

@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "cndstring.h"
 #include "../../../georesource.h"
 #include "../../../../animation/animation.h"
 #include "../../../../../audio/impl/sbtrack.h"
@@ -27,8 +28,8 @@ namespace libim::content::asset {
     struct CndHeader
     {
         uint32_t fileSize;
-        std::array<char, 1216> copyright;
-        std::array<char, kCndMaxNameLen>   filePath;
+        CndString<1216> copyright;
+        CndString<kCndMaxNameLen> filePath;
         uint32_t type;               // 0xD = container type (jones3dstatic.cnd), 0xC = game world
         uint32_t version;
         float    worldGravity;
@@ -119,8 +120,6 @@ namespace libim::content::asset {
 
     struct CND final
     {
-        using ResourceName = std::array<char, kCndMaxNameLen>;
-
         static CndHeader LoadHeader(const InputStream& istream);
 
         /**

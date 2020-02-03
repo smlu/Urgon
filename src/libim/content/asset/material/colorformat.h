@@ -5,9 +5,9 @@
 namespace libim::content::asset {
     enum class ColorMode : uint32_t
     {
-        Indexed = 1,
-        RGB     = 2,
-        RGBA    = 3
+        Indexed = 0,
+        RGB     = 1,
+        RGBA    = 2
     };
 
     struct ColorFormat final

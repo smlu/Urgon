@@ -19,7 +19,7 @@ std::size_t CND::GetOffset_Georesource(const CndHeader& header, const InputStrea
         istream.seek(off);
     });
 
-   const auto matSectionOffset = GetMatSectionOffset(istream);
+   const auto matSectionOffset = GetOffset_Materials(istream);
    istream.seek(matSectionOffset);
 
     const uint32_t nPixelDataSize = istream.read<uint32_t>();

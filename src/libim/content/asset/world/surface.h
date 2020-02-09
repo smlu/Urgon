@@ -13,8 +13,8 @@ namespace libim::content::asset {
         {
             Floor                    = 0x1,
             CogLinked                = 0x2,
-            Impassable               = 0x4,
-            AiCannotWalkOnFloor      = 0x8,
+            Impassable               = 0x4,        // Maybe unable for thing(player) to walk on this surface.
+            AiCannotWalkOnFloor      = 0x8,        // Ai won't walk on this surface
             DoubletextureScale       = 0x10,
             HalftextureScale         = 0x20,
             EighthtextureScale       = 0x40,
@@ -22,16 +22,26 @@ namespace libim::content::asset {
             HorizonSky               = 0x200,
             CeilingSky               = 0x400,
             Scrolling                = 0x800,
-            Icy                      = 0x1000,
-            VeryIcy                  = 0x2000,
-            MagSealed                = 0x4000,
+            KillFloor                = 0x1000,     // Player dies if it touches the floor. In cyn_killfloor.cog
+            Climbable                = 0x2000,
+            MineCarTrack             = 0x4000,     // Mine car track: sol_ramp.cog, sol_ctrllever5.cog, sol_ctrllever4.cog, sol_ctrllever3.cog, sol_ctrllever2.cog, sol_ctrllever1.cog, sol_comfalls.cog, sol_comentrance.cog
             Metal                    = 0x10000,
             DeepWater                = 0x20000,
             ShallowWater             = 0x40000,
             Dirt                     = 0x80000,
-            VeryDeepWater            = 0x100000
+            Web                      = 0x100000,   // Jones engine
+            Lava                     = 0x200000,
+            Unknown_400000           = 0x400000,
+            Hangable                 = 0x1000000,  // Player can hang on the ledge of this surface. In: tem_bossflood.cog, vol_block_ledgecontrol.cog
+            WaterClimbOutLedge       = 0x2000000,
+            UnknownCouldBeWhipSurf   = 0x10000000, // vol_lekk_door.cog
+            Wood                     = 0x40800000,
+            Vine                     = 0x80480000
+            //missing flag for stone
         };
+        
         using Id = std::size_t;
+        
         Id id;
         SurfaceFlag surflags;
         std::optional<std::size_t> adjoinIdx;

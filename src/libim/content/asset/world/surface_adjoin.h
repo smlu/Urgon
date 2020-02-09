@@ -18,8 +18,9 @@ namespace libim::content::asset {
         };
 
         Flag flags;
-        std::optional<std::size_t> mirrorIdx; // mirror surface
+        std::optional<std::size_t> mirrorIdx; // mirror adjoin
         std::optional<std::size_t> surfaceIdx;
+        std::optional<std::size_t> sectorIdx;
         float distance;
     };
 
@@ -28,9 +29,9 @@ namespace libim::content::asset {
         struct SurfaceAdjoin
         {
           int flags;
-          int unknown1;
-          Surface *pSurface;
-          SurfaceAdjoin *pMirror;
+          SithSector* pAdjoinSector;
+          Surface *pAdjoinSurface;
+          SurfaceAdjoin *pMirrorAdjoin;
           int unknown4;
           int unknown5;
           float distance;

@@ -20,7 +20,15 @@
 #include "../../../../../../math/vector4.h"
 #include "../../../../../../utils/hashmap.h"
 
+
 namespace libim::content::asset {
+
+    enum class CndWorldFlag : uint32_t
+    {
+        StaticWorld      = 0x1, // jones3dstatic.cnd
+        WorldInitialized = 0x2,
+        WorldHasFog      = 0x4
+    };
 
     //PACKED(
     struct CndHeader
@@ -28,7 +36,7 @@ namespace libim::content::asset {
         uint32_t fileSize;
         CndString<1216> copyright;
         CndString<kCndMaxNameLen> filePath;
-        uint32_t type;               // 0xD = container type (jones3dstatic.cnd), 0xC = game world
+        CndWorldFlag flags; // World stored in cnd file usually has flags set to 0x0C. The static world has also flag 0x1 (StaticWorld) set and combined with other flags results in value 0x0D.
         uint32_t version;
         float    worldGravity;
         float    ceilingSky_Z;

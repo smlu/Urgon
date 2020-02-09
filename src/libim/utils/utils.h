@@ -171,10 +171,12 @@ namespace libim::utils {
     struct underlying_type<T, std::enable_if_t<std::is_enum_v<T>>> {
         using type = std::underlying_type_t<T>;
     };
+
     template<typename T>
     using underlying_type_t = typename underlying_type<T>::type;
 
 
+    // Returns number of digits in the number.
     template<typename T>
     [[nodiscard]] inline std::size_t numdigits(T i)
     {
@@ -245,6 +247,32 @@ namespace libim::utils {
     [[nodiscard]] inline std::string trim(const std::array<char, N>& str)
     {
         return detail::trim(str.data(), N);
+    }
+
+
+    // Transforms inputed string to all lower case charactes.
+    inline void to_lower(std::string& str)
+    {
+        std::transform(str.begin(), str.end(), str.begin(),
+            [](unsigned char c){ return std::tolower(c); }
+        );
+    }
+
+    // Checks if string s ends with x
+    [[nodiscard]] inline bool ends_with(const std::string& s, std::string_view x)
+    {
+        return s.size() >= x.size() && s.compare(s.size() - x.size(), s.npos, x) == 0;
+    }
+
+    // Case Insensitive check if string s ends with x
+    [[nodiscard]] inline bool iends_with(const std::string& s, std::string_view x)
+    {
+        auto it = x.begin();
+        return s.size() >= x.size() &&
+            std::all_of(std::next(s.begin(), s.size() - x.size()), s.end(),
+                [&it](const char & c){
+                    return ::tolower(c) == ::tolower(*(it++));
+            });
     }
 }
 

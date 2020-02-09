@@ -31,12 +31,12 @@ bool PatchCndMaterials(const std::string& cndFile, const utils::HashMap<Material
         OutputFileStream ofstream(patchedCndFile);
 
         /* Copy input cnd file to output stream until materials section */
-        const auto matSectionOffset = CND::GetMatSectionOffset(ifstream);
+        const auto matSectionOffset = CND::GetOffset_Materials(ifstream);
         ofstream.write(ifstream, 0, matSectionOffset);
         std::size_t oldSizePixeldata = ifstream.read<uint32_t>();
 
         /* Write new materials section */
-        CND::WriteSectionMaterials(ofstream, materials);
+        CND::WriteSection_Materials(ofstream, materials);
 
         /* Write the rest of inputted cnd file to the output */
         std::size_t endOffsMatSection = ifstream.tell() + sizeof(CndMatHeader) * cndHeader.numMaterials + oldSizePixeldata;

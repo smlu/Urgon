@@ -9,7 +9,7 @@ using namespace libim::content::asset;
 using namespace libim::utils;
 
 
-std::size_t CND::GetMatSectionOffset(const InputStream& istream)
+std::size_t CND::GetOffset_Materials(const InputStream& istream)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
@@ -30,7 +30,7 @@ std::size_t CND::GetMatSectionOffset(const InputStream& istream)
             4;                         // 4 = unknown 4 bytes*/
 }
 
-HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, const InputStream& istream)
+HashMap<Material> CND::ParseSection_Materials(const CndHeader& header, const InputStream& istream)
 {
     HashMap<Material> materials;
     try
@@ -111,11 +111,11 @@ HashMap<Material> CND::ParseSectionMaterials(const CndHeader& header, const Inpu
 utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
 {
     auto cndHeader = LoadHeader(istream);
-    istream.seek(GetMatSectionOffset(istream));
-    return ParseSectionMaterials(cndHeader, istream);
+    istream.seek(GetOffset_Materials(istream));
+    return ParseSection_Materials(cndHeader, istream);
 }
 
-void CND::WriteSectionMaterials(OutputStream& ostream, const utils::HashMap<Material>& materials)
+void CND::WriteSection_Materials(OutputStream& ostream, const utils::HashMap<Material>& materials)
 {
     std::vector<CndMatHeader> cndHeaders;
     cndHeaders.reserve(materials.size());
@@ -185,7 +185,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /* Seek to material header list */
-        const auto matListOffset = GetMatSectionOffset(ifstream);
+        const auto matListOffset = GetOffset_Materials(ifstream);
         ifstream.seek(matListOffset);
 
         /* Read size of raw data of all materials */

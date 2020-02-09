@@ -132,10 +132,10 @@ namespace libim::content::asset {
         */
         static uint32_t ParseSectionSounds(audio::impl::SbTrack& track, const InputStream& istream);
 
-        static std::size_t GetMatSectionOffset(const InputStream& istream);
-        static utils::HashMap<Material> ParseSectionMaterials(const CndHeader& header, const InputStream& istream); // Reads materials section. Offset of istream hast to be at beginning of material section.
+        static std::size_t GetOffset_Materials(const InputStream& istream);
+        static utils::HashMap<Material> ParseSection_Materials(const CndHeader& header, const InputStream& istream); // Reads materials section. Offset of istream hast to be at beginning of material section.
         static utils::HashMap<Material> ReadMaterials(const InputStream& istream);
-        static void WriteSectionMaterials(OutputStream& ostream, const utils::HashMap<Material>& materials);
+        static void WriteSection_Materials(OutputStream& ostream, const utils::HashMap<Material>& materials);
         static bool ReplaceMaterial(const Material& mat, const std::string& filename);
 
         static std::size_t GetOffset_Georesource(const CndHeader& header, const InputStream& istream);

@@ -2,6 +2,7 @@
 #define LIBIM_TOKENIZER_H
 #include "token.h"
 #include "../io/stream.h"
+#include "../utils/typemask.h"
 
 #include <functional>
 #include <memory>
@@ -47,6 +48,9 @@ namespace libim::text {
         void assertPunctuator(std::string_view punc);
         void assertEndOfFile();
 
+        void skipNextToken();
+        bool skipNextTokenIf(utils::TypeMask<Token::Type> mask); // !< Skips next token if it maches the type. Returns true if skipped.
+        bool skipNextTokenIfNot(utils::TypeMask<Token::Type> mask); // !< Skips next token if it doesn't match the type. Returns true if skipped.
         void skipToNextLine();
 
         void setReportEol(bool report);

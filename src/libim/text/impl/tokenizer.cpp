@@ -133,6 +133,36 @@ void Tokenizer::assertEndOfFile()
     }
 }
 
+void Tokenizer::skipNextToken()
+{
+    Token t;
+    getNextToken(t);
+}
+
+bool Tokenizer::skipNextTokenIf(utils::TypeMask<Token::Type> mask)
+{
+    Token t;
+    using namespace utils;
+    if (peekNextToken(t); TypeMask(t.type()) & mask)
+    {
+        getNextToken(t);
+        return true;
+    }
+    return false;
+}
+
+bool Tokenizer::skipNextTokenIfNot(utils::TypeMask<Token::Type> mask)
+{
+    Token t;
+    using namespace utils;
+    if (peekNextToken(t); !(TypeMask(t.type()) & mask))
+    {
+        getNextToken(t);
+        return true;
+    }
+    return false;
+}
+
 void Tokenizer::skipToNextLine()
 {
     tp_->skipToNextLine();

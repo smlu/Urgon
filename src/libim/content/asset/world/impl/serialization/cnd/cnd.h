@@ -13,7 +13,6 @@
 #include "../../../../../audio/impl/sbtrack.h"
 #include "../../../../material/material.h"
 
-
 #include "../../../../../../common.h"
 #include "../../../../../../io/stream.h"
 #include "../../../../../../math/color.h"
@@ -22,7 +21,6 @@
 #include "../../../../../../utils/hashmap.h"
 
 namespace libim::content::asset {
-    static constexpr std::size_t kCndMaxNameLen = 64;
 
     //PACKED(
     struct CndHeader

@@ -22,9 +22,12 @@ const Token& Tokenizer::currentToken() const
     return cachedTkn_;
 }
 
-const Token& Tokenizer::getNextToken()
+const Token& Tokenizer::getNextToken(bool lowercased)
 {
     getNextToken(cachedTkn_);
+    if(lowercased){
+        cachedTkn_.toLowercase();
+    }
     return cachedTkn_;
 }
 
@@ -33,10 +36,13 @@ void Tokenizer::getNextToken(Token& out)
     tp_->readToken(out);
 }
 
-const Token& Tokenizer::peekNextToken()
+const Token& Tokenizer::peekNextToken(bool lowercased)
 {
-    peekNextToken(cachedTkn_);
-    return cachedTkn_;
+    peekNextToken(peekedTkn_);
+    if(lowercased){
+        peekedTkn_.toLowercase();
+    }
+    return peekedTkn_;
 }
 
 void Tokenizer::peekNextToken(Token& out)
@@ -60,7 +66,6 @@ std::string Tokenizer::getStringLiteral()
     if(cachedTkn_.type() != Token::String) {
         throw TokenizerError("expected string literal"sv, cachedTkn_.location());
     }
-
     return std::move(cachedTkn_).value();
 }
 

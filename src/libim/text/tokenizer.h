@@ -23,9 +23,9 @@ namespace libim::text {
         Tokenizer& operator=(const Tokenizer&) = delete;
         Tokenizer operator=(Tokenizer&&) noexcept = delete;
 
-        const Token& currentToken() const;
-        const Token& getNextToken();
-        const Token& peekNextToken();
+        [[nodiscard]] const Token& currentToken() const;
+        const Token& getNextToken(bool lowercased = false);
+        [[nodiscard]] const Token& peekNextToken(bool lowercased = false);
 
 
         template <typename T, typename DT = std::decay_t<T>>
@@ -63,6 +63,7 @@ namespace libim::text {
 
     protected:
         Token cachedTkn_;
+        Token peekedTkn_;
         class TokenizerPrivate;
         std::unique_ptr<
             TokenizerPrivate

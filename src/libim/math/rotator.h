@@ -21,16 +21,15 @@ namespace libim {
             Base_{ std::move(a) }
         {}
 
-        inline T roll() const
+        inline T pitch() const
         {
             return this->at(0);
         }
 
-        inline void setRoll(T r)
+        inline void setPitch(T p)
         {
-            set(0, r);
+            set(0, p);
         }
-
 
         inline T yaw() const
         {
@@ -41,15 +40,15 @@ namespace libim {
         {
             set(1, p);
         }
-
-        inline T pitch() const
+        
+        inline T roll() const
         {
             return this->at(2);
         }
 
-        inline void setPitch(T p)
+        inline void setRoll(T r)
         {
-            set(2, p);
+            set(2, r);
         }
     };
 

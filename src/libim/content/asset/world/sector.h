@@ -24,8 +24,9 @@ namespace libim::content::asset {
             HideOnAutomap   = 0x10,
             NoActorEnter    = 0x20,
             Pit             = 0x40,
+            Water           = 0x100,
             HasCollideBox   = 0x1000,
-            ShownOnAutoMap  = 0x4000
+            Seen            = 0x4000  // Sector has been seen by player/camera. See: sol_bluegem.cog, pru_lightspike.cog, pru_voicelinewhipeagle.cog, pru_voiceline.cog
         };
 
         using Id = std::size_t;

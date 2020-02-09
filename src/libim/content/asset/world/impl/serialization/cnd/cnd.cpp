@@ -10,8 +10,9 @@
 
 using namespace libim;
 using namespace libim::content::asset;
+using namespace libim::utils;
 
-static constexpr uint32_t FileVersion = 3;
+static constexpr uint32_t kFileVersion = 3;
 
 std::vector<std::string> ReadResourceList(const InputStream& istream, std::size_t size)
 {
@@ -21,7 +22,8 @@ std::vector<std::string> ReadResourceList(const InputStream& istream, std::size_
     res.reserve(rlist.size());
 
     std::transform(rlist.begin(), rlist.end(), std::back_insert_iterator(res),
-                   [](const auto& aName){ return utils::trim(aName); });
+        [](const auto& aName){ return utils::trim(aName); }
+    );
 
     return res;
 }
@@ -64,7 +66,7 @@ CndHeader CND::LoadHeader(const InputStream& istream)
     }
 
     /* Verify file version */
-    if(cndHeader.version != FileVersion) {
+    if(cndHeader.version != kFileVersion) {
         throw StreamError("Error wrong CND file version: " + std::to_string(cndHeader.version));
     }
 

@@ -47,6 +47,7 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
             a.flags,
             make_optional_idx(a.mirror),
             std::nullopt,
+            std::nullopt,
             a.distance
         });
     }

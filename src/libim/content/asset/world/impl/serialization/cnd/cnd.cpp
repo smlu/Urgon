@@ -45,6 +45,12 @@ void WriteResourceList(OutputStream& ostream, const List<T, Args...>& list, Lamb
     ostream.write(wlist);
 }
 
+template<template<typename, typename ...> class List, typename ...Args>
+void WriteResourceList(OutputStream& ostream, const List<std::string, Args...>& list)
+{
+     WriteResourceList(ostream, list, [](const std::string& e){ return e; });
+}
+
 
 
 CndHeader CND::LoadHeader(const InputStream& istream)

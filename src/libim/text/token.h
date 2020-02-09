@@ -6,6 +6,7 @@
 
 #include "diagnostic_location.h"
 #include "tokenizer_error.h"
+#include "../utils/utils.h"
 
 namespace libim::text {
     class Token final
@@ -13,16 +14,16 @@ namespace libim::text {
     public:
         enum Type
         {
-            Invalid = -1,
-            EndOfFile,
-            EndOfLine,
-            Identifier,
-            String,
-            Punctuator,
-            Integer,
-            HexInteger,
-            OctInteger,
-            FloatNumber
+            Invalid     = -1,
+            EndOfFile   = 0,
+            EndOfLine   = 1,
+            Identifier  = 2,
+            String      = 3,
+            Punctuator  = 4,
+            Integer     = 5,
+            HexInteger  = 6,
+            OctInteger  = 7,
+            FloatNumber = 8
         };
 
         Token() = default;
@@ -140,6 +141,18 @@ namespace libim::text {
 
             return result;
          }
+
+        void toLowercase()
+        {
+            utils::to_lower(m_value);
+        }
+
+        Token lowercased() const
+        {
+            Token cpy = *this;
+            cpy.toLowercase();
+            return cpy;
+        }
 
     private:
         Type m_type = Invalid;

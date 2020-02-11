@@ -143,7 +143,7 @@ namespace libim::utils {
     typename T::iterator copy(typename T::iterator s_begin, std::size_t count, T& dest)
     {
         dest.reserve(count);
-        auto s_end = s_begin + count;
+        auto s_end = std::next(s_begin, count);
         std::copy(s_begin, s_end, std::back_inserter(dest));
         return s_end;
     }

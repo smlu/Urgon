@@ -16,7 +16,7 @@ static constexpr uint32_t kFileVersion = 3;
 
 std::vector<std::string> ReadResourceList(const InputStream& istream, std::size_t size)
 {
-    auto rlist = istream.read<std::vector<ResourceName>>(size);
+    auto rlist = istream.read<std::vector<CndResourceName>>(size);
 
     std::vector<std::string> res;
     res.reserve(rlist.size());
@@ -31,13 +31,13 @@ std::vector<std::string> ReadResourceList(const InputStream& istream, std::size_
 template<template<typename, typename ...> class List, typename T, typename ...Args, typename Lambda>
 void WriteResourceList(OutputStream& ostream, const List<T, Args...>& list, Lambda&& nameExtractor)
 {
-    std::vector<ResourceName> wlist;
+    std::vector<CndResourceName> wlist;
     wlist.reserve(list.size());
 
     std::transform(list.begin(), list.end(), std::back_insert_iterator(wlist),
     [&](const T& e)
     {
-        ResourceName aName;
+        CndResourceName aName;
         if(!utils::strcpy(aName, nameExtractor(e))) {
             throw StreamError("Too long resource name to write to CND stream");
         }
@@ -107,7 +107,7 @@ void CND::WriteSection_AiClass(OutputStream& ostream, const std::vector<std::str
 
 std::size_t CND::GetOffset_Models(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_AiClass(istream, header) + header.numAiClasses * sizeof(ResourceName);
+    return GetOffset_AiClass(istream, header) + header.numAiClasses * sizeof(CndResourceName);
 }
 
 std::vector<std::string> CND::ParseSection_Models(const InputStream& istream, const CndHeader& header)
@@ -129,7 +129,7 @@ void CND::WriteSection_Models(OutputStream& ostream, const std::vector<std::stri
 
 std::size_t CND::GetOffset_Sprites(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_Models(istream, header) + header.numModels * sizeof(ResourceName);
+    return GetOffset_Models(istream, header) + header.numModels * sizeof(CndResourceName);
 }
 
 std::vector<std::string> CND::ParseSection_Sprites(const InputStream& istream, const CndHeader& header)
@@ -184,7 +184,7 @@ void CND::WriteSection_AnimClass(OutputStream& ostream, const std::vector<std::s
 
 std::size_t CND::GetOffset_SoundClass(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_AnimClass(istream, header) + sizeof(ResourceName) * header.numPuppets;
+    return GetOffset_AnimClass(istream, header) + sizeof(CndResourceName) * header.numPuppets;
 }
 
 std::vector<std::string> CND::ParseSection_SoundClass(const InputStream& istream, const CndHeader& header)
@@ -206,7 +206,7 @@ void CND::WriteSection_SoundClass(OutputStream& ostream, const std::vector<std::
 
 std::size_t CND::GetOffset_CogScripts(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_SoundClass(istream, header) + sizeof(ResourceName) * header.numSoundClasses;
+    return GetOffset_SoundClass(istream, header) + sizeof(CndResourceName) * header.numSoundClasses;
 }
 
 std::vector<std::string> CND::ParseSection_CogScripts(const InputStream& istream, const CndHeader& header)

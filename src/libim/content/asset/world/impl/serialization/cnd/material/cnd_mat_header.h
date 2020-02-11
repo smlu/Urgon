@@ -7,7 +7,7 @@
 namespace libim::content::asset {
     struct CndMatHeader final
     {
-        ResourceName name;
+        CndResourceName name;
         int width;
         int height;
         int mipmapCount;

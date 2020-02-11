@@ -16,7 +16,7 @@ namespace libim::content::asset {
         Vector2f avgLightFalloff;
         Box3f    collideBox;
         Box3f    boundBox;
-        ResourceName ambientSound; // The name of sound file
+        CndResourceName ambientSound; // The name of sound file
         float    ambientSoundVolume;
         Vector3f center;
         float    radius;

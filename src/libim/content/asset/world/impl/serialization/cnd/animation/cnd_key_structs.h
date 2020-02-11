@@ -56,7 +56,7 @@ namespace libim::content::asset
 
     struct CndKeyHeader final
     {
-        ResourceName name;
+        CndResourceName name;
         Animation::Flag flags;
         Animation::Type  type;
         uint32_t frames;
@@ -68,7 +68,7 @@ namespace libim::content::asset
 
     struct CndKeyNode final
     {
-        ResourceName meshName;
+        CndResourceName meshName;
         uint32_t nodeNum;
         uint32_t numEntries;
     };

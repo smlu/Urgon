@@ -19,7 +19,7 @@ using namespace std::string_view_literals;
 
 std::size_t CND::GetOffset_Keyframes(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_Sprites(istream, header) + header.numSprites * sizeof(ResourceName);
+    return GetOffset_Sprites(istream, header) + header.numSprites * sizeof(CndResourceName);
 }
 
 HashMap<Animation> CND::ParseSection_Keyframes(const InputStream& istream, const CndHeader& header)

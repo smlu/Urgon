@@ -43,7 +43,7 @@ namespace libim::content::asset {
         }
     };
 
-    using ResourceName = CndString<kCndMaxNameLen>;
+    using CndResourceName = CndString<kCndMaxNameLen>;
 
     template<std::size_t N>
     std::ostream& operator<<(std::ostream& os, const CndString<N>& cstr)

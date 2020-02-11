@@ -60,6 +60,15 @@ namespace libim::utils {
             return std::strncpy(dest, src.data(), d_size) != nullptr;
         #endif
         }
+
+        template <typename T>
+        auto promote_to_printable_integer_type(T i) -> decltype(+i)
+        {
+            // Make char type printable as number and not as character.
+            static_assert (std::is_arithmetic_v<T>);
+            return +i;
+        }
+
     } // detail
 
 
@@ -197,7 +206,6 @@ namespace libim::utils {
         std::stringstream ss;
         ss.exceptions(std::ios::failbit);
 
-
         if constexpr(base == 8) {
             ss << std::oct << std::showbase;
         }
@@ -219,7 +227,7 @@ namespace libim::utils {
                << std::setprecision(precision);
         }
 
-        ss << n;
+        ss << detail::promote_to_printable_integer_type(n);
         return ss.str();
     }
 

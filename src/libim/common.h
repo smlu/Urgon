@@ -47,10 +47,10 @@ namespace libim {
     static constexpr std::size_t DOUBLE_BYTE = 8;
     static constexpr std::size_t BYTE_BIT = CHAR_BIT;
 
-    using byte_t = uint8_t;
+    using byte_t    = uint8_t;
     using ByteArray = std::vector<byte_t>;
 
-    using Bitmap = ByteArray;
+    using Bitmap    = ByteArray;
     using BitmapPtr = std::shared_ptr<Bitmap>;
 
     inline BitmapPtr MakeBitmapPtr(std::size_t size) {

@@ -169,8 +169,14 @@ namespace libim::content::text {
 
             for(auto[i, v] : utils::enumerate(list))
             {
-                writeRow(*this, i, v);
-                writeEol();
+                auto pos = tell();
+                writeRow(*this, i, v); // TODO: detect via function trait the return type of row writer function.
+                                       //       The return type can only be bool or void.
+                                       //       Based on te return type write EOL, e.g:
+                                       //       if void always write EOL, if bool write EOL only when true is returned.
+                if(tell() > pos) { // write eol if pos has changed.
+                    writeEol();
+                }
             }
 
             if constexpr (!writeListSize)

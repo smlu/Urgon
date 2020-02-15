@@ -70,6 +70,7 @@ namespace libim::content::text {
         TextResourceWriter& indent(std::size_t width, char indch);
         TextResourceWriter& indent(std::size_t width);
         TextResourceWriter& write(std::string_view text);
+        TextResourceWriter& write(std::string_view text, std::size_t fieldWidth, std::size_t minSep = 1, char indentChar = ' ');
         TextResourceWriter& writeCommentLine(std::string_view comment);
         TextResourceWriter& writeEol();
 

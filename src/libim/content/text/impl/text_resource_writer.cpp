@@ -47,6 +47,16 @@ TextResourceWriter& TextResourceWriter::write(std::string_view text)
     return  *this;
 }
 
+TextResourceWriter& TextResourceWriter::write(std::string_view text, std::size_t fieldWidth, std::size_t minSep, char indentChar)
+{
+    write(text);
+
+    auto[min, max] = std::minmax(fieldWidth, std::clamp(text.size(), minSep, fieldWidth));
+    auto indw = std::max(minSep, max - min);
+    indent(indw, indentChar);
+    return *this;
+}
+
 TextResourceWriter& TextResourceWriter::writeCommentLine(std::string_view comment)
 {
     if(!comment.empty())

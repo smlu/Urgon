@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <string_view>
 
 #include "../../../../../../utils/utils.h"
 
@@ -27,6 +28,12 @@ namespace libim::content::asset {
             return toStdString();
         }
 
+        operator std::string_view() const // Warning: It is dangerus to implicitly return string_view!
+        {
+            auto endIt = std::find(this->begin(), this->end(), '\0');
+            return std::string_view(this->data(), std::distance(this->begin(), endIt));
+        }
+
         bool operator == (const std::string& rstr) const
         {
             if (rstr.size() > N) return false;
@@ -40,6 +47,10 @@ namespace libim::content::asset {
                 }
             }
             return true;
+        }
+
+        constexpr bool isEmpty() const {
+            return N == 0 || this->at(0) == 0;
         }
     };
 

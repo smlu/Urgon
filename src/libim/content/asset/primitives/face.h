@@ -17,9 +17,10 @@ namespace libim::content::asset {
     {
         enum Flag : uint32_t
         {
-            Normal                   = 0,
-            TwoSided                 = 1,
-            Translucent              = 2
+            Normal                   = 0x00,
+            TwoSided                 = 0x01,
+            Translucent              = 0x02,
+            Unknown_4                = 0x04,
         };
 
         struct VertexIdx

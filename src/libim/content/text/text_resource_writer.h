@@ -126,7 +126,7 @@ namespace libim::content::text {
             write(key);
             this->indent(indent);
             writeVector(box.v0, 1);
-            writeVector(box.v0, 1);
+            writeVector(box.v1, 1);
             return writeEol();
         }
 

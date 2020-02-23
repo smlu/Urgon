@@ -1,7 +1,8 @@
 #ifndef LIBIM_SECTOR_H
 #define LIBIM_SECTOR_H
-#include "../../../math/color.h"
 #include "../../../math/box.h"
+#include "../../../math/color.h"
+#include "../../../math/math.h"
 #include "../../../math/vector2.h"
 #include "../../../math/vector3.h"
 #include "../../audio/sound.h"
@@ -35,6 +36,7 @@ namespace libim::content::asset {
         Flag flags;
         ColorRgb tint;
 
+        int32_t  pvsIdx;
         Vector3f center;
         float    radius;
         Vector3f thrust;

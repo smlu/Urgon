@@ -23,7 +23,7 @@ namespace libim::content::asset {
         int32_t  firstSurfaceIdx;
         int32_t  surfacesCount;
         int32_t  verticesCount;
-        int32_t  unknown;
+        int32_t  pvsIdx;
         Vector3f thrust;
     };
 }

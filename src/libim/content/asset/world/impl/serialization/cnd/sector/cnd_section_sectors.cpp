@@ -47,6 +47,7 @@ std::vector<Sector> CND::ParseSection_Sectors(const InputStream& istream, const 
         s.center = h.center;
         s.radius = h.radius;
         s.thrust = h.thrust;
+        s.pvsIdx = h.pvsIdx;
 
         s.ambientLight    = h.ambientLight;   //TODO: Alpha is probably 0, set it to 1.f
         s.extraLight      = h.extraLight;     //TODO: Alpha is probably 0, set it to 1.f
@@ -104,8 +105,8 @@ void CND::WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>&
         h.center = s.center;
         h.radius = s.radius;
 
-        h.ambientLight = s.ambientLight;
-        h.extraLight   = s.extraLight;
+        h.ambientLight    = s.ambientLight;
+        h.extraLight      = s.extraLight;
         h.avgLightPos     = s.avgLightPos;
         h.avgLightInt     = s.avgLightInt;
         h.avgLightFalloff = s.avgLightFalloff;
@@ -125,6 +126,8 @@ void CND::WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>&
         h.firstSurfaceIdx = s.surfaces.firstIdx; // TODO: safecast
         h.surfacesCount   = s.surfaces.count;    // TODO: safecast
         h.verticesCount   = s.vertIdxs.size();   // TODO: safecast
+
+        h.pvsIdx = s.pvsIdx;
         h.thrust = s.thrust;
 
         if(vertIdxs.capacity() < s.vertIdxs.size()) {

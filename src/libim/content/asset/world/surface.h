@@ -10,7 +10,7 @@ namespace libim::content::asset {
     struct Surface final : public Face
     {
         enum SurfaceFlag : uint32_t
-        {
+        {                           // 0x0 - can got through the surface
             Floor                    = 0x1,
             CogLinked                = 0x2,
             Impassable               = 0x4,        // Maybe unable for thing(player) to walk on this surface.
@@ -45,9 +45,23 @@ namespace libim::content::asset {
         Id id;
         SurfaceFlag surflags;
         std::optional<std::size_t> adjoinIdx;
-        std::vector<Color> vecIntensities;
+        std::vector<Color> vecIntensities;     // verticies color. Color of each vertex is applied over surface's texture and
+                                               // can give surface an additional ambient color e.g. underwater blue color.
     };
 
+
+    inline bool operator == (const Surface& lhs, const Surface& rhs)
+    {
+        return dynamic_cast<const Face&>(lhs)  == rhs &&
+               lhs.id             == rhs.id           &&
+               lhs.surflags       == rhs.surflags     &&
+               lhs.adjoinIdx      == rhs.adjoinIdx    &&
+               lhs.vecIntensities == rhs.vecIntensities;
+    }
+
+    inline bool operator != (const Surface& lhs, const Surface& rhs) {
+        return !(lhs == rhs);
+    }
 
     /* Jones3d surface struct
 

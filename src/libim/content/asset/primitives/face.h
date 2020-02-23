@@ -33,7 +33,7 @@ namespace libim::content::asset {
         GeoMode geoMode;
         LightMode lightMode;
         std::optional<std::size_t> matIdx;
-        std::size_t matCelIdx; // material texture to use (material mipmap idx)
+        std::size_t matCelIdx = 0; // material texture to use (material mipmap idx)
         Color extraLight;          // face additional light color
         Vector3f normal;
         std::vector<VertexIdx> verts;

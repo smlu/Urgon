@@ -12,5 +12,6 @@ namespace libim::content::asset {
         float distance;
     };
 
+    static_assert (sizeof(CndSurfaceAdjoin) == 12);
 }
 #endif // LIBIM_CND_ADJOIN_H

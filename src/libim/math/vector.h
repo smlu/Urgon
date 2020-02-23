@@ -8,6 +8,8 @@ namespace libim {
 
     template<typename T, std::size_t N>
     struct Vector : public AbstractVector<T, N, position_vector_tag>
-    {};
+    {
+        using AbstractVector<T, N, position_vector_tag>::AbstractVector;
+    };
 }
 #endif // LIBIM_VECTOR_H

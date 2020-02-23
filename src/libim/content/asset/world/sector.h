@@ -62,5 +62,38 @@ namespace libim::content::asset {
         } surfaces;
     };
 
+    inline bool operator == (const Sector::AmbientSound& lhs, const Sector::AmbientSound& rhs) {
+        return lhs.sound == rhs.sound && lhs.volume == rhs.volume;
+    }
+
+    inline bool operator != (const Sector::AmbientSound& lhs, const Sector::AmbientSound& rhs) {
+        return !(lhs == rhs);
+    }
+
+    inline bool operator == (const Sector& lhs, const Sector& rhs)
+    {
+        return cmpf(lhs.radius, rhs.radius)                   &&
+               lhs.id                == rhs.id                &&
+               lhs.flags             == rhs.flags             &&
+               lhs.tint              == rhs.tint              &&
+               lhs.center            == rhs.center            &&
+               lhs.thrust            == rhs.thrust            &&
+               lhs.boundBox          == rhs.boundBox          &&
+               lhs.collideBox        == rhs.collideBox        &&
+               lhs.ambientLight      == rhs.ambientLight      &&
+               lhs.extraLight        == rhs.extraLight        &&
+               lhs.avgLightPos       == rhs.avgLightPos       &&
+               lhs.avgLightInt       == rhs.avgLightInt       &&
+               lhs.avgLightFalloff   == rhs.avgLightFalloff   &&
+               lhs.pvsIdx            == rhs.pvsIdx            &&
+               lhs.ambientSound      == rhs.ambientSound      &&
+               lhs.vertIdxs          == rhs.vertIdxs          &&
+               lhs.surfaces.count    == rhs.surfaces.count    &&
+               lhs.surfaces.firstIdx == rhs.surfaces.firstIdx;
+    }
+
+    inline bool operator != (const Sector& lhs, const Sector& rhs) {
+        return !(lhs == rhs);
+    }
 }
 #endif // LIBIM_SECTOR_H

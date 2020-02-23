@@ -55,18 +55,18 @@ void WriteResourceList(OutputStream& ostream, const List<std::string, Args...>& 
 
 
 
-CndHeader CND::LoadHeader(const InputStream& istream)
+CndHeader CND::ReadHeader(const InputStream& istream)
 {
-    istream.seek(0);
+    istream.seekBegin();
     CndHeader cndHeader = istream.read<CndHeader>();
 
     /* Verify file copyright notice  */
-    if( !std::equal(cndHeader.copyright.begin(), cndHeader.copyright.end(), kFileCopyright.begin())) {
+    if (!std::equal(cndHeader.copyright.begin(), cndHeader.copyright.end(), kFileCopyright.begin())) {
         throw StreamError("Error bad CND file copyright");
     }
 
     /* Verify file version */
-    if(cndHeader.version != kFileVersion) {
+    if (cndHeader.version != kFileVersion) {
         throw StreamError("Error wrong CND file version: " + std::to_string(cndHeader.version));
     }
 
@@ -95,7 +95,7 @@ std::vector<std::string> CND::ParseSection_AiClass(const InputStream& istream, c
 
 std::vector<std::string> CND::ReadAiClass(const InputStream& istream)
 {
-    auto header = LoadHeader(istream);
+    auto header = ReadHeader(istream);
     istream.seek(GetOffset_AiClass(istream, header));
     return ParseSection_AiClass(istream, header);
 }
@@ -117,7 +117,7 @@ std::vector<std::string> CND::ParseSection_Models(const InputStream& istream, co
 
 std::vector<std::string> CND::ReadModels(const InputStream& istream)
 {
-    auto header = LoadHeader(istream);
+    auto header = ReadHeader(istream);
     istream.seek(GetOffset_Models(istream, header));
     return ParseSection_Models(istream, header);
 }
@@ -139,7 +139,7 @@ std::vector<std::string> CND::ParseSection_Sprites(const InputStream& istream, c
 
 std::vector<std::string> CND::ReadSprites(const InputStream& istream)
 {
-    auto header = LoadHeader(istream);
+    auto header = ReadHeader(istream);
     istream.seek(GetOffset_Sprites(istream, header));
     return ParseSection_Sprites(istream, header);
 }
@@ -172,7 +172,7 @@ std::vector<std::string> CND::ParseSection_AnimClass(const InputStream& istream,
 
 std::vector<std::string> CND::ReadAnimClass(const InputStream& istream)
 {
-    auto header = LoadHeader(istream);
+    auto header = ReadHeader(istream);
     istream.seek(GetOffset_AnimClass(istream, header));
     return ParseSection_AnimClass(istream, header);
 }
@@ -194,7 +194,7 @@ std::vector<std::string> CND::ParseSection_SoundClass(const InputStream& istream
 
 std::vector<std::string> CND::ReadSoundClass(const InputStream& istream)
 {
-    auto header = LoadHeader(istream);
+    auto header = ReadHeader(istream);
     istream.seek(GetOffset_SoundClass(istream, header));
     return ParseSection_SoundClass(istream, header);
 }
@@ -216,7 +216,7 @@ std::vector<std::string> CND::ParseSection_CogScripts(const InputStream& istream
 
 std::vector<std::string> CND::ReadCogScripts(const InputStream& istream)
 {
-    auto header = LoadHeader(istream);
+    auto header = ReadHeader(istream);
     istream.seek(GetOffset_CogScripts(istream, header));
     return ParseSection_CogScripts(istream, header);
 }

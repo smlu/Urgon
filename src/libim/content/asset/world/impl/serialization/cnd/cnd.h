@@ -126,7 +126,7 @@ namespace libim::content::asset {
 
     struct CND final
     {
-        static CndHeader LoadHeader(const InputStream& istream);
+        static CndHeader ReadHeader(const InputStream& istream);
 
         /**
         * Parses sounds section.

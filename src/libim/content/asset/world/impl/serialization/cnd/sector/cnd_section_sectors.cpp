@@ -142,7 +142,7 @@ void CND::WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>&
 
 std::vector<Sector> CND::ReadSectors(const InputStream& istream)
 {
-    auto cndHeader = LoadHeader(istream);
+    auto cndHeader = ReadHeader(istream);
     istream.seek(GetOffset_Sectors(istream, cndHeader));
     return ParseSection_Sectors(istream, cndHeader);
 }

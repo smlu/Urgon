@@ -110,7 +110,7 @@ HashMap<Material> CND::ParseSection_Materials(const CndHeader& header, const Inp
 
 utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
 {
-    auto cndHeader = LoadHeader(istream);
+    auto cndHeader = ReadHeader(istream);
     istream.seek(GetOffset_Materials(istream));
     return ParseSection_Materials(cndHeader, istream);
 }
@@ -171,7 +171,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
         InputFileStream ifstream(cndFile);
 
         /* Read cnd file header */
-        auto cndHeader = LoadHeader(ifstream);
+        auto cndHeader = ReadHeader(ifstream);
 
         /* If no materials are present in file, return */
         if(cndHeader.numMaterials < 1)

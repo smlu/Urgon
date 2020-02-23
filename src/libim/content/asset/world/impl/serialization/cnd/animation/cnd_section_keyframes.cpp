@@ -83,7 +83,7 @@ HashMap<Animation> CND::ParseSection_Keyframes(const InputStream& istream, const
 
 HashMap<Animation> CND::ReadKeyframes(const InputStream& istream)
 {
-    auto cndHeader = LoadHeader(istream);
+    auto cndHeader = ReadHeader(istream);
 
     // Move stream to the beginning of the keyframes section
     auto sectionOffset = GetOffset_Keyframes(istream, cndHeader);

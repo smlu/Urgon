@@ -28,7 +28,7 @@ std::size_t CND::GetOffset_Georesource(const CndHeader& header, const InputStrea
 
 Georesource CND::ReadGeoresource(const InputStream& istream)
 {
-    auto cndHeader = LoadHeader(istream);
+    auto cndHeader = ReadHeader(istream);
     istream.seek(GetOffset_Georesource(cndHeader, istream));
     return ParseSection_Georesource(cndHeader, istream);
 }

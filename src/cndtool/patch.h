@@ -24,7 +24,7 @@ bool PatchCndMaterials(const std::string& cndFile, const utils::HashMap<Material
         InputFileStream ifstream(cndFile);
 
         /* Read cnd file header (this alos verifies if flie is valid cnd) */
-        auto cndHeader = CND::LoadHeader(ifstream);
+        auto cndHeader = CND::ReadHeader(ifstream);
 
         /* Open new output cnd file */
         const std::string patchedCndFile = cndFile + ".patched";
@@ -79,7 +79,7 @@ bool PatchCndAnimations(const std::string& cndFile, const utils::HashMap<Animati
         InputFileStream ifstream(cndFile);
 
         /* Read cnd file header (this alos verifies if flie is valid cnd) */
-        auto cndHeader = CND::LoadHeader(ifstream);
+        auto cndHeader = CND::ReadHeader(ifstream);
 
         /* Open new output cnd file */
         const std::string patchedCndFile = cndFile + ".patched";

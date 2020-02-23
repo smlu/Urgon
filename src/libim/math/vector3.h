@@ -8,7 +8,7 @@ namespace libim {
     {
         using Vector<T, 3>::Vector;
         constexpr inline Vector3(T x, T y, T z) noexcept :
-            Vector<T, 3>({ x, y, z })
+            Vector<T, 3>{{ x, y, z }}
         {}
 
         explicit constexpr inline Vector3(std::array<T, 3> a) noexcept :

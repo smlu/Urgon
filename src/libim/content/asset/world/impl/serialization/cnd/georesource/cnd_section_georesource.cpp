@@ -133,7 +133,7 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
 }
 
 
-void WriteSection_Georesource(OutputStream& ostream, const Georesource& geores)
+void CND::WriteSection_Georesource(OutputStream& ostream, const Georesource& geores)
 {
     // Write verteices and tex vertices
     ostream.write(geores.verts);
@@ -167,6 +167,7 @@ void WriteSection_Georesource(OutputStream& ostream, const Georesource& geores)
         h.lightMode   = s.lightMode;
         h.adjoinIdx   = from_optional_idx(s.adjoinIdx);
         h.extraLight  = s.extraLight;
+        h.numVerts    = s.verts.size();
         h.normal      = s.normal;
         surfheaders.push_back(std::move(h));
 

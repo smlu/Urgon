@@ -11,13 +11,13 @@ namespace libim::content::asset {
 
     struct CndSurfaceHeader
     {
-        int32_t materialIdx; // -1, if no surface material
+        int32_t materialIdx;   // -1, if no surface material
         Surface::SurfaceFlag surfflags;
         Face::Flag faceflags;
         GeoMode    geoMode;
         LightMode  lightMode;
         int32_t    adjoinIdx;  // -1, if no surface adjoin
-        Color      color;      // surface color
+        Color      extraLight; // surface additional light
         Vector3f   normal;
         uint32_t   numVerts;
     };
@@ -26,8 +26,9 @@ namespace libim::content::asset {
     {
         uint32_t vertIdx;
         int32_t texIdx;
-        Color color; // vertices color
+        Color color;       // vertex color
     };
+    static_assert(sizeof(CndSurfaceVerts) == 24);
 
 
     /* Jones3d surface struct

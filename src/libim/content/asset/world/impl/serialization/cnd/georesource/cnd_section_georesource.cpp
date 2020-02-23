@@ -103,19 +103,19 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
      for(const auto& h : vecSurfHeaders)
      {
          Surface s;
-         s.id        = std::size(geores.surfaces);
-         s.matIdx    = make_optional_idx(h.materialIdx);
-         s.surflags  = h.surfflags;
-         s.flags     = h.faceflags;
-         s.geoMode   = h.geoMode;
-         s.lightMode = h.lightMode;
-         s.adjoinIdx = make_optional_idx(h.adjoinIdx);
-         s.color     = h.color;
-         s.normal    = h.normal;
+         s.id         = std::size(geores.surfaces);
+         s.matIdx     = make_optional_idx(h.materialIdx);
+         s.surflags   = h.surfflags;
+         s.flags      = h.faceflags;
+         s.geoMode    = h.geoMode;
+         s.lightMode  = h.lightMode;
+         s.adjoinIdx  = make_optional_idx(h.adjoinIdx);
+         s.extraLight = h.extraLight;
+         s.normal     = h.normal;
 
          s.verts.resize(h.numVerts);
          s.vecIntensities.reserve(h.numVerts);
-         for(auto& v : s.verts)
+         for (auto& v : s.verts)
          {
              v.vertIdx   = itVerts->vertIdx; // TODO: safe cast
              v.texIdx    = make_optional_idx(itVerts->texIdx);
@@ -166,7 +166,7 @@ void WriteSection_Georesource(OutputStream& ostream, const Georesource& geores)
         h.geoMode     = s.geoMode;
         h.lightMode   = s.lightMode;
         h.adjoinIdx   = from_optional_idx(s.adjoinIdx);
-        h.color       = s.color;
+        h.extraLight  = s.extraLight;
         h.normal      = s.normal;
         surfheaders.push_back(std::move(h));
 

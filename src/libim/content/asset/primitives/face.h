@@ -38,5 +38,31 @@ namespace libim::content::asset {
         Vector3f normal;
         std::vector<VertexIdx> verts;
     };
+
+
+
+    inline bool operator == (const Face::VertexIdx& lhs, const Face::VertexIdx& rhs) {
+        return lhs.vertIdx == rhs.vertIdx && lhs.texIdx == rhs.texIdx;
+    }
+
+    inline bool operator != (const Face::VertexIdx& lhs, const Face::VertexIdx& rhs) {
+        return !(lhs == rhs);
+    }
+
+    inline bool operator == (const Face& lhs, const Face& rhs)
+    {
+        return lhs.flags      == rhs.flags      &&
+               lhs.geoMode    == rhs.geoMode    &&
+               lhs.lightMode  == rhs.lightMode  &&
+               lhs.matIdx     == rhs.matIdx     &&
+               lhs.matCelIdx  == rhs.matCelIdx  &&
+               lhs.extraLight == rhs.extraLight &&
+               lhs.normal     == rhs.normal     &&
+               lhs.verts      == rhs.verts;
+    }
+
+    inline bool operator != (const Face& lhs, const Face& rhs) {
+        return !(lhs == rhs);
+    }
 }
 #endif // LIBIM_FACE_H

@@ -16,5 +16,17 @@ namespace libim::content::asset {
         std::vector<SurfaceAdjoin> adjoints;
         std::vector<Surface> surfaces;
     };
+
+    inline bool operator == (const Georesource& lhs, const Georesource& rhs)
+    {
+        return lhs.verts == rhs.verts &&
+               lhs.texVerts == rhs.texVerts &&
+               lhs.adjoints == rhs.adjoints &&
+               lhs.surfaces == rhs.surfaces;
+    }
+
+    inline bool operator != (const Georesource& lhs, const Georesource& rhs) {
+        return !(lhs == rhs);
+    }
 }
 #endif // LIBIM_CND_GEORESOURCE_H

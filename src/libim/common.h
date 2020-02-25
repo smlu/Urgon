@@ -31,9 +31,9 @@
 #endif
 
 #ifndef _MSC_VER
-#  define PACKED( class_to_pack ) class_to_pack __attribute__((packed, aligned(1)))
+#  define PACKED( ... ) __VA_ARGS__ __attribute__((packed, aligned(1)))
 #else
-#  define PACKED( class_to_pack ) __pragma( pack(push, 1) ) class_to_pack __pragma( pack(pop) )
+#  define PACKED( ... ) __pragma( pack(push, 1) ) __VA_ARGS__ __pragma( pack(pop) )
 #endif
 
 namespace libim {
@@ -56,7 +56,6 @@ namespace libim {
     inline BitmapPtr MakeBitmapPtr(std::size_t size) {
         return std::make_shared<Bitmap>(size);
     }
-
 
 
     template <typename T,

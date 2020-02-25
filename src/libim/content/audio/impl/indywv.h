@@ -8,9 +8,21 @@
 #include "../../../io/stream.h"
 
 
-
 namespace libim::content::audio {
     constexpr std::array<char, 4> kWvsmId = { 'W', 'V', 'S', 'M' };
+    constexpr std::array<char, 6> kIndyWV = { 'I', 'N', 'D', 'Y', 'W', 'V' };
+
+    PACKED(struct IndyWVFileHeader
+    {
+        const std::array<char, 6> tag = kIndyWV;
+        int32_t sampleRate     = 0;
+        int32_t sampleBitSize  = 0;
+        int32_t numChannels    = 0;
+        int32_t dataSize       = 0;
+        int32_t unknown        = 0;
+    });
+    static_assert(sizeof(IndyWVFileHeader) == 26);
+
 
     struct IndyVWHeader
     {
@@ -20,6 +32,7 @@ namespace libim::content::audio {
         int16_t unknown4;
     };
 
+
     struct IndyVW
     {
         static int16_t swap16(int16_t x) // TODO: move to utils
@@ -28,7 +41,6 @@ namespace libim::content::audio {
             int16_t lo = (x & 0xff);
             return static_cast<int16_t>(lo << 8) | hi;
         }
-
 
         static ByteArray Inflate(const InputStream& istream)
         {
@@ -116,6 +128,5 @@ namespace libim::content::audio {
             }
         }
     };
-
 }
 #endif // LIBIM_INDYWV_H

@@ -1,6 +1,6 @@
-#include "../sound.h"
-#include "wav.h"
 #include "indywv.h"
+#include "sound_ser_helper.h"
+#include "../sound.h"
 #include "../../../io/stream.h"
 #include <exception>
 
@@ -42,12 +42,12 @@ std::shared_ptr<ByteArray> Sound::lock_or_throw() const
 bool Sound::is_valid(const ByteArray& data) const
 {
     return dataOffset_ + dataSize_  < data.size() &&
-            dirNameOffset_ < data.size() &&
-            dirNameOffset_ <= nameOffset_ &&
-            nameOffset_ < data.size() &&
-            sampleRate_ > 0 &&
-            bitsPerSample_ > 0 &&
-            numChannels_ > 0;
+        dirNameOffset_ < data.size()              &&
+        dirNameOffset_ <= nameOffset_             &&
+        nameOffset_    < data.size()              &&
+        sampleRate_    > 0                        &&
+        bitsPerSample_ > 0                        &&
+        numChannels_   > 0;
 }
 
 //Sound& Sound::deserialize(const InputStream& istream)
@@ -61,39 +61,39 @@ bool Sound::is_valid(const ByteArray& data) const
 //    return *this;
 //}
 
-bool Sound::serialize(OutputStream&& ostream) const
+void Sound::serialize(OutputStream&& ostream, SerializeFormat format) const
 {
-    return serialize(ostream);
+    serialize(ostream, format);
 }
 
-bool Sound::serialize(OutputStream& ostream) const
+void Sound::serialize(OutputStream& ostream, SerializeFormat format) const
 {
-    WavHeader wavHeader;
-    wavHeader.fmt.size          = 16;
-    wavHeader.fmt.audioFormat   = AudioFormat::LPCM;
-    wavHeader.fmt.numChannels   = numChannels_; // TODO: safe cast
-    wavHeader.fmt.sampleRate    = sampleRate_; // TODO: safe cast
-    wavHeader.fmt.blockAlign    = numChannels_ * bitsPerSample_/ 8; // TODO: safe cast
-    wavHeader.fmt.byteRate      = sampleRate_ * wavHeader.fmt.blockAlign; // TODO: safe cast
-    wavHeader.fmt.bitsPerSample = bitsPerSample_; // TODO: safe cast
-
-    WavDataChunk dataChunk;
-    dataChunk.data = data();
-    if(dataChunk.data.empty() && dataSize_ > 0) {
-        std::logic_error("Cannot serialize invalid sound object!");
+    switch (format) {
+        case SerializeFormat::WAV:
+        {
+            auto data = this->data();
+            if(data.empty() && dataSize_ > 0) {
+                std::logic_error("Cannot serialize invalid sound object as WAV");
+            }
+            SoundSerializeAsWAV(ostream, numChannels_, sampleRate_, bitsPerSample_, std::move(data));
+        } break;
+        case SerializeFormat::IndyWV:
+        {
+            auto ptrData = lock_or_throw();
+            if(!is_valid(*ptrData) || !isIndyWVFormat_) { // TODO: implement converting of data to indyWV format
+                std::logic_error("Cannot serialize invalid sound object as IndyWV");
+            }
+            SoundSerializeAsIndyWV(ostream, numChannels_, sampleRate_, bitsPerSample_, ptrData, dataOffset_, dataSize_);
+        } break;
+        default:
+            std::logic_error("Cannot serialize sound, unknown serialization format");
     }
-
-    dataChunk.size = dataChunk.data.size(); // TODO: safe cast
-    wavHeader.size = 36 + dataChunk.size;
-
-    ostream << wavHeader
-            << dataChunk;
-
-    return true;
 }
 
 ByteArray Sound::data() const
 {
+    // Returns decompressed sound data.
+
     ByteArray bytes;
     auto ptrData = lock_or_throw();
     if(!is_valid(*ptrData)) {
@@ -113,4 +113,3 @@ ByteArray Sound::data() const
 
     return bytes;
 }
-

@@ -7,9 +7,15 @@
 #include <string_view>
 
 namespace libim::content::audio {
+
     class Sound
     {
     public:
+        enum class SerializeFormat {
+            WAV    = 1,
+            IndyWV = 2
+        };
+
         Sound() = default;
         Sound(std::weak_ptr<ByteArray> wptrBankData, std::size_t dirNameOffset, std::size_t nameOffset, std::size_t dataOffset, std::size_t dataSize);
         Sound(Sound&&) noexcept = default;
@@ -84,8 +90,8 @@ namespace libim::content::audio {
 
         //Sound& deserialize(const InputStream& istream);
         //Sound& deserialize(const InputStream&& istream);
-        bool serialize(OutputStream&& ostream) const;
-        bool serialize(OutputStream& ostream) const;
+        void serialize(OutputStream&& ostream, SerializeFormat format = SerializeFormat::WAV) const;
+        void serialize(OutputStream& ostream, SerializeFormat format = SerializeFormat::WAV) const;
 
     private:
         std::shared_ptr<ByteArray> lock_or_throw() const;

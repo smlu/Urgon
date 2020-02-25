@@ -31,24 +31,23 @@ namespace libim::content::asset {
     using BV5Compression_t = BV5Compression;
 #endif
 
-    PACKED(
-    typedef struct {
+    PACKED(struct BitmapFileHeader {
         uint16_t   type;
         uint32_t   size;
         uint16_t   reserved1;
         uint16_t   reserved2;
         uint32_t   offBits;
-    }) BitmapFileHeader;
+    });
+    static_assert(sizeof(BitmapFileHeader) == 14);
 
-    typedef struct
+    struct Ciexyz
     {
         int32_t ciexyzX;
         int32_t ciexyzY;
         int32_t ciexyzZ;
-    } Ciexyz;
+    };
 
-    PACKED(
-    typedef struct {
+    PACKED(struct BitmapV5Header {
       uint32_t        size;
       int32_t         width;
       int32_t         height;
@@ -77,14 +76,16 @@ namespace libim::content::asset {
       uint32_t        profileData;
       uint32_t        profileSize;
       uint32_t        reserved;
-    }) BitmapV5Header;
+    });
+    static_assert(sizeof(BitmapV5Header) == 124);
 
 
-    typedef struct {
+    struct Bmp
+    {
         BitmapFileHeader header{};
         BitmapV5Header info{};
         BitmapPtr pixelData;
-    } Bmp;
+    };
 
 
     //std::shared_ptr<Bmp> LoadBmpFromFile(const std::string& filename)

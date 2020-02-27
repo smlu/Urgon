@@ -1,9 +1,9 @@
 #ifndef CNDTOOLARGS_H
 #define CNDTOOLARGS_H
 #include <stdexcept>
-#include "../libim/common.h"
-#include "../libim/utils/utils.h"
-#include "../cmdutils/options.h"
+#include <libim/common.h>
+#include <libim/utils/utils.h>
+#include <cmdutils/options.h>
 
 class CndToolArgs : public CmdArgs
 {

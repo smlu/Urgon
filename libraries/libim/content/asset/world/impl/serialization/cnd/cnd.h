@@ -12,6 +12,7 @@
 #include "../../../../animation/animation.h"
 #include "../../../../../audio/impl/sbtrack.h"
 #include "../../../../material/material.h"
+#include "../../../../world/sector.h"
 
 #include "../../../../../../common.h"
 #include "../../../../../../io/stream.h"

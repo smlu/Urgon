@@ -3,16 +3,17 @@
 #include <string>
 #include <string_view>
 
-#include "libim/common.h"
-#include "libim/io/filestream.h"
-#include "libim/content/asset/animation/animation.h"
-#include "libim/content/asset/material/bmp.h"
-#include "libim/content/asset/material/material.h"
-#include "libim/content/asset/world/impl/serialization/cnd/cnd.h"
-#include "libim/content/audio/soundbank.h"
-#include "libim/content/text/text_resource_writer.h"
-#include "libim/log/log.h"
+#include <libim/common.h>
+#include <libim/io/filestream.h>
+#include <libim/content/asset/animation/animation.h>
+#include <libim/content/asset/material/bmp.h>
+#include <libim/content/asset/material/material.h>
+#include <libim/content/asset/world/impl/serialization/cnd/cnd.h>
+#include <libim/content/audio/soundbank.h>
+#include <libim/content/text/text_resource_writer.h>
+#include <libim/log/log.h>
 
+#include "config.h"
 #include "cndtoolargs.h"
 #include "patch.h"
 
@@ -20,6 +21,7 @@
 #define SET_VINFO_LW(n) SETW(32 + n, '.')
 
 
+using namespace cndtool;
 using namespace libim;
 using namespace libim::content::audio;
 using namespace libim::content::asset;
@@ -27,10 +29,6 @@ using namespace libim::content::text;
 
 using namespace std::string_literals;
 using namespace std::string_view_literals;
-
-
-static constexpr auto kProgramName    = "cndtool"sv;
-static constexpr auto kProgramVersion = "0.3.1"sv;
 
 static constexpr auto extKey = ".key"sv;
 static constexpr auto extMat = ".mat"sv;
@@ -41,19 +39,18 @@ constexpr static auto cmdList    = "list"sv;
 constexpr static auto cmdRemove  = "remove"sv;
 constexpr static auto cmdHelp    = "help"sv;
 
-
 constexpr static auto scmdAnimation = "animation"sv;
 constexpr static auto scmdMaterial  = "material"sv;
 
-constexpr static auto optAnimations        =  "--animations"sv;
-constexpr static auto optConvertToBmp      =  "--bmp"sv;
+constexpr static auto optAnimations        = "--animations"sv;
+constexpr static auto optConvertToBmp      = "--bmp"sv;
 constexpr static auto optConvertToBmpShort = "-b"sv;
-constexpr static auto optMaterials         =  "--materials"sv;
-constexpr static auto optOutputDir         =  "--output-dir"sv;
+constexpr static auto optMaterials         = "--materials"sv;
+constexpr static auto optOutputDir         = "--output-dir"sv;
 constexpr static auto optOutputDirShort    = "-o"sv;
 constexpr static auto optReplace           = "--replace"sv;
 constexpr static auto optReplaceShort      = "-r"sv;
-constexpr static auto optSounds            =  "--sounds"sv;
+constexpr static auto optSounds            = "--sounds"sv;
 constexpr static auto optVerbose           = "--verbose"sv;
 constexpr static auto optVerboseShort      = "-v"sv;
 
@@ -80,18 +77,22 @@ void PrintErrorInvalidCnd(std::string_view cndPath, std::string_view cmd, std::s
 
 int ExecCmd(std::string_view cmd, const CndToolArgs& args);
 
+// Functions fro extractiong resources
 int ExecCmdExtract(const CndToolArgs& args);
 bool ExtractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool verbose = false);
 int32_t ExtractAnimations(const InputStream& istream, const std::string& outDir, bool verbose);
 int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials , bool verbose);
 int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, bool verbose);
 
+// Functions for adding resources
 int ExecCmdAdd(std::string_view scmd, const CndToolArgs& args);
 int ExecCmdAddAnimation(const CndToolArgs& args);
 int ExecCmdAddMaterial(const CndToolArgs& args);
 
+// Functions for listing resources
 int ExecCmdList(const CndToolArgs& args);
 
+// Functions for removing resources
 int ExecCmdRemove(std::string_view scmd, const CndToolArgs& args);
 int ExecCmdRemoveAnimation(const CndToolArgs& args);
 int ExecCmdRemoveMaterial(const CndToolArgs& args);
@@ -225,7 +226,7 @@ bool ExecCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndW
 
 int main(int argc, const char *argv[])
 {
-    std::cout << "\nIndiana Jones and the Infernal Machine CND file tool v" << kProgramVersion << std::endl;
+    std::cout << "\nIndiana Jones and the Infernal Machine CND file tool v" << kVersion << std::endl;
     CndToolArgs args(argc, argv);
     if(argc < 2 ||
        args.cmd().empty())
@@ -547,7 +548,7 @@ int32_t ExtractAnimations(const InputStream& istream, const std::string& outDir,
         /* Save extracted animations to file */
         const std::string keyHeaderComment = [&]() {
             return "Extracted from CND file '"s + istream.name() + "' with " +
-                std::string(kProgramName) + " v" + std::string(kProgramVersion);
+                std::string(kProgramName) + " v" + std::string(kVersion);
         }();
 
         for(const auto& key : mapAnimations)

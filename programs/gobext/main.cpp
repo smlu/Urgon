@@ -2,10 +2,11 @@
 #include <iomanip>
 #include <iostream>
 
-#include "libim/gob.h"
-#include "libim/common.h"
-#include "libim/io/filestream.h"
-#include "cmdutils/options.h"
+#include <libim/gob.h>
+#include <libim/common.h>
+#include <libim/io/filestream.h>
+#include <cmdutils/options.h>
+#include "config.h"
 
 #define SETW(n, f)  std::right << std::setfill(f) << std::setw(n)
 #define SET_FINFO_LW(n) SETW(10 + n, '.')
@@ -18,6 +19,7 @@ static constexpr auto OPT_HELP            ("--help");
 static constexpr auto OPT_HELP_SHORT      ("-h");
 
 
+using namespace gobext;
 using namespace libim;
 
 void print_help();
@@ -25,6 +27,7 @@ bool ExtractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outD
 
 int main(int argc, const char *argv[])
 {
+    std::cout << "\nIndiana Jones and The Infernal Machine GOB file extractor v" << kVersion << std::endl;
     CmdArgs opt(argc, argv);
     if(argc < 2 ||
        opt.hasArg(OPT_HELP) ||
@@ -81,7 +84,6 @@ int main(int argc, const char *argv[])
 
 void print_help()
 {
-    std::cout << "\nIndiana Jones and The Infernal Machine GOB file extractor\n";
     std::cout << "Extracts resources from CND file!\n";
     std::cout << "  Usage: gobext <gob file> [options]" << std::endl << std::endl;
 

@@ -6,11 +6,11 @@ project(
 )
 
 # Global constants
-set(PM_LIBIM   "libim")
-set(PM_LIBCMD  "libcmd")
-set(PM_GOBEXT  "gobext")
 set(PM_CNDEXT  "cndext")
 set(PM_CNDTOOL "cndtool")
+set(PM_GOBEXT  "gobext")
+set(PM_LIBCMD  "libcmd")
+set(PM_LIBIM   "libim")
 set(PM_TEST    "test")
 
 # Compiler flags
@@ -37,92 +37,6 @@ endif()
 
 add_definitions("-D__STDC_WANT_LIB_EXT1__=1")
 
-
-set(SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
-include_directories ("${SOURCE_DIR}")
-
-# LibIM source
-
-file(GLOB_RECURSE
-  LIBIM_HEADER_FILES
-  "${SOURCE_DIR}/libim/*.h"
-  [FOLLOW_SYMLINKS]
-)
-
-file(GLOB_RECURSE
-  LIBIM_SRC_FILES
-  "${SOURCE_DIR}/libim/*.cpp"
-  [FOLLOW_SYMLINKS]
-)
-
-# Cmd utils
-file(GLOB_RECURSE
-  CMDUTILS_HEADER_FILES
-  "${SOURCE_DIR}/cmdutils/*.h"
-  [FOLLOW_SYMLINKS]
-)
-
-file(GLOB_RECURSE
-  CMDUTILS_SRC_FILES
-  "${SOURCE_DIR}/cmdutils/*.cpp"
-  [FOLLOW_SYMLINKS]
-)
-
-# LibIM
-add_library(${PM_LIBIM} STATIC
-    ${LIBIM_HEADER_FILES}
-    ${LIBIM_SRC_FILES}
-)
-set_target_properties(${PM_LIBIM}  PROPERTIES PREFIX  "")
-
-# GCC < 9
-target_link_libraries(${PM_LIBIM} PUBLIC
-    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs>
-    $<$<AND:$<CXX_COMPILER_ID:Clang>>:stdc++fs>
-)
-
-# CND utils 
-add_library(${PM_LIBCMD} OBJECT
-    ${CMDUTILS_HEADER_FILES}
-    ${CMDUTILS_SRC_FILES}
-)
-set_target_properties(${PM_LIBCMD} PROPERTIES LINKER_LANGUAGE CXX)
-
-# CND Extractor
-set(CNDEXT_SRC_FILES "${SOURCE_DIR}/cndext/main.cpp")
-add_executable (${PM_CNDEXT}
-    ${CNDEXT_SRC_FILES}
-    $<TARGET_OBJECTS:${PM_LIBCMD}>
-)
-target_link_libraries(${PM_CNDEXT} ${PM_LIBIM})
-
-# CND tool
-set(CNDTOOL_SRC_FILES
-    "${SOURCE_DIR}/cndtool/main.cpp"
-    "${SOURCE_DIR}/cndtool/cndtoolargs.h"
-    "${SOURCE_DIR}/cndtool/patch.h"
-)
-add_executable (${PM_CNDTOOL}
-    ${CNDTOOL_SRC_FILES}
-    $<TARGET_OBJECTS:${PM_LIBCMD}>
-)
-target_link_libraries(${PM_CNDTOOL} ${PM_LIBIM})
-
-# GOB Extractor
-set(GOBEXT_SRC_FILES "${SOURCE_DIR}/gobext/main.cpp")
-add_executable (${PM_GOBEXT}
-    ${GOBEXT_SRC_FILES}
-    $<TARGET_OBJECTS:${PM_LIBCMD}>
-)
-target_link_libraries(${PM_GOBEXT} ${PM_LIBIM})
-
-# Test exe
-set(TEST_SRC_FILES "${SOURCE_DIR}/test/test.cpp")
-add_executable (${PM_TEST}
-    ${TEST_SRC_FILES}
-    $<TARGET_OBJECTS:${PM_LIBCMD}>
-)
-
-target_compile_definitions(${PM_TEST} PRIVATE "-DSRC_ROOT=\"${SOURCE_DIR}\"")
-target_link_libraries(${PM_TEST} ${PM_LIBIM})
-
+add_subdirectory( libraries )
+add_subdirectory( programs )
+add_subdirectory( tests )

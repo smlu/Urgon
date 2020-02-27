@@ -24,15 +24,16 @@ namespace libim::content::text {
 
         void assertKey(std::string_view key);
 
-        template<typename T, typename DT = std::decay_t<T>>
-        void assertKeyValue(std::string_view key, DT v)
+        template<typename T>
+        void assertKeyValue(std::string_view key, T v)
         {
+            using DT =  typename std::decay_t<T>;
             if constexpr (std::is_enum_v<DT>){
                 return assertKeyValue(key, utils::to_underlying(v));
             }
 
             bool bValid = false;
-            auto rv = readKey<DT>();
+            auto rv = readKey<DT>(key);
             if constexpr(isVector<DT> || std::is_arithmetic_v<DT>) {
                 bValid = (v = rv);
             }

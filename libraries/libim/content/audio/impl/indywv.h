@@ -14,7 +14,7 @@ namespace libim::content::audio {
 
     PACKED(struct IndyWVFileHeader
     {
-        const std::array<char, 6> tag = kIndyWV;
+        std::array<char, 6> tag = kIndyWV;
         int32_t sampleRate     = 0;
         int32_t sampleBitSize  = 0;
         int32_t numChannels    = 0;

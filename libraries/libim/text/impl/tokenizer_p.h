@@ -7,6 +7,7 @@
 #include "../diagnostic_location.h"
 #include "../../io/stream.h"
 
+#include <array>
 #include <cctype>
 #include <functional>
 #include <string_view>

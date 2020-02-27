@@ -108,7 +108,7 @@ namespace libim::content::text {
             );
             */
 
-            auto reserve = []([[maybe_unused]]auto& c, [[maybe_unused]] typename Container::size_type r ){
+            auto reserve = [](auto& c, typename Container::size_type r ){
                 if constexpr(utils::has_mf_reserve<Container>) {
                     c.reserve(r);
                 }

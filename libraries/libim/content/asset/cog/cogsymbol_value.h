@@ -15,7 +15,7 @@
 #include "../../../math/vector3.h"
 
 namespace libim::content::asset {
-    class Cog;
+    struct Cog;
     struct CogSubrutine {};
     using CogFlexType = std::variant<float, CogSubrutine>;
     using CogSymbolValue = std::variant<

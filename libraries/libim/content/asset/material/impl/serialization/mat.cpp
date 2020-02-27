@@ -40,7 +40,7 @@ uint32_t MatTextureBitmapSize(const MatTexture& tex, uint32_t bpp)
 //    }
 //}
 
-Material& Material::deserialize(const InputStream&& istream)
+Material& Material::deserialize(InputStream&& istream)
 {
     return deserialize(istream);
 }

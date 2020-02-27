@@ -23,7 +23,7 @@ namespace libim::content::asset {
             deserialize(istream);
         }
 
-        Material(const InputStream&& istream)
+        Material(InputStream&& istream)
         {
             deserialize(std::move(istream));
         }
@@ -36,7 +36,7 @@ namespace libim::content::asset {
 
 
         Material& deserialize(const InputStream& istream);
-        Material& deserialize(const InputStream&& istream);
+        Material& deserialize(InputStream&& istream);
         bool serialize(OutputStream&& ostream) const;
         bool serialize(OutputStream& ostream) const;
 

@@ -7,7 +7,7 @@ project(
 # LibIM source
 file(GLOB_RECURSE
   LIBIM_HEADER_FILES
-  ".h"
+  "*.h"
   [FOLLOW_SYMLINKS]
 )
 

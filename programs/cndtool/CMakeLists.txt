@@ -1,7 +1,7 @@
 project(
     ${PM_CNDTOOL}
     LANGUAGES CXX
-    VERSION 0.3.1
+    VERSION 0.4.0
 )
 
 configure_file(config.h.in config.h)

@@ -45,6 +45,8 @@ constexpr static auto scmdMaterial  = "material"sv;
 constexpr static auto optAnimations        = "--animations"sv;
 constexpr static auto optConvertToBmp      = "--bmp"sv;
 constexpr static auto optConvertToBmpShort = "-b"sv;
+constexpr static auto optConvertToWav      = "--wav"sv;
+constexpr static auto optConvertToWavShort = "-w"sv;
 constexpr static auto optMaterials         = "--materials"sv;
 constexpr static auto optOutputDir         = "--output-dir"sv;
 constexpr static auto optOutputDirShort    = "-o"sv;
@@ -79,10 +81,10 @@ int ExecCmd(std::string_view cmd, const CndToolArgs& args);
 
 // Functions fro extractiong resources
 int ExecCmdExtract(const CndToolArgs& args);
-bool ExtractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool verbose = false);
+bool ExtractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool convertSoundsToWav, bool verbose = false);
 int32_t ExtractAnimations(const InputStream& istream, const std::string& outDir, bool verbose);
 int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials , bool verbose);
-int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, bool verbose);
+int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, bool convetToWav, bool verbose);
 
 // Functions for adding resources
 int ExecCmdAdd(std::string_view scmd, const CndToolArgs& args);
@@ -270,7 +272,7 @@ void PrintHelp(std::string_view cmd, std::string_view subcmd)
         {
             std::cout << "Add or replace existing animations in CND file." << std::endl << std::endl;
             std::cout << "  Usage: cndtool add material [options] <cnd-file-path> <animation-files>" << std::endl << std::endl;
-            std::cout << "Options:        Long options:        Description:\n";
+            std::cout << "Option:        Long option:        Description:\n";
             std::cout << "  " << optReplaceShort << SETW(23, ' ') << optReplace << SETW(51, ' ') << "Replace existing animation in CND file\n";
             std::cout << "  " << optVerboseShort << SETW(23, ' ') << optVerbose << SETW(44, ' ') << "Verbose printout to the console\n";
         }
@@ -278,7 +280,7 @@ void PrintHelp(std::string_view cmd, std::string_view subcmd)
         {
             std::cout << "Add or replace existing materials in CND file." << std::endl << std::endl;
             std::cout << "  Usage: cndtool add material [options] <cnd-file-path> <material-files>" << std::endl << std::endl;
-            std::cout << "Options:        Long options:        Description:\n";
+            std::cout << "Option:        Long option:        Description:\n";
             std::cout << "  " << optReplaceShort << SETW(23, ' ') << optReplace << SETW(50, ' ') << "Replace existing material in CND file\n";
             std::cout << "  " << optVerboseShort << SETW(23, ' ') << optVerbose << SETW(44, ' ') << "Verbose printout to the console\n";
         }
@@ -293,10 +295,12 @@ void PrintHelp(std::string_view cmd, std::string_view subcmd)
     }
     else if(cmd == cmdExtract)
     {
-        std::cout << "Extract resources from CND file." << std::endl << std::endl;
+        std::cout << "Extract animations [KEY], materials [MAT] and sounds [IndyWV] from CND file." << std::endl << std::endl;
         std::cout << "  Usage: cndtool extract [options] <cnd-file-path>" << std::endl << std::endl;
-        std::cout << "Options:        Long options:        Description:\n";
-        std::cout << "  " << optConvertToBmpShort << SETW(19, ' ') << optConvertToBmp << SETW(51, ' ') << "Convert extracted materials to bmp\n";
+        std::cout << "Option:        Long option:        Description:\n";
+        std::cout << "  " << optConvertToBmpShort       << SETW(19, ' ') << optConvertToBmp << SETW(51, ' ') << "Convert extracted materials to BMP\n";
+        std::cout << "  " << optConvertToWavShort       << SETW(19, ' ') << optConvertToWav << SETW(48, ' ') << "Convert extracted sounds to WAV\n";
+
         std::cout << "  " << optOutputDirShort    << SETW(26, ' ') << optOutputDir    << SETW(36, ' ') << "Output folder <output dir>\n";
         std::cout << "  " << optVerboseShort      << SETW(23, ' ') << optVerbose      << SETW(44, ' ') << "Verbose printout to the console\n";
     }
@@ -304,7 +308,7 @@ void PrintHelp(std::string_view cmd, std::string_view subcmd)
     {
         std::cout << "List resources in the CND file." << std::endl << std::endl;
         std::cout << "  Usage: cndtool list [options] <cnd-file-path>" << std::endl << std::endl;
-        std::cout << "Options:              Description:\n";
+        std::cout << "Option:              Description:\n";
         std::cout << "  " << optAnimations << SETW(52, ' ') << "List only animation resources in cnd file\n";
         std::cout << "  " << optMaterials  << SETW(52, ' ') << "List only material resources in cnd file\n";
         std::cout << "  " << optSounds     << SETW(52, ' ') << "List only sound resources in cnd file\n";
@@ -486,14 +490,15 @@ int ExecCmdExtract(const CndToolArgs& args)
         outDir += GetBaseName(inputFile);
     }
 
-    const bool bVerboseOutput   = args.hasArg(optVerboseShort) || args.hasArg(optVerbose) ;
-    const bool bConvertMatToBmp = args.hasArg(optConvertToBmpShort) || args.hasArg(optConvertToBmp);
+    const bool bVerboseOutput      = args.hasArg(optVerboseShort) || args.hasArg(optVerbose) ;
+    const bool bConvertMatToBmp    = args.hasArg(optConvertToBmpShort) || args.hasArg(optConvertToBmp);
+    const bool bConvertIndyWVToWav = args.hasArg(optConvertToWavShort) || args.hasArg(optConvertToWav);
 
     int result = 0;
     try
     {
         /* Extract animations, materials & sounds */
-        if(!ExtractResources(inputFile, std::move(outDir), bConvertMatToBmp, bVerboseOutput)) {
+        if(!ExtractResources(inputFile, std::move(outDir), bConvertMatToBmp, bConvertIndyWVToWav, bVerboseOutput)) {
             result = 1;
         }
     }
@@ -506,7 +511,7 @@ int ExecCmdExtract(const CndToolArgs& args)
     return result;
 }
 
-bool ExtractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool verbose)
+bool ExtractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool convertSoundsToWav, bool verbose)
 {
     InputFileStream ifstream(cndFile);
 
@@ -516,9 +521,8 @@ bool ExtractResources(const std::string& cndFile, std::string outDir, bool conve
     auto nExtMatFiles  = ExtractMaterials(ifstream, outDir, convertMaterials, verbose);
     if(nExtMatFiles < 0) return false;
 
-    auto nExtSndFiles = ExtractSounds(ifstream, outDir, verbose);
+    auto nExtSndFiles = ExtractSounds(ifstream, outDir, convertSoundsToWav, verbose);
     if(nExtSndFiles < 0) return false;
-
 
     std::cout << "\n-------------------------------------\n";
     std::cout << "Total extracted animations: " << nExtAnimFiles << std::endl;
@@ -658,7 +662,7 @@ int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, 
     return static_cast<int32_t>(materials.size());
 }
 
-int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, bool verbose)
+int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, bool convetToWav, bool verbose)
 {
     try
     {
@@ -668,6 +672,8 @@ int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, boo
         auto& sounds = sb.getTrack(0);
 
         std::filesystem::path outPath;
+        std::filesystem::path wavDir;
+
         if(!sounds.isEmpty())
         {
             if(verbose) {
@@ -676,6 +682,12 @@ int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, boo
 
             outPath = outDir+ (outDir.empty() ? "" : "/" ) + "sound";
             MakeDir(outPath);
+
+            if(convetToWav)
+            {
+                wavDir = outDir + "/" + "wav";
+                MakePath(wavDir);
+            }
         }
 
         for (const auto& s : sounds)
@@ -685,9 +697,16 @@ int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, boo
             }
 
             OutputFileStream ofs(outPath.append(s.name()));
-            s.serialize(ofs);
-
+            s.serialize(ofs, Sound::SerializeFormat::IndyWV);
             outPath = outPath.parent_path();
+
+            /* Save in WAV format */
+            if(convetToWav)
+            {
+                OutputFileStream ofs(wavDir.append(s.name()));
+                s.serialize(ofs, Sound::SerializeFormat::WAV);
+                wavDir = wavDir.parent_path();
+            }
         }
 
         std::cout << kSuccess << std::endl;

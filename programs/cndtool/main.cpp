@@ -4,13 +4,13 @@
 #include <string_view>
 
 #include <libim/common.h>
-#include <libim/io/filestream.h>
 #include <libim/content/asset/animation/animation.h>
 #include <libim/content/asset/material/bmp.h>
 #include <libim/content/asset/material/material.h>
 #include <libim/content/asset/world/impl/serialization/cnd/cnd.h>
 #include <libim/content/audio/soundbank.h>
 #include <libim/content/text/text_resource_writer.h>
+#include <libim/io/filestream.h>
 #include <libim/log/log.h>
 
 #include "config.h"
@@ -202,7 +202,6 @@ bool ExecCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndW
         auto mapAssets = cndReadAssets(ifstream);
         ifstream.close();
 
-        const auto bVerbose = HasOptVerbose(args);
         for(const auto& asset : args.unspecified())
         {
             if(mapAssets.contains(asset)) {
@@ -228,6 +227,8 @@ bool ExecCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndW
 
 int main(int argc, const char *argv[])
 {
+    gLogLevel = LogLevel::Warning;
+
     std::cout << "\nIndiana Jones and the Infernal Machine CND file tool v" << kVersion << std::endl;
     CndToolArgs args(argc, argv);
     if(argc < 2 ||

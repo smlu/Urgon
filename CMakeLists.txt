@@ -26,7 +26,6 @@ if(MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /diagnostics:caret")
     endif()
 elseif(MINGW)
-  add_definitions("-mno-ms-bitfields") # TODO: this is bad
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fPIC -pipe -static")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fPIC -pipe -static")

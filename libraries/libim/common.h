@@ -18,8 +18,10 @@
 
 #if defined(WIN32) || defined(_WIN32)
 #  define OS_WINDOWS 1
-#  define NOMINMAX
-#  include <Windows.h>
+#  ifndef NOMINMAX
+#    define NOMINMAX
+#  endif
+#  include <windows.h>
 #endif
 
 #if !defined(OS_WINDOWS) || defined(__MINGW32__)

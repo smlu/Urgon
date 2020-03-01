@@ -18,6 +18,8 @@ namespace libim {
         constexpr LogLevel(Level l) : m_level(l) {}
         constexpr LogLevel(const LogLevel&) = default;
         constexpr LogLevel(LogLevel&&) noexcept = default;
+        constexpr LogLevel& operator = (const LogLevel&) = default;
+        constexpr LogLevel& operator = (LogLevel&&) noexcept = default;
 
         friend constexpr bool operator == (LogLevel ll1, LogLevel ll2) {
             return ll1.m_level == ll2.m_level;

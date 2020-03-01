@@ -13,6 +13,8 @@ namespace libim {
         using std::runtime_error::runtime_error;
     };
 
+    inline LogLevel gLogLevel = LogLevel::Debug;
+
     namespace detail {
         inline  void ss_printf(std::stringstream& ss, const char* format) {
             ss << format;
@@ -37,6 +39,10 @@ namespace libim {
     template<typename ...Args>
     static void write_log(const char* file, int line, LogLevel level, std::string_view msg, Args&&... args)
     {
+        if(gLogLevel < level) {
+            return;
+        }
+
         using namespace std::string_literals;
         using namespace detail;
 

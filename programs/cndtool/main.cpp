@@ -546,7 +546,7 @@ int32_t ExtractAnimations(const InputStream& istream, const std::string& outDir,
                 std::cout << "\nFound: " << mapAnimations.size() << std::endl;
             }
 
-            keyDir = outDir + "/" + "key";
+            keyDir = outDir + (outDir.empty() ? "" : "/" ) + "key";
             MakePath(keyDir);
         }
 
@@ -594,12 +594,12 @@ int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, 
             std:: cout << " Found: " << materials.size() << std::endl;
         }
 
-        matDir = outDir + "/" + "mat";
+        matDir = outDir + (outDir.empty() ? "" : "/" ) + "mat";
         MakePath(matDir);
 
         if(convertMaterials)
         {
-            bmpDir = outDir + "/" + "bmp";
+            bmpDir = outDir + (outDir.empty() ? "" : "/" ) + "bmp";
             MakePath(bmpDir);
         }
     }
@@ -681,12 +681,12 @@ int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, boo
                 std::cout << "\nFound: " << sounds.size() << std::endl;
             }
 
-            outPath = outDir+ (outDir.empty() ? "" : "/" ) + "sound";
-            MakeDir(outPath);
+            outPath = outDir + (outDir.empty() ? "" : "/" ) + "sound";
+            MakePath(outPath);
 
             if(convetToWav)
             {
-                wavDir = outDir + "/" + "wav";
+                wavDir = outDir + (outDir.empty() ? "" : "/" ) + "wav";
                 MakePath(wavDir);
             }
         }

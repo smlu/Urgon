@@ -8,7 +8,7 @@
 #include <iterator>
 
 #ifdef OS_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #include <locale>
 #include <codecvt>
 #include <string>

@@ -278,6 +278,11 @@ namespace libim {
         return true;
     }
 
+    inline bool MakePath(const std::filesystem::path& path, bool createFile = false)
+    {
+        return MakePath(path.u8string(), createFile);
+    }
+
     inline bool RemoveFile(const std::filesystem::path& file)
     {
         return std::filesystem::remove(file);

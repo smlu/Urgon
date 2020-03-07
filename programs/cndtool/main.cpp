@@ -12,6 +12,7 @@
 #include <libim/content/text/text_resource_writer.h>
 #include <libim/io/filestream.h>
 #include <libim/log/log.h>
+#include <libim/types/safe_cast.h>
 
 #include "config.h"
 #include "cndtoolargs.h"
@@ -568,7 +569,7 @@ int32_t ExtractAnimations(const InputStream& istream, const std::string& outDir,
         }
 
         std::cout << kSuccess << std::endl;
-        return static_cast<int32_t>(mapAnimations.size());
+        return safe_cast<int32_t>(mapAnimations.size());
 
     }
     catch (const std::exception& e)
@@ -660,7 +661,7 @@ int32_t ExtractMaterials(const InputStream& istream, const std::string& outDir, 
         std::cout << kSuccess << std::endl;
     }
 
-    return static_cast<int32_t>(materials.size());
+    return safe_cast<int32_t>(materials.size());
 }
 
 int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, bool convetToWav, bool verbose)
@@ -711,7 +712,7 @@ int32_t ExtractSounds(const InputStream& istream, const std::string& outDir, boo
         }
 
         std::cout << kSuccess << std::endl;
-        return static_cast<int32_t>(sounds.size());
+        return safe_cast<int32_t>(sounds.size());
     }
     catch (const std::exception& e)
     {

@@ -44,13 +44,13 @@ bool PatchCndMaterials(const std::string& cndFile, const utils::HashMap<Material
 
         /* Write new file size to the beginning of the output cnd file*/
         ofstream.seekBegin();
-        ofstream.write(static_cast<uint32_t>(ofstream.size()));
+        ofstream.write(safe_cast<uint32_t>(ofstream.size()));
 
         /* Update materials info in CND header */
         ofstream.seek(offsetof(CndHeader, numMaterials));
-        ofstream.write(static_cast<uint32_t>(materials.size())); // numMaterials field
+        ofstream.write(safe_cast<uint32_t>(materials.size())); // numMaterials field
         if(cndHeader.sizeMaterials < materials.size()) {
-            ofstream.write(static_cast<uint32_t>(materials.size())); // sizeMaterials field
+            ofstream.write(safe_cast<uint32_t>(materials.size())); // sizeMaterials field
         }
 
         /* Close IO file stream */
@@ -94,24 +94,23 @@ bool PatchCndAnimations(const std::string& cndFile, const utils::HashMap<Animati
 
         /* Write the rest of inputted cnd file to the output */
         auto aOldNumEntries = ifstream.read<std::array<uint32_t, 3>>();
-        std::size_t endOffsKeySection = ifstream.tell() +
+        std::size_t endOffsKeySection = ifstream.tell()       +
                 sizeof(CndKeyHeader) * cndHeader.numKeyframes +
-                sizeof(KeyMarker) * aOldNumEntries.at(0) +
-                sizeof(CndKeyNode) * aOldNumEntries.at(1) +
+                sizeof(KeyMarker)    * aOldNumEntries.at(0)   +
+                sizeof(CndKeyNode)   * aOldNumEntries.at(1)   +
                 sizeof(KeyNodeEntry) * aOldNumEntries.at(2);
-
 
         ofstream.write(ifstream, /*offset=*/endOffsKeySection);
 
         /* Write new file size to the beginning of the output cnd file*/
         ofstream.seekBegin();
-        ofstream.write(static_cast<uint32_t>(ofstream.size()));
+        ofstream.write(safe_cast<uint32_t>(ofstream.size()));
 
         /* Update materials info in CND header */
         ofstream.seek(offsetof(CndHeader, numKeyframes));
-        ofstream.write(static_cast<uint32_t>(animations.size())); // numKeyframes field
+        ofstream.write(safe_cast<uint32_t>(animations.size())); // numKeyframes field
         if(cndHeader.sizeKeyframes < animations.size()) {
-            ofstream.write(static_cast<uint32_t>(animations.size())); // sizeKeyframes field
+            ofstream.write(safe_cast<uint32_t>(animations.size())); // sizeKeyframes field
         }
 
         /* Close IO file stream */

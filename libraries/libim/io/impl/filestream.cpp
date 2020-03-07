@@ -1,6 +1,7 @@
 #include "../filestream.h"
 #include "../binarystream.h"
-#include "../../common.h"
+#include <libim/common.h>
+#include <libim/types/safe_cast.h>
 
 #include <algorithm>
 #include <array>
@@ -46,7 +47,7 @@ struct IOBuffer final : public std::array<byte_t, BufferSize>
 
     std::size_t write(const byte_t* data, std::size_t size)
     {
-        std::size_t nWrite = std::distance(pos_, Base_::end()); // TODO: safe cast
+        std::size_t nWrite = safe_cast<std::size_t>(std::distance(pos_, Base_::end()));
         if(size < nWrite) {
             nWrite = size;
         }
@@ -56,7 +57,9 @@ struct IOBuffer final : public std::array<byte_t, BufferSize>
 
     std::size_t size() const noexcept
     {
-        return std::distance(Base_::cbegin(), typename Base_::const_iterator(pos_)); // TODO: safe cast
+        return safe_cast<std::size_t>(
+            std::distance(Base_::cbegin(), typename Base_::const_iterator(pos_))
+        );
     }
 
     std::size_t capacity() const noexcept
@@ -202,7 +205,7 @@ struct FileStream::FileStreamImpl
     {
         ssize_t nRead = 0;
     #ifdef OS_WINDOWS
-        if(!ReadFile(fileHandle, reinterpret_cast<LPVOID>(data), static_cast<DWORD>(length), reinterpret_cast<LPDWORD>(&nRead), nullptr)) {
+        if(!ReadFile(fileHandle, reinterpret_cast<LPVOID>(data), safe_cast<DWORD>(length), reinterpret_cast<LPDWORD>(&nRead), nullptr)) {
     #else
         nRead = ::read(fd, data, length);
         if(nRead == -1) {
@@ -237,7 +240,7 @@ struct FileStream::FileStreamImpl
             buffer_.reset();
         }
 
-        return nWritten;
+        return static_cast<std::size_t>(nWritten);
     }
 
     std::size_t write(const byte_t* data, std::size_t length)
@@ -271,30 +274,6 @@ struct FileStream::FileStreamImpl
         }
 
         return nTotalWritten;
-
-
-//       ssize_t nWritten;
-//    #ifdef OS_WINDOWS
-//        if(!WriteFile(
-//                fileHandle,
-//                reinterpret_cast<LPCVOID>(data),
-//                static_cast<DWORD>(length),
-//                reinterpret_cast<LPDWORD>(&nWritten),
-//                nullptr)){
-//    #else
-//        nWritten = ::write(fd, data, length);
-//        if(nWritten == -1) {
-//    #endif
-//            throw FileStreamError("Failed to write data to file: " + GetLastErrorAsString());
-//        }
-
-//        currentOffset += nWritten;
-//        if(currentOffset > fileSize) {
-//            fileSize = currentOffset;
-//        }
-
-//        return static_cast<std::size_t>(nWritten);
-
     }
 
     void seek(std::size_t position) const

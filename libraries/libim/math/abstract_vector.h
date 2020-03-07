@@ -6,7 +6,8 @@
 #include <type_traits>
 
 #include "math.h"
-#include "../utils/utils.h"
+#include <libim/utils/utils.h>
+#include <libim/types/safe_cast.h>
 
 
 namespace libim {
@@ -70,7 +71,10 @@ namespace libim {
         {
             std::istringstream istream;
             istream.exceptions(std::ios::failbit);
-            istream.rdbuf()->pubsetbuf(const_cast<char*>(str.data()), str.size()); // TODO: safe cast
+            istream.rdbuf()->pubsetbuf(
+                const_cast<char*>(str.data()),
+                safe_cast<std::streamsize>(str.size())
+            );
 
             char ch;
             istream >> ch;

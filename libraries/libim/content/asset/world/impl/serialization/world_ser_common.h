@@ -4,6 +4,9 @@
 #include <string_view>
 #include <optional>
 
+#include <libim/types/safe_cast.h>
+#include <libim/utils/utils.h>
+
 namespace libim::content::asset {
     static constexpr std::string_view kFileCopyright = {
         "................................" \
@@ -48,12 +51,12 @@ namespace libim::content::asset {
 
     inline std::optional<std::size_t> make_optional_idx(int32_t idx)
     {
-        return idx > -1 ? std::make_optional(static_cast<std::size_t>(idx)) : std::nullopt;
+        return idx > -1 ? std::make_optional(safe_cast<std::size_t>(idx)) : std::nullopt;
     }
 
     inline int32_t from_optional_idx(std::optional<std::size_t> idx)
     {
-        return idx.has_value() ? static_cast<int32_t>(idx.value()) : -1;
+        return idx.has_value() ? safe_cast<int32_t>(idx.value()) : -1;
     }
 }
 #endif // LIBIM_WORLD_SER_COMMON_H

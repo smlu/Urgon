@@ -12,7 +12,8 @@
 #include "mat_ser_helpers.h"
 #include "../../material.h"
 #include "../../colorformat.h"
-#include "../../../../../io/stream.h"
+#include <libim/io/stream.h>
+#include <libim/types/safe_cast.h>
 
 
 using namespace libim;
@@ -75,7 +76,7 @@ Material& Material::deserialize(const InputStream& istream)
     auto records = istream.read<std::vector<MatRecordHeader>>(header.recordCount);
 
     /* Read mipmaps */
-    std::vector<Mipmap> mipmaps(static_cast<std::size_t>(header.mipmapCount));
+    std::vector<Mipmap> mipmaps(safe_cast<std::size_t>(header.mipmapCount));
     for(auto& mipmap : mipmaps)
     {
         auto mmHeader = istream.read<MatMipmapHeader>();
@@ -103,11 +104,7 @@ bool Material::serialize(OutputStream& ostream) const
     }
 
     /* Write MAT header to file */
-    if(mipmaps().size() > std::numeric_limits<int32_t>::max()) {
-        throw StreamError("Cannot write material sto stream, mipmaps().size() > std::numeric_limits<int32_t>::max()");
-    }
-
-    int32_t mimpamCount = static_cast<int32_t>(mipmaps().size());
+    int32_t mimpamCount = safe_cast<int32_t>(mipmaps().size());
 
     MatHeader header{};
     header.magic       = MAT_FILE_SIG;

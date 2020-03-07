@@ -1,9 +1,11 @@
 #include "cnd_key_structs.h"
 #include "../cnd.h"
 #include "../material/cnd_mat_header.h"
-#include "../../../../../animation/animation.h"
-#include "../../../../../../../log/log.h"
-#include "../../../../../../../utils/utils.h"
+
+#include <libim/content/asset/animation/animation.h>
+#include <libim/log/log.h>
+#include <libim/utils/utils.h>
+#include <libim/types/safe_cast.h>
 
 #include <algorithm>
 #include <cctype>
@@ -36,9 +38,9 @@ HashMap<Animation> CND::ParseSection_Keyframes(const InputStream& istream, const
     auto aNumEntries = istream.read<std::array<uint32_t, 3>>();
 
     // Read key header list, marker list, key node list and key node entry list
-    auto headerList = istream.read<std::vector<CndKeyHeader>>(header.numKeyframes);
-    auto markerList = istream.read<std::vector<KeyMarker>>(aNumEntries.at(0));
-    auto nodeList   = istream.read<std::vector<CndKeyNode>>(aNumEntries.at(1));
+    auto headerList    = istream.read<std::vector<CndKeyHeader>>(header.numKeyframes);
+    auto markerList    = istream.read<std::vector<KeyMarker>>   (aNumEntries.at(0));
+    auto nodeList      = istream.read<std::vector<CndKeyNode>>  (aNumEntries.at(1));
     auto nodeEntryList = istream.read<std::vector<KeyNodeEntry>>(aNumEntries.at(2));
 
     auto mIt  = markerList.begin();
@@ -112,11 +114,11 @@ void CND::WriteSection_Keyframes(OutputStream& ostream, const utils::HashMap<Ani
 
         h.flags      = anim.flages();
         h.type       = anim.type();
-        h.frames     = static_cast<uint32_t>(anim.frames());         // TODO: check bounds
+        h.frames     = safe_cast<decltype(h.frames)>(anim.frames());
         h.fps        = anim.fps();
-        h.numMarkers = static_cast<uint32_t>(anim.markers().size()); // TODO: check bounds
-        h.numJoints  = static_cast<uint32_t>(anim.joints());         // TODO: check bounds
-        h.numNodes   = static_cast<uint32_t>(anim.nodes().size());   // TODO: check bounds
+        h.numMarkers = safe_cast<decltype(h.numMarkers)>(anim.markers().size());
+        h.numJoints  = safe_cast<decltype(h.numJoints)>(anim.joints());
+        h.numNodes   = safe_cast<decltype(h.numNodes)>(anim.nodes().size());
         cndHeaders.push_back(std::move(h));
 
         /* Copy key markers */
@@ -137,7 +139,7 @@ void CND::WriteSection_Keyframes(OutputStream& ostream, const utils::HashMap<Ani
             }
 
             n.nodeNum = node.num;
-            n.numEntries = static_cast<uint32_t>(node.entries.size()); // TODO: check bounds
+            n.numEntries = safe_cast<decltype(n.numEntries)>(node.entries.size());
             nodes.push_back(std::move(n));
 
             entries.reserve(node.entries.size());
@@ -146,9 +148,9 @@ void CND::WriteSection_Keyframes(OutputStream& ostream, const utils::HashMap<Ani
     }
 
     std::array<uint32_t, 3> aSizeEntries {
-        static_cast<uint32_t>(markers.size()),  // TODO: check bounds
-        static_cast<uint32_t>(nodes.size()),    // TODO: check bounds
-        static_cast<uint32_t>(entries.size())   // TODO: check bounds
+        safe_cast<uint32_t>(markers.size()),
+        safe_cast<uint32_t>(nodes.size()),
+        safe_cast<uint32_t>(entries.size())
     };
 
     /* Write sizes of key entries */

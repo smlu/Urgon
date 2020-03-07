@@ -4,7 +4,8 @@
 #include "cnd_adjoin.h"
 #include "cnd_surface.h"
 #include "../../world_ser_common.h"
-#include "../../../../../../../utils/utils.h"
+#include <libim/types/safe_cast.h>
+#include <libim/utils/utils.h>
 
 
 
@@ -117,7 +118,7 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
          s.vecIntensities.reserve(h.numVerts);
          for (auto& v : s.verts)
          {
-             v.vertIdx   = itVerts->vertIdx; // TODO: safe cast
+             v.vertIdx   = safe_cast<decltype(v.vertIdx)>(itVerts->vertIdx);
              v.texIdx    = make_optional_idx(itVerts->texIdx);
              s.vecIntensities.push_back(std::move(itVerts->color));
              ++itVerts;
@@ -175,7 +176,7 @@ void CND::WriteSection_Georesource(OutputStream& ostream, const Georesource& geo
         for(auto[idx, v] : cenumerate(s.verts))
         {
             vecSurfVerts.push_back({
-                static_cast<uint32_t>(v.vertIdx), // TODO: safe cast
+                safe_cast<decltype(CndSurfaceVerts::vertIdx)>(v.vertIdx),
                 from_optional_idx(v.texIdx),
                 s.vecIntensities.at(idx)
             });
@@ -183,7 +184,7 @@ void CND::WriteSection_Georesource(OutputStream& ostream, const Georesource& geo
     }
 
     ostream.write(surfheaders);
-    ostream.write<int32_t>(vecSurfVerts.size()); // TODO: safe cast
+    ostream.write<int32_t>(safe_cast<int32_t>(vecSurfVerts.size()));
     ostream.write(vecSurfVerts);
 }
 

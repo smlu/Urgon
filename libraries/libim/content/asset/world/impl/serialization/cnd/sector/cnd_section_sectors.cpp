@@ -2,7 +2,8 @@
 #include "cnd_sector.h"
 #include "../georesource/cnd_adjoin.h"
 #include "../georesource/cnd_surface.h"
-#include "../../../../../../../utils/utils.h"
+#include <libim/types/safe_cast.h>
+#include <libim/utils/utils.h>
 
 using namespace libim;
 using namespace libim::content::asset;
@@ -66,11 +67,11 @@ std::vector<Sector> CND::ParseSection_Sectors(const InputStream& istream, const 
             };
         }
 
-        s.surfaces.firstIdx = h.firstSurfaceIdx; //TODO: safecast
-        s.surfaces.count    = h.surfacesCount;   //TODO: safecast
+        s.surfaces.firstIdx = safe_cast<decltype(s.surfaces.firstIdx)>(h.firstSurfaceIdx);
+        s.surfaces.count    = safe_cast<decltype(s.surfaces.count)>(h.surfacesCount);
 
         // Copy vertex idxs
-        s.vertIdxs.resize(h.verticesCount); //TODO: safecast
+        s.vertIdxs.resize(safe_cast<std::size_t>(h.verticesCount));
         auto vidxItEnd = std::next(vidxIt, h.verticesCount);
         std::copy(vidxIt, vidxItEnd, s.vertIdxs.begin());
         vidxIt = vidxItEnd;
@@ -123,9 +124,9 @@ void CND::WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>&
             h.ambientSoundVolume = s.ambientSound->volume;
         }
 
-        h.firstSurfaceIdx = s.surfaces.firstIdx; // TODO: safecast
-        h.surfacesCount   = s.surfaces.count;    // TODO: safecast
-        h.verticesCount   = s.vertIdxs.size();   // TODO: safecast
+        h.firstSurfaceIdx = safe_cast<decltype(h.firstSurfaceIdx)>(s.surfaces.firstIdx);
+        h.surfacesCount   = safe_cast<decltype(h.surfacesCount)>(s.surfaces.count);
+        h.verticesCount   = safe_cast<decltype(h.verticesCount)>(s.vertIdxs.size());
 
         h.pvsIdx = s.pvsIdx;
         h.thrust = s.thrust;
@@ -139,7 +140,7 @@ void CND::WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>&
     }
 
     ostream.write(cndsectors);
-    ostream.write<uint32_t>(vertIdxs.size()); // TODO: safecast
+    ostream.write<uint32_t>(safe_cast<uint32_t>(vertIdxs.size()));
     ostream.write(vertIdxs);
 }
 

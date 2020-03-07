@@ -1,7 +1,9 @@
 #include "cnd_mat_header.h"
 #include "../cnd.h"
 #include "../sound/cnd_sound_header.h"
-#include "../../../../../../../log/log.h"
+#include <libim/log/log.h>
+#include <libim/types/safe_cast.h>
+
 #include <cstring>
 
 using namespace libim;
@@ -132,8 +134,8 @@ void CND::WriteSection_Materials(OutputStream& ostream, const utils::HashMap<Mat
         h.width       = mat.width();
         h.height      = mat.height();
         h.colorInfo   = mat.colorFormat();
-        h.mipmapCount = mat.mipmaps().size();
-        h.texturesPerMipmap = mat.mipmaps().at(0).size();
+        h.mipmapCount = safe_cast<decltype(h.mipmapCount)>(mat.mipmaps().size());
+        h.texturesPerMipmap = safe_cast<decltype(h.texturesPerMipmap)>(mat.mipmaps().at(0).size());
         cndHeaders.push_back(h);
 
         const std::size_t sizePixeldata = GetMipmapPixelDataSize(h.texturesPerMipmap, h.width, h.height, h.colorInfo.bpp);
@@ -149,7 +151,7 @@ void CND::WriteSection_Materials(OutputStream& ostream, const utils::HashMap<Mat
     }
 
     /* Write new pixel data size */
-    ostream.write(static_cast<uint32_t>(bitmaps.size())); // TODO: check bounds
+    ostream.write(safe_cast<uint32_t>(bitmaps.size()));
 
     /* Write material headers */
     ostream.write(cndHeaders);
@@ -227,9 +229,8 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
                 matHeader.width       = mat.width();
                 matHeader.height      = mat.height();
                 matHeader.colorInfo   = mat.colorFormat();
-                matHeader.mipmapCount = mat.mipmaps().size();
-                matHeader.texturesPerMipmap = mat.mipmaps().at(0).size();
-
+                matHeader.mipmapCount = safe_cast<decltype(matHeader.mipmapCount )>(mat.mipmaps().size());
+                matHeader.texturesPerMipmap = safe_cast<decltype(matHeader.texturesPerMipmap)>(mat.mipmaps().at(0).size());
                 break;
             }
 
@@ -294,7 +295,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
 
         /* Write new file size to the beginning of the output cnd file*/
         ofstream.seekBegin();
-        ofstream.write(static_cast<uint32_t>(ofstream.size()));
+        ofstream.write(safe_cast<uint32_t>(ofstream.size()));
 
         /* Close IO file stream */
         ifstream.close();

@@ -100,8 +100,8 @@ ByteArray Sound::data() const
         return bytes;
     }
 
-    auto itBegin = ptrData->begin() + dataOffset_; //TODO: safe cast
-    auto itEnd = itBegin + dataSize_; //TODO: safe cast
+    auto itBegin = ptrData->begin() + dataOffset_; //TODO: safe cast to difference_type
+    auto itEnd = itBegin + dataSize_; //TODO: safe cast to difference_type
     if(isIndyWVFormat_) {
         bytes = IndyVW::Inflate(InputBinaryStream(*ptrData, itBegin, itEnd));
     }

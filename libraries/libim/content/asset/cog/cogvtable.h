@@ -5,12 +5,13 @@
 #include <stdexcept>
 
 #include "cogsymbol_value.h"
+#include <libim/utils/utils.h>
 
 namespace libim::content::asset {
     class CogVTable final : protected std::map<std::size_t, CogSymbolValue>
     {
         using base_ = std::map<std::size_t, CogSymbolValue>;
-        constexpr static auto to_key = [](auto id) { return static_cast<std::size_t>(id); };
+        constexpr static auto to_key = [](auto id) { return utils::to_underlying(id); };
     public:
         enum class Id : std::size_t {};
         constexpr static CogVTable::Id defaultId = Id{0};
@@ -37,18 +38,18 @@ namespace libim::content::asset {
 
         CogSymbolValue& at(const Id& id)
         {
-            return base_::at(static_cast<std::size_t>(id));
+            return base_::at(to_key(id));
         }
 
         const CogSymbolValue& at(const Id& id) const
         {
-            return base_::at(static_cast<std::size_t>(id));
+            return base_::at(to_key(id));
         }
 
         CogSymbolValue& operator[](const Id& id)
         {
             if(id == defaultId && !contains(defaultId)) {
-                throw std::runtime_error("Cannot insert into CogVTable default value via operator[]");
+                throw std::runtime_error("Cannot insert default value into CogVTable via operator[]");
             }
             return base_::operator[](to_key(id));
         }

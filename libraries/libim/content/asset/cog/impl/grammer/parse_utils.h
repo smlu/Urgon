@@ -12,9 +12,21 @@
 #include <variant>
 
 namespace libim::content::asset::impl {
+    [[nodiscard]] inline bool is_op_assign(const libim::text::Token& t)
+    {
+        using namespace std::string_view_literals;
+        return t.type() == libim::text::Token::Punctuator && t.value() == "="sv;
+    }
+
+    [[nodiscard]] inline bool is_primitive_type(CogSymbol::Type t)
+    {
+        return t == CogSymbol::Int   ||
+               t == CogSymbol::Flex  ||
+               t == CogSymbol::Vector;
+    }
 
     // Checks if string value is of format: (%f/%f/%f)
-    [[nodiscard]] inline bool IsValidRawVectorValue(const std::string& value)
+    [[nodiscard]] inline bool is_valid_raw_vector_value(const std::string& value)
     {
         float vec[3];
 #ifdef _MSC_VER
@@ -25,7 +37,7 @@ namespace libim::content::asset::impl {
     }
 
     // Checks if string value is integer or float number. If allowFloat is false, only integers are allowed.
-    [[nodiscard]] inline bool IsNumericRawValue(const std::string& value, bool allowFloat = true)
+    [[nodiscard]] inline bool is_numeric_raw_value(const std::string& value, bool allowFloat = true)
     {
         bool foundFpDot = false;
         for (const auto[idx, c] : utils::enumerate(value))
@@ -41,12 +53,12 @@ namespace libim::content::asset::impl {
     }
 
     // Checks if string value is integer.
-    [[nodiscard]] inline bool IsIntRawValue(const std::string& value)
+    [[nodiscard]] inline bool is_int_raw_value(const std::string& value)
     {
-        return IsNumericRawValue(value, false);
+        return is_numeric_raw_value(value, false);
     }
 
-    [[nodiscard]] static bool IsValidRawInitValue(CogSymbol::Type stype, const CogSymbolValue& value)
+    [[nodiscard]] static bool is_valid_raw_init_value(CogSymbol::Type stype, const CogSymbolValue& value)
     {
         using namespace std::string_view_literals;
         auto sval = std::get_if<std::string>(&value);
@@ -56,11 +68,11 @@ namespace libim::content::asset::impl {
             case CogSymbol::Flex:
                 return std::holds_alternative<int32_t>(value) ||
                         std::holds_alternative<float>(value)  ||
-                        (sval && IsNumericRawValue(*sval));
+                        (sval && is_numeric_raw_value(*sval));
             case CogSymbol::Ai:
                 return sval && utils::iends_with(*sval, ".ai"sv);
             case CogSymbol::Cog:
-                return sval && IsIntRawValue(*sval);
+                return sval && is_int_raw_value(*sval);
             case CogSymbol::Keyframe:
                 return sval && utils::iends_with(*sval, ".key"sv);
             case CogSymbol::Material:
@@ -68,17 +80,17 @@ namespace libim::content::asset::impl {
             case CogSymbol::Model:
                 return sval && utils::iends_with(*sval, ".3do"sv);
             case CogSymbol::Sector:
-                return sval && IsIntRawValue(*sval);
+                return sval && is_int_raw_value(*sval);
             case CogSymbol::Sound:
                 return sval && utils::iends_with(*sval, ".wav"sv);
             case CogSymbol::Surface:
-                return sval && IsIntRawValue(*sval);
+                return sval && is_int_raw_value(*sval);
             case CogSymbol::Vector:
-                return sval && IsValidRawVectorValue(*sval);
+                return sval && is_valid_raw_vector_value(*sval);
             case CogSymbol::Template:
-                return sval && !IsIntRawValue(*sval); // must be string chars not all numeric chars.
+                return sval && !is_int_raw_value(*sval); // must be string chars not all numeric chars.
             case CogSymbol::Thing:
-                return sval && IsIntRawValue(*sval);
+                return sval && is_int_raw_value(*sval);
             default:
                 return false;
         }

@@ -10,6 +10,7 @@ set(TEST_SRC_FILES "test.cpp")
 add_executable (${PROJECT_NAME}
     ${TEST_SRC_FILES}
     $<TARGET_OBJECTS:${PM_LIBCMD}>
+    $<TARGET_OBJECTS:${PM_IMFIXES}>
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSRC_ROOT=\"${PM_SOURCE_DIR}\"")

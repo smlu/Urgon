@@ -9,6 +9,7 @@ project(
 set(PM_CNDEXT  "cndext")
 set(PM_CNDTOOL "cndtool")
 set(PM_GOBEXT  "gobext")
+set(PM_IMFIXES "imfixes")
 set(PM_LIBCMD  "libcmd")
 set(PM_LIBIM   "libim")
 set(PM_TEST    "test")

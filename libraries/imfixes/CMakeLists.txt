@@ -1,0 +1,24 @@
+project(
+    ${PM_IMFIXES}
+    LANGUAGES CXX
+    VERSION 0.1.0
+)
+
+file(GLOB_RECURSE
+    IMFIXES_HEADER_FILES
+    "*.h"
+    [FOLLOW_SYMLINKS]
+)
+
+file(GLOB_RECURSE
+    IMFIXES_SRC_FILES
+    "*.cpp"
+    [FOLLOW_SYMLINKS]
+)
+
+add_library(${PROJECT_NAME} OBJECT
+    ${IMFIXES_HEADER_FILES}
+    ${IMFIXES_SRC_FILES}
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)

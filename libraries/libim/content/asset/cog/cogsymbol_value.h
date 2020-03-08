@@ -11,8 +11,8 @@
 #include "../world/surface.h"
 #include "../../audio/sound.h"
 
-#include "../../../utils/sharedref.h"
-#include "../../../math/vector3.h"
+#include <libim/types/sharedref.h>
+#include <libim/math/vector3.h>
 
 namespace libim::content::asset {
     struct Cog;
@@ -26,13 +26,13 @@ namespace libim::content::asset {
         Vector3f,
         CogFlexType,
         CogMessageType,
-        utils::SharedRef<audio::Sound>,
-        utils::SharedRef<Animation>,
-        utils::SharedRef<Material>,
-        utils::SharedRef<Surface>,
-        utils::SharedRef<Sector>,
+        SharedRef<audio::Sound>,
+        SharedRef<Animation>,
+        SharedRef<Material>,
+        SharedRef<Surface>,
+        SharedRef<Sector>,
         /* utils::SharedRef<Ai>,*/
-        utils::SharedRef<Cog>
+        SharedRef<Cog>
         /*utils::SharedRef<Template>,
         utils::SharedRef<Thing>, */
     >;

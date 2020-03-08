@@ -1,27 +1,30 @@
 #ifndef LIBIM_TYPEMASK_H
 #define LIBIM_TYPEMASK_H
-#include "utils.h"
-
+#include <libim/utils/utils.h>
 #include <utility>
 #include <type_traits>
 
-namespace libim::utils {
+namespace libim {
+    /**
+     * Class represents enum type enumerators as bit flags.
+    *  e.g. enumerator A = 5 is convert to flag (0x1 << 5) aka 0x20
+    */
     template <typename T>
     class TypeMask {
     protected:
         static_assert (std::is_enum_v<T>, "T must be enum type");
-        using UT = underlying_type_t<T>;
+        using UT = utils::underlying_type_t<T>;
 
     public:
         TypeMask() = default;
-        TypeMask(T f) : value(toMask(f)) {}
+        TypeMask(T f) : value(toFlag(f)) {}
         explicit TypeMask(UT v) : value(v) {}
 
         TypeMask(std::initializer_list<T> initl)
         {
             value = 0;
             for(T val : initl) {
-                value |= toMask(val);
+                value |= toFlag(val);
             }
         }
 
@@ -32,13 +35,13 @@ namespace libim::utils {
 
         inline const TypeMask& operator = (T val)
         {
-            value = toMask(val);
+            value = toFlag(val);
             return *this;
         }
 
         inline bool operator & (T val) const
         {
-            return value & toMask(val);
+            return value & toFlag(val);
         }
 
         inline bool operator & (TypeMask val) const
@@ -48,7 +51,7 @@ namespace libim::utils {
 
         inline TypeMask operator | (T val) const
         {
-            return TypeMask(value | toMask(val));
+            return TypeMask(value | toFlag(val));
         }
 
         inline TypeMask operator | (TypeMask val) const
@@ -58,7 +61,7 @@ namespace libim::utils {
 
         inline const TypeMask& operator |= (T val)
         {
-            value |= toMask(val);
+            value |= toFlag(val);
             return *this;
         }
 
@@ -70,7 +73,7 @@ namespace libim::utils {
 
         inline TypeMask operator - (T val) const
         {
-            return TypeMask(value & ~toMask(val));
+            return TypeMask(value & ~toFlag(val));
         }
 
         inline TypeMask operator - (TypeMask val) const
@@ -80,7 +83,7 @@ namespace libim::utils {
 
         inline const TypeMask& operator -= (T val)
         {
-            value = value & ~toMask(val);
+            value = value & ~toFlag(val);
             return *this;
         }
 
@@ -101,7 +104,7 @@ namespace libim::utils {
         }
 
     private:
-        static UT toMask(T t) {
+        static UT toFlag(T t) {
             return 1 << static_cast<UT>(t);
         }
 

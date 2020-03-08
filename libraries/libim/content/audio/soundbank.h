@@ -1,9 +1,9 @@
 #ifndef LIBIM_SOUNDBANK_H
 #define LIBIM_SOUNDBANK_H
 #include "sound.h"
-#include "../../common.h"
-#include "../../io/stream.h"
-#include "../../utils/hashmap.h"
+#include <libim/common.h>
+#include <libim/io/stream.h>
+#include <libim/types/hashmap.h>
 
 #include <cstdint>
 #include <memory>
@@ -21,7 +21,7 @@ namespace libim::content::audio
 
         std::size_t count() const; // !< Returns number of tracks
 
-        const utils::HashMap<Sound>& getTrack(std::size_t trackIdx) const;
+        const HashMap<Sound>& getTrack(std::size_t trackIdx) const;
 
         /** Imports sounbank data to track at index Idx */
         bool importTrack(std::size_t trackIdx, const InputStream& istream);

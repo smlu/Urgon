@@ -139,7 +139,7 @@ void Tokenizer::skipNextToken()
     getNextToken(t);
 }
 
-bool Tokenizer::skipNextTokenIf(utils::TypeMask<Token::Type> mask)
+bool Tokenizer::skipNextTokenIf(TypeMask<Token::Type> mask)
 {
     Token t;
     using namespace utils;
@@ -151,7 +151,7 @@ bool Tokenizer::skipNextTokenIf(utils::TypeMask<Token::Type> mask)
     return false;
 }
 
-bool Tokenizer::skipNextTokenIfNot(utils::TypeMask<Token::Type> mask)
+bool Tokenizer::skipNextTokenIfNot(TypeMask<Token::Type> mask)
 {
     Token t;
     using namespace utils;

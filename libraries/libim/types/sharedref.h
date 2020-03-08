@@ -4,11 +4,12 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace libim::utils {
+namespace libim {
 
     template<typename T>
     class WeakRef;
 
+    /** SharedRef represents owning non-nullable shared pointer **/
     template<typename T>
     class SharedRef
     {
@@ -24,7 +25,6 @@ namespace libim::utils {
         {
             ptr_ = std::make_shared<DT>(v);
         }
-
 
         SharedRef(T&& v)
         {
@@ -95,8 +95,7 @@ namespace libim::utils {
 
 
 
-
-
+    /** WeakRef represents non-owning non-nullable shared weak pointer **/
     template<typename T>
     class WeakRef
     {

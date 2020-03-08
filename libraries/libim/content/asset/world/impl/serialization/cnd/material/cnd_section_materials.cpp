@@ -110,14 +110,14 @@ HashMap<Material> CND::ParseSection_Materials(const CndHeader& header, const Inp
     }
 }
 
-utils::HashMap<Material> CND::ReadMaterials(const InputStream& istream)
+HashMap<Material> CND::ReadMaterials(const InputStream& istream)
 {
     auto cndHeader = ReadHeader(istream);
     istream.seek(GetOffset_Materials(istream));
     return ParseSection_Materials(cndHeader, istream);
 }
 
-void CND::WriteSection_Materials(OutputStream& ostream, const utils::HashMap<Material>& materials)
+void CND::WriteSection_Materials(OutputStream& ostream, const HashMap<Material>& materials)
 {
     std::vector<CndMatHeader> cndHeaders;
     cndHeaders.reserve(materials.size());
@@ -159,7 +159,6 @@ void CND::WriteSection_Materials(OutputStream& ostream, const utils::HashMap<Mat
     /* Write pixeldata of all materials */
     ostream.write(bitmaps);
 }
-
 
 
 bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)

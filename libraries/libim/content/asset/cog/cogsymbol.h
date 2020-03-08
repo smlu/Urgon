@@ -6,7 +6,7 @@
 
 #include "cogvtable.h"
 #include "../thing/thing.h"
-#include "../../../utils/typemask.h"
+#include <libim/types/typemask.h>
 
 namespace libim::content::asset {
 
@@ -37,7 +37,7 @@ namespace libim::content::asset {
 
         bool isLocal = false;
         int linkId   = 0;    // Note: LinkId get be accessed via cog function GetSenderId(). TODO: Verify if default should be -1.
-        utils::TypeMask<Thing::Type> mask = Thing::Free;
+        TypeMask<Thing::Type> mask = Thing::Free;
         std::string description;
 
         void setDefaultValue(CogSymbolValue v)

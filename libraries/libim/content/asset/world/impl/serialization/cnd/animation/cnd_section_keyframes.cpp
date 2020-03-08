@@ -97,7 +97,7 @@ HashMap<Animation> CND::ReadKeyframes(const InputStream& istream)
     return ParseSection_Keyframes(istream, cndHeader);
 }
 
-void CND::WriteSection_Keyframes(OutputStream& ostream, const utils::HashMap<Animation>& animations)
+void CND::WriteSection_Keyframes(OutputStream& ostream, const HashMap<Animation>& animations)
 {
     std::vector<CndKeyHeader> cndHeaders;
     cndHeaders.reserve(animations.size());

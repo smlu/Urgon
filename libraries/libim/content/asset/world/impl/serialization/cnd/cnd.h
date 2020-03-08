@@ -14,12 +14,12 @@
 #include "../../../../material/material.h"
 #include "../../../../world/sector.h"
 
-#include "../../../../../../common.h"
-#include "../../../../../../io/stream.h"
-#include "../../../../../../math/color.h"
-#include "../../../../../../math/vector2.h"
-#include "../../../../../../math/vector4.h"
-#include "../../../../../../utils/hashmap.h"
+#include <libim/common.h>
+#include <libim/io/stream.h>
+#include <libim/math/color.h>
+#include <libim/math/vector2.h>
+#include <libim/math/vector4.h>
+#include <libim/types/hashmap.h>
 
 
 namespace libim::content::asset {
@@ -140,9 +140,9 @@ namespace libim::content::asset {
         static uint32_t ParseSectionSounds(audio::impl::SbTrack& track, const InputStream& istream);
 
         static std::size_t GetOffset_Materials(const InputStream& istream);
-        static utils::HashMap<Material> ParseSection_Materials(const CndHeader& header, const InputStream& istream); // Reads materials section. Offset of istream hast to be at beginning of material section.
-        static utils::HashMap<Material> ReadMaterials(const InputStream& istream);
-        static void WriteSection_Materials(OutputStream& ostream, const utils::HashMap<Material>& materials);
+        static HashMap<Material> ParseSection_Materials(const CndHeader& header, const InputStream& istream); // Reads materials section. Offset of istream hast to be at beginning of material section.
+        static HashMap<Material> ReadMaterials(const InputStream& istream);
+        static void WriteSection_Materials(OutputStream& ostream, const HashMap<Material>& materials);
         static bool ReplaceMaterial(const Material& mat, const std::string& filename);
 
         static std::size_t GetOffset_Georesource(const CndHeader& header, const InputStream& istream);
@@ -171,9 +171,9 @@ namespace libim::content::asset {
         static void WriteSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites);
 
         static std::size_t GetOffset_Keyframes(const InputStream& istream, const CndHeader& header);
-        static utils::HashMap<Animation> ParseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
-        static utils::HashMap<Animation> ReadKeyframes(const InputStream& istream);
-        static void WriteSection_Keyframes(OutputStream& ostream, const utils::HashMap<Animation>& animations);
+        static HashMap<Animation> ParseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
+        static HashMap<Animation> ReadKeyframes(const InputStream& istream);
+        static void WriteSection_Keyframes(OutputStream& ostream, const HashMap<Animation>& animations);
 
         static std::size_t GetOffset_AnimClass(const InputStream& istream, const CndHeader& header);
         static std::vector<std::string> ParseSection_AnimClass(const InputStream& istream, const CndHeader& header);

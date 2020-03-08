@@ -2,18 +2,18 @@
 #define PATCH_H
 #include <string>
 
-#include "libim/content/asset/material/material.h"
-#include "libim/content/asset/world/impl/serialization/cnd/cnd.h"
-#include "libim/content/asset/world/impl/serialization/cnd/animation/cnd_key_structs.h"
-#include "libim/content/asset/world/impl/serialization/cnd/material/cnd_mat_header.h"
-#include "libim/utils/hashmap.h"
-#include "libim/io/stream.h"
+#include <libim/content/asset/material/material.h>
+#include <libim/content/asset/world/impl/serialization/cnd/cnd.h>
+#include <libim/content/asset/world/impl/serialization/cnd/animation/cnd_key_structs.h>
+#include <libim/content/asset/world/impl/serialization/cnd/material/cnd_mat_header.h>
+#include <libim/io/stream.h>
+#include <libim/types/hashmap.h>
 
 using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::utils;
 
-bool PatchCndMaterials(const std::string& cndFile, const utils::HashMap<Material>& materials)
+bool PatchCndMaterials(const std::string& cndFile, const HashMap<Material>& materials)
 {
     if(materials.isEmpty()) {
         return false;
@@ -68,7 +68,7 @@ bool PatchCndMaterials(const std::string& cndFile, const utils::HashMap<Material
     }
 }
 
-bool PatchCndAnimations(const std::string& cndFile, const utils::HashMap<Animation>& animations)
+bool PatchCndAnimations(const std::string& cndFile, const HashMap<Animation>& animations)
 {
     if(animations.isEmpty()) {
         return false;
@@ -123,7 +123,7 @@ bool PatchCndAnimations(const std::string& cndFile, const utils::HashMap<Animati
     }
     catch(const std::exception& e)
     {
-        std::cerr << "An exception was encountered while patching keyframe section e=" << e.what() <<std::endl;
+        std::cerr << "An exception was encountered while patching keyframe section e=" << e.what() << std::endl;
         return false;
     }
 }

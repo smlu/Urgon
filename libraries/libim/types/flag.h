@@ -1,16 +1,15 @@
 #ifndef LIBIM_FLAG_H
 #define LIB_IMFLAG_H
-#include "utils.h"
-
+#include <libim/utils/utils.h>
 #include <utility>
 #include <type_traits>
 
-namespace libim::utils {
+namespace libim {
     template <typename T>
     class Flag {
     protected:
         static_assert (std::is_enum_v<T>, "T must be enum type");
-        using UT = underlying_type_t<T>;
+        using UT = utils::underlying_type_t<T>;
 
     public:
         Flag() = default;

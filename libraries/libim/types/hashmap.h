@@ -9,9 +9,9 @@
 #include <type_traits>
 #include <unordered_map>
 
-namespace libim::utils {
+namespace libim {
 
-    /** Sequence ordered list which elements are maped by the key. */
+    /** Sequence ordered list which elements are mapped to the key. */
     template<typename T, typename KeyT = std::string>
     class HashMap
     {
@@ -71,7 +71,6 @@ namespace libim::utils {
             }
             return *this;
         }
-
 
         iterator begin() noexcept
         {
@@ -420,9 +419,6 @@ namespace libim::utils {
         IndexType index_;
         MapType map_;
     };
-
-
-
 
 
 

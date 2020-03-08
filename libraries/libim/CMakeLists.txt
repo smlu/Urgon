@@ -1,7 +1,7 @@
 project(
     ${PM_LIBIM}
     LANGUAGES CXX
-    VERSION 0.6.6
+    VERSION 0.7.0
 )
 
 # LibIM source

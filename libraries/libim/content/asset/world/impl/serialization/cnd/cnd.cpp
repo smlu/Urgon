@@ -3,10 +3,13 @@
 #include "sector/cnd_sector.h"
 #include "../world_ser_common.h"
 #include "../../../../../../utils/utils.h"
+#include <libim/types/safe_cast.h>
 
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <functional>
+#include <variant>
 
 using namespace libim;
 using namespace libim::content::asset;
@@ -227,3 +230,100 @@ void CND::WriteSection_CogScripts(OutputStream& ostream, const std::vector<std::
 }
 
 
+std::size_t CND::GetOffset_Cogs(const InputStream& istream, const CndHeader& header)
+{
+    return GetOffset_CogScripts(istream, header) + sizeof(CndResourceName) * header.numCogScripts;
+}
+
+std::vector<SharedRef<Cog>> CND::ParseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts)
+{
+    auto aSizes = istream.read<std::array<uint32_t, 2>>();
+    auto snames = ReadResourceList(istream, aSizes.at(0));
+    auto values = ReadResourceList(istream, aSizes.at(1));
+
+    std::vector<SharedRef<Cog>> cogs;
+    cogs.reserve(snames.size());
+
+    auto vit = values.begin();
+    for(const auto& sname : snames)
+    {
+        auto it = scripts.find(sname);
+        if(it == scripts.end())
+        {
+            LOG_ERROR("CND::ParseSection_Cogs(): Can't find cog script '%'", sname);
+            throw StreamError("Can't make Cog, CogScript not found");
+        }
+
+        Cog c;
+        c.id     = std::size(cogs);
+        c.script = *it;
+        c.flags  = c.script->flags;
+        c.vtid   = c.script->getNextVTableId();
+
+        for(auto& s : c.script->symbols)
+        {
+            if(s.isLocal ||
+               s.type == CogSymbol::Message) {
+                continue;
+            }
+
+            s.vtable[c.vtid] = std::move(*vit);
+            // TODO: initialize value with valid type
+            ++vit;
+        }
+
+        cogs.push_back(std::move(c));
+    }
+
+    if(vit != values.end()) {
+        throw StreamError("Incomplete initialization of COGs while parsing COG section");
+    }
+
+    return cogs;
+}
+
+std::vector<SharedRef<Cog>> CND::ReadCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts)
+{
+    auto header = ReadHeader(istream);
+    istream.seek(GetOffset_Cogs(istream, header));
+    return ParseSection_Cogs(istream, header, scripts);
+}
+
+void CND::WriteSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs)
+{
+    std::vector<std::string> cogvals;
+    cogvals.reserve(cogs.size());
+
+    for(const auto& c : cogs)
+    {
+        if(cogvals.capacity() < c->script->symbols.size()) {
+            cogvals.reserve(c->script->symbols.size());
+        }
+
+        for(const CogSymbol& s : c->script->symbols)
+        {
+            if(s.isLocal ||
+               !s.vtable.contains(c->vtid)) {
+                continue;
+            }
+
+            cogvalue_visitor([&](auto&& s) {
+                using ST = decltype(s);
+                if constexpr(std::is_same_v<std::string_view, std::decay_t<ST>>) {
+                    cogvals.emplace_back(s);
+                }
+                else {
+                    cogvals.push_back(std::forward<ST>(s));
+                }
+            }, s.vtable.at(c->vtid));
+        }
+    }
+
+    ostream.write(std::array<uint32_t, 2>{
+        safe_cast<uint32_t>(cogs.size()),
+        safe_cast<uint32_t>(cogvals.size())
+    });
+
+    WriteResourceList(ostream, cogs, [](const SharedRef<Cog>& e) { return e->name(); });
+    WriteResourceList(ostream, cogvals);
+}

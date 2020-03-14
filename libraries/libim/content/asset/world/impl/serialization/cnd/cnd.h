@@ -10,9 +10,10 @@
 #include "cndstring.h"
 #include "../../../georesource.h"
 #include "../../../../animation/animation.h"
-#include "../../../../../audio/impl/sbtrack.h"
+#include "../../../../cog/cog.h"
+#include "../../../../cog/cogscript.h"
 #include "../../../../material/material.h"
-#include "../../../../world/sector.h"
+#include "../../../../../audio/impl/sbtrack.h"
 
 #include <libim/common.h>
 #include <libim/io/stream.h>
@@ -190,6 +191,10 @@ namespace libim::content::asset {
         static std::vector<std::string> ReadCogScripts(const InputStream& istream);
         static void WriteSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts);
     };
+        static std::size_t GetOffset_Cogs(const InputStream& istream, const CndHeader& header);
+        static std::vector<SharedRef<Cog>> ParseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts);
+        static std::vector<SharedRef<Cog>> ReadCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts);
+        static void WriteSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs);
 
 
 }

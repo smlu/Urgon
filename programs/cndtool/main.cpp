@@ -381,7 +381,7 @@ int ExecCmdAdd(std::string_view scmd, const CndToolArgs& args)
 
 int ExecCmdAddAnimation(const CndToolArgs& args)
 {
-    bool success = ExecCmdAddAssets<Animation>(args, ".key",
+    bool success = ExecCmdAddAssets<Animation>(args, extKey,
         [](const auto& istream){
             return Animation(TextResourceReader(istream));
         },
@@ -398,7 +398,7 @@ int ExecCmdAddAnimation(const CndToolArgs& args)
 
 int ExecCmdAddMaterial(const CndToolArgs& args)
 {
-    bool success = ExecCmdAddAssets<Material>(args, ".mat",
+    bool success = ExecCmdAddAssets<Material>(args, extMat,
         [](const auto& istream){
             return Material(istream);
         },

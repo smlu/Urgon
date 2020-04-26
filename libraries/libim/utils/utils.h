@@ -102,6 +102,24 @@ namespace libim::utils {
 
 
 
+    /**
+     * Returns wrapped iterable object which iterator is pair of iterator's
+     * index number and iterator of iterable object. Wrapping object has 4 mehods:
+     * begin, end and their const variation.
+     * Example:
+     *     std::vector<char> chars{ 'a', 'b', 'c' };
+     *     for(auto[idx, c] : chars) {
+     *         std::cout << "idx: " << idx << " char: " << c << std::endl;
+     *     }
+     *
+     *     Should print: idx: 0 char: a
+     *                   idx: 1 char: b
+     *                   idx: 2 char: c
+     *
+     *
+     * @param iterable RValue iterable object.
+     * @return Wrapped iterable object.
+    */
     template <typename T,
               typename TIter = decltype(std::begin(std::declval<T>())),
               typename = decltype(std::end(std::declval<T>()))>
@@ -129,6 +147,10 @@ namespace libim::utils {
         return iterable_wrapper{ std::forward<T>(iterable) };
     }
 
+    /**
+     * Const version of enumerate function.
+     * @see enumerate
+    */
     template<typename T>
     constexpr auto cenumerate(T&& iterable)
     {
@@ -139,17 +161,25 @@ namespace libim::utils {
     }
 
 
-    template<typename T>
-    typename T::iterator copy(typename T::iterator s_begin, std::size_t count, T& dest)
+    /**
+     * Copies n elements begining at source iterator to destination container.
+     *
+     * @param srcIt Source iterator.
+     * @param count Number of elements to copy.
+     * @param dest Destination container.
+     * @return An instance of SourceIt at srcIt + count.
+    */
+    template<typename SourceIt, typename T>
+    SourceIt copy(SourceIt srcIt, const std::size_t count, T& dest)
     {
         dest.reserve(count);
-        auto s_end = std::next(s_begin, count);
-        std::copy(s_begin, s_end, std::back_inserter(dest));
-        return s_end;
+        auto srcEnd = std::next(srcIt, count);
+        std::copy(srcIt, srcEnd, std::back_inserter(dest));
+        return srcEnd;
     }
 
 
-    /* Case insensitive comparison of two strings */
+    /** Case insensitive comparison of two strings */
     [[nodiscard]] inline bool iequal(const std::string& s1, const std::string& s2)
     {
         return ((s1.size() == s2.size()) &&
@@ -165,6 +195,7 @@ namespace libim::utils {
     }
 
 
+    /** Returns instance of enumerator casted to it's underlying type. */
     template<typename T>
     [[nodiscard]] inline constexpr auto to_underlying(T t)
     {
@@ -185,7 +216,7 @@ namespace libim::utils {
     using underlying_type_t = typename underlying_type<T>::type;
 
 
-    // Returns number of digits in the number.
+    /* Returns number of digits in the number. */
     template<typename T>
     [[nodiscard]] inline std::size_t numdigits(T i)
     {
@@ -258,7 +289,11 @@ namespace libim::utils {
     }
 
 
-    // Transforms inputed string to all lower case charactes.
+    /**
+     * Transforms string to all lower case characters.
+     *
+     * @param str A reference to a string to convert to lower case.
+     */
     inline void to_lower(std::string& str)
     {
         std::transform(str.begin(), str.end(), str.begin(),
@@ -266,13 +301,13 @@ namespace libim::utils {
         );
     }
 
-    // Checks if string s ends with x
+    /* Checks if string s ends with x */
     [[nodiscard]] inline bool ends_with(const std::string& s, std::string_view x)
     {
         return s.size() >= x.size() && s.compare(s.size() - x.size(), s.npos, x) == 0;
     }
 
-    // Case Insensitive check if string s ends with x
+    /** Case Insensitive check if string s ends with x */
     [[nodiscard]] inline bool iends_with(const std::string& s, std::string_view x)
     {
         auto it = x.begin();

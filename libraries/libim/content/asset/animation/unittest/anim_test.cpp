@@ -41,7 +41,7 @@ void test_anim_file(const std::filesystem::path& filePath)
         }
 
         // Test
-        assert(anim.flages()  == anim2.flages());
+        assert(anim.flags()   == anim2.flags());
         assert(anim.type()    == anim2.type());
         assert(anim.frames()  == anim2.frames());
         assert(cmpf(anim.fps() , anim2.fps()));

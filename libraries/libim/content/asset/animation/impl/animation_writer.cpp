@@ -19,10 +19,10 @@ void WriteHeader(TextResourceWriter& rw, const Animation& anim, std::string_view
 
     rw.writeSection(kResName_Header)
       .writeEol()
-      .writeKeyValue(kResName_Flags, anim.flages(), 2)
-      .writeKeyValue(kResName_Type, anim.type(), 3)
+      .writeKeyValue(kResName_Flags,  anim.flags(), 2)
+      .writeKeyValue(kResName_Type,   anim.type(), 3)
       .writeKeyValue(kResName_Frames, anim.frames())
-      .writeKeyValue(kResName_Fps, utils::to_string<10,3>(anim.fps()), 4)
+      .writeKeyValue(kResName_Fps,    utils::to_string<10,3>(anim.fps()), 4)
       .writeKeyValue(kResName_Joints, anim.joints())
       .writeEol()
       .writeEol();

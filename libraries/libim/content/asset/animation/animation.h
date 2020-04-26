@@ -67,7 +67,7 @@ namespace libim::content::asset {
             flags_ = flags;
         }
 
-        Flag flages() const
+        Flag flags() const
         {
             return flags_;
         }

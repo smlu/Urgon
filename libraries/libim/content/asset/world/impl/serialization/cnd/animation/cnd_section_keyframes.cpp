@@ -112,7 +112,7 @@ void CND::WriteSection_Keyframes(OutputStream& ostream, const HashMap<Animation>
             throw StreamError("Too long animation name to copy to CndKeyHeader.name field");
         }
 
-        h.flags      = anim.flages();
+        h.flags      = anim.flags();
         h.type       = anim.type();
         h.frames     = safe_cast<decltype(h.frames)>(anim.frames());
         h.fps        = anim.fps();

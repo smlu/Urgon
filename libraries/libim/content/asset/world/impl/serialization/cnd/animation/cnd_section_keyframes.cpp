@@ -43,9 +43,9 @@ HashMap<Animation> CND::ParseSection_Keyframes(const InputStream& istream, const
     auto nodeList      = istream.read<std::vector<CndKeyNode>>  (aNumEntries.at(1));
     auto nodeEntryList = istream.read<std::vector<KeyNodeEntry>>(aNumEntries.at(2));
 
-    auto mIt  = markerList.begin();
-    auto nIt  = nodeList.begin();
-    auto neIt = nodeEntryList.begin();
+    auto mIt  = markerList.cbegin();
+    auto nIt  = nodeList.cbegin();
+    auto neIt = nodeEntryList.cbegin();
     animations.reserve(header.numKeyframes);
 
     for(const auto& header : headerList)
@@ -54,9 +54,9 @@ HashMap<Animation> CND::ParseSection_Keyframes(const InputStream& istream, const
         anim.setName(utils::trim(header.name));
         anim.setFlags(header.flags);
         anim.setType(header.type);
-        anim.setFrames(header.frames);  // TODO: check bounds
+        anim.setFrames(header.frames);
         anim.setFps(header.fps);
-        anim.setJoints(header.numJoints); // TODO: check bounds
+        anim.setJoints(header.numJoints);
 
         /* Copy key markers */
         std::vector<KeyMarker> markers;
@@ -64,7 +64,7 @@ HashMap<Animation> CND::ParseSection_Keyframes(const InputStream& istream, const
         anim.setMarkers(std::move(markers));
 
         /* Copy key nodes and it's entries */
-        anim.nodes().resize(header.numNodes); // TODO: check bounds
+        anim.nodes().resize(header.numNodes);
         for(auto& node : anim.nodes())
         {
             node.meshName = utils::trim(nIt->meshName);

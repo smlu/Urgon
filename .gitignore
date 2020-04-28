@@ -44,4 +44,5 @@ CTestTestfile.cmake
 
 # Visual Studio
 .vs
+.vscode
 CMakeSettings.json

@@ -143,7 +143,7 @@ struct FileStream::FileStreamImpl
         }
 
     #ifdef OS_WINDOWS
-        
+
         /* Open file */
         #if _WIN32_WINNT >= _WIN32_WINNT_WIN8
 
@@ -349,7 +349,6 @@ HANDLE fileHandle = INVALID_HANDLE_VALUE;
 
 FileStream::FileStream(std::string filePath, Mode mode) :
     FileStream(std::move(filePath), false, mode)
-
 {}
 
 FileStream::FileStream(std::string filePath, bool truncate, Mode mode) :

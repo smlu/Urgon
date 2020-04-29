@@ -118,15 +118,38 @@ namespace libim::content::asset {
 
 
     Bitmap::const_iterator
-        CopyMipmapFromBuffer(Mipmap& mipmap, const Bitmap& buffer, uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo);
-    Mipmap MoveMipmapFromBuffer(Bitmap& buffer, uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo);
+    copyMipmapFromBuffer(
+        Mipmap& mipmap,
+        const Bitmap& buffer,
+        uint32_t textureCount,
+        uint32_t width,
+        uint32_t height,
+        const ColorFormat& colorInfo
+    );
+
+    Mipmap moveMipmapFromBuffer(
+        Bitmap& buffer,
+        uint32_t textureCount,
+        uint32_t width,
+        uint32_t height,
+        const ColorFormat& colorInfo
+    );
 }
 
 namespace libim {
-    template<> content::asset::Mipmap Stream::read<
-        content::asset::Mipmap, uint32_t, uint32_t, uint32_t, const content::asset::ColorFormat&
-    >
-    (uint32_t textureCount, uint32_t width, uint32_t height, const content::asset::ColorFormat& colorInfo) const;
+    template<> content::asset::Mipmap
+    Stream::read<
+        content::asset::Mipmap,
+        uint32_t,
+        uint32_t,
+        uint32_t,
+        const content::asset::ColorFormat&>
+    (
+        uint32_t textureCount,
+        uint32_t width,
+        uint32_t height,
+        const content::asset::ColorFormat& colorInfo
+    ) const;
 }
 
 #endif // LIBIM_MATERIAL_H

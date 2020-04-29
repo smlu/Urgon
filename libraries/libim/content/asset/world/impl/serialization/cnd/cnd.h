@@ -128,7 +128,7 @@ namespace libim::content::asset {
 
     struct CND final
     {
-        static CndHeader ReadHeader(const InputStream& istream);
+        static CndHeader readHeader(const InputStream& istream);
 
         /**
         * Parses sounds section.
@@ -138,65 +138,63 @@ namespace libim::content::asset {
         * @param Const reference to the InputStream
         * @return Returns last sound file ID nonce
         */
-        static uint32_t ParseSectionSounds(audio::impl::SbTrack& track, const InputStream& istream);
+        static uint32_t parseSectionSounds(audio::impl::SbTrack& track, const InputStream& istream);
 
-        static std::size_t GetOffset_Materials(const InputStream& istream);
-        static HashMap<Material> ParseSection_Materials(const CndHeader& header, const InputStream& istream); // Reads materials section. Offset of istream hast to be at beginning of material section.
-        static HashMap<Material> ReadMaterials(const InputStream& istream);
-        static void WriteSection_Materials(OutputStream& ostream, const HashMap<Material>& materials);
-        static bool ReplaceMaterial(const Material& mat, const std::string& filename);
+        static std::size_t getOffset_Materials(const InputStream& istream);
+        static HashMap<Material> parseSection_Materials(const CndHeader& header, const InputStream& istream); // Reads materials section. Offset of istream hast to be at beginning of material section.
+        static HashMap<Material> readMaterials(const InputStream& istream);
+        static void writeSection_Materials(OutputStream& ostream, const HashMap<Material>& materials);
+        static bool replaceMaterial(const Material& mat, const std::string& filename);
 
-        static std::size_t GetOffset_Georesource(const CndHeader& header, const InputStream& istream);
-        static Georesource ParseSection_Georesource(const CndHeader& cndHeader, const InputStream& istream);
-        static Georesource ReadGeoresource(const InputStream& istream);
-        static void WriteSection_Georesource(OutputStream& ostream, const Georesource& geores);
+        static std::size_t getOffset_Georesource(const CndHeader& header, const InputStream& istream);
+        static Georesource parseSection_Georesource(const CndHeader& cndHeader, const InputStream& istream);
+        static Georesource readGeoresource(const InputStream& istream);
+        static void writeSection_Georesource(OutputStream& ostream, const Georesource& geores);
 
-        static std::size_t GetOffset_Sectors(const InputStream& istream, const CndHeader& header);
-        static std::vector<Sector> ParseSection_Sectors(const InputStream& istream, const CndHeader& header);
-        static std::vector<Sector> ReadSectors(const InputStream& istream);
-        static void WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>& sectors);
+        static std::size_t getOffset_Sectors(const InputStream& istream, const CndHeader& header);
+        static std::vector<Sector> parseSection_Sectors(const InputStream& istream, const CndHeader& header);
+        static std::vector<Sector> readSectors(const InputStream& istream);
+        static void writeSection_Sectors(OutputStream& ostream, const std::vector<Sector>& sectors);
 
-        static std::size_t GetOffset_AiClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ParseSection_AiClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ReadAiClass(const InputStream& istream);
-        static void WriteSection_AiClass(OutputStream& ostream, const std::vector<std::string>& aiclasses);
+        static std::size_t getOffset_AiClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> parseSection_AiClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> readAiClass(const InputStream& istream);
+        static void writeSection_AiClass(OutputStream& ostream, const std::vector<std::string>& aiclasses);
 
-        static std::size_t GetOffset_Models(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ParseSection_Models(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ReadModels(const InputStream& istream);
-        static void WriteSection_Models(OutputStream& ostream, const std::vector<std::string>& models);
+        static std::size_t getOffset_Models(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> parseSection_Models(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> readModels(const InputStream& istream);
+        static void writeSection_Models(OutputStream& ostream, const std::vector<std::string>& models);
 
-        static std::size_t GetOffset_Sprites(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ParseSection_Sprites(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ReadSprites(const InputStream& istream);
+        static std::size_t getOffset_Sprites(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> parseSection_Sprites(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> readSprites(const InputStream& istream);
         static void WriteSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites);
 
-        static std::size_t GetOffset_Keyframes(const InputStream& istream, const CndHeader& header);
-        static HashMap<Animation> ParseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
-        static HashMap<Animation> ReadKeyframes(const InputStream& istream);
-        static void WriteSection_Keyframes(OutputStream& ostream, const HashMap<Animation>& animations);
+        static std::size_t getOffset_Keyframes(const InputStream& istream, const CndHeader& header);
+        static HashMap<Animation> parseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
+        static HashMap<Animation> readKeyframes(const InputStream& istream);
+        static void writeSection_Keyframes(OutputStream& ostream, const HashMap<Animation>& animations);
 
-        static std::size_t GetOffset_AnimClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ParseSection_AnimClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ReadAnimClass(const InputStream& istream);
-        static void WriteSection_AnimClass(OutputStream& ostream, const std::vector<std::string>& animclasses);
+        static std::size_t getOffset_AnimClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> parseSection_AnimClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> readAnimClass(const InputStream& istream);
+        static void writeSection_AnimClass(OutputStream& ostream, const std::vector<std::string>& animclasses);
 
-        static std::size_t GetOffset_SoundClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ParseSection_SoundClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ReadSoundClass(const InputStream& istream);
-        static void WriteSection_SoundClass(OutputStream& ostream, const std::vector<std::string>& sndclasses);
+        static std::size_t getOffset_SoundClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> parseSection_SoundClass(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> readSoundClass(const InputStream& istream);
+        static void writeSection_SoundClass(OutputStream& ostream, const std::vector<std::string>& sndclasses);
 
-        static std::size_t GetOffset_CogScripts(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ParseSection_CogScripts(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> ReadCogScripts(const InputStream& istream);
-        static void WriteSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts);
+        static std::size_t getOffset_CogScripts(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> parseSection_CogScripts(const InputStream& istream, const CndHeader& header);
+        static std::vector<std::string> readCogScripts(const InputStream& istream);
+        static void writeSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts);
 
-        static std::size_t GetOffset_Cogs(const InputStream& istream, const CndHeader& header);
-        static std::vector<SharedRef<Cog>> ParseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts);
-        static std::vector<SharedRef<Cog>> ReadCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts);
-        static void WriteSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs);
-
-
+        static std::size_t getOffset_Cogs(const InputStream& istream, const CndHeader& header);
+        static std::vector<SharedRef<Cog>> parseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts);
+        static std::vector<SharedRef<Cog>> readCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts);
+        static void writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs);
     };
 }
 #endif // LIBIM_CND_H

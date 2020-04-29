@@ -60,11 +60,11 @@ namespace libim {
         return entry;
     }
 
-    std::shared_ptr<GobFileDirectory> LoadGobFromFile(const std::string& filepath)
+    std::shared_ptr<GobFileDirectory> loadGobFromFile(const std::string& filepath)
     {
         try
         {
-            auto ifs = MakeStreamPtr<InputFileStream>(filepath);
+            auto ifs = makeStreamPtr<InputFileStream>(filepath);
 
             /* Read Header */
             auto header = ifs->read<GobFileHeader>();

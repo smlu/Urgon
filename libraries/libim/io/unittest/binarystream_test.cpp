@@ -25,7 +25,7 @@ constexpr auto tvString   = std::string_view("Test test vector");
 constexpr auto tvString_2 = std::string_view("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
 
 
-void libim::unit_test::run_binarystream_test()
+void libim::unit_test::run_binarystream_tests()
 {
 
     ByteArray bytes;

@@ -24,7 +24,7 @@ namespace imfixes {
             // Cog Script: shs_BTladder.cog
             // What's fixed: symbol 'int in_rotrate' is marked as non-local variable.
             // Description:
-            //      The script contains int symbol 'in_rotrate' with assigment to default value '0'.
+            //      The script contains int symbol 'in_rotrate' with assignment to default value '0'.
             //      The end part of assignment is not delimited with whitespace character resulting in
             //      attribute 'local' being combined with the assignment value e.g.: int in_rotrate=0local
             //      The Jones3D engine interpreters this symbol as non-local symbol and assigns value
@@ -50,13 +50,13 @@ namespace imfixes {
 
     }
 
-    bool IsMalformedCogScript(const libim::content::asset::CogScript& s)
+    bool isMalformedCogScript(const libim::content::asset::CogScript& s)
     {
         using namespace  details;
         return get_cog_script_fix(s.name()) != kCogScriptFixes.end();
     }
 
-    void FixCogScript(libim::content::asset::CogScript& s)
+    void fixCogScript(libim::content::asset::CogScript& s)
     {
         using namespace  details;
         auto it = get_cog_script_fix(s.name());

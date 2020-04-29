@@ -20,13 +20,6 @@ using namespace libim;
 using namespace libim::content::asset;
 
 
-
-
-uint32_t MatTextureBitmapSize(const MatTexture& tex, uint32_t bpp)
-{
-    return GetBitmapSize(tex.header.height, tex.header.width, bpp);
-}
-
 //void UpdateAlpha(ColorFormat& colorInfo)
 //{
 //    auto alphaBpp = colorInfo.alphaBPP;
@@ -84,7 +77,7 @@ Material& Material::deserialize(const InputStream& istream)
                     mmHeader.textureCount, mmHeader.width, mmHeader.height, header.colorInfo);
     }
 
-    this->setName(GetFilename(istream.name()));
+    this->setName(getFilename(istream.name()));
     this->setSize(mipmaps.at(0).at(0).width(), mipmaps.at(0).at(0).height());
     this->setColorFormat(header.colorInfo);
     this->setMipmaps(std::move(mipmaps));
@@ -119,13 +112,9 @@ bool Material::serialize(OutputStream& ostream) const
     /* Write record headers to file */
     MatRecordHeader record {};
     record.recordType = 8;
-
     while(mimpamCount --> 0) {
         ostream.write(record);
     }
-//    for(int32_t i = 0; i < mimpamCount; i++) {
-//        ostream.write(record);
-//    }
 
     /* Write mipmaps to file */
     MatMipmapHeader mmHeader {};
@@ -146,5 +135,3 @@ bool Material::serialize(OutputStream& ostream) const
 
     return true;
 }
-
-

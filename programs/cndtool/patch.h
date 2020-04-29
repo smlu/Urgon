@@ -13,7 +13,7 @@ using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::utils;
 
-bool PatchCndMaterials(const std::string& cndFile, const HashMap<Material>& materials)
+bool patchCndMaterials(const std::string& cndFile, const HashMap<Material>& materials)
 {
     if(materials.isEmpty()) {
         return false;
@@ -24,19 +24,19 @@ bool PatchCndMaterials(const std::string& cndFile, const HashMap<Material>& mate
         InputFileStream ifstream(cndFile);
 
         /* Read cnd file header (this alos verifies if flie is valid cnd) */
-        auto cndHeader = CND::ReadHeader(ifstream);
+        auto cndHeader = CND::readHeader(ifstream);
 
         /* Open new output cnd file */
         const std::string patchedCndFile = cndFile + ".patched";
         OutputFileStream ofstream(patchedCndFile);
 
         /* Copy input cnd file to output stream until materials section */
-        const auto matSectionOffset = CND::GetOffset_Materials(ifstream);
+        const auto matSectionOffset = CND::getOffset_Materials(ifstream);
         ofstream.write(ifstream, 0, matSectionOffset);
         std::size_t oldSizePixeldata = ifstream.read<uint32_t>();
 
         /* Write new materials section */
-        CND::WriteSection_Materials(ofstream, materials);
+        CND::writeSection_Materials(ofstream, materials);
 
         /* Write the rest of inputted cnd file to the output */
         std::size_t endOffsMatSection = ifstream.tell() + sizeof(CndMatHeader) * cndHeader.numMaterials + oldSizePixeldata;
@@ -58,7 +58,7 @@ bool PatchCndMaterials(const std::string& cndFile, const HashMap<Material>& mate
         ofstream.close();
 
         /* Rename patched file name to original name */
-        RenameFile(patchedCndFile, cndFile);
+        renameFile(patchedCndFile, cndFile);
         return true;
     }
     catch(const std::exception& e)
@@ -68,7 +68,7 @@ bool PatchCndMaterials(const std::string& cndFile, const HashMap<Material>& mate
     }
 }
 
-bool PatchCndAnimations(const std::string& cndFile, const HashMap<Animation>& animations)
+bool patchCndAnimations(const std::string& cndFile, const HashMap<Animation>& animations)
 {
     if(animations.isEmpty()) {
         return false;
@@ -79,18 +79,18 @@ bool PatchCndAnimations(const std::string& cndFile, const HashMap<Animation>& an
         InputFileStream ifstream(cndFile);
 
         /* Read cnd file header (this alos verifies if flie is valid cnd) */
-        auto cndHeader = CND::ReadHeader(ifstream);
+        auto cndHeader = CND::readHeader(ifstream);
 
         /* Open new output cnd file */
         const std::string patchedCndFile = cndFile + ".patched";
         OutputFileStream ofstream(patchedCndFile);
 
         /* Copy input cnd file to output stream until materials section */
-        const auto keySectionOffset = CND::GetOffset_Keyframes(ifstream, cndHeader);
+        const auto keySectionOffset = CND::getOffset_Keyframes(ifstream, cndHeader);
         ofstream.write(ifstream, 0, keySectionOffset);
 
         /* Write new materials section */
-        CND::WriteSection_Keyframes(ofstream, animations);
+        CND::writeSection_Keyframes(ofstream, animations);
 
         /* Write the rest of inputted cnd file to the output */
         auto aOldNumEntries = ifstream.read<std::array<uint32_t, 3>>();
@@ -118,7 +118,7 @@ bool PatchCndAnimations(const std::string& cndFile, const HashMap<Animation>& an
         ofstream.close();
 
         /* Rename patched file name to original name */
-        RenameFile(patchedCndFile, cndFile);
+        renameFile(patchedCndFile, cndFile);
         return true;
     }
     catch(const std::exception& e)

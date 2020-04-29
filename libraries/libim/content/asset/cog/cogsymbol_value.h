@@ -16,8 +16,8 @@
 
 namespace libim::content::asset {
     struct Cog;
-    struct CogSubrutine {};
-    using CogFlexType = std::variant<float, CogSubrutine>;
+    struct CogSubroutine {};
+    using CogFlexType = std::variant<float, CogSubroutine>;
     using CogSymbolValue = std::variant<
         std::monostate,
         int32_t,

@@ -4,7 +4,7 @@ using namespace libim;
 using namespace libim::content::asset;
 
 
-inline Bitmap::const_iterator libim::content::asset::CopyMipmapFromBuffer(Mipmap& mipmap, const Bitmap& buffer, uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo)
+inline Bitmap::const_iterator libim::content::asset::copyMipmapFromBuffer(Mipmap& mipmap, const Bitmap& buffer, uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo)
 {
     auto itBitmapBegin = buffer.begin();
     auto itBitmapEnd   = buffer.end();
@@ -21,8 +21,8 @@ inline Bitmap::const_iterator libim::content::asset::CopyMipmapFromBuffer(Mipmap
            .setRowSize(GetRowSize(texHeight, tex.colorInfo().bpp));
 
         /* Init texture bitmap buffer */
-        uint32_t bitmapSize = GetBitmapSize(texWidth, texHeight, tex.colorInfo().bpp);
-        auto bitmap = MakeBitmapPtr(bitmapSize);
+        uint32_t bitmapSize = getBitmapSize(texWidth, texHeight, tex.colorInfo().bpp);
+        auto bitmap = makeBitmapPtr(bitmapSize);
 
         /* Copy texture's bitmap from buffer */
         itBitmapEnd = std::next(itBitmapBegin, bitmapSize);
@@ -36,7 +36,7 @@ inline Bitmap::const_iterator libim::content::asset::CopyMipmapFromBuffer(Mipmap
     return itBitmapEnd;
 }
 
-Mipmap libim::content::asset::MoveMipmapFromBuffer(Bitmap& buffer, uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo)
+Mipmap libim::content::asset::moveMipmapFromBuffer(Bitmap& buffer, uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo)
 {
     Mipmap mipmap;
     for(uint32_t mmIdx = 0; mmIdx < textureCount; mmIdx++) // Mipmap's textures
@@ -52,7 +52,7 @@ Mipmap libim::content::asset::MoveMipmapFromBuffer(Bitmap& buffer, uint32_t text
            .setRowSize(GetRowSize(texHeight, tex.colorInfo().bpp));
 
         /* Init texture bitmap buffer */
-        uint32_t bitmapSize = GetBitmapSize(texWidth, texHeight, tex.colorInfo().bpp);
+        uint32_t bitmapSize = getBitmapSize(texWidth, texHeight, tex.colorInfo().bpp);
         auto bitmap = std::make_shared<Bitmap>(bitmapSize);
 
         /* Copy texture's bitmap from buffer */

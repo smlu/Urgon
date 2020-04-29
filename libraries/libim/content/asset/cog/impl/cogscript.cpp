@@ -12,5 +12,5 @@ using namespace libim::text;
 CogScript::CogScript(const InputStream& istream, bool parseSymDescription)
 {
     Tokenizer tok(istream);
-    ParseCogScript(tok, *this, parseSymDescription);
+    parseCogScript(tok, *this, parseSymDescription);
 }

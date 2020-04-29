@@ -99,8 +99,15 @@ namespace libim::content::asset{
 
 namespace libim {
     /* Stream template specialization */
-    template<> content::asset::Texture Stream::read<content::asset::Texture, uint32_t, uint32_t, const content::asset::ColorFormat&>
-        (uint32_t width, uint32_t height, const content::asset::ColorFormat& colorInfo) const;
+    template<>
+    content::asset::Texture
+    Stream::read<
+        content::asset::Texture,
+        uint32_t,
+        uint32_t,
+        const content::asset::ColorFormat&
+    >
+    (uint32_t width, uint32_t height, const content::asset::ColorFormat& colorInfo) const;
 }
 
 #endif // LIBIM_TEXTURE_H

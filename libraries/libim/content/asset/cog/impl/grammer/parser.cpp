@@ -56,7 +56,7 @@ static const std::unordered_map<CogSymbol::Type, std::string_view> kSymbolTypeMa
 };
 
 
-static const std::unordered_map<std::string_view, CogMessageType> kMessageTypeMap {
+static const std::unordered_map<std::string_view, CogMessageType> kMessageNameMap {
     { "activate"   , CogMessageType::Activate    },
     { "activated"  , CogMessageType::Activated   },
     { "removed"    , CogMessageType::Removed     },
@@ -112,7 +112,7 @@ static const std::unordered_map<std::string_view, CogMessageType> kMessageTypeMa
 
 
 
-void parse_section_flags(Tokenizer& tok, CogScript& script)
+void parseSectionFlags(Tokenizer& tok, CogScript& script)
 {
     if(iequal(tok.getNextToken().value(), "flags"sv))
     {
@@ -139,7 +139,7 @@ void parse_section_flags(Tokenizer& tok, CogScript& script)
     }
 }
 
-CogSymbol::Type get_symbol_type(Tokenizer& tok)
+CogSymbol::Type getSymbolType(Tokenizer& tok)
 {
     auto it = kSymbolNameMap.find(tok.currentToken().value());
     if(it == kSymbolNameMap.end())
@@ -151,7 +151,7 @@ CogSymbol::Type get_symbol_type(Tokenizer& tok)
     return it->second;
 }
 
-void skip_assignment(Tokenizer& tok, Token::Type type)
+void skipAssignment(Tokenizer& tok, Token::Type type)
 {
     if(is_op_assign(tok.peekNextToken()))
     {
@@ -168,7 +168,7 @@ void skip_assignment(Tokenizer& tok, Token::Type type)
     }
 }
 
-CogSymbolValue parse_assignment(Tokenizer& tok, CogSymbol::Type type)
+CogSymbolValue parseAssignment(Tokenizer& tok, CogSymbol::Type type)
 {
     AT_SCOPE_EXIT([&tok]{
         // Skip ';' at the end of assigned value if present
@@ -225,9 +225,9 @@ CogSymbolValue parse_assignment(Tokenizer& tok, CogSymbol::Type type)
     return value;
 }
 
-void parse_symbol_init_value(Tokenizer& tok, CogSymbol& sym)
+void parseSymbolInitValue(Tokenizer& tok, CogSymbol& sym)
 {
-    auto v = parse_assignment(tok, sym.type);
+    auto v = parseAssignment(tok, sym.type);
     if(!is_valid_raw_init_value(sym.type, v))
     {
         auto loc = tok.currentToken().location();
@@ -244,7 +244,7 @@ void parse_symbol_init_value(Tokenizer& tok, CogSymbol& sym)
     sym.setDefaultValue(std::move(v));
 }
 
-void parse_symbol_attribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
+void parseSymbolAttribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
 {
     const auto& t = tok.currentToken();
     if(iequal(t.value(), "local")){
@@ -286,7 +286,7 @@ void parse_symbol_attribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
             throw TokenizerError("Invalid syntax in cog script", loc);
         }
 
-        auto v = parse_assignment(tok, CogSymbol::Int);
+        auto v = parseAssignment(tok, CogSymbol::Int);
         if(!std::holds_alternative<int32_t>(v))
         {
             auto loc = t.location();
@@ -303,7 +303,7 @@ void parse_symbol_attribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
         {
             if(is_op_assign(tok.peekNextToken()))
             {
-                auto v = parse_assignment(tok, CogSymbol::Int);
+                auto v = parseAssignment(tok, CogSymbol::Int);
                 if(!std::holds_alternative<int32_t>(v))
                 {
                     auto loc = t.location();
@@ -323,7 +323,7 @@ void parse_symbol_attribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
         {
             auto loc = t.location();
             LOG_WARNING("CogScript %:%:%: Invalid attribute 'mask' for primitive symbol '%'. Attribute ignored.", loc.filename, loc.first_line, loc.first_col, sym.name);
-            skip_assignment(tok, Token::HexInteger);
+            skipAssignment(tok, Token::HexInteger);
         }
     }
     else
@@ -333,7 +333,7 @@ void parse_symbol_attribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
     }
 }
 
-void parse_symbol(Tokenizer& tok, CogScript& script, bool parse_desc)
+void parseSymbol(Tokenizer& tok, CogScript& script, bool parse_desc)
 {
     AT_SCOPE_EXIT([&tok, reol = tok.reportEol()]{
         tok.setReportEol(reol);
@@ -342,7 +342,7 @@ void parse_symbol(Tokenizer& tok, CogScript& script, bool parse_desc)
     tok.setReportEol(true);
 
     CogSymbol sym;
-    sym.type = get_symbol_type(tok);
+    sym.type = getSymbolType(tok);
 
     const Token& t = tok.getNextToken(); // Note: Do not lowercase symbol name identifier!
     if(t.type() != Token::Identifier)
@@ -358,8 +358,8 @@ void parse_symbol(Tokenizer& tok, CogScript& script, bool parse_desc)
     if(sym.type == CogSymbol::Message)
     {
         to_lower(sym.name); // Lowercase message symbol name
-        auto it = kMessageTypeMap.find(sym.name);
-        if(it == kMessageTypeMap.end())
+        auto it = kMessageNameMap.find(sym.name);
+        if(it == kMessageNameMap.end())
         {
             auto loc = t.location();
             LOG_ERROR("CogScript %:%:%: Unknown COG message '%'", loc.filename, loc.first_line, loc.first_col, t.value());
@@ -374,7 +374,7 @@ void parse_symbol(Tokenizer& tok, CogScript& script, bool parse_desc)
     {
         // Get symbol default value
         if(is_op_assign(tok.peekNextToken())) {
-            parse_symbol_init_value(tok, sym);
+            parseSymbolInitValue(tok, sym);
         }
 
         // Set default mask
@@ -391,7 +391,7 @@ void parse_symbol(Tokenizer& tok, CogScript& script, bool parse_desc)
         {
             if(t.type() == Token::Identifier)
             {
-                parse_symbol_attribute(tok, sym, parse_desc);
+                parseSymbolAttribute(tok, sym, parse_desc);
                 tok.getNextToken();
             }
             else
@@ -437,7 +437,7 @@ void parse_symbol(Tokenizer& tok, CogScript& script, bool parse_desc)
     }
 }
 
-void parse_section_symbols(Tokenizer& tok, CogScript& script, bool parse_description)
+void parseSectionSymbols(Tokenizer& tok, CogScript& script, bool parse_description)
 {
     AT_SCOPE_EXIT([&tok, reol = tok.reportEol()]{
         tok.setReportEol(reol);
@@ -466,7 +466,7 @@ void parse_section_symbols(Tokenizer& tok, CogScript& script, bool parse_descrip
         }
         else if(t.type() == Token::Identifier)
         {
-            parse_symbol(tok, script, parse_description);
+            parseSymbol(tok, script, parse_description);
             tok.setReportEol(false);
             tok.getNextToken(/*lowercased=*/true);
         }
@@ -481,9 +481,9 @@ void parse_section_symbols(Tokenizer& tok, CogScript& script, bool parse_descrip
     tok.getNextToken();
 }
 
-void libim::content::asset::impl::ParseCogScript(Tokenizer& tok, CogScript& script, bool parseSymDescription)
+void libim::content::asset::impl::parseCogScript(Tokenizer& tok, CogScript& script, bool parseSymDescription)
 {
     script.setName(tok.istream().name());
-    parse_section_flags(tok, script);
-    parse_section_symbols(tok, script, parseSymDescription);
+    parseSectionFlags(tok, script);
+    parseSectionSymbols(tok, script, parseSymDescription);
 }

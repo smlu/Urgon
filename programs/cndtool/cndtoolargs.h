@@ -33,7 +33,7 @@ public:
 private:
     std::string_view parseToken(std::size_t tokenPos, std::string_view token, std::string_view arg)
     {
-        if(libim::FileExtMatch(token, ".cnd"))
+        if(libim::fileExtMatch(token, ".cnd"))
         {
             if(!cndfile_.empty()) {
                 throw std::invalid_argument("CND file path already set");

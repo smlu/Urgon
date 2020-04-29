@@ -4,6 +4,6 @@
 #include "../../../../../text/tokenizer.h"
 
 namespace libim::content::asset::impl {
-    void ParseCogScript(text::Tokenizer& tok, CogScript& script, bool parseSymDescription);
+    void parseCogScript(text::Tokenizer& tok, CogScript& script, bool parseSymDescription);
 }
 #endif // LIBIM_PARRSER_H

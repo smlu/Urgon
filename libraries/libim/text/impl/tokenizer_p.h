@@ -498,5 +498,4 @@ namespace libim::text {
     };
 }
 
-
 #endif // LIBIM_TOKENIZER_P_H

@@ -37,7 +37,7 @@ namespace libim {
     }
 
     template<typename ...Args>
-    static void write_log(const char* file, int line, LogLevel level, std::string_view msg, Args&&... args)
+    static void writeLog(const char* file, int line, LogLevel level, std::string_view msg, Args&&... args)
     {
         if(gLogLevel < level) {
             return;
@@ -64,7 +64,7 @@ namespace libim {
 }
 
 #define LOG_WITH_LEVEL(l, msg, ...) \
-    libim::write_log(__FILE__, __LINE__, l, msg, ##__VA_ARGS__)
+    libim::writeLog(__FILE__, __LINE__, l, msg, ##__VA_ARGS__)
 
 #define LOG_VERBOSE(msg, ...) \
     LOG_WITH_LEVEL(libim::LogLevel::Verbose, msg, ##__VA_ARGS__)

@@ -18,7 +18,7 @@ Sound::Sound(std::weak_ptr<ByteArray> wptrBankData, std::size_t dirNameOffset, s
 
 std::string_view Sound::name() const
 {
-    auto ptrData = lock_or_throw();
+    auto ptrData = lockOrThrow();
     const char* pName = reinterpret_cast<char*>(&ptrData->at(nameOffset_));
     return std::string_view(pName);
 }
@@ -26,11 +26,11 @@ std::string_view Sound::name() const
 bool Sound::isValid() const
 {
     auto ptrData = wptrData_.lock();
-    return ptrData && is_valid(*ptrData);
+    return ptrData && isValid(*ptrData);
 
 }
 
-std::shared_ptr<ByteArray> Sound::lock_or_throw() const
+std::shared_ptr<ByteArray> Sound::lockOrThrow() const
 {
     auto ptrData = wptrData_.lock();
     if(!ptrData) {
@@ -39,7 +39,7 @@ std::shared_ptr<ByteArray> Sound::lock_or_throw() const
     return ptrData;
 }
 
-bool Sound::is_valid(const ByteArray& data) const
+bool Sound::isValid(const ByteArray& data) const
 {
     return dataOffset_ + dataSize_  < data.size() &&
         dirNameOffset_ < data.size()              &&
@@ -75,15 +75,15 @@ void Sound::serialize(OutputStream& ostream, SerializeFormat format) const
             if(data.empty() && dataSize_ > 0) {
                 std::logic_error("Cannot serialize invalid sound object as WAV");
             }
-            SoundSerializeAsWAV(ostream, numChannels_, sampleRate_, bitsPerSample_, std::move(data));
+            soundSerializeAsWAV(ostream, numChannels_, sampleRate_, bitsPerSample_, std::move(data));
         } break;
         case SerializeFormat::IndyWV:
         {
-            auto ptrData = lock_or_throw();
-            if(!is_valid(*ptrData) || !isIndyWVFormat_) { // TODO: implement converting of data to indyWV format
+            auto ptrData = lockOrThrow();
+            if(!isValid(*ptrData) || !isIndyWVFormat_) { // TODO: implement converting of data to indyWV format
                 std::logic_error("Cannot serialize invalid sound object as IndyWV");
             }
-            SoundSerializeAsIndyWV(ostream, numChannels_, sampleRate_, bitsPerSample_, ptrData, dataOffset_, dataSize_);
+            soundSerializeAsIndyWV(ostream, numChannels_, sampleRate_, bitsPerSample_, ptrData, dataOffset_, dataSize_);
         } break;
         default:
             std::logic_error("Cannot serialize sound, unknown serialization format");
@@ -95,15 +95,15 @@ ByteArray Sound::data() const
     // Returns decompressed sound data.
 
     ByteArray bytes;
-    auto ptrData = lock_or_throw();
-    if(!is_valid(*ptrData)) {
+    auto ptrData = lockOrThrow();
+    if(!isValid(*ptrData)) {
         return bytes;
     }
 
     auto itBegin = ptrData->begin() + dataOffset_; //TODO: safe cast to difference_type
     auto itEnd = itBegin + dataSize_; //TODO: safe cast to difference_type
     if(isIndyWVFormat_) {
-        bytes = IndyVW::Inflate(InputBinaryStream(*ptrData, itBegin, itEnd));
+        bytes = IndyVW::inflate(InputBinaryStream(*ptrData, itBegin, itEnd));
     }
     else
     {

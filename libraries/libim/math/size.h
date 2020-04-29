@@ -20,8 +20,7 @@ namespace libim {
     };
 
     template <typename T, typename ...A>
-    constexpr Size<T, sizeof...(A) + 1> MakeSize(T v0, A ...v)
-    {
+    constexpr Size<T, sizeof...(A) + 1> makeSize(T v0, A ...v) {
        return Size<T, sizeof...(A) + 1>{v0, v...};
     }
 }

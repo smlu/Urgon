@@ -55,7 +55,7 @@ namespace libim {
     using Bitmap    = ByteArray;
     using BitmapPtr = std::shared_ptr<Bitmap>;
 
-    inline BitmapPtr MakeBitmapPtr(std::size_t size) {
+    inline BitmapPtr makeBitmapPtr(std::size_t size) {
         return std::make_shared<Bitmap>(size);
     }
 
@@ -63,45 +63,45 @@ namespace libim {
     template <typename T,
         typename R = std::enable_if_t<std::is_integral<T>::value,
         typename std::make_unsigned<T>::type>>
-    inline constexpr R Abs(T val)
+    inline constexpr R abs(T val)
     {
         R mask = val >> ((2 << sizeof(val)) - 1);
         return (mask ^ val) - mask;
     }
 
-    inline constexpr uint32_t BBS(uint32_t bits) //Bits byte size
+    inline constexpr uint32_t bbs(uint32_t bits) //Bits byte size
     {
         return bits / BYTE_BIT;
     }
 
-    inline constexpr uint32_t GetBitmapSize(int32_t width, int32_t height, uint32_t bpp)
+    inline constexpr uint32_t getBitmapSize(int32_t width, int32_t height, uint32_t bpp)
     {
-        return Abs(height * width) * BBS(bpp);
+        return abs(height * width) * bbs(bpp);
     }
 
     inline constexpr uint32_t GetRowSize(int32_t width, uint32_t bpp)
     {
-        return Abs(width) * BBS(bpp);
+        return abs(width) * bbs(bpp);
     }
 
-    inline constexpr uint32_t GetMipmapPixelDataSize(std::size_t numTextures, int32_t width, int32_t height, uint32_t bpp)
+    inline constexpr uint32_t getMipmapPixelDataSize(std::size_t numTextures, int32_t width, int32_t height, uint32_t bpp)
     {
         uint32_t size = 0;
         while(numTextures --> 0)
         {
-            size += GetBitmapSize(width, height, bpp);
+            size += getBitmapSize(width, height, bpp);
             width  = width  >> 1;
             height = height >> 1;
         }
         return size;
     }
 
-    inline constexpr uint32_t RGBMask(uint32_t bitsPerColor, uint32_t colorLeftShift)
+    inline constexpr uint32_t rgbMask(uint32_t bitsPerColor, uint32_t colorLeftShift)
     {
         return ((1 << bitsPerColor) - 1) << colorLeftShift;
     }
 
-    static std::vector<std::string> SplitString(const std::string& string, const std::string& delim)
+    static std::vector<std::string> splitString(const std::string& string, const std::string& delim)
     {
         std::vector<std::string> tokens;
 
@@ -122,12 +122,12 @@ namespace libim {
         return tokens;
     }
 
-    inline std::vector<std::string> SplitString(const std::string& string, char delim)
+    inline std::vector<std::string> splitString(const std::string& string, char delim)
     {
-        return SplitString(string, std::string(1, delim));
+        return splitString(string, std::string(1, delim));
     }
 
-    inline constexpr char PathSeparator()
+    inline constexpr char pathSeparator()
     {
     #ifdef OS_WINDOWS
         return '\\';
@@ -136,7 +136,7 @@ namespace libim {
     #endif
     }
 
-    inline constexpr char NoneNativePathSeparator()
+    inline constexpr char noneNativePathSeparator()
     {
     #ifdef OS_WINDOWS
         return '/';
@@ -145,32 +145,32 @@ namespace libim {
     #endif
     }
 
-    inline bool IsNativePath(const std::string& path)
+    inline bool isNativePath(const std::string& path)
     {
-        return path.find(NoneNativePathSeparator()) == std::string::npos;
+        return path.find(noneNativePathSeparator()) == std::string::npos;
     }
 
-    inline std::string GetNativePath(std::string path)
+    inline std::string getNativePath(std::string path)
     {
         std::replace_if
         (
             path.begin(),
             path.end(),
-            [](char ch) { return ch == NoneNativePathSeparator(); },
-            PathSeparator()
+            [](char ch) { return ch == noneNativePathSeparator(); },
+            pathSeparator()
         );
 
         return path;
     }
 
-    inline std::string GetFilename(const std::string& path)
+    inline std::string getFilename(const std::string& path)
     {
         std::string name = path;
-        if(!IsNativePath(name)) {
-            name = GetNativePath(name);
+        if(!isNativePath(name)) {
+            name = getNativePath(name);
         }
 
-        size_t sep = name.find_last_of(PathSeparator());
+        size_t sep = name.find_last_of(pathSeparator());
         if (sep != std::string::npos) {
             name = name.substr(sep + 1, name.size() - sep - 1);
         }
@@ -178,9 +178,9 @@ namespace libim {
         return name;
     }
 
-    inline std::string GetBaseName(const std::string& path)
+    inline std::string getBaseName(const std::string& path)
     {
-        std::string name = GetFilename(path);
+        std::string name = getFilename(path);
 
         size_t dot = name.find_last_of(".");
         if (dot != std::string::npos) {
@@ -190,7 +190,7 @@ namespace libim {
         return name;
     }
 
-    inline std::string GetFileExtension(const std::string& path)
+    inline std::string getFileExtension(const std::string& path)
     {
         size_t dotPos = path.find_last_of(".");
         if (dotPos == std::string::npos) {
@@ -200,7 +200,7 @@ namespace libim {
         return  path.substr(dotPos + 1);
     }
 
-    inline bool FileExtMatch(const std::filesystem::path& path, std::string_view ext, bool icase = true)
+    inline bool fileExtMatch(const std::filesystem::path& path, std::string_view ext, bool icase = true)
     {
         auto pext = path.extension().string();
         if (pext.empty() != ext.empty()) {
@@ -215,12 +215,12 @@ namespace libim {
         return svpext == ext;
     }
 
-    inline bool IsFilePath(const std::string& path)
+    inline bool isFilePath(const std::string& path)
     {
         return path.find_last_of(".") != std::string::npos;
     }
 
-    inline bool FileExists(const std::filesystem::path& filePath)
+    inline bool fileExists(const std::filesystem::path& filePath)
     {
         if(filePath.empty()) {
             return false;
@@ -229,72 +229,72 @@ namespace libim {
         return std::filesystem::exists(filePath);
     }
 
-    inline bool DirExists(const std::filesystem::path& dirPath)
+    inline bool dirExists(const std::filesystem::path& dirPath)
     {
         if(dirPath.empty()) {
             return false;
         }
-        else if(!IsNativePath(dirPath.string())) {
-            return DirExists(GetNativePath(dirPath.string()));
+        else if(!isNativePath(dirPath.string())) {
+            return dirExists(getNativePath(dirPath.string()));
         }
 
          return std::filesystem::exists(dirPath);
     }
 
-    inline bool MakeDir(const std::filesystem::path& dirName)
+    inline bool makeDir(const std::filesystem::path& dirName)
     {
         return std::filesystem::create_directory(dirName);
     }
 
-    static bool MakePath(const std::string& path, bool createFile = false)
+    static bool makePath(const std::string& path, bool createFile = false)
     {
         if(path.empty()) {
             return false;
         }
-        else if(!IsNativePath(path)) {
-            return MakePath(GetNativePath(path));
+        else if(!isNativePath(path)) {
+            return makePath(getNativePath(path));
         }
 
-        std::string currentPath = path.at(0) == PathSeparator() ? std::string(1, PathSeparator()) : "";
+        std::string currentPath = path.at(0) == pathSeparator() ? std::string(1, pathSeparator()) : "";
 
-        auto pathParts = SplitString(path, PathSeparator());
+        auto pathParts = splitString(path, pathSeparator());
         for(auto&& part : pathParts)
         {
             currentPath += std::move(part);
-            if(!IsFilePath(currentPath))
+            if(!isFilePath(currentPath))
             {
-                if(!DirExists(currentPath) && !MakeDir(currentPath)) {
+                if(!dirExists(currentPath) && !makeDir(currentPath)) {
                     return false;
                 }
             }
-            else if(createFile && !FileExists(currentPath)) {
+            else if(createFile && !fileExists(currentPath)) {
                 // TODO: make file
                 break;
             }
 
-            currentPath += std::string(1, PathSeparator());
+            currentPath += std::string(1, pathSeparator());
         }
 
         return true;
     }
 
-    inline bool MakePath(const std::filesystem::path& path, bool createFile = false)
+    inline bool makePath(const std::filesystem::path& path, bool createFile = false)
     {
-        return MakePath(path.u8string(), createFile);
+        return makePath(path.u8string(), createFile);
     }
 
-    inline bool RemoveFile(const std::filesystem::path& file)
+    inline bool removeFile(const std::filesystem::path& file)
     {
         return std::filesystem::remove(file);
     }
 
-    inline bool RenameFile(const std::filesystem::path& from, const std::filesystem::path&& to, bool override = true)
+    inline bool renameFile(const std::filesystem::path& from, const std::filesystem::path&& to, bool override = true)
     {
-        if(FileExists(to) && !override) {
+        if(fileExists(to) && !override) {
             return false;
         }
 
-        RemoveFile(to);
+        removeFile(to);
 
         try
         {
@@ -306,7 +306,7 @@ namespace libim {
         }
     }
 
-    inline std::string IosErrorStr(const std::ios& ios)
+    inline std::string iosErrorStr(const std::ios& ios)
     {
         std::string error = "No error";
         if(ios.eof()){

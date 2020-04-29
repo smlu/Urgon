@@ -6,6 +6,7 @@ namespace libim {
 
     struct rotation_vector_tag {};
 
+    // Represents pitch-yaw-roll (PYR) orientation
     template<typename T>
     struct Rotator :
         public AbstractVector<T, 3, rotation_vector_tag>
@@ -40,7 +41,7 @@ namespace libim {
         {
             set(1, p);
         }
-        
+
         inline T roll() const
         {
             return this->at(2);

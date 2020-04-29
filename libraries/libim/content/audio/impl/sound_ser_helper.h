@@ -7,7 +7,7 @@
 #include <libim/types/safe_cast.h>
 
 namespace libim::content::audio {
-    void SoundSerializeAsWAV(OutputStream& ostream, std::size_t numChannels, std::size_t sampleRate, std::size_t bitsPerSample, ByteArray data)
+    void soundSerializeAsWAV(OutputStream& ostream, std::size_t numChannels, std::size_t sampleRate, std::size_t bitsPerSample, ByteArray data)
     {
         WavHeader wavHeader;
         wavHeader.fmt.size          = 16;
@@ -28,7 +28,7 @@ namespace libim::content::audio {
                 << dataChunk;
     }
 
-    void SoundSerializeAsIndyWV(OutputStream& ostream, std::size_t numChannels, std::size_t sampleRate, std::size_t bitsPerSample,std::shared_ptr<ByteArray> ptrData, std::size_t dataOffset, std::size_t dataSize)
+    void soundSerializeAsIndyWV(OutputStream& ostream, std::size_t numChannels, std::size_t sampleRate, std::size_t bitsPerSample,std::shared_ptr<ByteArray> ptrData, std::size_t dataOffset, std::size_t dataSize)
     {
         IndyWVFileHeader wv;
         wv.sampleRate     = safe_cast<decltype(wv.sampleRate)>(sampleRate);

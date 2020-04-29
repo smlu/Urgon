@@ -9,7 +9,7 @@ using namespace libim::content::text;
 
 constexpr static std::size_t vecIndent = 4;
 
-void WriteHeader(TextResourceWriter& rw, const Animation& anim, std::string_view headerComment)
+void writeHeader(TextResourceWriter& rw, const Animation& anim, std::string_view headerComment)
 {
     if(!headerComment.empty())
     {
@@ -28,7 +28,7 @@ void WriteHeader(TextResourceWriter& rw, const Animation& anim, std::string_view
       .writeEol();
 }
 
-void WriteMarkers(TextResourceWriter& rw, const Animation& anim)
+void writeMarkers(TextResourceWriter& rw, const Animation& anim)
 {
     if(anim.markers().empty()) {
         return;
@@ -46,7 +46,7 @@ void WriteMarkers(TextResourceWriter& rw, const Animation& anim)
       .writeEol();
 }
 
-void WriteKeyframes(TextResourceWriter& rw, const Animation& anim)
+void writeKeyframes(TextResourceWriter& rw, const Animation& anim)
 {
     rw.writeSection(kResName_KfNodes)
       .writeEol()
@@ -93,9 +93,9 @@ void WriteKeyframes(TextResourceWriter& rw, const Animation& anim)
 
 void Animation::serialize(TextResourceWriter& rw, std::string_view headerComment) const
 {
-    WriteHeader(rw, *this, headerComment);
-    WriteMarkers(rw, *this);
-    WriteKeyframes(rw, *this);
+    writeHeader(rw, *this, headerComment);
+    writeMarkers(rw, *this);
+    writeKeyframes(rw, *this);
 }
 
 void Animation::serialize(TextResourceWriter&& rw, std::string_view headerComment) const

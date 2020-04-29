@@ -3,6 +3,8 @@
 #include "vector.h"
 
 namespace libim {
+
+    // Class represents 4D vector (x,y,z,w)
     template<typename T>
     struct Vector4 : public Vector<T, 4>
     {

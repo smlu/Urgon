@@ -9,6 +9,6 @@
 
 namespace libim::unit_test {
 
-    void anim_test(const std::filesystem::path& tvRootPath);
+    void run_animation_tests(const std::filesystem::path& tvRootPath);
 }
 #endif // LIBIM_ANIM_TEST_H

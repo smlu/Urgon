@@ -11,7 +11,7 @@ using namespace libim::content::asset;
 using namespace libim::utils;
 
 
-std::size_t CND::GetOffset_Materials(const InputStream& istream)
+std::size_t CND::getOffset_Materials(const InputStream& istream)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
@@ -32,7 +32,7 @@ std::size_t CND::GetOffset_Materials(const InputStream& istream)
             4;                         // 4 = unknown 4 bytes*/
 }
 
-HashMap<Material> CND::ParseSection_Materials(const CndHeader& header, const InputStream& istream)
+HashMap<Material> CND::parseSection_Materials(const CndHeader& header, const InputStream& istream)
 {
     HashMap<Material> materials;
     try
@@ -79,7 +79,7 @@ HashMap<Material> CND::ParseSection_Materials(const CndHeader& header, const Inp
             std::vector<Mipmap> mipmaps(matHeader.mipmapCount);
             for(auto&& mipmap : mipmaps)
             {
-                mipmap = MoveMipmapFromBuffer(
+                mipmap = moveMipmapFromBuffer(
                     vecBitmapBuff,
                     matHeader.texturesPerMipmap,
                     matHeader.width,
@@ -110,14 +110,14 @@ HashMap<Material> CND::ParseSection_Materials(const CndHeader& header, const Inp
     }
 }
 
-HashMap<Material> CND::ReadMaterials(const InputStream& istream)
+HashMap<Material> CND::readMaterials(const InputStream& istream)
 {
-    auto cndHeader = ReadHeader(istream);
-    istream.seek(GetOffset_Materials(istream));
-    return ParseSection_Materials(cndHeader, istream);
+    auto cndHeader = readHeader(istream);
+    istream.seek(getOffset_Materials(istream));
+    return parseSection_Materials(cndHeader, istream);
 }
 
-void CND::WriteSection_Materials(OutputStream& ostream, const HashMap<Material>& materials)
+void CND::writeSection_Materials(OutputStream& ostream, const HashMap<Material>& materials)
 {
     std::vector<CndMatHeader> cndHeaders;
     cndHeaders.reserve(materials.size());
@@ -138,7 +138,7 @@ void CND::WriteSection_Materials(OutputStream& ostream, const HashMap<Material>&
         h.texturesPerMipmap = safe_cast<decltype(h.texturesPerMipmap)>(mat.mipmaps().at(0).size());
         cndHeaders.push_back(h);
 
-        const std::size_t sizePixeldata = GetMipmapPixelDataSize(h.texturesPerMipmap, h.width, h.height, h.colorInfo.bpp);
+        const std::size_t sizePixeldata = getMipmapPixelDataSize(h.texturesPerMipmap, h.width, h.height, h.colorInfo.bpp);
         bitmaps.reserve(sizePixeldata);
         for(const auto& mipmap : mat.mipmaps())
         {
@@ -161,7 +161,7 @@ void CND::WriteSection_Materials(OutputStream& ostream, const HashMap<Material>&
 }
 
 
-bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
+bool CND::replaceMaterial(const Material& mat, const std::string& cndFile)
 {
     if(mat.mipmaps().empty() || mat.mipmaps().at(0).empty()) {
         return false;
@@ -172,7 +172,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
         InputFileStream ifstream(cndFile);
 
         /* Read cnd file header */
-        auto cndHeader = ReadHeader(ifstream);
+        auto cndHeader = readHeader(ifstream);
 
         /* If no materials are present in file, return */
         if(cndHeader.numMaterials < 1)
@@ -186,7 +186,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /* Seek to material header list */
-        const auto matListOffset = GetOffset_Materials(ifstream);
+        const auto matListOffset = getOffset_Materials(ifstream);
         ifstream.seek(matListOffset);
 
         /* Read size of raw data of all materials */
@@ -222,7 +222,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
             {
                 /* Calculate material's mipmap size */
                 for(int32_t i = 0; i < matHeader.mipmapCount; i++){
-                    replMatSize += GetMipmapPixelDataSize(matHeader.texturesPerMipmap, matHeader.width, matHeader.height, matHeader.colorInfo.bpp);
+                    replMatSize += getMipmapPixelDataSize(matHeader.texturesPerMipmap, matHeader.width, matHeader.height, matHeader.colorInfo.bpp);
                 }
 
                 matHeader.width       = mat.width();
@@ -234,7 +234,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
             }
 
             for(int32_t i = 0; i < matHeader.mipmapCount; i++){
-                replMatOff += GetMipmapPixelDataSize(matHeader.texturesPerMipmap, matHeader.width, matHeader.height, matHeader.colorInfo.bpp);
+                replMatOff += getMipmapPixelDataSize(matHeader.texturesPerMipmap, matHeader.width, matHeader.height, matHeader.colorInfo.bpp);
             }
         }
 
@@ -253,7 +253,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
         /* Get patching material pixel data size */
         uint32_t nPatchMatSize = 0;
         for(std::size_t i = 0; i < mat.mipmaps().size(); i++){
-            nPatchMatSize += GetMipmapPixelDataSize(mat.mipmaps().at(i).size(), mat.width(), mat.height(), mat.colorFormat().bpp);
+            nPatchMatSize += getMipmapPixelDataSize(mat.mipmaps().at(i).size(), mat.width(), mat.height(), mat.colorFormat().bpp);
         }
 
         /* Calculate new bitmap buffer size */
@@ -301,7 +301,7 @@ bool CND::ReplaceMaterial(const Material& mat, const std::string& cndFile)
         ofstream.close();
 
         /* Rename patched file name to original name */
-        RenameFile(patchedCndFile, cndFile);
+        renameFile(patchedCndFile, cndFile);
         return true;
     }
     catch(const std::exception& e)

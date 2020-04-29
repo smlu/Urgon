@@ -94,8 +94,8 @@ namespace libim::content::audio {
         void serialize(OutputStream& ostream, SerializeFormat format = SerializeFormat::WAV) const;
 
     private:
-        std::shared_ptr<ByteArray> lock_or_throw() const;
-        bool is_valid(const ByteArray& data) const;
+        std::shared_ptr<ByteArray> lockOrThrow() const;
+        bool isValid(const ByteArray& data) const;
         ByteArray data() const;
 
     private:

@@ -70,22 +70,22 @@ namespace libim {
     struct Color : AbstractColor<float, 4> {};
     struct ColorRgb : AbstractColor<float, 3> {};
 
-    constexpr inline Color MakeColor(float red, float green, float blue, float alpha)
+    constexpr inline Color makeColor(float red, float green, float blue, float alpha)
     {
         return Color{{{{ red, green, blue, alpha }}}};
     }
 
-    constexpr inline Color MakeColor(const ColorRgb& rgb, float alpha)
+    constexpr inline Color makeColor(const ColorRgb& rgb, float alpha)
     {
         return Color{{{{ rgb.red(), rgb.green(), rgb.blue(), alpha }}}};
     }
 
-    constexpr inline ColorRgb MakeColorRgb(float red, float green, float blue)
+    constexpr inline ColorRgb makeColorRgb(float red, float green, float blue)
     {
         return ColorRgb{{{{ red, green, blue }}}};
     }
 
-    constexpr inline ColorRgb MakeColorRgb(const Color& rgba)
+    constexpr inline ColorRgb makeColorRgb(const Color& rgba)
     {
         return ColorRgb{{{{ rgba.red(), rgba.green(), rgba.blue() }}}};
     }

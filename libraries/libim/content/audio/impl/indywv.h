@@ -42,7 +42,7 @@ namespace libim::content::audio {
             return static_cast<int16_t>(lo << 8) | hi;
         }
 
-        static ByteArray Inflate(const InputStream& istream)
+        static ByteArray inflate(const InputStream& istream)
         {
             std::size_t mode = 1;
             IndyVWHeader header;

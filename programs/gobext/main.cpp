@@ -22,8 +22,8 @@ static constexpr auto OPT_HELP_SHORT      ("-h");
 using namespace gobext;
 using namespace libim;
 
-void print_help();
-bool ExtractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outDir, const bool verbose);
+void printHelp();
+bool extractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outDir, const bool verbose);
 
 int main(int argc, const char *argv[])
 {
@@ -34,17 +34,17 @@ int main(int argc, const char *argv[])
        opt.hasArg(OPT_HELP_SHORT) ||
        opt.unspecified().empty())
     {
-        print_help();
+        printHelp();
         return 1;
     }
 
     std::string inputFile = opt.unspecified().at(0);
-    if(!FileExists(inputFile)) 
+    if(!fileExists(inputFile))
     {
-        std::cerr << "Error: File \"" << inputFile << "\" does not exists!"; 
+        std::cerr << "Error: File \"" << inputFile << "\" does not exists!";
         return 1;
     }
-    
+
     std::string outdir;
     if(opt.hasArg(OPT_OTPUT_DIR_SHORT)){
         outdir = opt.arg(OPT_OTPUT_DIR_SHORT);
@@ -63,13 +63,13 @@ int main(int argc, const char *argv[])
 
     /* Extract files from gob file */
     int result = 0;
-    auto gobDir = LoadGobFromFile(inputFile);
+    auto gobDir = loadGobFromFile(inputFile);
     if(gobDir)
     {
-        outdir += (outdir.empty() ? "" : "/") + GetBaseName(inputFile) + "_GOB";
-        MakePath(outdir);
+        outdir += (outdir.empty() ? "" : "/") + getBaseName(inputFile) + "_GOB";
+        makePath(outdir);
 
-        if(!ExtractGob(gobDir, outdir, bVerboseOutput)) {
+        if(!extractGob(gobDir, outdir, bVerboseOutput)) {
             result = 1;
         }
     }
@@ -82,7 +82,7 @@ int main(int argc, const char *argv[])
     return result;
 }
 
-void print_help()
+void printHelp()
 {
     std::cout << "Extracts resources from CND file!\n";
     std::cout << "  Usage: gobext <gob file> [options]" << std::endl << std::endl;
@@ -93,7 +93,7 @@ void print_help()
     std::cout << OPT_VERBOSE_SHORT     << SETW(21, ' ') << OPT_VERBOSE     << SETW(25, ' ') << "Verbose output\n";
 }
 
-bool ExtractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outDir, const bool verbose)
+bool extractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outDir, const bool verbose)
 {
     try
     {
@@ -113,7 +113,7 @@ bool ExtractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outD
 
             /* Set entry file path */
             auto outPath = outDir + '/' + entry.name;
-            if(!MakePath(outPath))
+            if(!makePath(outPath))
             {
                 std::cerr << "Error: could not make file path: " << outPath << "!\n";
                 return 1;

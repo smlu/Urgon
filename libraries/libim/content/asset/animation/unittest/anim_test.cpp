@@ -37,7 +37,7 @@ void test_anim_file(const std::filesystem::path& filePath)
             anim2.deserialize(TextResourceReader(fs));
 
             fs.close();
-            RemoveFile(testFile);
+            removeFile(testFile);
         }
 
         // Test
@@ -52,13 +52,12 @@ void test_anim_file(const std::filesystem::path& filePath)
     catch(const std::exception& e)
     {
         LOG_ERROR("Animation unit test failed: %", e.what());
-        RemoveFile(testFile);
+        removeFile(testFile);
     }
 }
 
 
-
-void libim::unit_test::anim_test(const std::filesystem::path& tvRootPath )
+void libim::unit_test::run_animation_tests(const std::filesystem::path& tvRootPath )
 {
     using namespace libim;
     using namespace libim::content::text;

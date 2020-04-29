@@ -8,14 +8,14 @@
 using namespace libim;
 using namespace libim::content::asset;
 
-std::size_t CND::GetOffset_Sectors(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_Sectors(const InputStream& istream, const CndHeader& header)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
     });
 
     istream.seek(
-        GetOffset_Georesource(header, istream) +
+        getOffset_Georesource(header, istream) +
         sizeof(Vector3f) * header.numVertices +
         sizeof(Vector2f) * header.numTexVertices +
         sizeof(CndSurfaceAdjoin) * header.numAdjoins +
@@ -27,7 +27,7 @@ std::size_t CND::GetOffset_Sectors(const InputStream& istream, const CndHeader& 
     return offs;
 }
 
-std::vector<Sector> CND::ParseSection_Sectors(const InputStream& istream, const CndHeader& header)
+std::vector<Sector> CND::parseSection_Sectors(const InputStream& istream, const CndHeader& header)
 {
     auto headers = istream.read<std::vector<CndSectorHeader>>(header.numSectors);
     std::size_t numVertIdxs = istream.read<uint32_t>();
@@ -89,7 +89,7 @@ std::vector<Sector> CND::ParseSection_Sectors(const InputStream& istream, const 
     return sectors;
 }
 
-void CND::WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>& sectors)
+void CND::writeSection_Sectors(OutputStream& ostream, const std::vector<Sector>& sectors)
 {
     std::vector<CndSectorHeader> cndsectors;
     cndsectors.reserve(sectors.size());
@@ -144,9 +144,9 @@ void CND::WriteSection_Sectors(OutputStream& ostream, const std::vector<Sector>&
     ostream.write(vertIdxs);
 }
 
-std::vector<Sector> CND::ReadSectors(const InputStream& istream)
+std::vector<Sector> CND::readSectors(const InputStream& istream)
 {
-    auto cndHeader = ReadHeader(istream);
-    istream.seek(GetOffset_Sectors(istream, cndHeader));
-    return ParseSection_Sectors(istream, cndHeader);
+    auto cndHeader = readHeader(istream);
+    istream.seek(getOffset_Sectors(istream, cndHeader));
+    return parseSection_Sectors(istream, cndHeader);
 }

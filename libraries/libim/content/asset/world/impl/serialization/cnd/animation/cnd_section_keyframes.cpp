@@ -19,12 +19,12 @@ using namespace libim::utils;
 using namespace std::string_view_literals;
 
 
-std::size_t CND::GetOffset_Keyframes(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_Keyframes(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_Sprites(istream, header) + header.numSprites * sizeof(CndResourceName);
+    return getOffset_Sprites(istream, header) + header.numSprites * sizeof(CndResourceName);
 }
 
-HashMap<Animation> CND::ParseSection_Keyframes(const InputStream& istream, const CndHeader& header)
+HashMap<Animation> CND::parseSection_Keyframes(const InputStream& istream, const CndHeader& header)
 {
     HashMap<Animation>  animations;
 
@@ -83,21 +83,21 @@ HashMap<Animation> CND::ParseSection_Keyframes(const InputStream& istream, const
     return animations;
 }
 
-HashMap<Animation> CND::ReadKeyframes(const InputStream& istream)
+HashMap<Animation> CND::readKeyframes(const InputStream& istream)
 {
-    auto cndHeader = ReadHeader(istream);
+    auto cndHeader = readHeader(istream);
 
     // Move stream to the beginning of the keyframes section
-    auto sectionOffset = GetOffset_Keyframes(istream, cndHeader);
+    auto sectionOffset = getOffset_Keyframes(istream, cndHeader);
     if(sectionOffset == 0) {
         throw StreamError("No keyframes section found in CND file stream");
     }
 
     istream.seek(sectionOffset);
-    return ParseSection_Keyframes(istream, cndHeader);
+    return parseSection_Keyframes(istream, cndHeader);
 }
 
-void CND::WriteSection_Keyframes(OutputStream& ostream, const HashMap<Animation>& animations)
+void CND::writeSection_Keyframes(OutputStream& ostream, const HashMap<Animation>& animations)
 {
     std::vector<CndKeyHeader> cndHeaders;
     cndHeaders.reserve(animations.size());

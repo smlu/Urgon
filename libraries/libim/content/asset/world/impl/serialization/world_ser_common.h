@@ -55,12 +55,12 @@ namespace libim::content::asset {
         "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
     };
 
-    inline std::optional<std::size_t> make_optional_idx(int32_t idx)
+    inline std::optional<std::size_t> makeOptionalIdx(int32_t idx)
     {
         return idx > -1 ? std::make_optional(safe_cast<std::size_t>(idx)) : std::nullopt;
     }
 
-    inline int32_t from_optional_idx(std::optional<std::size_t> idx)
+    inline int32_t fromOptionalIdx(std::optional<std::size_t> idx)
     {
         return idx.has_value() ? safe_cast<int32_t>(idx.value()) : -1;
     }
@@ -81,7 +81,7 @@ namespace libim::content::asset {
             [&consumer](const SharedRef<audio::Sound>& v) { consumer(v->name());                 },
             [&consumer](const SharedRef<Animation>& v)    { consumer(v->name());                 },
             [&consumer](const SharedRef<Material>& v)     { consumer(v->name());                 },
-            // TODO: for all types below that have mv 'id', remove it and find it's id in content table / world
+            // TODO: for all types below that have member 'id', remove it and find it's id in content table / world
             [&consumer](const SharedRef<Surface>& v)      { consumer(utils::to_string(v->id));   },
             [&consumer](const SharedRef<Sector>& v)       { consumer(utils::to_string(v->id));   },
             [&consumer](const SharedRef<Cog>& v)          { consumer(utils::to_string(v->id));   }

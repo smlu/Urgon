@@ -64,7 +64,7 @@ Texture& Texture::operator = (Texture&& rrhs) noexcept
 
 Bmp Texture::toBmp() const
 {
-    uint32_t matBitdataSize = GetBitmapSize(width(), height(), m_colorInfo.bpp);
+    uint32_t matBitdataSize = getBitmapSize(width(), height(), m_colorInfo.bpp);
 
     Bmp bmp;
     bmp.header.type    = BMP_TYPE;
@@ -78,10 +78,10 @@ Bmp Texture::toBmp() const
     bmp.info.bitCount    = m_colorInfo.bpp;
     bmp.info.compression = BI_BITFIELDS; //m_colorInfo.colorMode ? BI_BITFIELDS : BI_ALPHABITFIELDS;
     bmp.info.sizeImage   = matBitdataSize;
-    bmp.info.redMask     = RGBMask(m_colorInfo.redBPP  , m_colorInfo.redShl);
-    bmp.info.greenMask   = RGBMask(m_colorInfo.greenBPP, m_colorInfo.greenShl);
-    bmp.info.blueMask    = RGBMask(m_colorInfo.blueBPP , m_colorInfo.blueShl);
-    bmp.info.alphaMask   = RGBMask(m_colorInfo.alphaBPP, m_colorInfo.alphaShl);
+    bmp.info.redMask     = rgbMask(m_colorInfo.redBPP  , m_colorInfo.redShl);
+    bmp.info.greenMask   = rgbMask(m_colorInfo.greenBPP, m_colorInfo.greenShl);
+    bmp.info.blueMask    = rgbMask(m_colorInfo.blueBPP , m_colorInfo.blueShl);
+    bmp.info.alphaMask   = rgbMask(m_colorInfo.alphaBPP, m_colorInfo.alphaShl);
 
     bmp.pixelData = m_bitmap;
     return bmp;
@@ -96,7 +96,7 @@ template<> Texture Stream::read<Texture, uint32_t, uint32_t, const ColorFormat&>
        .setRowSize(GetRowSize(height, tex.colorInfo().bpp));
 
     /* Read bitmap data from stream */
-    uint32_t bitmapSize = GetBitmapSize(tex.width(), tex.height(), tex.colorInfo().bpp);
+    uint32_t bitmapSize = getBitmapSize(tex.width(), tex.height(), tex.colorInfo().bpp);
     tex.setBitmap(read<BitmapPtr>(bitmapSize));
 
     return tex;

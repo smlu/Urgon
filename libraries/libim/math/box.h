@@ -12,10 +12,10 @@ namespace libim {
     template <typename T, std::size_t N> class Box
     {
         template <std::size_t m, std::size_t S, typename G>
-        friend std::tuple<T, T> get_range(const Box<G, S>&);
+        friend std::tuple<T, T> getRange(const Box<G, S>&);
 
         template <std::size_t m,  size_t S, typename G>
-        friend T get_size(const Box<G, S>&);
+        friend T getSize(const Box<G, S>&);
 
     public:
         using value_type = T;
@@ -110,27 +110,25 @@ namespace libim {
     };
 
 
-
-
     template <typename T, std::size_t N>
-    inline constexpr Box<T, N> MakeBox(const Vector<T, N>& v0, const Vector<T, N>& v1) {
+    inline constexpr Box<T, N> makeBox(const Vector<T, N>& v0, const Vector<T, N>& v1) {
         return Box<T, N>(v0, v1);
     }
 
     template <typename T, size_t N>
-    inline Box<T, N> MakeBox(const Vector<T, N>& v0, const Size<T, N>& sz) {
+    inline Box<T, N> makeBox(const Vector<T, N>& v0, const Size<T, N>& sz) {
         return Box<T, N>(v0, sz);
     }
 
     template <size_t m,  size_t n, typename T>
-    std::tuple<T, T> get_range(const Box<T, n>& box)
+    std::tuple<T, T> getRange(const Box<T, n>& box)
     {
         static_assert(m < n, "box dimension out of bounds");
         return std::make_tuple(std::get<m>(box.v0), std::get<m>(box.v1));
     }
 
     template <size_t m, size_t n, typename T>
-    T get_size(const Box<T, n>& box)
+    T getSize(const Box<T, n>& box)
     {
         static_assert(m < n, "box dimension out of bounds");
         return std::get<m>(box.v1) - std::get<m>(box.v0);

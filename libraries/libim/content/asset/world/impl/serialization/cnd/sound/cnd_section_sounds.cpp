@@ -9,7 +9,7 @@ using namespace libim::content::asset;
 using namespace libim::content::audio;
 using namespace libim::content::audio::impl;
 
-uint32_t CND::ParseSectionSounds(SbTrack& track, const InputStream& istream)
+uint32_t CND::parseSectionSounds(SbTrack& track, const InputStream& istream)
 {
     uint32_t nonce = 0;
 

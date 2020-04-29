@@ -18,26 +18,26 @@ namespace libim {
     class Stream;
 
     template<typename T>
-    constexpr bool IsStreamType = std::is_base_of<Stream, T>::value || std::is_same<T, Stream>::value;
+    constexpr bool isStreamType = std::is_base_of<Stream, T>::value || std::is_same<T, Stream>::value;
 
-    template<class T, typename std::enable_if_t<IsStreamType<T>, int> = 0>
+    template<class T, typename std::enable_if_t<isStreamType<T>, int> = 0>
     using StreamPtr = std::shared_ptr<T>;
 
-    template<class T, class... Args, typename std::enable_if_t<IsStreamType<T>, int> = 0>
-    StreamPtr<T> MakeStreamPtr(Args&&... args) {
+    template<class T, class... Args, typename std::enable_if_t<isStreamType<T>, int> = 0>
+    StreamPtr<T> makeStreamPtr(Args&&... args) {
         return std::make_shared<T>(std::forward<Args>(args)...);
     }
 
     template<typename T, typename U,
-             typename std::enable_if_t<std::is_same<T, Stream>::value && IsStreamType<U>, int> = 0>
-    std::shared_ptr<T> StreamPointerCast(const std::shared_ptr<U>& r) {
+             typename std::enable_if_t<std::is_same<T, Stream>::value && isStreamType<U>, int> = 0>
+    std::shared_ptr<T> stream_ptr_cast(const std::shared_ptr<U>& r) {
         return std::static_pointer_cast<Stream>(r);
     }
 
     template<typename T, typename U,
-             typename std::enable_if_t<IsStreamType<T> && IsStreamType<U> && !std::is_same<Stream, T>::value, int> = 0>
-    std::shared_ptr<T> StreamPointerCast(const std::shared_ptr<U>& r) {
-        return std::static_pointer_cast<T>(StreamPointerCast<Stream>(r));
+             typename std::enable_if_t<isStreamType<T> && isStreamType<U> && !std::is_same<Stream, T>::value, int> = 0>
+    std::shared_ptr<T> stream_ptr_cast(const std::shared_ptr<U>& r) {
+        return std::static_pointer_cast<T>(stream_ptr_cast<Stream>(r));
     }
 
 
@@ -136,13 +136,13 @@ namespace libim {
         Stream& write(double d);
         Stream& write(bool b);
 
-        template<class T, typename std::enable_if_t<!IsStreamType<T>, int> = 0>
+        template<class T, typename std::enable_if_t<!isStreamType<T>, int> = 0>
         Stream& write(const T& data)
         {
             return _write(data, tag<T>{});
         }
 
-        template<class T, typename std::enable_if_t<IsStreamType<T>, int> = 0>
+        template<class T, typename std::enable_if_t<isStreamType<T>, int> = 0>
         Stream& write(const T& istream)
         {
             return write(istream, 0, istream.size());

@@ -82,7 +82,7 @@ private:
 };
 
 
-std::string GetLastErrorAsString()
+std::string getLastErrorAsString()
 {
     std::string message;
 #ifdef OS_WINDOWS
@@ -169,13 +169,13 @@ struct FileStream::FileStreamImpl
         #endif
 
         if (fileHandle == INVALID_HANDLE_VALUE) {
-            throw FileStreamError(GetLastErrorAsString());
+            throw FileStreamError(getLastErrorAsString());
         }
 
         /* Get file size */
         LARGE_INTEGER lSize {{0, 0}};
         if(!GetFileSizeEx(fileHandle, &lSize)) {
-            throw FileStreamError("Error getting the file size: " + GetLastErrorAsString());
+            throw FileStreamError("Error getting the file size: " + getLastErrorAsString());
         }
 
         #ifdef _WIN64
@@ -210,7 +210,7 @@ struct FileStream::FileStreamImpl
         nRead = ::read(fd, data, length);
         if(nRead == -1) {
     #endif
-            throw FileStreamError("Failed to read from file: " + GetLastErrorAsString());
+            throw FileStreamError("Failed to read from file: " + getLastErrorAsString());
         }
 
         currentOffset += nRead;
@@ -234,7 +234,7 @@ struct FileStream::FileStreamImpl
             nWritten = ::write(fd, buffer_.data(), buffer_.size());
             if(nWritten == -1) {
         #endif
-                throw FileStreamError("Failed to write data to file: " + GetLastErrorAsString());
+                throw FileStreamError("Failed to write data to file: " + getLastErrorAsString());
             }
 
             buffer_.reset();
@@ -288,7 +288,7 @@ struct FileStream::FileStreamImpl
         auto off = lseek(fd, position, SEEK_SET);
         if(off == -1) {
     #endif
-            throw FileStreamError(std::string("Failed to seek to position: ") + GetLastErrorAsString());
+            throw FileStreamError(std::string("Failed to seek to position: ") + getLastErrorAsString());
         }
 
         currentOffset = position;
@@ -352,10 +352,10 @@ FileStream::FileStream(std::string filePath, Mode mode) :
 {}
 
 FileStream::FileStream(std::string filePath, bool truncate, Mode mode) :
-    m_fs(std::make_shared<FileStreamImpl>(GetNativePath(std::move(filePath)), truncate, mode))
+    m_fs(std::make_shared<FileStreamImpl>(getNativePath(std::move(filePath)), truncate, mode))
 
 {
-    this->setName(GetFilename(m_fs->filePath));
+    this->setName(getFilename(m_fs->filePath));
 }
 
 FileStream::FileStream(const std::filesystem::path& filePath, Mode mode) :

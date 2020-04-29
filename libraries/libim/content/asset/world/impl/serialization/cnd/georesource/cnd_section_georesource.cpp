@@ -14,27 +14,27 @@ using namespace libim::content::asset;
 using namespace libim::utils;
 
 
-std::size_t CND::GetOffset_Georesource(const CndHeader& header, const InputStream& istream)
+std::size_t CND::getOffset_Georesource(const CndHeader& header, const InputStream& istream)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
     });
 
-   const auto matSectionOffset = GetOffset_Materials(istream);
+   const auto matSectionOffset = getOffset_Materials(istream);
    istream.seek(matSectionOffset);
 
     const uint32_t nPixelDataSize = istream.read<uint32_t>();
     return istream.tell() + nPixelDataSize + header.numMaterials * sizeof(CndMatHeader);
 }
 
-Georesource CND::ReadGeoresource(const InputStream& istream)
+Georesource CND::readGeoresource(const InputStream& istream)
 {
-    auto cndHeader = ReadHeader(istream);
-    istream.seek(GetOffset_Georesource(cndHeader, istream));
-    return ParseSection_Georesource(cndHeader, istream);
+    auto cndHeader = readHeader(istream);
+    istream.seek(getOffset_Georesource(cndHeader, istream));
+    return parseSection_Georesource(cndHeader, istream);
 }
 
-Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const InputStream& istream)
+Georesource CND::parseSection_Georesource(const CndHeader& cndHeader, const InputStream& istream)
 {
     Georesource geores;
     geores.verts    = istream.read<std::vector<Vector3f>>(cndHeader.numVertices);
@@ -46,7 +46,7 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
     {
         geores.adjoints.push_back({
             a.flags,
-            make_optional_idx(a.mirror),
+            makeOptionalIdx(a.mirror),
             std::nullopt,
             std::nullopt,
             a.distance
@@ -105,12 +105,12 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
      {
          Surface s;
          s.id         = std::size(geores.surfaces);
-         s.matIdx     = make_optional_idx(h.materialIdx);
+         s.matIdx     = makeOptionalIdx(h.materialIdx);
          s.surflags   = h.surfflags;
          s.flags      = h.faceflags;
          s.geoMode    = h.geoMode;
          s.lightMode  = h.lightMode;
-         s.adjoinIdx  = make_optional_idx(h.adjoinIdx);
+         s.adjoinIdx  = makeOptionalIdx(h.adjoinIdx);
          s.extraLight = h.extraLight;
          s.normal     = h.normal;
 
@@ -119,7 +119,7 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
          for (auto& v : s.verts)
          {
              v.vertIdx   = safe_cast<decltype(v.vertIdx)>(itVerts->vertIdx);
-             v.texIdx    = make_optional_idx(itVerts->texIdx);
+             v.texIdx    = makeOptionalIdx(itVerts->texIdx);
              s.vecIntensities.push_back(std::move(itVerts->color));
              ++itVerts;
          }
@@ -134,7 +134,7 @@ Georesource CND::ParseSection_Georesource(const CndHeader& cndHeader, const Inpu
 }
 
 
-void CND::WriteSection_Georesource(OutputStream& ostream, const Georesource& geores)
+void CND::writeSection_Georesource(OutputStream& ostream, const Georesource& geores)
 {
     // Write verteices and tex vertices
     ostream.write(geores.verts);
@@ -147,7 +147,7 @@ void CND::WriteSection_Georesource(OutputStream& ostream, const Georesource& geo
     {
         cadjons.push_back({
             a.flags,
-            from_optional_idx(a.mirrorIdx),
+            fromOptionalIdx(a.mirrorIdx),
             a.distance,
         });
     }
@@ -161,12 +161,12 @@ void CND::WriteSection_Georesource(OutputStream& ostream, const Georesource& geo
     for(const auto& s : geores.surfaces)
     {
         CndSurfaceHeader h;
-        h.materialIdx = from_optional_idx(s.matIdx);
+        h.materialIdx = fromOptionalIdx(s.matIdx);
         h.surfflags   = s.surflags;
         h.faceflags   = s.flags;
         h.geoMode     = s.geoMode;
         h.lightMode   = s.lightMode;
-        h.adjoinIdx   = from_optional_idx(s.adjoinIdx);
+        h.adjoinIdx   = fromOptionalIdx(s.adjoinIdx);
         h.extraLight  = s.extraLight;
         h.numVerts    = s.verts.size();
         h.normal      = s.normal;
@@ -177,7 +177,7 @@ void CND::WriteSection_Georesource(OutputStream& ostream, const Georesource& geo
         {
             vecSurfVerts.push_back({
                 safe_cast<decltype(CndSurfaceVerts::vertIdx)>(v.vertIdx),
-                from_optional_idx(v.texIdx),
+                fromOptionalIdx(v.texIdx),
                 s.vecIntensities.at(idx)
             });
         }

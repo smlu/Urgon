@@ -1,14 +1,16 @@
 #include "../animation.h"
 #include "../../../text/impl/text_resource_literals.h"
 
+#include <string_view>
 #include <utility>
 
 using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::content::text;
+using namespace std::string_view_literals;
 
 
-void ParseHeader(TextResourceReader& rr, Animation& anim)
+void parseHeader(TextResourceReader& rr, Animation& anim)
 {
     auto flags  = rr.readKey<Animation::Flag>(kResName_Flags);
     auto type   = rr.readKey<Animation::Type>(kResName_Type);
@@ -23,7 +25,7 @@ void ParseHeader(TextResourceReader& rr, Animation& anim)
     anim.setJoints(joints);
 }
 
-void ParseMarkers(TextResourceReader& rr, Animation& anim)
+void parseMarkers(TextResourceReader& rr, Animation& anim)
 {
     auto markers = rr.readList<std::vector<KeyMarker>, false>(kResName_Markers,
     [](TextResourceReader& rr, auto /*rowIdx*/, auto& m){
@@ -34,7 +36,7 @@ void ParseMarkers(TextResourceReader& rr, Animation& anim)
     anim.setMarkers(std::move(markers));
 }
 
-void ParseKeyframes(TextResourceReader& rr, Animation& anim)
+void parseKeyframes(TextResourceReader& rr, Animation& anim)
 {
     auto nodes = rr.readList<std::vector<KeyNode>, false>(kResName_Nodes,
     [&](TextResourceReader& rr, auto /*rowIdx*/, auto& node)
@@ -63,12 +65,12 @@ void ParseKeyframes(TextResourceReader& rr, Animation& anim)
 Animation& Animation::deserialize(TextResourceReader& rr)
 {
     rr.assertSection(kResName_Header);
-    ParseHeader(rr, *this);
+    parseHeader(rr, *this);
 
     auto section = rr.readSection();
     if(section == kResName_Markers)
     {
-        ParseMarkers(rr, *this);
+        parseMarkers(rr, *this);
         rr.assertSection(kResName_KfNodes);
     }
     else if(section != kResName_KfNodes)
@@ -77,8 +79,8 @@ Animation& Animation::deserialize(TextResourceReader& rr)
         throw TokenizerError("expected section: KEYFRAME NODES"sv, rr.currentToken().location());
     }
 
-    ParseKeyframes(rr, *this);
-    this->setName(GetFilename(rr.istream().name()));
+    parseKeyframes(rr, *this);
+    this->setName(getFilename(rr.istream().name()));
     return *this;
 }
 

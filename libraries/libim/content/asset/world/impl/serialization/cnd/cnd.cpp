@@ -2,7 +2,8 @@
 #include "animation/cnd_key_structs.h"
 #include "sector/cnd_sector.h"
 #include "../world_ser_common.h"
-#include "../../../../../../utils/utils.h"
+
+#include <libim/utils/utils.h>
 #include <libim/types/safe_cast.h>
 
 #include <algorithm>
@@ -17,7 +18,7 @@ using namespace libim::utils;
 
 static constexpr uint32_t kFileVersion = 3;
 
-std::vector<std::string> ReadResourceList(const InputStream& istream, std::size_t size)
+std::vector<std::string> readResourceList(const InputStream& istream, std::size_t size)
 {
     auto rlist = istream.read<std::vector<CndResourceName>>(size);
 
@@ -32,7 +33,7 @@ std::vector<std::string> ReadResourceList(const InputStream& istream, std::size_
 }
 
 template<template<typename, typename ...> class List, typename T, typename ...Args, typename Lambda>
-void WriteResourceList(OutputStream& ostream, const List<T, Args...>& list, Lambda&& nameExtractor)
+void writeResourceList(OutputStream& ostream, const List<T, Args...>& list, Lambda&& nameExtractor)
 {
     std::vector<CndResourceName> wlist;
     wlist.reserve(list.size());
@@ -51,14 +52,14 @@ void WriteResourceList(OutputStream& ostream, const List<T, Args...>& list, Lamb
 }
 
 template<template<typename, typename ...> class List, typename ...Args>
-void WriteResourceList(OutputStream& ostream, const List<std::string, Args...>& list)
+void writeResourceList(OutputStream& ostream, const List<std::string, Args...>& list)
 {
-     WriteResourceList(ostream, list, [](const std::string& e){ return e; });
+     writeResourceList(ostream, list, [](const std::string& e){ return e; });
 }
 
 
 
-CndHeader CND::ReadHeader(const InputStream& istream)
+CndHeader CND::readHeader(const InputStream& istream)
 {
     istream.seekBegin();
     CndHeader cndHeader = istream.read<CndHeader>();
@@ -76,14 +77,14 @@ CndHeader CND::ReadHeader(const InputStream& istream)
     return cndHeader;
 }
 
-std::size_t CND::GetOffset_AiClass(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_AiClass(const InputStream& istream, const CndHeader& header)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
     });
 
     istream.seek(
-        GetOffset_Sectors(istream, header) +
+        getOffset_Sectors(istream, header) +
         sizeof(CndSectorHeader) * header.numSectors
     );
 
@@ -91,74 +92,74 @@ std::size_t CND::GetOffset_AiClass(const InputStream& istream, const CndHeader& 
     return istream.tell() + vecBuffSize * sizeof(uint32_t);
 }
 
-std::vector<std::string> CND::ParseSection_AiClass(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_AiClass(const InputStream& istream, const CndHeader& header)
 {
-    return ReadResourceList(istream, header.numAiClasses);
+    return readResourceList(istream, header.numAiClasses);
 }
 
-std::vector<std::string> CND::ReadAiClass(const InputStream& istream)
+std::vector<std::string> CND::readAiClass(const InputStream& istream)
 {
-    auto header = ReadHeader(istream);
-    istream.seek(GetOffset_AiClass(istream, header));
-    return ParseSection_AiClass(istream, header);
+    auto header = readHeader(istream);
+    istream.seek(getOffset_AiClass(istream, header));
+    return parseSection_AiClass(istream, header);
 }
 
-void CND::WriteSection_AiClass(OutputStream& ostream, const std::vector<std::string>& aiclasses)
+void CND::writeSection_AiClass(OutputStream& ostream, const std::vector<std::string>& aiclasses)
 {
-    WriteResourceList(ostream, aiclasses);
+    writeResourceList(ostream, aiclasses);
 }
 
-std::size_t CND::GetOffset_Models(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_Models(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_AiClass(istream, header) + header.numAiClasses * sizeof(CndResourceName);
+    return getOffset_AiClass(istream, header) + header.numAiClasses * sizeof(CndResourceName);
 }
 
-std::vector<std::string> CND::ParseSection_Models(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_Models(const InputStream& istream, const CndHeader& header)
 {
-    return ReadResourceList(istream, header.numModels);
+    return readResourceList(istream, header.numModels);
 }
 
-std::vector<std::string> CND::ReadModels(const InputStream& istream)
+std::vector<std::string> CND::readModels(const InputStream& istream)
 {
-    auto header = ReadHeader(istream);
-    istream.seek(GetOffset_Models(istream, header));
-    return ParseSection_Models(istream, header);
+    auto header = readHeader(istream);
+    istream.seek(getOffset_Models(istream, header));
+    return parseSection_Models(istream, header);
 }
 
-void CND::WriteSection_Models(OutputStream& ostream, const std::vector<std::string>& models)
+void CND::writeSection_Models(OutputStream& ostream, const std::vector<std::string>& models)
 {
-    WriteResourceList(ostream, models);
+    writeResourceList(ostream, models);
 }
 
-std::size_t CND::GetOffset_Sprites(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_Sprites(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_Models(istream, header) + header.numModels * sizeof(CndResourceName);
+    return getOffset_Models(istream, header) + header.numModels * sizeof(CndResourceName);
 }
 
-std::vector<std::string> CND::ParseSection_Sprites(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_Sprites(const InputStream& istream, const CndHeader& header)
 {
-    return ReadResourceList(istream, header.numSprites);
+    return readResourceList(istream, header.numSprites);
 }
 
-std::vector<std::string> CND::ReadSprites(const InputStream& istream)
+std::vector<std::string> CND::readSprites(const InputStream& istream)
 {
-    auto header = ReadHeader(istream);
-    istream.seek(GetOffset_Sprites(istream, header));
-    return ParseSection_Sprites(istream, header);
+    auto header = readHeader(istream);
+    istream.seek(getOffset_Sprites(istream, header));
+    return parseSection_Sprites(istream, header);
 }
 
 void CND::WriteSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites)
 {
-    WriteResourceList(ostream, sprites);
+    writeResourceList(ostream, sprites);
 }
 
-std::size_t CND::GetOffset_AnimClass(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_AnimClass(const InputStream& istream, const CndHeader& header)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
     });
 
-    istream.seek(GetOffset_Keyframes(istream, header));
+    istream.seek(getOffset_Keyframes(istream, header));
     auto aSizes = istream.read<std::array<uint32_t, 3>>();
 
     return istream.tell() +
@@ -168,78 +169,78 @@ std::size_t CND::GetOffset_AnimClass(const InputStream& istream, const CndHeader
            sizeof(KeyNodeEntry) * aSizes.at(2);
 }
 
-std::vector<std::string> CND::ParseSection_AnimClass(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_AnimClass(const InputStream& istream, const CndHeader& header)
 {
-    return ReadResourceList(istream, header.numPuppets);
+    return readResourceList(istream, header.numPuppets);
 }
 
-std::vector<std::string> CND::ReadAnimClass(const InputStream& istream)
+std::vector<std::string> CND::readAnimClass(const InputStream& istream)
 {
-    auto header = ReadHeader(istream);
-    istream.seek(GetOffset_AnimClass(istream, header));
-    return ParseSection_AnimClass(istream, header);
+    auto header = readHeader(istream);
+    istream.seek(getOffset_AnimClass(istream, header));
+    return parseSection_AnimClass(istream, header);
 }
 
-void CND::WriteSection_AnimClass(OutputStream& ostream, const std::vector<std::string>& animclasses)
+void CND::writeSection_AnimClass(OutputStream& ostream, const std::vector<std::string>& animclasses)
 {
-    WriteResourceList(ostream, animclasses);
+    writeResourceList(ostream, animclasses);
 }
 
-std::size_t CND::GetOffset_SoundClass(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_SoundClass(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_AnimClass(istream, header) + sizeof(CndResourceName) * header.numPuppets;
+    return getOffset_AnimClass(istream, header) + sizeof(CndResourceName) * header.numPuppets;
 }
 
-std::vector<std::string> CND::ParseSection_SoundClass(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_SoundClass(const InputStream& istream, const CndHeader& header)
 {
-    return ReadResourceList(istream, header.numSoundClasses);
+    return readResourceList(istream, header.numSoundClasses);
 }
 
-std::vector<std::string> CND::ReadSoundClass(const InputStream& istream)
+std::vector<std::string> CND::readSoundClass(const InputStream& istream)
 {
-    auto header = ReadHeader(istream);
-    istream.seek(GetOffset_SoundClass(istream, header));
-    return ParseSection_SoundClass(istream, header);
+    auto header = readHeader(istream);
+    istream.seek(getOffset_SoundClass(istream, header));
+    return parseSection_SoundClass(istream, header);
 }
 
-void CND::WriteSection_SoundClass(OutputStream& ostream, const std::vector<std::string>& sndclasses)
+void CND::writeSection_SoundClass(OutputStream& ostream, const std::vector<std::string>& sndclasses)
 {
-    WriteResourceList(ostream, sndclasses);
+    writeResourceList(ostream, sndclasses);
 }
 
-std::size_t CND::GetOffset_CogScripts(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_CogScripts(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_SoundClass(istream, header) + sizeof(CndResourceName) * header.numSoundClasses;
+    return getOffset_SoundClass(istream, header) + sizeof(CndResourceName) * header.numSoundClasses;
 }
 
-std::vector<std::string> CND::ParseSection_CogScripts(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_CogScripts(const InputStream& istream, const CndHeader& header)
 {
-    return ReadResourceList(istream, header.numCogScripts);
+    return readResourceList(istream, header.numCogScripts);
 }
 
-std::vector<std::string> CND::ReadCogScripts(const InputStream& istream)
+std::vector<std::string> CND::readCogScripts(const InputStream& istream)
 {
-    auto header = ReadHeader(istream);
-    istream.seek(GetOffset_CogScripts(istream, header));
-    return ParseSection_CogScripts(istream, header);
+    auto header = readHeader(istream);
+    istream.seek(getOffset_CogScripts(istream, header));
+    return parseSection_CogScripts(istream, header);
 }
 
-void CND::WriteSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts)
+void CND::writeSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts)
 {
-    WriteResourceList(ostream, scripts);
+    writeResourceList(ostream, scripts);
 }
 
 
-std::size_t CND::GetOffset_Cogs(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_Cogs(const InputStream& istream, const CndHeader& header)
 {
-    return GetOffset_CogScripts(istream, header) + sizeof(CndResourceName) * header.numCogScripts;
+    return getOffset_CogScripts(istream, header) + sizeof(CndResourceName) * header.numCogScripts;
 }
 
-std::vector<SharedRef<Cog>> CND::ParseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts)
+std::vector<SharedRef<Cog>> CND::parseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts)
 {
     auto aSizes = istream.read<std::array<uint32_t, 2>>();
-    auto snames = ReadResourceList(istream, aSizes.at(0));
-    auto values = ReadResourceList(istream, aSizes.at(1));
+    auto snames = readResourceList(istream, aSizes.at(0));
+    auto values = readResourceList(istream, aSizes.at(1));
 
     std::vector<SharedRef<Cog>> cogs;
     cogs.reserve(snames.size());
@@ -282,14 +283,14 @@ std::vector<SharedRef<Cog>> CND::ParseSection_Cogs(const InputStream& istream, c
     return cogs;
 }
 
-std::vector<SharedRef<Cog>> CND::ReadCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts)
+std::vector<SharedRef<Cog>> CND::readCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts)
 {
-    auto header = ReadHeader(istream);
-    istream.seek(GetOffset_Cogs(istream, header));
-    return ParseSection_Cogs(istream, header, scripts);
+    auto header = readHeader(istream);
+    istream.seek(getOffset_Cogs(istream, header));
+    return parseSection_Cogs(istream, header, scripts);
 }
 
-void CND::WriteSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs)
+void CND::writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs)
 {
     std::vector<std::string> cogvals;
     cogvals.reserve(cogs.size());
@@ -324,6 +325,7 @@ void CND::WriteSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<C
         safe_cast<uint32_t>(cogvals.size())
     });
 
-    WriteResourceList(ostream, cogs, [](const SharedRef<Cog>& e) { return e->name(); });
-    WriteResourceList(ostream, cogvals);
+    writeResourceList(ostream, cogs, [](const SharedRef<Cog>& e) { return e->name(); });
+    writeResourceList(ostream, cogvals);
+}
 }

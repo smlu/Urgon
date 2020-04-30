@@ -233,6 +233,26 @@ namespace libim::content::asset {
         CndThingMoveInfo    moveInfo;
         CndThingInfo        thingInfo;
     };
+
+
+    // Array of sizes (number of elements) of each list
+    // that is written after thing header list
+    struct CndThingSectorListSizes
+    {
+        uint32_t sizePhysicsInfoList;
+        uint32_t sizeNumPathFramesList;
+        uint32_t sizePathFrameList;
+        uint32_t sizeActorInfoList;
+        uint32_t sizeWeaponInfoList;
+        uint32_t sizeExplosionInfoList;
+        uint32_t sizeItemInfoList;
+        uint32_t sizeParticleInfoList;
+        uint32_t sizeHintUserValueList;
+        uint32_t sizeAiControlInfoList;
+        uint32_t sizeAiPathFrameList;
+    };
+
+    static_assert(sizeof(CndThingSectorListSizes) == 44);
 }
 
 #endif //LIBIM_CNDTHING_H

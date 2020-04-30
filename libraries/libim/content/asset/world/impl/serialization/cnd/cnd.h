@@ -125,6 +125,8 @@ namespace libim::content::asset {
         uint32_t aPvs;                // 32-bit pointer (struct of 16 * int)
     };//);
 
+    static_assert(sizeof(CndHeader) == 1568);
+
 
     struct CND final
     {

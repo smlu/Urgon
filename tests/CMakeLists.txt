@@ -13,5 +13,5 @@ add_executable (${PROJECT_NAME}
     $<TARGET_OBJECTS:${PM_IMFIXES}>
 )
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSRC_ROOT=\"${PM_SOURCE_DIR}\"")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSRC_ROOT=\"${CMAKE_SOURCE_DIR}\"")
 target_link_libraries(${PROJECT_NAME} ${PM_LIBIM})

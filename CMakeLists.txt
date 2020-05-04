@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.6 FATAL_ERROR)
 project(
     ProjectMarduk
     LANGUAGES CXX
-    VERSION 0.8.0
+    VERSION 0.8.2
 )
 
 # Global constants

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <string_view>
+#include <stdexcept>
 
 #include <libim/utils/utils.h>
 
@@ -17,6 +18,20 @@ namespace libim::content::asset {
         using typename base_type::array;
         constexpr CndString() : base_type{ 0 } {}
         constexpr CndString(base_type a) : base_type(std::move(a)) {}
+        constexpr CndString(std::string_view str) : base_type{ 0 }
+        {
+            if(str.size() > N) {
+                throw std::invalid_argument("Invalid str size to init CndString");
+            }
+            std::copy(str.begin(), str.end(), this->begin());
+        }
+
+        template<std::size_t C>
+        constexpr CndString(const char (&str)[C]) : base_type{ 0 }
+        {
+            static_assert(C <= N, "Invalid string literal size to init CndString");
+            std::copy(str, str + C, this->begin()); // Note: since C++20 constexpr
+        }
 
         std::string toStdString() const
         {

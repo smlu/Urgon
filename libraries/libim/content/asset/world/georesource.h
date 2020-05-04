@@ -5,8 +5,9 @@
 
 #include "surface_adjoin.h"
 #include "surface.h"
-#include "../../../math/vector2.h"
-#include "../../../math/vector3.h"
+
+#include <libim/math/vector2.h>
+#include <libim/math/vector3.h>
 
 namespace libim::content::asset {
     struct Georesource

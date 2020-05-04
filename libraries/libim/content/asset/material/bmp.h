@@ -7,9 +7,9 @@
 #include <string>
 #include <vector>
 
-#include "../../../common.h"
-#include "../../../log/log.h"
-#include "../../../io/filestream.h"
+#include <libim/common.h>
+#include <libim/log/log.h>
+#include <libim/io/filestream.h>
 
 namespace libim::content::asset {
 

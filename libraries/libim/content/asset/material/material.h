@@ -7,8 +7,8 @@
 
 #include "texture.h"
 #include "../asset.h"
-#include "../../../common.h"
-#include "../../../io/stream.h"
+#include <libim/common.h>
+#include <libim/io/stream.h>
 
 namespace libim::content::asset {
     struct Mipmap : public std::vector<Texture>{};

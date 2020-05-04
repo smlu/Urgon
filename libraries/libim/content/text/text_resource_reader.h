@@ -1,14 +1,15 @@
 #ifndef LIBIM_RESOURCE_READER_H
 #define LIBIM_RESOURCE_READER_H
-#include "../../math/abstract_vector.h"
-#include "../../log/log.h"
-#include "../../math/abstract_vector.h"
-#include "../../math/box.h"
-#include "../../text/tokenizer.h"
-#include "../../utils/traits.h"
-#include "../../utils/utils.h"
+#include <libim/log/log.h>
+#include <libim/math/abstract_vector.h>
+#include <libim/math/box.h>
+#include <libim/text/tokenizer.h>
+#include <libim/utils/traits.h>
+#include <libim/utils/utils.h>
+#include <libim/types/flags.h>
 
 #include <cstdint>
+#include <string_view>
 #include <vector>
 #include <type_traits>
 
@@ -28,7 +29,7 @@ namespace libim::content::text {
         void assertKeyValue(std::string_view key, T v)
         {
             using DT =  typename std::decay_t<T>;
-            if constexpr (std::is_enum_v<DT>){
+            if constexpr (utils::is_enum<DT>){
                 return assertKeyValue(key, utils::to_underlying(v));
             }
 
@@ -54,10 +55,10 @@ namespace libim::content::text {
         template<typename T, typename DT = typename std::decay_t<T>>
         DT readFlags()
         {
-            static_assert(std::is_enum_v<DT>, "T must be an enum type");
-
-            using U = utils::underlying_type_t<DT>;
-            return static_cast<DT>(getNumber<U>());
+            static_assert(utils::is_enum<DT>,
+                "T must be either enum, Flags or TypeMask type"
+            );
+            return getFlags<DT>();
         }
 
         template<typename T, typename DT = std::decay_t<T>>

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "../primitives/face.h"
+#include <libim/types/flags.h>
 
 namespace libim::content::asset {
 
@@ -39,11 +40,11 @@ namespace libim::content::asset {
             Vine                     = 0x80480000
             //missing flag for stone
         };
-        
+
         using Id = std::size_t;
-        
+
         Id id;
-        SurfaceFlag surflags;
+        Flags<SurfaceFlag> surflags;
         std::optional<std::size_t> adjoinIdx;
         std::vector<Color> vecIntensities;     // verticies color. Color of each vertex is applied over surface's texture and
                                                // can give surface an additional ambient color e.g. underwater blue color.
@@ -122,6 +123,5 @@ namespace libim::content::asset {
           MatRecord *aRecords;
         };
    */
-
 }
 #endif // LIBIM_SURFACE_H

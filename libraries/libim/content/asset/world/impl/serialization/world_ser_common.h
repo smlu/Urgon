@@ -8,8 +8,8 @@
 
 #include <libim/content/asset/cog/cog.h>
 #include <libim/content/asset/cog/cogsymbol_value.h>
-#include <libim/types/sharedref.h>
 #include <libim/types/safe_cast.h>
+#include <libim/types/sharedref.h>
 #include <libim/utils/utils.h>
 
 

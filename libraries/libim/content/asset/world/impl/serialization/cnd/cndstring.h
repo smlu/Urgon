@@ -6,7 +6,7 @@
 #include <string>
 #include <string_view>
 
-#include "../../../../../../utils/utils.h"
+#include <libim/utils/utils.h>
 
 namespace libim::content::asset {
     static constexpr std::size_t kCndMaxNameLen = 64;

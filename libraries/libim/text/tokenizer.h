@@ -2,6 +2,8 @@
 #define LIBIM_TOKENIZER_H
 #include "token.h"
 #include <libim/io/stream.h>
+#include <libim/utils/traits.h>
+#include <libim/types/flags.h>
 #include <libim/types/typemask.h>
 
 #include <functional>
@@ -28,6 +30,16 @@ namespace libim::text {
         const Token& getNextToken(bool lowercased = false);
         [[nodiscard]] const Token& peekNextToken(bool lowercased = false);
 
+
+        template <typename T, typename DT = std::decay_t<T>>
+        DT getFlags()
+        {
+            static_assert(utils::is_enum<DT>,
+                "T must be either enum, Flags or TypeMask type"
+            );
+            auto tkn = getNextToken();
+            return DT(tkn.getNumber<utils::underlying_type_t<DT>>());
+        }
 
         template <typename T, typename DT = std::decay_t<T>>
         DT getNumber()

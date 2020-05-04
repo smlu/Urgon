@@ -1,9 +1,10 @@
 #include "../soundbank.h"
 #include "../soundbank_error.h"
 #include "sbtrack.h"
-#include "../../asset/world/impl/serialization/cnd/cnd.h"
-#include "../../../common.h"
-#include "../../../utils/utils.h"
+
+#include <libim/common.h>
+#include <libim/content/asset/world/impl/serialization/cnd/cnd.h>
+#include <libim/utils/utils.h>
 
 using namespace libim;
 using namespace libim::content;

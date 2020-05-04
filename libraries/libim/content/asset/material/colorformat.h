@@ -32,6 +32,7 @@ namespace libim::content::asset {
         uint32_t alphaShl;
         uint32_t alphaShr;
     };
+    static_assert(sizeof(ColorFormat) == 56);
 
     static constexpr ColorFormat RGB_565   { ColorMode::RGB,   16,   5, 6, 5,   11,  5,  0,   3, 2, 3,   0,  0, 0 };
     static constexpr ColorFormat RGBA_4444 { ColorMode::RGBA,  16,   4, 4, 4,   12,  8,  4,   4, 4, 4,   4,  0, 4 };

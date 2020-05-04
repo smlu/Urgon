@@ -1,6 +1,7 @@
 #ifndef CNDTOOL_CONFIG_H
 #define CNDTOOL_CONFIG_H
 #include <string_view>
+
 namespace cndtool {
     constexpr std::string_view kProgramName = "@PROJECT_NAME@";
     constexpr std::string_view kVersion     = "@PROJECT_VERSION@";

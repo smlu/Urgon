@@ -2,7 +2,7 @@
 #define LIBIM_PARSE_UTILS_H
 #include "../../cogscript.h"
 #include "../../cogvtable.h"
-#include "../../../../../utils/utils.h"
+#include <libim/utils/utils.h>
 
 #include <algorithm>
 #include <cstdio>

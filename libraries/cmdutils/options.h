@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-
 class CmdArgs
 {
 protected:

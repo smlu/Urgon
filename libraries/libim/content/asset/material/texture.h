@@ -7,8 +7,8 @@
 
 #include "bmp.h"
 #include "colorformat.h"
-#include "../../../common.h"
-#include "../../../io/stream.h"
+#include <libim/common.h>
+#include <libim/io/stream.h>
 
 namespace libim::content::asset{
     class Texture

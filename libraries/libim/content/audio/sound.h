@@ -1,7 +1,7 @@
 #ifndef LIBIM_SOUND_H
 #define LIBIM_SOUND_H
-#include "../../common.h"
-#include "../../io/stream.h"
+#include <libim/common.h>
+#include <libim/io/stream.h>
 
 #include <memory>
 #include <string_view>

@@ -4,8 +4,9 @@
 #include "key_node.h"
 #include "key_marker.h"
 
-#include "../../text/text_resource_reader.h"
-#include "../../text/text_resource_writer.h"
+#include <libim/content/text/text_resource_reader.h>
+#include <libim/content/text/text_resource_writer.h>
+#include <libim/types/flags.h>
 
 #include <cstdint>
 #include <string>
@@ -62,12 +63,12 @@ namespace libim::content::asset {
             deserialize(std::move(rr));
         }
 
-        void setFlags(Flag flags)
+        void setFlags(Flags<Flag> flags)
         {
             flags_ = flags;
         }
 
-        Flag flags() const
+        Flags<Flag> flags() const
         {
             return flags_;
         }
@@ -144,11 +145,11 @@ namespace libim::content::asset {
         void serialize(text::TextResourceWriter&& rw, std::string_view headerComment = "") const;
 
     private:
-        Flag     flags_  = Flag::Loop;
-        Type     type_   = Unknown;
-        uint32_t frames_ = 0UL;
-        float    fps_    = 0.0f;
-        uint32_t joints_ = 0UL;
+        Flags<Flag> flags_  = Flag::Loop;
+        Type        type_   = Unknown;
+        uint32_t    frames_ = 0UL;
+        float       fps_    = 0.0f;
+        uint32_t    joints_ = 0UL;
 
         std::vector<KeyMarker> markers_;
         std::vector<KeyNode> nodes_;

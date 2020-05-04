@@ -1,5 +1,5 @@
 #include "../animation.h"
-#include "../../../text/impl/text_resource_literals.h"
+#include <libim/content/text/impl/text_resource_literals.h>
 
 #include <string_view>
 #include <utility>

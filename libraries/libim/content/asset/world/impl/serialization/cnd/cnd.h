@@ -8,20 +8,19 @@
 #include <vector>
 
 #include "cndstring.h"
-#include "../../../georesource.h"
-#include "../../../../animation/animation.h"
-#include "../../../../cog/cog.h"
-#include "../../../../cog/cogscript.h"
-#include "../../../../material/material.h"
-#include "../../../../../audio/impl/sbtrack.h"
 
 #include <libim/common.h>
+#include <libim/content/asset/animation/animation.h>
+#include <libim/content/asset/cog/cog.h>
+#include <libim/content/asset/cog/cogscript.h>
+#include <libim/content/asset/material/material.h>
+#include <libim/content/asset/world/georesource.h>
+#include <libim/content/audio/impl/sbtrack.h>
 #include <libim/io/stream.h>
 #include <libim/math/color.h>
 #include <libim/math/vector2.h>
 #include <libim/math/vector4.h>
 #include <libim/types/hashmap.h>
-
 
 namespace libim::content::asset {
 
@@ -32,8 +31,7 @@ namespace libim::content::asset {
         WorldHasFog      = 0x4
     };
 
-    //PACKED(
-    struct CndHeader
+    struct CndHeader final
     {
         uint32_t fileSize;
         CndString<1216> copyright;
@@ -123,7 +121,7 @@ namespace libim::content::asset {
 
         uint32_t pvsSize;
         uint32_t aPvs;                // 32-bit pointer (struct of 16 * int)
-    };//);
+    };
 
     static_assert(sizeof(CndHeader) == 1568);
 

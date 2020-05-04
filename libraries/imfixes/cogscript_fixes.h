@@ -4,8 +4,8 @@
 #include <map>
 #include <string>
 
-#include "libim/content/asset/cog/cogscript.h"
-#include "libim/utils/utils.h"
+#include <libim/content/asset/cog/cogscript.h>
+#include <libim/utils/utils.h>
 
 namespace imfixes {
     namespace details {

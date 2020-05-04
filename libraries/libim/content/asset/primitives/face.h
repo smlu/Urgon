@@ -8,8 +8,10 @@
 
 #include "geomode.h"
 #include "light_mode.h"
-#include "../../../math/color.h"
-#include "../../../math/vector3.h"
+
+#include <libim/math/color.h>
+#include <libim/math/vector3.h>
+#include <libim/types/flags.h>
 
 namespace libim::content::asset {
 
@@ -29,7 +31,7 @@ namespace libim::content::asset {
             std::optional<std::size_t> texIdx;
         };
 
-        Flag flags;
+        Flags<Flag> flags;
         GeoMode geoMode;
         LightMode lightMode;
         std::optional<std::size_t> matIdx;
@@ -38,7 +40,6 @@ namespace libim::content::asset {
         Vector3f normal;
         std::vector<VertexIdx> verts;
     };
-
 
 
     inline bool operator == (const Face::VertexIdx& lhs, const Face::VertexIdx& rhs) {

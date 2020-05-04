@@ -1,6 +1,7 @@
 #ifndef GOBEXT_CONFIG_H
 #define GOBEXT_CONFIG_H
 #include <string_view>
+
 namespace gobext {
     constexpr std::string_view kProgramName = "@PROJECT_NAME@";
     constexpr std::string_view kVersion     = "@PROJECT_VERSION@";

@@ -2,6 +2,7 @@
 #define LIBIM_PHYSICSINFO_H
 #include <cstdint>
 #include <libim/math/vector3.h>
+#include <libim/types/flags.h>
 
 namespace libim::content::asset {
     struct PhysicsInfo final
@@ -33,7 +34,7 @@ namespace libim::content::asset {
             Unknown_40000000             = 0x40000000
         };
 
-        PhysicsInfo::Flag flags    = None;
+        Flags<Flag> flags          = None;
         double mass                = 0;
         double height              = 0;
         double airDrag             = 0;

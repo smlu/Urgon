@@ -1,7 +1,8 @@
 #include "indywv.h"
 #include "sound_ser_helper.h"
 #include "../sound.h"
-#include "../../../io/stream.h"
+
+#include <libim/io/stream.h>
 #include <exception>
 
 using namespace libim;

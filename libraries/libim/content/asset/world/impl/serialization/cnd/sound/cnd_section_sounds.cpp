@@ -1,8 +1,9 @@
 #include "cnd_sound_header.h"
 #include "../cnd.h"
-#include "../../../../../../audio/sound.h"
-#include "../../../../../../../log/log.h"
+
 #include <cstring>
+#include <libim/content/audio/sound.h>
+#include <libim/log/log.h>
 
 using namespace libim;
 using namespace libim::content::asset;

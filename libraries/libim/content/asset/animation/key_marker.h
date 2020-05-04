@@ -1,8 +1,7 @@
 #ifndef KEY_MARKER_H
 #define KEY_MARKER_H
 #include <cstdint>
-#include "../../../math/math.h"
-
+#include <libim/math/math.h>
 
 namespace libim::content::asset {
 

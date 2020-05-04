@@ -1,5 +1,7 @@
 #ifndef LIBIM_TRAITS_H
 #define LIBIM_TRAITS_H
+#include <libim/types/flags.h>
+#include <libim/types/typemask.h>
 #include <type_traits>
 
 namespace libim::utils {
@@ -39,6 +41,18 @@ namespace libim::utils {
         struct has_reserve<C,
                 std::void_t<decltype(std::declval<C>().reserve(typename C::size_type{}))>>
             : std::true_type{};
+
+        template<typename>
+        struct is_flags : std::false_type {};
+
+        template<typename T>
+        struct is_flags<Flags<T>> : std::true_type {};
+
+        template<typename>
+        struct is_typemask : std::false_type {};
+
+        template<typename T>
+        struct is_typemask<TypeMask<T>> : std::true_type {};
     }
 
 
@@ -71,5 +85,16 @@ namespace libim::utils {
     template<typename C>
     constexpr bool has_mf_reserve = detail::has_reserve<C>::value;
 
+    // Is T of type Flags
+    template<typename T>
+    constexpr bool is_flags = detail::is_flags<T>::value;
+
+    // Is T of type TypeMask
+    template<typename T>
+    constexpr bool is_typemask = detail::is_typemask<T>::value;
+
+    // is T of type enum or Flags or TypeMask
+    template<typename T>
+    constexpr bool is_enum = std::is_enum_v<T> || is_flags<T> || is_typemask<T>;
 }
 #endif // LIBIM_TRAITS_H

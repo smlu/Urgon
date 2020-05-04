@@ -1,6 +1,6 @@
 #include "binarystream_test.h"
 #include "../binarystream.h"
-#include "../../math/math.h"
+#include <libim/math/math.h>
 
 #include <cstdint>
 #include <string>

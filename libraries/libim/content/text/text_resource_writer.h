@@ -1,10 +1,11 @@
 #ifndef LIBIM_TEXT_RESOURCE_WRITER_H
 #define LIBIM_TEXT_RESOURCE_WRITER_H
-#include "../../math/abstract_vector.h"
-#include "../../math/box.h"
-#include "../../io/stream.h"
-#include "../../utils/traits.h"
-#include "../../utils/utils.h"
+#include <libim/math/abstract_vector.h>
+#include <libim/math/box.h>
+#include <libim/io/stream.h>
+#include <libim/utils/traits.h>
+#include <libim/utils/utils.h>
+#include <libim/types/flags.h>
 
 #include <cmath>
 #include <sstream>
@@ -79,14 +80,14 @@ namespace libim::content::text {
         template<std::size_t precision = 0,
             typename T,
             bool isArithmetic = std::is_arithmetic_v<T>,
-            typename = std::enable_if_t<isArithmetic || std::is_enum_v<T>>
+            typename = std::enable_if_t<isArithmetic || utils::is_enum<T>>
         >
         TextResourceWriter& writeKeyValue(std::string_view key, T value, std::size_t indent = 1)
         {
             constexpr std::size_t p = [&](){
                 // Set default precision for float and enum type
                 if constexpr(precision == 0 &&
-                    (std::is_floating_point_v<T> || std::is_enum_v<T>))
+                    (std::is_floating_point_v<T> || utils::is_enum<T>))
                 {
                     if constexpr (std::is_floating_point_v<T>) {
                         return std::size_t(6);

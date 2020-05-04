@@ -18,6 +18,7 @@ namespace libim::content::asset {
         uint32_t isIndyWVFormat;
         uint32_t index;
     };
+    static_assert(sizeof(CndSoundHeader) == 48);
 }
 
 #endif // LIBIM_CND_SOUND_HEADER_H

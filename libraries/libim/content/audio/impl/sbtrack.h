@@ -2,6 +2,7 @@
 #define LIBIM_SBTRACK_H
 #include "../sound.h"
 #include <libim/types/hashmap.h>
+
 #include <memory>
 #include <unordered_map>
 

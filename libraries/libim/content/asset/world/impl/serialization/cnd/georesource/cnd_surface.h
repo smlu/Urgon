@@ -3,17 +3,18 @@
 #include <cstdint>
 #include <vector>
 #include <tuple>
-#include "../../../../surface.h"
-#include "../../../../../../../math/color.h"
-#include "../../../../../../../math/vector3.h"
+
+#include <libim/content/asset/world/surface.h>
+#include <libim/math/color.h>
+#include <libim/math/vector3.h>
 
 namespace libim::content::asset {
 
     struct CndSurfaceHeader
     {
         int32_t materialIdx;   // -1, if no surface material
-        Surface::SurfaceFlag surfflags;
-        Face::Flag faceflags;
+        Flags<Surface::SurfaceFlag> surfflags;
+        Flags<Face::Flag> faceflags;
         GeoMode    geoMode;
         LightMode  lightMode;
         int32_t    adjoinIdx;  // -1, if no surface adjoin
@@ -21,6 +22,7 @@ namespace libim::content::asset {
         Vector3f   normal;
         uint32_t   numVerts;
     };
+    static_assert(sizeof(CndSurfaceHeader) == 56);
 
     struct CndSurfaceVerts
     {

@@ -1,10 +1,10 @@
 #include "cnd_mat_header.h"
 #include "../cnd.h"
 #include "../sound/cnd_sound_header.h"
-#include <libim/log/log.h>
-#include <libim/types/safe_cast.h>
 
 #include <cstring>
+#include <libim/log/log.h>
+#include <libim/types/safe_cast.h>
 
 using namespace libim;
 using namespace libim::content::asset;
@@ -218,7 +218,7 @@ bool CND::replaceMaterial(const Material& mat, const std::string& cndFile)
             }
 
             /* Do we have material header that is being patched? */
-            if(matHeader.name == mat.name())
+            if(matHeader.name == CndResourceName(mat.name()))
             {
                 /* Calculate material's mipmap size */
                 for(int32_t i = 0; i < matHeader.mipmapCount; i++){

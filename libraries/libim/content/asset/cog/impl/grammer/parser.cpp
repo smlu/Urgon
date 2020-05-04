@@ -6,6 +6,7 @@
 #include <libim/io/stremerror.h>
 #include <libim/types/typemask.h>
 #include <libim/utils/utils.h>
+#include <libim/types/flags.h>
 
 #include <filesystem>
 #include <string_view>
@@ -130,8 +131,7 @@ void parseSectionFlags(Tokenizer& tok, CogScript& script)
                 throw TokenizerError("Invalid syntax in cog script", loc);
             }
 
-            using UT = std::underlying_type_t<CogScript::Flag>;
-            script.flags = static_cast<CogScript::Flag>(tok.getNumber<UT>());
+            script.flags = tok.getFlags<decltype(script.flags)>();
         }
 
         tok.setReportEol(false);

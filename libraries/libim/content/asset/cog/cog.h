@@ -3,6 +3,7 @@
 #include "cogscript.h"
 #include "cogvtable.h"
 #include "../asset.h"
+#include <libim/types/flags.h>
 #include <libim/types/sharedref.h>
 
 namespace libim::content::asset {
@@ -10,7 +11,7 @@ namespace libim::content::asset {
     {
         using Id = std::size_t;
         Id id;
-        CogScript::Flag flags;
+        Flags<CogScript::Flag> flags;
         SharedRef<CogScript> script;
         CogVTable::Id vtid;
     };

@@ -24,6 +24,7 @@ namespace libim::content::asset {
 
         ColorFormat colorInfo;
     };
+    static_assert(sizeof(MatHeader) == 76);
 
     struct MatRecordHeader
     {
@@ -40,6 +41,7 @@ namespace libim::content::asset {
         int32_t Unknown7;       // 4, 0x0051F8F8 (gen_4red.mat), 0x0169FC3E (jonsescomic_sans_ms14.mat), 5 (splashdemo_6.mat)
         int32_t mipmapIdx;      // Coresponding mipmap index num
     };
+    static_assert(sizeof(MatRecordHeader) == 40);
 
     struct MatMipmapHeader
     {
@@ -52,6 +54,7 @@ namespace libim::content::asset {
 
         int32_t textureCount;
     };
+    static_assert(sizeof(MatMipmapHeader) == 24);
 
     struct MatTexture
     {
@@ -68,5 +71,6 @@ namespace libim::content::asset {
         float Unknown3;
         float Unknown4;
     };
+    static_assert(sizeof(MatColorHeader) == 24);
 }
 #endif // LIBIM_MAT_STRUCTS_H

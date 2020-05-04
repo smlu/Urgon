@@ -1,11 +1,11 @@
 #ifndef LIBIM_SECTOR_H
 #define LIBIM_SECTOR_H
-#include "../../../math/box.h"
-#include "../../../math/color.h"
-#include "../../../math/math.h"
-#include "../../../math/vector2.h"
-#include "../../../math/vector3.h"
-#include "../../audio/sound.h"
+#include <libim/content/audio/sound.h>
+#include <libim/math/box.h>
+#include <libim/math/color.h>
+#include <libim/math/math.h>
+#include <libim/math/vector2.h>
+#include <libim/math/vector3.h>
 
 #include <cstdint>
 #include <optional>
@@ -33,7 +33,7 @@ namespace libim::content::asset {
         using Id = std::size_t;
         Id id;
 
-        Flag flags;
+        Flags<Flag> flags;
         ColorRgb tint;
 
         int32_t  pvsIdx;

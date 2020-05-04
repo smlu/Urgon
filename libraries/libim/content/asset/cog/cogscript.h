@@ -5,6 +5,7 @@
 #include "../asset.h"
 
 #include <libim/io/stream.h>
+#include <libim/types/flags.h>
 #include <libim/types/hashmap.h>
 #include <string>
 
@@ -25,7 +26,7 @@ namespace libim::content::asset {
             NoSync   = 0x200,   //Cog results are not broadcast to the other machines.
         };
 
-        Flag flags;
+        Flags<Flag> flags;
         HashMap<CogSymbol> symbols;
 
         using Asset::Asset;

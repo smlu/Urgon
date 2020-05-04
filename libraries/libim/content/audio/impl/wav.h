@@ -1,7 +1,7 @@
 #ifndef LIBIM_WAV_H
 #define LIBIM_WAV_H
-#include "../../../common.h"
-#include "../../../io/stream.h"
+#include <libim/common.h>
+#include <libim/io/stream.h>
 #include <cstdint>
 
 namespace libim::content::audio

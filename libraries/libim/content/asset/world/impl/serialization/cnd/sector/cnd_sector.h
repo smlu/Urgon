@@ -1,13 +1,15 @@
 #ifndef LIBIM_CND_SECTOR_H
 #define LIBIM_CND_SECTOR_H
 #include "../cndstring.h"
-#include "../../../../sector.h"
 #include <cstdint>
+
+#include <libim/content/asset/world/sector.h>
+#include <libim/types/flags.h>
 
 namespace libim::content::asset {
     struct CndSectorHeader final
     {
-        Sector::Flag flags;
+        Flags<Sector::Flag> flags;
         Color    ambientLight;
         Color    extraLight;
         ColorRgb tint; // tint rgb color
@@ -26,5 +28,7 @@ namespace libim::content::asset {
         int32_t  pvsIdx;
         Vector3f thrust;
     };
+    static_assert(sizeof(CndSectorHeader) == 244);
+
 }
 #endif // LIBIM_CND_SECTOR_H

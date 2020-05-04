@@ -2,9 +2,11 @@
 #define LIBIM_CND_KEY_STRUCTS_H
 
 #include "../cnd.h"
-#include "../../../../../animation/animation.h"
-#include "../../../../../animation/key_node_entry.h"
-#include "../../../../../animation/key_marker.h"
+
+#include <libim/content/asset/animation/animation.h>
+#include <libim/content/asset/animation/key_node_entry.h>
+#include <libim/content/asset/animation/key_marker.h>
+#include <libim/types/flags.h>
 
 // Ref: https://www.massassi.net/jkspecs/key.htm
 
@@ -57,7 +59,7 @@ namespace libim::content::asset
     struct CndKeyHeader final
     {
         CndResourceName name;
-        Animation::Flag flags;
+        Flags<Animation::Flag> flags;
         Animation::Type  type;
         uint32_t frames;
         float    fps;
@@ -65,6 +67,7 @@ namespace libim::content::asset
         uint32_t numJoints;
         uint32_t numNodes;
     };
+    static_assert(sizeof(CndKeyHeader) == 92);
 
     struct CndKeyNode final
     {
@@ -72,10 +75,7 @@ namespace libim::content::asset
         uint32_t nodeNum;
         uint32_t numEntries;
     };
+    static_assert(sizeof(CndKeyNode) == 72);
 }
 
-
-
-
 #endif // LIBIM_CND_KEY_STRUCTS_H
-

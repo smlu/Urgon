@@ -18,7 +18,7 @@
 #include <libim/math/color.h>
 #include <libim/math/rotator.h>
 #include <libim/math/vector3.h>
-
+#include <libim/types/flags.h>
 
 namespace libim::content::asset {
     using namespace libim::content::text;
@@ -74,7 +74,7 @@ namespace libim::content::asset {
         int unknown;                        // Possible: padding
         int sectorNum;
         Thing::Type type;
-        Thing::Flag flags;
+        Flags<Thing::Flag> flags;
         CndThingMoveType moveType;
         CndThingControlType controlType;
         CndThingLight light;
@@ -94,7 +94,7 @@ namespace libim::content::asset {
     // Thing movement info
     struct CndPhysicsInfo final
     {
-        PhysicsInfo::Flag flags;
+        Flags<PhysicsInfo::Flag> flags;
         float mass;
         float height;
         float airDrag;
@@ -113,7 +113,7 @@ namespace libim::content::asset {
     // Thing infos
     struct CndActorInfo final
     {
-        Actor::Flag flags;
+        Flags<Actor::Flag> flags;
         CndResourceName weaponTemplateName;
         float health;
         float maxHealth;
@@ -136,7 +136,7 @@ namespace libim::content::asset {
 
     struct CndWeaponInfo final
     {
-        Weapon::Flag flags;
+        Flags<Weapon::Flag> flags;
         CndResourceName explosionTemplateName;
         float damage;
         float minDamage;
@@ -150,7 +150,7 @@ namespace libim::content::asset {
 
     struct CndExplosionInfo final
     {
-        ExplosionThing::Flag flags;
+        Flags<ExplosionThing::Flag> flags;
         float damage;
         DamageType damageType;
         float range;
@@ -170,7 +170,7 @@ namespace libim::content::asset {
 
     struct CndItemInfo final
     {
-      Item::Flag flags;
+      Flags<Item::Flag> flags;
       float secRespawnInterval;
     };
     static_assert (sizeof(CndItemInfo) == 8);
@@ -182,7 +182,7 @@ namespace libim::content::asset {
 
     struct  CndParticleInfo final
     {
-        ParticleThing::Flag flags;
+        Flags<ParticleThing::Flag> flags;
         float growthSpeed;
         float minRadius;
         float maxRadius;
@@ -237,7 +237,7 @@ namespace libim::content::asset {
 
     // Array of sizes (number of elements) of each list
     // that is written after thing header list
-    struct CndThingSectorListSizes
+    struct CndThingSectorListSizes final
     {
         uint32_t sizePhysicsInfoList;
         uint32_t sizeNumPathFramesList;

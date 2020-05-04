@@ -3,7 +3,9 @@
 #include <cstdint>
 #include <string>
 #include <optional>
-#include "../../../math/math.h"
+
+#include <libim/math/math.h>
+#include <libim/types/flags.h>
 
 
 namespace libim::content::asset {
@@ -19,7 +21,7 @@ namespace libim::content::asset {
             AllowAiOnly        = 0x10
         };
 
-        Flag flags;
+        Flags<Flag> flags;
         std::optional<std::size_t> mirrorIdx; // mirror adjoin
         std::optional<std::size_t> surfaceIdx;
         std::optional<std::size_t> sectorIdx;

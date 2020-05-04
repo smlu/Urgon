@@ -10,97 +10,101 @@ namespace libim {
     *  e.g. enumerator A = 5 is convert to flag (0x1 << 5) aka 0x20
     */
     template <typename T>
-    class TypeMask {
-    protected:
+    class TypeMask final {
         static_assert (std::is_enum_v<T>, "T must be enum type");
         using UT = utils::underlying_type_t<T>;
 
     public:
-        TypeMask() = default;
-        TypeMask(T f) : value(toFlag(f)) {}
-        explicit TypeMask(UT v) : value(v) {}
+        constexpr TypeMask() = default;
+        constexpr TypeMask(T f) : value_(toFlag(f)) {}
+        constexpr explicit TypeMask(UT v) : value_(v) {}
 
-        TypeMask(std::initializer_list<T> initl)
+        constexpr TypeMask(std::initializer_list<T> initList)
         {
-            value = 0;
-            for(T val : initl) {
-                value |= toFlag(val);
+            value_ = 0;
+            for(T v : initList) {
+                value_ |= toFlag(v);
             }
         }
 
-        explicit operator T() const
+        explicit constexpr operator T() const
         {
-            return T(value);
+            return T(value_);
         }
 
-        inline const TypeMask& operator = (T val)
+        inline constexpr TypeMask& operator = (T val)
         {
-            value = toFlag(val);
+            value_ = toFlag(val);
             return *this;
         }
 
-        inline bool operator & (T val) const
+        inline constexpr bool operator & (T val) const
         {
-            return value & toFlag(val);
+            return value_ & toFlag(val);
         }
 
-        inline bool operator & (TypeMask val) const
+        inline constexpr bool operator & (TypeMask val) const
         {
-            return value & val.value;
+            return value_ & val.value_;
         }
 
-        inline TypeMask operator | (T val) const
+        inline constexpr TypeMask operator | (T val) const
         {
-            return TypeMask(value | toFlag(val));
+            return TypeMask(value_ | toFlag(val));
         }
 
-        inline TypeMask operator | (TypeMask val) const
+        inline constexpr TypeMask operator | (TypeMask val) const
         {
-            return TypeMask(value | val.value);
+            return TypeMask(value_ | val.value_);
         }
 
-        inline const TypeMask& operator |= (T val)
+        inline constexpr TypeMask& operator |= (T val)
         {
-            value |= toFlag(val);
+            value_ |= toFlag(val);
             return *this;
         }
 
-        inline const TypeMask& operator |= (TypeMask val)
+        inline constexpr TypeMask& operator |= (TypeMask val)
         {
-            value |= val.value;
+            value_ |= val.value_;
             return *this;
         }
 
-        inline TypeMask operator - (T val) const
+        inline constexpr TypeMask operator - (T val) const
         {
-            return TypeMask(value & ~toFlag(val));
+            return TypeMask(value_ & ~toFlag(val));
         }
 
-        inline TypeMask operator - (TypeMask val) const
+        inline constexpr TypeMask operator - (TypeMask val) const
         {
-            return TypeMask(value & ~val.value);
+            return TypeMask(value_ & ~val.value_);
         }
 
-        inline const TypeMask& operator -= (T val)
+        inline constexpr TypeMask& operator -= (T val)
         {
-            value = value & ~toFlag(val);
+            value_ = value_ & ~toFlag(val);
             return *this;
         }
 
-        inline const TypeMask& operator -= (TypeMask val)
+        inline constexpr TypeMask& operator -= (TypeMask val)
         {
-            value = value & ~val.value;
+            value_ = value_ & ~val.value_;
             return *this;
         }
 
-        inline bool operator == (TypeMask val) const
+        inline constexpr bool operator == (TypeMask val) const
         {
-            return value == val.value;
+            return value_ == val.value_;
         }
 
-        inline bool operator != (TypeMask val) const
+        inline constexpr bool operator != (TypeMask val) const
         {
-            return value != val.value;
+            return value_ != val.value_;
+        }
+
+        constexpr T value() const
+        {
+            return T(value_);
         }
 
     private:
@@ -109,7 +113,20 @@ namespace libim {
         }
 
     private:
-        UT value = 0;
+        UT value_ = 0;
     };
+
+
+    namespace utils {
+        template<typename T>
+        [[nodiscard]] inline constexpr auto to_underlying(TypeMask<T> tm) {
+            return to_underlying(tm.value());
+        }
+
+        template<typename T>
+        struct underlying_type<TypeMask<T>> {
+            using type = std::underlying_type_t<T>;
+        };
+    }
 }
 #endif // LIBIM_TYPEMASK_H

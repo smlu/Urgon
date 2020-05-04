@@ -1,5 +1,5 @@
 #include "anim_test.h"
-#include "../../../../common.h"
+#include <libim/common.h>
 
 using namespace libim;
 using namespace libim::content::text;

@@ -2,9 +2,10 @@
 #define LIBIM_KEY_NODE_ENTRY_H
 #include <cstdint>
 
-#include "../../../math/math.h"
-#include "../../../math/rotator.h"
-#include "../../../math/vector3.h"
+#include <libim/math/math.h>
+#include <libim/math/rotator.h>
+#include <libim/math/vector3.h>
+#include <libim/types/flags.h>
 
 namespace libim::content::asset {
 
@@ -20,7 +21,7 @@ namespace libim::content::asset {
         };
 
         float frame;
-        Flag  flags;
+        Flags<Flag> flags;
 
         Vector3f pos;
         FRotator rot;

@@ -28,15 +28,14 @@ namespace libim::content::asset {
             return toStdString();
         }
 
-        operator std::string_view() const // Warning: It is dangerus to implicitly return string_view!
+        operator std::string_view() const // Warning: It is dangerous to implicitly return string_view!
         {
             auto endIt = std::find(this->begin(), this->end(), '\0');
             return std::string_view(this->data(), std::distance(this->begin(), endIt));
         }
 
-        bool operator == (const std::string& rstr) const
+        bool operator == (const CndString& rstr) const
         {
-            if (rstr.size() > N) return false;
             for (std::size_t i = 0; i < N; i++)
             {
                 if(this->at(i) != rstr.at(i)) {

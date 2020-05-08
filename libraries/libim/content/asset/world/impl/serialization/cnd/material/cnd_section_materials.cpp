@@ -20,19 +20,15 @@ std::size_t CND::getOffset_Materials(const InputStream& istream)
     istream.seek(sizeof(CndHeader));
     std::size_t numSoundHeaders = istream.read<uint32_t>();
     std::size_t sizeSoundData   = istream.read<uint32_t>();
-    constexpr std::size_t sizeNexFileIdField = sizeof(uint32_t);
+    constexpr std::size_t sizeNextFileIdField = sizeof(uint32_t);
 
     return istream.tell() +
            numSoundHeaders * sizeof(CndSoundHeader) +
            sizeSoundData +
-           sizeNexFileIdField;
-   /* return sizeof(CndHeader) +
-            header.worldSoundUnknown + // worldSoundUnknown = sound data size;
-            48 * header.worldSounds  + // size of sound file header struct * number of sound files in cnd file
-            4;                         // 4 = unknown 4 bytes*/
+           sizeNextFileIdField;
 }
 
-HashMap<Material> CND::parseSection_Materials(const CndHeader& header, const InputStream& istream)
+HashMap<Material> CND::parseSection_Materials(const InputStream& istream, const CndHeader& header)
 {
     HashMap<Material> materials;
     try
@@ -114,7 +110,7 @@ HashMap<Material> CND::readMaterials(const InputStream& istream)
 {
     auto cndHeader = readHeader(istream);
     istream.seek(getOffset_Materials(istream));
-    return parseSection_Materials(cndHeader, istream);
+    return parseSection_Materials(istream, cndHeader);
 }
 
 void CND::writeSection_Materials(OutputStream& ostream, const HashMap<Material>& materials)

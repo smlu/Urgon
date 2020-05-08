@@ -15,7 +15,7 @@ std::size_t CND::getOffset_Sectors(const InputStream& istream, const CndHeader& 
     });
 
     istream.seek(
-        getOffset_Georesource(header, istream) +
+        getOffset_Georesource(istream, header) +
         sizeof(Vector3f) * header.numVertices +
         sizeof(Vector2f) * header.numTexVertices +
         sizeof(CndSurfaceAdjoin) * header.numAdjoins +

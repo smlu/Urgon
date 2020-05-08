@@ -138,16 +138,16 @@ namespace libim::content::asset {
         * @param Const reference to the InputStream
         * @return Returns last sound file ID nonce
         */
-        static uint32_t parseSectionSounds(audio::impl::SbTrack& track, const InputStream& istream);
+        static uint32_t parseSectionSounds(const InputStream& istream, audio::impl::SbTrack& track);
 
         static std::size_t getOffset_Materials(const InputStream& istream);
-        static HashMap<Material> parseSection_Materials(const CndHeader& header, const InputStream& istream); // Reads materials section. Offset of istream hast to be at beginning of material section.
+        static HashMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.
         static HashMap<Material> readMaterials(const InputStream& istream);
         static void writeSection_Materials(OutputStream& ostream, const HashMap<Material>& materials);
-        static bool replaceMaterial(const Material& mat, const std::string& filename);
+        [[deprecated]] static bool replaceMaterial(const Material& mat, const std::string& filename);
 
-        static std::size_t getOffset_Georesource(const CndHeader& header, const InputStream& istream);
-        static Georesource parseSection_Georesource(const CndHeader& cndHeader, const InputStream& istream);
+        static std::size_t getOffset_Georesource(const InputStream& istream, const CndHeader& header);
+        static Georesource parseSection_Georesource(const InputStream& istream, const CndHeader& cndHeader);
         static Georesource readGeoresource(const InputStream& istream);
         static void writeSection_Georesource(OutputStream& ostream, const Georesource& geores);
 

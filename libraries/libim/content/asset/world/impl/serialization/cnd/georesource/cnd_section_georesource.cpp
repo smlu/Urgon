@@ -14,7 +14,7 @@ using namespace libim::content::asset;
 using namespace libim::utils;
 
 
-std::size_t CND::getOffset_Georesource(const CndHeader& header, const InputStream& istream)
+std::size_t CND::getOffset_Georesource(const InputStream& istream, const CndHeader& header)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
@@ -30,11 +30,11 @@ std::size_t CND::getOffset_Georesource(const CndHeader& header, const InputStrea
 Georesource CND::readGeoresource(const InputStream& istream)
 {
     auto cndHeader = readHeader(istream);
-    istream.seek(getOffset_Georesource(cndHeader, istream));
-    return parseSection_Georesource(cndHeader, istream);
+    istream.seek(getOffset_Georesource(istream, cndHeader));
+    return parseSection_Georesource(istream, cndHeader);
 }
 
-Georesource CND::parseSection_Georesource(const CndHeader& cndHeader, const InputStream& istream)
+Georesource CND::parseSection_Georesource(const InputStream& istream, const CndHeader& cndHeader)
 {
     Georesource geores;
     geores.verts    = istream.read<std::vector<Vector3f>>(cndHeader.numVertices);

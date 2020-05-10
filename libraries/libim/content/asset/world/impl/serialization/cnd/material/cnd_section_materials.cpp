@@ -1,14 +1,17 @@
-#include "cnd_mat_header.h"
 #include "../cnd.h"
 #include "../sound/cnd_sound_header.h"
+#include "cnd_mat_header.h"
 
 #include <cstring>
+#include <strings.h>
+
 #include <libim/log/log.h>
 #include <libim/types/safe_cast.h>
 
 using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::utils;
+using namespace std::string_literals;
 
 
 std::size_t CND::getOffset_Materials(const InputStream& istream)
@@ -36,16 +39,14 @@ HashMap<Material> CND::parseSection_Materials(const InputStream& istream, const 
         /* Return if no materials are present in file*/
         if(header.numMaterials < 1)
         {
-            LOG_INFO("CND::ParseSectionMaterials(): No materials found!");
+            LOG_INFO("CND::parseSection_Materials(): No materials found!");
             return materials;
         }
 
         /* Read materials pixel data size */
         uint32_t nBitmapBuffSize = istream.read<uint32_t>();
-        if(nBitmapBuffSize == 0)
-        {
-            LOG_ERROR("CND::ParseSectionMaterials(): bitmap data size == 0!");
-            return materials;
+        if(nBitmapBuffSize == 0){
+            throw CNDError("parseSection_Materials", "Bitmap buffer data size == 0");
         }
 
         /* Read material header list from file stream */
@@ -59,16 +60,17 @@ HashMap<Material> CND::parseSection_Materials(const InputStream& istream, const 
         {
             if(matHeader.mipmapCount < 1 || matHeader.texturesPerMipmap < 1)
             {
-                LOG_DEBUG("CND::ParseSectionMaterials(): No pixel data found for material: %", matHeader.name);
+                LOG_DEBUG("CND::parseSection_Materials(): Material '%' has no pixel data!", matHeader.name);
                 continue;
             }
 
             /* Verify material bitdepth */
             if(matHeader.colorInfo.bpp % 8 != 0) // TODO: check for 16 and 32 bbp
             {
-                LOG_ERROR("CND::ParseSectionMaterials(): Cannot extract material % from buffer. Wrong bitdepth size: %", matHeader.name, matHeader.colorInfo.bpp);
-                materials.clear();
-                return materials;
+                throw CNDError("parseSection_Materials",
+                    "Cannot extract material "s +  matHeader.name.toStdString() +
+                    "from buffer. Wrong color depth: " + std::to_string(matHeader.colorInfo.bpp)
+                );
             }
 
             /* Read mipmaps from buffer */
@@ -94,15 +96,17 @@ HashMap<Material> CND::parseSection_Materials(const InputStream& istream, const 
         }
 
         if(!vecBitmapBuff.empty()) {
-            LOG_WARNING("CND::ParseSectionMaterials(): Not all bitmap data was copied from buffer!");
+            throw CNDError("parseSection_Materials", "Not all bitmap data was copied from buffer");
         }
 
         return materials;
     }
+    catch (const CNDError&) { throw; }
     catch(const std::exception& e)
     {
-        LOG_ERROR("CND Error: An exception was thrown while loading material from CND file stream: %!", e.what());
-        return materials;
+        throw CNDError("parseSection_Materials",
+            "An exception was encountered while parsing secion 'Materials': "s + e.what()
+        );
     }
 }
 
@@ -115,45 +119,56 @@ HashMap<Material> CND::readMaterials(const InputStream& istream)
 
 void CND::writeSection_Materials(OutputStream& ostream, const HashMap<Material>& materials)
 {
-    std::vector<CndMatHeader> cndHeaders;
-    cndHeaders.reserve(materials.size());
-
-    Bitmap bitmaps;
-    for(const auto& mat : materials)
+    try
     {
-        CndMatHeader h;
+        std::vector<CndMatHeader> cndHeaders;
+        cndHeaders.reserve(materials.size());
 
-        if(!utils::strcpy(h.name, mat.name())) {
-            throw StreamError("Too long material name to copy to CndMatHeader.name field");
-        }
-
-        h.width       = mat.width();
-        h.height      = mat.height();
-        h.colorInfo   = mat.colorFormat();
-        h.mipmapCount = safe_cast<decltype(h.mipmapCount)>(mat.mipmaps().size());
-        h.texturesPerMipmap = safe_cast<decltype(h.texturesPerMipmap)>(mat.mipmaps().at(0).size());
-        cndHeaders.push_back(h);
-
-        const std::size_t sizePixeldata = getMipmapPixelDataSize(h.texturesPerMipmap, h.width, h.height, h.colorInfo.bpp);
-        bitmaps.reserve(sizePixeldata);
-        for(const auto& mipmap : mat.mipmaps())
+        Bitmap bitmaps;
+        for(const auto& mat : materials)
         {
-            for(const auto& tex : mipmap)
+            CndMatHeader h;
+
+            if(!utils::strcpy(h.name, mat.name())) {
+                throw CNDError("writeSection_Materials",
+                    "Too long material name to copy it to CndMatHeader.name field"
+                );
+            }
+
+            h.width       = mat.width();
+            h.height      = mat.height();
+            h.colorInfo   = mat.colorFormat();
+            h.mipmapCount = safe_cast<decltype(h.mipmapCount)>(mat.mipmaps().size());
+            h.texturesPerMipmap = safe_cast<decltype(h.texturesPerMipmap)>(mat.mipmaps().at(0).size());
+            cndHeaders.push_back(h);
+
+            const std::size_t sizePixeldata = getMipmapPixelDataSize(h.texturesPerMipmap, h.width, h.height, h.colorInfo.bpp);
+            bitmaps.reserve(sizePixeldata);
+            for(const auto& mipmap : mat.mipmaps())
             {
-                const Bitmap& bitmap = *tex.bitmap();
-                bitmaps.insert(bitmaps.end(), bitmap.begin(), bitmap.end());
+                for(const auto& tex : mipmap)
+                {
+                    const Bitmap& bitmap = *tex.bitmap();
+                    bitmaps.insert(bitmaps.end(), bitmap.begin(), bitmap.end());
+                }
             }
         }
+
+        /* Write new pixel data size */
+        ostream.write(safe_cast<uint32_t>(bitmaps.size()));
+
+        /* Write material headers */
+        ostream.write(cndHeaders);
+
+        /* Write pixeldata of all materials */
+        ostream.write(bitmaps);
     }
-
-    /* Write new pixel data size */
-    ostream.write(safe_cast<uint32_t>(bitmaps.size()));
-
-    /* Write material headers */
-    ostream.write(cndHeaders);
-
-    /* Write pixeldata of all materials */
-    ostream.write(bitmaps);
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_Materials",
+            "An exception was encountered while writing section 'Materials': "s + e.what()
+        );
+    }
 }
 
 

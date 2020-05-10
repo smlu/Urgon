@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "cnderror.h"
 #include "cndstring.h"
 
 #include <libim/common.h>
@@ -138,7 +139,7 @@ namespace libim::content::asset {
         * @param Const reference to the InputStream
         * @return Returns last sound file ID nonce
         */
-        static uint32_t parseSectionSounds(const InputStream& istream, audio::impl::SbTrack& track);
+        static uint32_t parseSection_Sounds(const InputStream& istream, audio::impl::SbTrack& track);
 
         static std::size_t getOffset_Materials(const InputStream& istream);
         static HashMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.

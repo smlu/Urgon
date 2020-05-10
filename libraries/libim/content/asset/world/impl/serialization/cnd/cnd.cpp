@@ -10,13 +10,16 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <string>
 #include <variant>
 
 using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::utils;
+using namespace std::string_literals;
 
 static constexpr uint32_t kFileVersion = 3;
+
 
 std::vector<std::string> readResourceList(const InputStream& istream, std::size_t size)
 {
@@ -43,7 +46,7 @@ void writeResourceList(OutputStream& ostream, const List<T, Args...>& list, Lamb
     {
         CndResourceName aName;
         if(!utils::strcpy(aName, nameExtractor(e))) {
-            throw StreamError("Too long resource name to write to CND stream");
+            throw std::runtime_error("Too long resource name to write to CND stream");
         }
         return aName;
     });
@@ -66,12 +69,12 @@ CndHeader CND::readHeader(const InputStream& istream)
 
     /* Verify file copyright notice  */
     if (!std::equal(cndHeader.copyright.begin(), cndHeader.copyright.end(), kFileCopyright.begin())) {
-        throw StreamError("Error bad CND file copyright");
+        throw CNDError("readHeader", "Error bad CND file copyright");
     }
 
     /* Verify file version */
     if (cndHeader.version != kFileVersion) {
-        throw StreamError("Error wrong CND file version: " + std::to_string(cndHeader.version));
+        throw CNDError("readHeader", "Error wrong CND file version: " + std::to_string(cndHeader.version));
     }
 
     return cndHeader;
@@ -94,7 +97,15 @@ std::size_t CND::getOffset_AiClass(const InputStream& istream, const CndHeader& 
 
 std::vector<std::string> CND::parseSection_AiClass(const InputStream& istream, const CndHeader& header)
 {
-    return readResourceList(istream, header.numAiClasses);
+    try {
+        return readResourceList(istream, header.numAiClasses);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_AiClass",
+            "An exception was encountered while parsing section 'AIClass': "s + e.what()
+        );
+    }
 }
 
 std::vector<std::string> CND::readAiClass(const InputStream& istream)
@@ -106,7 +117,15 @@ std::vector<std::string> CND::readAiClass(const InputStream& istream)
 
 void CND::writeSection_AiClass(OutputStream& ostream, const std::vector<std::string>& aiclasses)
 {
-    writeResourceList(ostream, aiclasses);
+    try {
+        writeResourceList(ostream, aiclasses);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_AiClass",
+            "An exception was encountered while writing section 'AIClass': "s + e.what()
+        );
+    }
 }
 
 std::size_t CND::getOffset_Models(const InputStream& istream, const CndHeader& header)
@@ -116,7 +135,15 @@ std::size_t CND::getOffset_Models(const InputStream& istream, const CndHeader& h
 
 std::vector<std::string> CND::parseSection_Models(const InputStream& istream, const CndHeader& header)
 {
-    return readResourceList(istream, header.numModels);
+    try {
+        return readResourceList(istream, header.numModels);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_Models",
+            "An exception was encountered while parsing section 'Models': "s + e.what()
+        );
+    }
 }
 
 std::vector<std::string> CND::readModels(const InputStream& istream)
@@ -128,7 +155,15 @@ std::vector<std::string> CND::readModels(const InputStream& istream)
 
 void CND::writeSection_Models(OutputStream& ostream, const std::vector<std::string>& models)
 {
-    writeResourceList(ostream, models);
+    try {
+        writeResourceList(ostream, models);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_Models",
+            "An exception was encountered while writing section 'Models': "s + e.what()
+        );
+    }
 }
 
 std::size_t CND::getOffset_Sprites(const InputStream& istream, const CndHeader& header)
@@ -138,7 +173,15 @@ std::size_t CND::getOffset_Sprites(const InputStream& istream, const CndHeader& 
 
 std::vector<std::string> CND::parseSection_Sprites(const InputStream& istream, const CndHeader& header)
 {
-    return readResourceList(istream, header.numSprites);
+    try{
+        return readResourceList(istream, header.numSprites);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_Sprites",
+            "An exception was encountered while parsing section 'Sprites': "s + e.what()
+        );
+    }
 }
 
 std::vector<std::string> CND::readSprites(const InputStream& istream)
@@ -150,7 +193,15 @@ std::vector<std::string> CND::readSprites(const InputStream& istream)
 
 void CND::WriteSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites)
 {
-    writeResourceList(ostream, sprites);
+    try {
+        writeResourceList(ostream, sprites);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_Sprites",
+            "An exception was encountered while writing section 'Sprites': "s + e.what()
+        );
+    }
 }
 
 std::size_t CND::getOffset_AnimClass(const InputStream& istream, const CndHeader& header)
@@ -171,7 +222,15 @@ std::size_t CND::getOffset_AnimClass(const InputStream& istream, const CndHeader
 
 std::vector<std::string> CND::parseSection_AnimClass(const InputStream& istream, const CndHeader& header)
 {
-    return readResourceList(istream, header.numPuppets);
+    try {
+        return readResourceList(istream, header.numPuppets);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_AnimClass",
+            "An exception was encountered while parsing section 'AnimClass': "s + e.what()
+        );
+    }
 }
 
 std::vector<std::string> CND::readAnimClass(const InputStream& istream)
@@ -183,7 +242,15 @@ std::vector<std::string> CND::readAnimClass(const InputStream& istream)
 
 void CND::writeSection_AnimClass(OutputStream& ostream, const std::vector<std::string>& animclasses)
 {
-    writeResourceList(ostream, animclasses);
+    try {
+        writeResourceList(ostream, animclasses);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_AnimClass",
+            "An exception was encountered while writing section 'AnimClass': "s + e.what()
+        );
+    }
 }
 
 std::size_t CND::getOffset_SoundClass(const InputStream& istream, const CndHeader& header)
@@ -193,7 +260,15 @@ std::size_t CND::getOffset_SoundClass(const InputStream& istream, const CndHeade
 
 std::vector<std::string> CND::parseSection_SoundClass(const InputStream& istream, const CndHeader& header)
 {
-    return readResourceList(istream, header.numSoundClasses);
+    try {
+        return readResourceList(istream, header.numSoundClasses);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_SoundClass",
+            "An exception was encountered while parsing section 'SoundClass': "s + e.what()
+        );
+    }
 }
 
 std::vector<std::string> CND::readSoundClass(const InputStream& istream)
@@ -205,7 +280,15 @@ std::vector<std::string> CND::readSoundClass(const InputStream& istream)
 
 void CND::writeSection_SoundClass(OutputStream& ostream, const std::vector<std::string>& sndclasses)
 {
-    writeResourceList(ostream, sndclasses);
+    try {
+        writeResourceList(ostream, sndclasses);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_SoundClass",
+            "An exception was encountered while writing section 'SoundClass': "s + e.what()
+        );
+    }
 }
 
 std::size_t CND::getOffset_CogScripts(const InputStream& istream, const CndHeader& header)
@@ -215,7 +298,15 @@ std::size_t CND::getOffset_CogScripts(const InputStream& istream, const CndHeade
 
 std::vector<std::string> CND::parseSection_CogScripts(const InputStream& istream, const CndHeader& header)
 {
-    return readResourceList(istream, header.numCogScripts);
+    try {
+        return readResourceList(istream, header.numCogScripts);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_CogScripts",
+            "An exception was encountered while parsing section 'CogScripts': "s + e.what()
+        );
+    }
 }
 
 std::vector<std::string> CND::readCogScripts(const InputStream& istream)
@@ -227,7 +318,15 @@ std::vector<std::string> CND::readCogScripts(const InputStream& istream)
 
 void CND::writeSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts)
 {
-    writeResourceList(ostream, scripts);
+    try {
+        writeResourceList(ostream, scripts);
+    }
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_CogScripts",
+            "An exception was encountered while writing section 'CogScripts': "s + e.what()
+        );
+    }
 }
 
 
@@ -238,49 +337,60 @@ std::size_t CND::getOffset_Cogs(const InputStream& istream, const CndHeader& hea
 
 std::vector<SharedRef<Cog>> CND::parseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts)
 {
-    auto aSizes = istream.read<std::array<uint32_t, 2>>();
-    auto snames = readResourceList(istream, aSizes.at(0));
-    auto values = readResourceList(istream, aSizes.at(1));
-
-    std::vector<SharedRef<Cog>> cogs;
-    cogs.reserve(snames.size());
-
-    auto vit = values.begin();
-    for(const auto& sname : snames)
+    try
     {
-        auto it = scripts.find(sname);
-        if(it == scripts.end())
-        {
-            LOG_ERROR("CND::ParseSection_Cogs(): Can't find cog script '%'", sname);
-            throw StreamError("Can't make Cog, CogScript not found");
-        }
+        auto aSizes = istream.read<std::array<uint32_t, 2>>();
+        auto snames = readResourceList(istream, aSizes.at(0));
+        auto values = readResourceList(istream, aSizes.at(1));
 
-        Cog c;
-        c.id     = std::size(cogs);
-        c.script = *it;
-        c.flags  = c.script->flags;
-        c.vtid   = c.script->getNextVTableId();
+        std::vector<SharedRef<Cog>> cogs;
+        cogs.reserve(snames.size());
 
-        for(auto& s : c.script->symbols)
+        auto vit = values.begin();
+        for(const auto& sname : snames)
         {
-            if(s.isLocal ||
-               s.type == CogSymbol::Message) {
-                continue;
+            auto it = scripts.find(sname);
+            if(it == scripts.end()) {
+                throw CNDError("parseSection_Cogs",
+                    "Can't parse COG, can't find cog script: " + sname
+                );
             }
 
-            s.vtable[c.vtid] = std::move(*vit);
-            // TODO: initialize value with valid type
-            ++vit;
+            Cog c;
+            c.id     = std::size(cogs);
+            c.script = *it;
+            c.flags  = c.script->flags;
+            c.vtid   = c.script->getNextVTableId();
+
+            for(auto& s : c.script->symbols)
+            {
+                if(s.isLocal ||
+                s.type == CogSymbol::Message) {
+                    continue;
+                }
+
+                s.vtable[c.vtid] = std::move(*vit);
+                // TODO: initialize value with valid type
+                ++vit;
+            }
+
+            cogs.push_back(std::move(c));
         }
 
-        cogs.push_back(std::move(c));
-    }
+        if(vit != values.end()) {
+            throw CNDError("parseSection_Cogs",
+                "Incomplete initialization of COGs while parsing COG section"
+            );
+        }
 
-    if(vit != values.end()) {
-        throw StreamError("Incomplete initialization of COGs while parsing COG section");
+        return cogs;
     }
-
-    return cogs;
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_Cogs",
+            "An exception was encountered while parsing section 'COGs': "s + e.what()
+        );
+    }
 }
 
 std::vector<SharedRef<Cog>> CND::readCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts)
@@ -292,40 +402,48 @@ std::vector<SharedRef<Cog>> CND::readCogs(const InputStream& istream, const Hash
 
 void CND::writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs)
 {
-    std::vector<std::string> cogvals;
-    cogvals.reserve(cogs.size());
-
-    for(const auto& c : cogs)
+    try
     {
-        if(cogvals.capacity() < c->script->symbols.size()) {
-            cogvals.reserve(c->script->symbols.size());
-        }
+        std::vector<std::string> cogvals;
+        cogvals.reserve(cogs.size());
 
-        for(const CogSymbol& s : c->script->symbols)
+        for(const auto& c : cogs)
         {
-            if(s.isLocal ||
-               !s.vtable.contains(c->vtid)) {
-                continue;
+            if(cogvals.capacity() < c->script->symbols.size()) {
+                cogvals.reserve(c->script->symbols.size());
             }
 
-            cogvalue_visitor([&](auto&& s) {
-                using ST = decltype(s);
-                if constexpr(std::is_same_v<std::string_view, std::decay_t<ST>>) {
-                    cogvals.emplace_back(s);
+            for(const CogSymbol& s : c->script->symbols)
+            {
+                if(s.isLocal ||
+                !s.vtable.contains(c->vtid)) {
+                    continue;
                 }
-                else {
-                    cogvals.push_back(std::forward<ST>(s));
-                }
-            }, s.vtable.at(c->vtid));
+
+                cogvalue_visitor([&](auto&& s) {
+                    using ST = decltype(s);
+                    if constexpr(std::is_same_v<std::string_view, std::decay_t<ST>>) {
+                        cogvals.emplace_back(s);
+                    }
+                    else {
+                        cogvals.push_back(std::forward<ST>(s));
+                    }
+                }, s.vtable.at(c->vtid));
+            }
         }
+
+        ostream.write(std::array<uint32_t, 2>{
+            safe_cast<uint32_t>(cogs.size()),
+            safe_cast<uint32_t>(cogvals.size())
+        });
+
+        writeResourceList(ostream, cogs, [](const SharedRef<Cog>& e) { return e->name(); });
+        writeResourceList(ostream, cogvals);
     }
-
-    ostream.write(std::array<uint32_t, 2>{
-        safe_cast<uint32_t>(cogs.size()),
-        safe_cast<uint32_t>(cogvals.size())
-    });
-
-    writeResourceList(ostream, cogs, [](const SharedRef<Cog>& e) { return e->name(); });
-    writeResourceList(ostream, cogvals);
-}
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_Cogs",
+            "An exception was encountered while writing section 'Cogs': "s + e.what()
+        );
+    }
 }

@@ -63,7 +63,7 @@ bool SoundBank::importTrack(std::size_t trackIdx, const InputStream& istream)
     auto& track = ptrImpl_->vecTracks.at(trackIdx);
     if(fileExtMatch(istream.name(), ".cnd"sv))
     {
-        auto nonce = CND::parseSectionSounds(istream, track);
+        auto nonce = CND::parseSection_Sounds(istream, track);
         LOG_DEBUG("Imported % sounds to track: %", track.sounds.size(), trackIdx);
 
         if(nonce == 0 && !track.sounds.isEmpty()) {
@@ -74,7 +74,7 @@ bool SoundBank::importTrack(std::size_t trackIdx, const InputStream& istream)
         return true;
     }
     else {
-        throw SoundBankError("Cannot import soundbank, unknown stream!");
+        throw SoundBankError("Cannot import soundbank, unknown soundbank stream!");
     }
 }
 

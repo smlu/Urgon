@@ -1,6 +1,7 @@
 #ifndef LIBIM_WORLD_SER_COMMON_H
 #define LIBIM_WORLD_SER_COMMON_H
 #include <array>
+#include <stdexcept>
 #include <string_view>
 #include <string>
 #include <optional>
@@ -54,6 +55,13 @@ namespace libim::content::asset {
         "@...used.under.authorization...@" \
         "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
     };
+
+    inline void world_ser_assert(bool pred, const char* message)
+    {
+        if(!pred) {
+            throw std::runtime_error(message);
+        }
+    }
 
     inline std::optional<std::size_t> makeOptionalIdx(int32_t idx)
     {

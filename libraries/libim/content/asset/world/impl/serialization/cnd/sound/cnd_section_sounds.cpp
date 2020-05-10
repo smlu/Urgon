@@ -1,7 +1,10 @@
-#include "cnd_sound_header.h"
 #include "../cnd.h"
+#include "../../world_ser_common.h"
+#include "cnd_sound_header.h"
 
 #include <cstring>
+#include <string>
+
 #include <libim/content/audio/sound.h>
 #include <libim/log/log.h>
 
@@ -9,8 +12,9 @@ using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::content::audio;
 using namespace libim::content::audio::impl;
+using namespace std::string_literals;
 
-uint32_t CND::parseSectionSounds(const InputStream& istream, SbTrack& track)
+uint32_t CND::parseSection_Sounds(const InputStream& istream, SbTrack& track)
 {
     uint32_t nonce = 0;
 
@@ -33,6 +37,16 @@ uint32_t CND::parseSectionSounds(const InputStream& istream, SbTrack& track)
         track.sounds.reserve(nSounds);
         for(const auto& h : vecHeaders)
         {
+            world_ser_assert(h.dirNameOffset + kCndMaxNameLen <= track.ptrData->size(),
+                "Sound dir name offset out of bounds"
+            );
+            world_ser_assert(h.dirNameOffset + kCndMaxNameLen <= track.ptrData->size(),
+                "Sound file name offset out of bounds"
+            );
+            world_ser_assert(h.dataOffset + h.dataSize <= track.ptrData->size(),
+                "Sound data offset out of bounds"
+            );
+
             Sound s (
                 track.ptrData,
                 h.dirNameOffset,
@@ -48,22 +62,24 @@ uint32_t CND::parseSectionSounds(const InputStream& istream, SbTrack& track)
             s.setChannels(h.numChannels);
             s.setIndyWVFormat(h.isIndyWVFormat);
 
+
             std::string name(s.name());
             auto r = track.sounds.pushBack(name, std::move(s));
-            if(!r.second)
-            {
-                LOG_ERROR("CND Error: Soundbank already contains sound file: '%'!", name);
-                return nonce;
+            if(!r.second) {
+                throw CNDError("parseSection_Sounds",
+                    "Found duplicated sound file in soundbank with name: " + name
+                );
             }
         }
 
-        /* Read nonce */
+        /* Read next file ID nonce */
         nonce = istream.read<uint32_t>();
         return nonce;
     }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR("CND Error: An exception was thrown while importing soundbank from CND file stream: %!", e.what());
-        return nonce;
+    catch (const CNDError&) { throw; }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_Sounds",
+            "An exception was encountered while importing soundbank: "s + e.what()
+        );
     }
 }

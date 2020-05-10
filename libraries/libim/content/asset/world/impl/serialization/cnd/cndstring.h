@@ -17,13 +17,19 @@ namespace libim::content::asset {
         using base_type = std::array<char, N>;
         using typename base_type::array;
         constexpr CndString() : base_type{ 0 } {}
-        constexpr CndString(base_type a) : base_type(std::move(a)) {}
+        constexpr CndString(base_type a) : base_type(std::move(a))
+        {
+            this->operator[](N-1) = 0;
+        }
+
         constexpr CndString(std::string_view str) : base_type{ 0 }
         {
             if(str.size() > N) {
                 throw std::invalid_argument("Invalid str size to init CndString");
             }
             std::copy(str.begin(), str.end(), this->begin());
+            this->operator[](N-1) = 0;
+
         }
 
         template<std::size_t C>
@@ -31,6 +37,7 @@ namespace libim::content::asset {
         {
             static_assert(C <= N, "Invalid string literal size to init CndString");
             std::copy(str, str + C, this->begin()); // Note: since C++20 constexpr
+            this->operator[](N-1) = 0;
         }
 
         std::string toStdString() const

@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "types/optref.h"
 #include "utils/utils.h"
 
 #if defined(WIN32) || defined(_WIN32)
@@ -283,9 +284,18 @@ namespace libim {
         return makePath(path.u8string(), createFile);
     }
 
-    inline bool removeFile(const std::filesystem::path& file)
+    inline bool removeFile(const std::filesystem::path& file, OptionalRef<std::error_code> ec = std::nullopt)
     {
+        if(ec) {
+            return std::filesystem::remove(file, *ec);
+        }
         return std::filesystem::remove(file);
+    }
+
+    inline bool deleteFile(const std::filesystem::path& file)
+    {
+        static std::error_code ec;
+        return removeFile(file, ec);
     }
 
     inline bool renameFile(const std::filesystem::path& from, const std::filesystem::path&& to, bool override = true)
@@ -294,8 +304,7 @@ namespace libim {
             return false;
         }
 
-        removeFile(to);
-
+        deleteFile(to);
         try
         {
             std::filesystem::rename(from, to);

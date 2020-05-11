@@ -14,20 +14,20 @@ namespace libim {
             return this->has_value();
         }
 
-        constexpr auto value() const & {
+        constexpr auto& value() const & {
             return base::value().get();
         }
 
-        constexpr auto operator->() const {
+        constexpr auto* operator->() const {
             return &base::value().get();
         }
 
-        constexpr auto operator*() const & {
+        constexpr auto& operator*() const & {
             return this->value();
         }
 
         template<class U>
-        constexpr auto valueOr(U&& defaultValue) const& {
+        constexpr auto valueOr(U&& defaultValue) const & {
             return this->value_or(defaultValue);
         }
 

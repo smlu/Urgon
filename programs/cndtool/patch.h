@@ -15,10 +15,6 @@ using namespace libim::utils;
 
 bool patchCndMaterials(const std::string& cndFile, const HashMap<Material>& materials)
 {
-    if(materials.isEmpty()) {
-        return false;
-    }
-
     try
     {
         InputFileStream ifstream(cndFile);
@@ -63,17 +59,15 @@ bool patchCndMaterials(const std::string& cndFile, const HashMap<Material>& mate
     }
     catch(const std::exception& e)
     {
-        std::cerr << "An exception was encountered while patching material section e=" << e.what() <<std::endl;
+        std::cerr << "ERROR: Failed to patch material section!\n";
+        std::cerr << "       Reason: " << e.what() << std::endl;
+        deleteFile(cndFile + ".patched");
         return false;
     }
 }
 
 bool patchCndAnimations(const std::string& cndFile, const HashMap<Animation>& animations)
 {
-    if(animations.isEmpty()) {
-        return false;
-    }
-
     try
     {
         InputFileStream ifstream(cndFile);
@@ -123,9 +117,10 @@ bool patchCndAnimations(const std::string& cndFile, const HashMap<Animation>& an
     }
     catch(const std::exception& e)
     {
-        std::cerr << "An exception was encountered while patching keyframe section e=" << e.what() << std::endl;
+        std::cerr << "ERROR: Failed to patch keyframe section!\n";
+        std::cerr << "       Reason: " << e.what() << std::endl;
+        deleteFile(cndFile + ".patched");
         return false;
     }
 }
-
 #endif // PATCH_H

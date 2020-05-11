@@ -80,27 +80,27 @@ void printErrorInvalidCnd(std::string_view cndPath, std::string_view cmd, std::s
 
 int execCmd(std::string_view cmd, const CndToolArgs& args);
 
-// Functions fro extractiong resources
+// Functions for extracting assets from level
 int execCmdExtract(const CndToolArgs& args);
-bool extractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool convertSoundsToWav, bool verbose = false);
-int32_t extractAnimations(const InputStream& istream, const std::string& outDir, bool verbose);
-int32_t extractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials , bool verbose);
-int32_t extractSounds(const InputStream& istream, const std::string& outDir, bool convetToWav, bool verbose);
+void extractAssets(const std::string& cndFile, std::string outDir, bool convertMaterials, bool convertSoundsToWav, bool verbose = false);
+std::size_t extractAnimations(const InputStream& istream, const std::string& outDir, bool verbose);
+std::size_t extractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials , bool verbose);
+std::size_t extractSounds(const InputStream& istream, const std::string& outDir, bool convetToWav, bool verbose);
 
-// Functions for adding resources
+// Functions for adding assets to level
 int execCmdAdd(std::string_view scmd, const CndToolArgs& args);
 int execCmdAddAnimation(const CndToolArgs& args);
 int execCmdAddMaterial(const CndToolArgs& args);
 
-// Functions for listing resources
+// Functions for listing level assets
 int execCmdList(const CndToolArgs& args);
 
-// Functions for removing resources
+// Functions for removing assets from level
 int execCmdRemove(std::string_view scmd, const CndToolArgs& args);
 int execCmdRemoveAnimation(const CndToolArgs& args);
 int execCmdRemoveMaterial(const CndToolArgs& args);
 
-template<typename ResourceT, typename ResLoadF, typename CndReadF, typename CndWriteF>
+template<typename AssetT, typename ResLoadF, typename CndReadF, typename CndWriteF>
 bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, ResLoadF&& loadAsset, CndReadF&& cndReadAssets, CndWriteF&& cndWriteAssets)
 {
     const bool bVerbose = hasOptVerbose(args);
@@ -113,7 +113,7 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
 
     std::cout << "Patching CND file... "  << std::flush;
 
-    std::vector<ResourceT> newAssets;
+    std::vector<AssetT> newAssets;
     newAssets.reserve(args.unspecified().size());
     for (const auto& assetFile : args.unspecified())
     {
@@ -139,9 +139,9 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
         }
         catch (const std::exception& e)
         {
-            std::cerr << "Failed to load resource file: " << assetFile << std::endl;
+            std::cerr << "ERROR: Failed to load asset file: " << assetFile << std::endl;
             if(bVerbose) {
-                std::cerr << "Error: " << e.what() << std::endl;
+                std::cerr << "Reason: " << e.what() << std::endl;
             }
         }
     }
@@ -163,29 +163,31 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
         {
             if(mapAssets.contains(asset.name()) && !hasOptReplace(args))
             {
-                std::cerr << "\nERROR: Resource '" << asset.name() << "' already exists in CND file and no '--replace' option was provided.\n";
-                std::cerr << "       CND file was not modified!\n\n";
-                return 1;
+                std::cerr << "\nERROR: Asset '" << asset.name() << "' already exists in CND file and no '--replace' option was provided.\n";
+                std::cerr << "         CND file was not modified!\n\n";
+                return false;
             }
 
             mapAssets[asset.name()] = std::move(asset);
         }
 
         const bool success = cndWriteAssets(cndFile, mapAssets);
-        std::cout << (success ? kSuccess : kFailed) << std::endl;
+        if(success) {
+            std::cout << kSuccess << std::endl;
+        }
         return success;
     }
     catch (const std::exception& e)
     {
-        std::cerr << "ERROR: An exception was encountered while updating resources in CND file!\n";
-        std::cerr <<         "e: " << e.what() << std::endl << std::endl;
+        std::cerr << "ERROR: Failed to patch CND file!\n";
+        std::cerr <<        "Reason: " << e.what() << std::endl << std::endl;
         printHelp(cmdAdd, args.subcmd());
         return false;
     }
 }
 
 
-template<typename ResourceT, typename CndReadF, typename CndWriteF>
+template<typename AssetT, typename CndReadF, typename CndWriteF>
 bool execCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndWriteF&& cndWriteAssets)
 {
     const bool bVerbose = hasOptVerbose(args);
@@ -214,13 +216,15 @@ bool execCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndW
         }
 
         const bool success = cndWriteAssets(cndFile, mapAssets);
-        std::cout << (success ? kSuccess : kFailed) << std::endl;
+        if(success) {
+            std::cout << kSuccess << std::endl;
+        }
         return success;
     }
     catch (const std::exception& e)
     {
-        std::cerr << "ERROR: An exception was encountered while updating resources in CND file!\n";
-        std::cerr <<         "e: " << e.what() << std::endl << std::endl;
+        std::cerr << "ERROR: Failed to patch CND file!\n";
+        std::cerr <<        "Reason: " << e.what() << std::endl << std::endl;
         return false;
     }
 }
@@ -259,7 +263,9 @@ int execCmd(std::string_view cmd, const CndToolArgs& args)
     }
     else
     {
-        std::cerr << "ERROR: Unknown command\n\n";
+        if(cmd != cmdHelp) {
+            std::cerr << "ERROR: Unknown command\n\n";
+        }
         printHelp();
     }
 
@@ -272,84 +278,84 @@ void printHelp(std::string_view cmd, std::string_view subcmd)
     {
         if(subcmd == scmdAnimation)
         {
-            std::cout << "Add or replace existing animations in CND file." << std::endl << std::endl;
-            std::cout << "  Usage: cndtool add material [options] <cnd-file-path> <animation-files>" << std::endl << std::endl;
+            std::cout << "Add or replace existing animation assets in a CND level file." << std::endl << std::endl;
+            std::cout << "  Usage: cndtool add animation [options] <cnd-file-path> <animation-files>" << std::endl << std::endl;
             std::cout << "Option:        Long option:        Description:\n";
-            std::cout << "  " << optReplaceShort << SETW(23, ' ') << optReplace << SETW(51, ' ') << "Replace existing animation in CND file\n";
-            std::cout << "  " << optVerboseShort << SETW(23, ' ') << optVerbose << SETW(44, ' ') << "Verbose printout to the console\n";
+            std::cout << "  " << optReplaceShort << SETW(22, ' ') << optReplace << SETW(44, ' ') << "Replace existing animation asset\n";
+            std::cout << "  " << optVerboseShort << SETW(22, ' ') << optVerbose << SETW(43, ' ') << "Verbose printout to the console\n";
         }
         else if(subcmd == scmdMaterial)
         {
-            std::cout << "Add or replace existing materials in CND file." << std::endl << std::endl;
+            std::cout << "Add or replace existing material assets in a CND level file." << std::endl << std::endl;
             std::cout << "  Usage: cndtool add material [options] <cnd-file-path> <material-files>" << std::endl << std::endl;
             std::cout << "Option:        Long option:        Description:\n";
-            std::cout << "  " << optReplaceShort << SETW(23, ' ') << optReplace << SETW(50, ' ') << "Replace existing material in CND file\n";
-            std::cout << "  " << optVerboseShort << SETW(23, ' ') << optVerbose << SETW(44, ' ') << "Verbose printout to the console\n";
+            std::cout << "  " << optReplaceShort << SETW(22, ' ') << optReplace << SETW(43, ' ') << "Replace existing material asset\n";
+            std::cout << "  " << optVerboseShort << SETW(22, ' ') << optVerbose << SETW(43, ' ') << "Verbose printout to the console\n";
         }
         else
         {
-            std::cout << "Add or replace existing resources in CND file." << std::endl << std::endl;
+            std::cout << "Add or replace existing assets in a CND level file." << std::endl << std::endl;
             std::cout << "  Usage: cndtool add <sub-command> " << std::endl << std::endl;
             std::cout << "Sub-commands:" << SETW(31, ' ') << "Description:\n";
-            std::cout << "  " << scmdAnimation << SETW(58, ' ') << "Add animation resources to CND file\n";
-            std::cout << "  " << scmdMaterial  << SETW(58, ' ') << "Add material resources to CND file\n";
+            std::cout << "  " << scmdAnimation << SETW(43, ' ') << "Add animation assets\n";
+            std::cout << "  " << scmdMaterial  << SETW(43, ' ') << "Add material assets\n";
         }
     }
     else if(cmd == cmdExtract)
     {
-        std::cout << "Extract animations [KEY], materials [MAT] and sounds [IndyWV] from CND file." << std::endl << std::endl;
+        std::cout << "Extract animation [KEY], material [MAT] and sound [IndyWV] assets from CND level file." << std::endl << std::endl;
         std::cout << "  Usage: cndtool extract [options] <cnd-file-path>" << std::endl << std::endl;
         std::cout << "Option:        Long option:        Description:\n";
-        std::cout << "  " << optConvertToBmpShort       << SETW(19, ' ') << optConvertToBmp << SETW(51, ' ') << "Convert extracted materials to BMP\n";
-        std::cout << "  " << optConvertToWavShort       << SETW(19, ' ') << optConvertToWav << SETW(48, ' ') << "Convert extracted sounds to WAV\n";
+        std::cout << "  " << optConvertToBmpShort << SETW(18, ' ') << optConvertToBmp << SETW(63, ' ') << "Convert extracted material assets to BMP format\n";
+        std::cout << "  " << optConvertToWavShort << SETW(18, ' ') << optConvertToWav << SETW(67, ' ') << "Convert extracted IndyWV sound assets to WAV format\n";
 
-        std::cout << "  " << optOutputDirShort    << SETW(26, ' ') << optOutputDir    << SETW(36, ' ') << "Output folder <output dir>\n";
-        std::cout << "  " << optVerboseShort      << SETW(23, ' ') << optVerbose      << SETW(44, ' ') << "Verbose printout to the console\n";
+        std::cout << "  " << optOutputDirShort    << SETW(25, ' ') << optOutputDir    << SETW(22, ' ') << "Output folder\n";
+        std::cout << "  " << optVerboseShort      << SETW(22, ' ') << optVerbose      << SETW(43, ' ') << "Verbose printout to the console\n";
     }
     else if(cmd == cmdList)
     {
-        std::cout << "List resources in the CND file." << std::endl << std::endl;
+        std::cout << "List assets in a CND level file." << std::endl << std::endl;
         std::cout << "  Usage: cndtool list [options] <cnd-file-path>" << std::endl << std::endl;
-        std::cout << "Option:              Description:\n";
-        std::cout << "  " << optAnimations << SETW(52, ' ') << "List only animation resources in cnd file\n";
-        std::cout << "  " << optMaterials  << SETW(52, ' ') << "List only material resources in cnd file\n";
-        std::cout << "  " << optSounds     << SETW(52, ' ') << "List only sound resources in cnd file\n";
+        std::cout << "Option:" << SETW(31, ' ') << " Description:\n";
+        std::cout << "  " << optAnimations << SETW(40, ' ') << "List only animation assets\n";
+        std::cout << "  " << optMaterials  << SETW(40, ' ') << "List only material assets\n";
+        std::cout << "  " << optSounds     << SETW(40, ' ') << "List only sound assets\n";
     }
     else if (cmd == cmdRemove)
     {
         if(subcmd == scmdAnimation)
         {
-            std::cout << "Remove animations from CND file." << std::endl << std::endl;
-            std::cout << "  Usage: cndtool remove material [options] <cnd-file-path> <animation_name>.key ..." << std::endl << std::endl;
+            std::cout << "Remove animation assets from CND level file." << std::endl << std::endl;
+            std::cout << "  Usage: cndtool remove animation [options] <cnd-file-path> <animation_name>.key ..." << std::endl << std::endl;
             std::cout << "Options:        Long options:        Description:\n";
             std::cout << "  " << optVerboseShort << SETW(23, ' ') << optVerbose << SETW(44, ' ') << "Verbose printout to the console\n";
         }
         else if(subcmd == scmdMaterial)
         {
-            std::cout << "Remove materials from CND file." << std::endl << std::endl;
+            std::cout << "Remove material assets from a CND level file." << std::endl << std::endl;
             std::cout << "  Usage: cndtool remove material [options] <cnd-file-path> <animation_name>.mat ..." << std::endl << std::endl;
             std::cout << "Options:        Long options:        Description:\n";
             std::cout << "  " << optVerboseShort << SETW(23, ' ') << optVerbose << SETW(44, ' ') << "Verbose printout to the console\n";
         }
         else
         {
-            std::cout << "Remove resources from CND file." << std::endl << std::endl;
+            std::cout << "Remove assets from CND level file." << std::endl << std::endl;
             std::cout << "  Usage: cndtool remove <sub-command> " << std::endl << std::endl;
             std::cout << "Sub-commands:" << SETW(31, ' ') << "Description:\n";
-            std::cout << "  " << scmdAnimation << SETW(63, ' ') << "Remove animation resources from CND file\n";
-            std::cout << "  " << scmdMaterial  << SETW(63, ' ') << "Remove material resources from CND file\n";
+            std::cout << "  " << scmdAnimation << SETW(46, ' ') << "Remove animation assets\n";
+            std::cout << "  " << scmdMaterial  << SETW(46, ' ') << "Remove material assets\n";
         }
     }
     else
     {
-        std::cout << "\nCommand line interface tool to extract and modify game\nresources stored in a CND archive file.\n\n";
+        std::cout << "\nCommand line interface tool to extract and modify\ngame assets stored in a CND level file.\n\n";
         std::cout << "  Usage: cndtool <command> [sub-command] [options]" << std::endl << std::endl;
         std::cout << "Commands:" << SETW(35, ' ') << "Description:\n";
-        std::cout << "  " << cmdAdd   << SETW(57, ' ') << "Add or replace game resource\n";
-        std::cout << "  " << cmdExtract   << SETW(47, ' ') << "Extract game resources\n";
-        std::cout << "  " << cmdList   << SETW(70, ' ') << "Print to the console stored game resources\n";
-        std::cout << "  " << cmdRemove  << SETW(58, ' ') << "Remove one or more game resource\n";
-        std::cout << "  " << cmdHelp        << SETW(45, ' ') << "Show this message\n";
+        std::cout << "  " << cmdAdd     << SETW(55, ' ') << "Add or replace game assets\n";
+        std::cout << "  " << cmdExtract << SETW(44, ' ') << "Extract game assets\n";
+        std::cout << "  " << cmdList    << SETW(67, ' ') << "Print to the console stored game assets\n";
+        std::cout << "  " << cmdRemove  << SETW(56, ' ') << "Remove one or more game assets\n";
+        std::cout << "  " << cmdHelp    << SETW(45, ' ') << "Show this message\n";
     }
 }
 
@@ -369,7 +375,7 @@ int execCmdAdd(std::string_view scmd, const CndToolArgs& args)
     }
 
     if(scmd.empty()) {
-        std::cerr << "ERROR: Subcommand requirded!\n\n";
+        std::cerr << "ERROR: Subcommand required!\n\n";
     }
     else {
         std::cerr << "ERROR: Unknown subcommand \"" << scmd << "\"!\n\n";
@@ -496,93 +502,72 @@ int execCmdExtract(const CndToolArgs& args)
     const bool bConvertMatToBmp    = args.hasArg(optConvertToBmpShort) || args.hasArg(optConvertToBmp);
     const bool bConvertIndyWVToWav = args.hasArg(optConvertToWavShort) || args.hasArg(optConvertToWav);
 
-    int result = 0;
     try
     {
         /* Extract animations, materials & sounds */
-        if(!extractResources(inputFile, std::move(outDir), bConvertMatToBmp, bConvertIndyWVToWav, bVerboseOutput)) {
-            result = 1;
-        }
+        extractAssets(inputFile, std::move(outDir), bConvertMatToBmp, bConvertIndyWVToWav, bVerboseOutput);
+        return 0;
     }
     catch(const std::exception& e)
     {
-        std::cout << "An exception was encountered during resources extraction: " << e.what() << std::endl;
-        result = 1;
+        std::cerr << "\nERROR: Failed to extract assets from CND file!" << std::endl;
+        std::cerr << "       Reason: " << e.what();
+        return 1;
     }
-
-    return result;
 }
 
-bool extractResources(const std::string& cndFile, std::string outDir, bool convertMaterials, bool convertSoundsToWav, bool verbose)
+void extractAssets(const std::string& cndFile, std::string outDir, bool convertMaterials, bool convertSoundsToWav, bool verbose)
 {
     InputFileStream ifstream(cndFile);
 
     auto nExtAnimFiles = extractAnimations(ifstream, outDir, verbose);
-    if(nExtAnimFiles < 0) return false;
-
     auto nExtMatFiles  = extractMaterials(ifstream, outDir, convertMaterials, verbose);
-    if(nExtMatFiles < 0) return false;
-
-    auto nExtSndFiles = extractSounds(ifstream, outDir, convertSoundsToWav, verbose);
-    if(nExtSndFiles < 0) return false;
+    auto nExtSndFiles  = extractSounds(ifstream, outDir, convertSoundsToWav, verbose);
 
     std::cout << "\n-------------------------------------\n";
     std::cout << "Total extracted animations: " << nExtAnimFiles << std::endl;
     std::cout << "Total extracted materials:  " << nExtMatFiles << std::endl;
     std::cout << "Total extracted sounds:     " << nExtSndFiles << std::endl;
-    return true;
 }
 
-int32_t extractAnimations(const InputStream& istream, const std::string& outDir, bool verbose)
+std::size_t extractAnimations(const InputStream& istream, const std::string& outDir, bool verbose)
 {
-    try
+    std::cout << "Extracting animations... " << std::flush;
+    auto mapAnimations = CND::readKeyframes(istream);
+
+    std::string keyDir;
+    if(!mapAnimations.isEmpty())
     {
-        std::cout << "Extracting animations... " << std::flush;
-        auto mapAnimations = CND::readKeyframes(istream);
-
-        std::string keyDir;
-        if(!mapAnimations.isEmpty())
-        {
-            if(verbose) {
-                std::cout << "\nFound: " << mapAnimations.size() << std::endl;
-            }
-
-            keyDir = outDir + (outDir.empty() ? "" : "/" ) + "key";
-            makePath(keyDir);
+        if(verbose) {
+            std::cout << "\nFound: " << mapAnimations.size() << std::endl;
         }
 
-        /* Save extracted animations to file */
-        const std::string keyHeaderComment = [&]() {
-            return "Extracted from CND file '"s + istream.name() + "' with " +
-                std::string(kProgramName) + " v" + std::string(kVersion);
-        }();
-
-        for(const auto& key : mapAnimations)
-        {
-            if(verbose){
-                std::cout << "Extracting animation: " << key.name() << std::endl;
-            }
-
-            std::string keyFilePath(keyDir + "/" + key.name());
-            OutputFileStream ofs(std::move(keyFilePath));
-            key.serialize(TextResourceWriter(ofs), keyHeaderComment);
-        }
-
-        std::cout << kSuccess << std::endl;
-        return safe_cast<int32_t>(mapAnimations.size());
-
+        keyDir = outDir + (outDir.empty() ? "" : "/" ) + "key";
+        makePath(keyDir);
     }
-    catch (const std::exception& e)
+
+    /* Save extracted animations to file */
+    const std::string keyHeaderComment = [&]() {
+        return "Extracted from CND file '"s + istream.name() + "' with " +
+            std::string(kProgramName) + " v" + std::string(kVersion);
+    }();
+
+    for(const auto& key : mapAnimations)
     {
-        std::cout << kFailed << std::endl;
         if(verbose){
-            std::cerr << "An exception was encountered while extracting animations, e=" << e.what() << std::endl;
+            std::cout << "Extracting animation: " << key.name() << std::endl;
         }
-        return -1;
+
+        std::string keyFilePath(keyDir + "/" + key.name());
+        OutputFileStream ofs(std::move(keyFilePath));
+        key.serialize(TextResourceWriter(ofs), keyHeaderComment);
     }
+
+    std::cout << kSuccess << std::endl;
+    return mapAnimations.size();
 }
 
-int32_t extractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials, bool verbose)
+std::size_t extractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials, bool verbose)
 {
     std::cout << "Extracting materials... " << std::flush;
     auto materials = CND::readMaterials(istream);
@@ -661,67 +646,56 @@ int32_t extractMaterials(const InputStream& istream, const std::string& outDir, 
         std::cout << kSuccess << std::endl;
     }
 
-    return safe_cast<int32_t>(materials.size());
+    return materials.size();
 }
 
-int32_t extractSounds(const InputStream& istream, const std::string& outDir, bool convetToWav, bool verbose)
+std::size_t extractSounds(const InputStream& istream, const std::string& outDir, bool convetToWav, bool verbose)
 {
-    try
+    std::cout << "Extracting sounds... " << std::flush;
+    SoundBank sb(2);
+    sb.importTrack(0, istream);
+    auto& sounds = sb.getTrack(0);
+
+    std::filesystem::path outPath;
+    std::filesystem::path wavDir;
+
+    if(!sounds.isEmpty())
     {
-        std::cout << "Extracting sounds... " << std::flush;
-        SoundBank sb(2);
-        sb.importTrack(0, istream);
-        auto& sounds = sb.getTrack(0);
-
-        std::filesystem::path outPath;
-        std::filesystem::path wavDir;
-
-        if(!sounds.isEmpty())
-        {
-            if(verbose) {
-                std::cout << "\nFound: " << sounds.size() << std::endl;
-            }
-
-            outPath = outDir + (outDir.empty() ? "" : "/" ) + "sound";
-            makePath(outPath);
-
-            if(convetToWav)
-            {
-                wavDir = outDir + (outDir.empty() ? "" : "/" ) + "wav";
-                makePath(wavDir);
-            }
-        }
-
-        for (const auto& s : sounds)
-        {
-            if(verbose) {
-                std::cout << "Extracting sound: " << s.name() << std::endl;
-            }
-
-            OutputFileStream ofs(outPath.append(s.name()));
-            s.serialize(ofs, Sound::SerializeFormat::IndyWV);
-            outPath = outPath.parent_path();
-
-            /* Save in WAV format */
-            if(convetToWav)
-            {
-                OutputFileStream ofs(wavDir.append(s.name()));
-                s.serialize(ofs, Sound::SerializeFormat::WAV);
-                wavDir = wavDir.parent_path();
-            }
-        }
-
-        std::cout << kSuccess << std::endl;
-        return safe_cast<int32_t>(sounds.size());
-    }
-    catch (const std::exception& e)
-    {
-        std::cout << kFailed << std::endl;
         if(verbose) {
-            std::cerr << "An exception was encountered while extracting sounds from CND, e=" << e.what() << std::endl;
+            std::cout << "\nFound: " << sounds.size() << std::endl;
         }
-        return -1;
+
+        outPath = outDir + (outDir.empty() ? "" : "/" ) + "sound";
+        makePath(outPath);
+
+        if(convetToWav)
+        {
+            wavDir = outDir + (outDir.empty() ? "" : "/" ) + "wav";
+            makePath(wavDir);
+        }
     }
+
+    for (const auto& s : sounds)
+    {
+        if(verbose) {
+            std::cout << "Extracting sound: " << s.name() << std::endl;
+        }
+
+        OutputFileStream ofs(outPath.append(s.name()));
+        s.serialize(ofs, Sound::SerializeFormat::IndyWV);
+        outPath = outPath.parent_path();
+
+        /* Save in WAV format */
+        if(convetToWav)
+        {
+            OutputFileStream ofs(wavDir.append(s.name()));
+            s.serialize(ofs, Sound::SerializeFormat::WAV);
+            wavDir = wavDir.parent_path();
+        }
+    }
+
+    std::cout << kSuccess << std::endl;
+    return sounds.size();
 }
 
 int execCmdRemove(std::string_view scmd, const CndToolArgs& args)
@@ -734,7 +708,7 @@ int execCmdRemove(std::string_view scmd, const CndToolArgs& args)
     }
 
     if(scmd.empty()) {
-        std::cerr << "ERROR: Subcommand requirded!\n\n";
+        std::cerr << "ERROR: Subcommand required!\n\n";
     }
     else {
         std::cerr << "ERROR: Unknown subcommand \"" << scmd << "\"!\n\n";
@@ -830,6 +804,5 @@ void printErrorInvalidCnd(std::string_view cndPath, std::string_view cmd, std::s
     } else {
         std::cerr << "ERROR: CND file \"" << cndPath << "\" does not exist!\n\n";
     }
-
     printHelp(cmd, subcmd);
 }

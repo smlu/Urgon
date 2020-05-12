@@ -80,7 +80,7 @@ namespace libim {
         return abs(height * width) * bbs(bpp);
     }
 
-    inline constexpr uint32_t GetRowSize(int32_t width, uint32_t bpp)
+    inline constexpr uint32_t getRowSize(int32_t width, uint32_t bpp)
     {
         return abs(width) * bbs(bpp);
     }

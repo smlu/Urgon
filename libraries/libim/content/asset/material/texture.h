@@ -15,6 +15,7 @@ namespace libim::content::asset{
     {
     public:
         Texture() = default;
+        Texture(uint32_t width, uint32_t height, ColorFormat format, BitmapPtr ptrBitmap); // !< Throws std::runtime_error if invalid size and format for given ptrBitmap arg
         Texture(const Texture& rhs);
         Texture(Texture&& rrhs) noexcept;
 
@@ -23,78 +24,41 @@ namespace libim::content::asset{
 
         virtual ~Texture() = default;
 
-        Texture& setWidth(uint32_t width)
-        {
-            m_width = width;
-            return *this;
-        }
-
         uint32_t width() const
         {
-            return m_width;
-        }
-
-        Texture& setHeight(uint32_t height)
-        {
-            m_height = height;
-            return *this;
+            return width_;
         }
 
         uint32_t height() const
         {
-            return m_height;
-        }
-
-        Texture& setRowSize(uint32_t rowSize)
-        {
-            m_rowSize = rowSize;
-            return *this;
+            return height_;
         }
 
         uint32_t rowSize() const
         {
-            return m_rowSize;
-        }
-
-        Texture& setColorInfo(const ColorFormat& colorInfo)
-        {
-            m_colorInfo = colorInfo;
-            return *this;
+            return rowSize_;
         }
 
         const ColorFormat& colorInfo() const
         {
-            return m_colorInfo;
-        }
-
-        Texture& setBitmap(const BitmapPtr& bitmap)
-        {
-            m_bitmap = bitmap;
-            return *this;
-        }
-
-        Texture& setBitmap(BitmapPtr&& bitmap)
-        {
-            m_bitmap = std::move(bitmap);
-            return *this;
+            return ci_;
         }
 
         BitmapPtr bitmap() const
         {
-            return m_bitmap;
+            return bitmap_;
         }
 
         Bmp toBmp() const;
 
     private:
-        uint32_t m_width    = 0;
-        uint32_t m_height   = 0;
-        uint32_t m_rowSize  = 0;
+        uint32_t width_    = 0;
+        uint32_t height_   = 0;
+        uint32_t rowSize_  = 0;
         //uint32_t m_rowWidth = 0; // in jones engine row width is defined as rowSize / Bitdepth in bytes
-        ColorFormat m_colorInfo;
-        BitmapPtr m_bitmap;
+        ColorFormat ci_;
+        BitmapPtr bitmap_;
     };
-
 }
 
 namespace libim {

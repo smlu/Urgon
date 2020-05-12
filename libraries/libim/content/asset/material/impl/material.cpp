@@ -14,21 +14,20 @@ inline Bitmap::const_iterator libim::content::asset::copyMipmapFromBuffer(Mipmap
         uint32_t texWidth  = width >> mmIdx;
         uint32_t texHeight = height >> mmIdx;
 
-        Texture tex;
-        tex.setWidth(texWidth)
-           .setHeight(texHeight)
-           .setColorInfo(colorInfo)
-           .setRowSize(GetRowSize(texHeight, tex.colorInfo().bpp));
-
         /* Init texture bitmap buffer */
-        uint32_t bitmapSize = getBitmapSize(texWidth, texHeight, tex.colorInfo().bpp);
+        uint32_t bitmapSize = getBitmapSize(texWidth, texHeight, colorInfo.bpp);
         auto bitmap = makeBitmapPtr(bitmapSize);
 
         /* Copy texture's bitmap from buffer */
         itBitmapEnd = std::next(itBitmapBegin, bitmapSize);
         std::copy(itBitmapBegin, itBitmapEnd, bitmap->begin());
 
-        tex.setBitmap(std::move(bitmap));
+        Texture tex(
+            texWidth,
+            texHeight,
+            colorInfo,
+            std::move(bitmap)
+        );
         mipmap.emplace_back(std::move(tex));
         itBitmapBegin = itBitmapEnd;
     }
@@ -45,22 +44,21 @@ Mipmap libim::content::asset::moveMipmapFromBuffer(Bitmap& buffer, uint32_t text
         uint32_t texWidth  = width >> mmIdx;
         uint32_t texHeight = height >> mmIdx;
 
-        Texture tex;
-        tex.setWidth(texWidth)
-           .setHeight(texHeight)
-           .setColorInfo(colorInfo)
-           .setRowSize(GetRowSize(texHeight, tex.colorInfo().bpp));
-
         /* Init texture bitmap buffer */
-        uint32_t bitmapSize = getBitmapSize(texWidth, texHeight, tex.colorInfo().bpp);
+        uint32_t bitmapSize = getBitmapSize(texWidth, texHeight, colorInfo.bpp);
         auto bitmap = std::make_shared<Bitmap>(bitmapSize);
 
         /* Copy texture's bitmap from buffer */
         auto itBitmapEnd = std::next(buffer.begin(), bitmapSize);
         std::copy(buffer.begin(), itBitmapEnd, bitmap->begin());
-
         buffer.erase(buffer.begin(), itBitmapEnd);
-        tex.setBitmap(std::move(bitmap));
+
+        Texture tex(
+            texWidth,
+            texHeight,
+            colorInfo,
+            std::move(bitmap)
+        );
         mipmap.emplace_back(std::move(tex));
     }
 

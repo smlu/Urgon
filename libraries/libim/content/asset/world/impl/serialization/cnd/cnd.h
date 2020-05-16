@@ -196,6 +196,16 @@ namespace libim::content::asset {
         static std::vector<SharedRef<Cog>> parseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts);
         static std::vector<SharedRef<Cog>> readCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts);
         static void writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs);
+
+        static std::size_t getOffset_Templates(const InputStream& istream, const CndHeader& header);
+        static HashMap<CndThing> parseSection_Templates(const InputStream& istream, const CndHeader& header);
+        static HashMap<CndThing> readTemplates(const InputStream& istream);
+        static void writeSection_Templates(OutputStream& ostream, const HashMap<CndThing>& templates);
+
+        static std::size_t getOffset_Things(const InputStream& istream, const CndHeader& header);
+        static std::vector<CndThing> parseSection_Things(const InputStream& istream, const CndHeader& header);
+        static std::vector<CndThing> readThings(const InputStream& istream);
+        static void writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things);
     };
 }
 #endif // LIBIM_CND_H

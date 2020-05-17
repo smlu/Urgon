@@ -63,6 +63,13 @@ namespace libim::content::asset {
         }
     }
 
+    inline void world_ser_assert(bool pred, const std::string& message)
+    {
+        if(!pred) {
+            throw std::runtime_error(message);
+        }
+    }
+
     inline std::optional<std::size_t> makeOptionalIdx(int32_t idx)
     {
         return idx > -1 ? std::make_optional(safe_cast<std::size_t>(idx)) : std::nullopt;

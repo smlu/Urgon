@@ -1,11 +1,13 @@
 #ifndef LIBIM_INDYWV_H
 #define LIBIM_INDYWV_H
 #include <array>
+#include <assert.h>
 #include <cstdint>
-#include "../../../common.h"
-#include "../../../log/log.h"
-#include "../../../io/binarystream.h"
-#include "../../../io/stream.h"
+
+#include <libim/common.h>
+#include <libim/log/log.h>
+#include <libim/io/binarystream.h>
+#include <libim/io/stream.h>
 
 
 namespace libim::content::audio {

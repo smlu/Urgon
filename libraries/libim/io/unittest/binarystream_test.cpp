@@ -2,6 +2,7 @@
 #include "../binarystream.h"
 #include <libim/math/math.h>
 
+#include <assert.h>
 #include <cstdint>
 #include <string>
 #include <string_view>

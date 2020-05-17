@@ -8,6 +8,7 @@
 #include <libim/utils/utils.h>
 #include <libim/types/flags.h>
 
+#include <assert.h>
 #include <cstdint>
 #include <string_view>
 #include <vector>

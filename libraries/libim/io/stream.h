@@ -3,7 +3,6 @@
 #include "../common.h"
 #include "stremerror.h"
 
-#include <assert.h>
 #include <climits>
 #include <cstdint>
 #include <memory>
@@ -166,11 +165,8 @@ namespace libim {
 
         virtual Stream& write(const Stream& istream, std::size_t offsetBegin, std::size_t offsetEnd)
         {
-            if(!istream.canRead() || offsetBegin >= istream.size())
-            {
-                // TODO: log!
-                assert(false &&  "!istream.canRead()");
-                return *this;
+            if(!istream.canRead() || offsetBegin >= istream.size()){
+                throw StreamError("Can't write unreadable stream or trying to read pass the end of input stream");
             }
 
             if((offsetBegin + offsetEnd) > istream.size()) {

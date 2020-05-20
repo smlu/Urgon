@@ -9,6 +9,7 @@
 
 #include "cnderror.h"
 #include "cndstring.h"
+#include "thing/cnd_thing.h"
 
 #include <libim/common.h>
 #include <libim/content/asset/animation/animation.h>

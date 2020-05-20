@@ -4,10 +4,10 @@
 #include <string>
 
 #include "../cnd.h"
+#include "../../world_ser_common.h"
 #include "cnd_thing.h"
 
 #include <libim/utils/utils.h>
-
 
 using namespace libim;
 using namespace libim::content::asset;
@@ -162,16 +162,16 @@ void parseThingList(const InputStream& istream, std::size_t numThings, Lambda&& 
         insertThing(std::move(t));
     }
 
-    assert(pit == physicsInfos.end());
-    assert(npfit == numPathFrames.end());
-    assert(pfit == pathFrames.end());
-    assert(ait == actorInfos.end());
-    assert(wit == weaponInfos.end());
-    assert(eit == explosionInfos.end());
-    assert(iit == itemInfos.end());
-    assert(pait == partInfos.end());
-    assert(aicit == aiControlInfos.end());
-    assert(aipfit == aiPathFrames.end());
+    world_ser_assert(pit == physicsInfos.end()    , "Not all parsed PhysicsInfos were used");
+    world_ser_assert(npfit == numPathFrames.end() , "Not all parsed path frames were used");
+    world_ser_assert(pfit == pathFrames.end()     , "Not all parsed path frames were used");
+    world_ser_assert(ait == actorInfos.end()      , "Not all parsed ActorInfos were used");
+    world_ser_assert(wit == weaponInfos.end()     , "Not all parsed WeaponInfos were used");
+    world_ser_assert(eit == explosionInfos.end()  , "Not all parsed ExplosionInfos were used");
+    world_ser_assert(iit == itemInfos.end()       , "Not all parsed ItemInfos were used");
+    world_ser_assert(pait == partInfos.end()      , "Not all parsed ParticleInfos were used");
+    world_ser_assert(aicit == aiControlInfos.end(), "Not all parsed AiControlInfos were used");
+    world_ser_assert(aipfit == aiPathFrames.end() , "Not all parsed AiPathFrames were used");
 }
 
 template<typename Container>
@@ -356,7 +356,9 @@ HashMap<CndThing> CND::parseSection_Templates(const InputStream& istream, const 
         HashMap<CndThing> templates;
         templates.reserve(header.numThingTemplates);
         parseThingList(istream, header.numThingTemplates, [&](CndThing&& t){
-            assert(templates.pushBack(t.name, std::move(t)).second);
+            world_ser_assert(templates.pushBack(t.name, std::move(t)).second,
+                "Found duplicated template '" + t.name.toStdString() + "'"
+            );
         });
         return templates;
     }

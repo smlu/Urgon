@@ -207,6 +207,13 @@ namespace libim::content::asset {
         static std::vector<CndThing> parseSection_Things(const InputStream& istream, const CndHeader& header);
         static std::vector<CndThing> readThings(const InputStream& istream);
         static void writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things);
+
+        // Note: Section PVS is optional and it doesn't need to be written but performance will be degraded.
+        //       Also if this section is not written, the sectors in sector section should have pvsIdx member set to -1
+        static std::size_t getOffset_PVS(const InputStream& istream, const CndHeader& header);
+        static ByteArray parseSection_PVS(const InputStream& istream);
+        static ByteArray readPVS(const InputStream& istream);
+        static void writeSection_PVS(OutputStream& ostream, const ByteArray& pvs);
     };
 }
 #endif // LIBIM_CND_H

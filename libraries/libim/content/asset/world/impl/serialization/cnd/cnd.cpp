@@ -447,3 +447,64 @@ void CND::writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<C
         );
     }
 }
+
+
+std::size_t CND::getOffset_PVS(const InputStream& istream, const CndHeader& header)
+{
+    AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
+        istream.seek(off);
+    });
+
+    // PVS section is at the end of thing section
+    istream.seek(getOffset_Things(istream, header));
+    istream.advance(sizeof(CndThingHeader) * header.numThings);
+
+    auto sizes = istream.read<CndThingSectorListSizes>();
+    istream.advance(
+        sizeof(CndPhysicsInfo)         * sizes.sizePhysicsInfoList    +
+        sizeof(uint32_t)               * sizes.sizeNumPathFramesList  +
+        sizeof(PathFrame)              * sizes.sizePathFrameList      +
+        sizeof(CndActorInfo)           * sizes.sizeActorInfoList      +
+        sizeof(CndWeaponInfo)          * sizes.sizeWeaponInfoList     +
+        sizeof(CndExplosionInfo)       * sizes.sizeExplosionInfoList  +
+        sizeof(CndItemInfo)            * sizes.sizeItemInfoList       +
+        sizeof(CndHintUserVal)         * sizes.sizeHintUserValueList  +
+        sizeof(CndParticleInfo)        * sizes.sizeParticleInfoList   +
+        sizeof(CndAiControlInfoHeader) * sizes.sizeAiControlInfoList  +
+        sizeof(Vector3f)               * sizes.sizeAiPathFrameList
+    );
+
+    return istream.tell();
+}
+
+ByteArray CND::parseSection_PVS(const InputStream& istream)
+{
+    try {
+        return istream.read<ByteArray>(istream.read<uint32_t>());
+    }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_PVS",
+            "An exception was encountered while parsing section 'PVS': "s + e.what()
+        );
+    }
+}
+
+ByteArray CND::readPVS(const InputStream& istream)
+{
+    auto header = readHeader(istream);
+    istream.seek(getOffset_PVS(istream, header));
+    return parseSection_PVS(istream);
+}
+
+void CND::writeSection_PVS(OutputStream& ostream, const ByteArray& pvs)
+{
+    try {
+        ostream.write<int32_t>(safe_cast<int32_t>(pvs.size()));
+        ostream.write(pvs);
+    }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_PVS",
+            "An exception was encountered while writing section 'PVS': "s + e.what()
+        );
+    }
+}

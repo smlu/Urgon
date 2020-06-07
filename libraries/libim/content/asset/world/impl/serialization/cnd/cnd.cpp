@@ -1,6 +1,7 @@
 #include "cnd.h"
 #include "animation/cnd_key_structs.h"
 #include "sector/cnd_sector.h"
+#include "thing/cnd_thing.h"
 #include "../world_ser_common.h"
 
 #include <libim/utils/utils.h>

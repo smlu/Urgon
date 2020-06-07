@@ -106,15 +106,17 @@ protected:
         }
     }
 
-    std::string_view parseToken(std::size_t token_pos, std::string_view token, std::string_view arg)
+    std::string_view parseToken(std::size_t tokenPos, std::string_view token, std::string_view arg)
     {
-        if(token_pos == 0) {
+        if(tokenPos == 0) {
             m_exePath = token;
         }
         else if(token.compare(0, 1, "-") == 0 || token.compare(0, 2, "--") == 0)
         {
-            m_args.emplace(token, std::vector<std::string>());
-            return token;
+            auto s = libim::utils::split(token, "=", 1);
+            auto v = s.size() > 1 ? std::vector<std::string>{ std::string(s.at(1)) } : std::vector<std::string>();
+            m_args.emplace(s.at(0), std::move(v));
+            return s.at(0);
         }
         else if(!arg.empty()) {
             m_args.at(std::string(arg)).emplace_back(token);

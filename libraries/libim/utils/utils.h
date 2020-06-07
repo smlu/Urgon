@@ -1,10 +1,12 @@
 #ifndef LIBIM_UTILS_H
 #define LIBIM_UTILS_H
 #include <algorithm>
+#include <assert.h>
 #include <cctype>
 #include <cmath>
 #include <cstring>
 #include <iomanip>
+#include <optional>
 #include <string>
 #include <sstream>
 #include <string_view>
@@ -26,7 +28,7 @@ namespace libim::utils {
     namespace detail {
         inline bool compare_char(char c1, char c2)
         {
-            if(c1 == c2) {
+            if (c1 == c2) {
                 return true;
             }
             else if (std::toupper(c1) == std::toupper(c2)) {
@@ -39,7 +41,7 @@ namespace libim::utils {
         {
             std::size_t end = 0;
             while(end++ < len) {
-                if(str[end] == '\0') {
+                if (str[end] == '\0') {
                     break;
                 }
             }
@@ -236,7 +238,7 @@ namespace libim::utils {
         std::stringstream ss;
         ss.exceptions(std::ios::failbit);
 
-        if constexpr(base == 8) {
+        if constexpr (base == 8) {
             ss << std::oct << std::showbase;
         }
         else if constexpr (base == 10) {
@@ -249,7 +251,7 @@ namespace libim::utils {
                << std::hex;
         }
 
-        if constexpr(precision != 0)
+        if constexpr (precision != 0)
         {
             ss << std::setw(precision)
                << std::setfill('0')
@@ -315,6 +317,54 @@ namespace libim::utils {
                 [&it](const char & c){
                     return ::tolower(c) == ::tolower(*(it++));
             });
+    }
+
+
+    /**
+     * Splits input string view by delim string and returns
+     *
+     * @param str - input string to split.
+     * @param delims - optional string of deliminators by which to split input string.
+     *                 By default input string is splitted by space character.
+     * @param max - optional the maximum number of splits.
+     * @return std::vector of std::string_view elements
+     * */
+    [[nodiscard]] inline std::vector<std::string_view>
+    split(std::string_view str, std::string_view delims = "\t\n\v\f\r ", std::optional<std::size_t> optMax = std::nullopt)
+    {
+        assert(!optMax || optMax.value() > 0);
+        std::vector<std::string_view> result;
+        auto first = str.begin();
+        while (first != str.end() && optMax.value_or(1))
+        {
+            const auto second =
+                std::find_first_of(first, str.cend(), delims.cbegin(), delims.cend());
+            if (first != second)
+            {
+                result.emplace_back(
+                    str.substr(
+                        std::distance(str.cbegin(), first),
+                        std::distance(first, second)
+                ));
+                first = second; // Needed for if statement before return.
+            }
+
+            if (second == str.end()) break;
+            if(optMax) optMax = optMax.value() - 1;
+            first = std::next(second);
+        }
+
+        // If optMax and not whole string was parsed
+        // add remaining string to the list.
+        if (first != str.end()) {
+            result.emplace_back(
+                str.substr(
+                    std::distance(str.cbegin(), first),
+                    std::distance(first, str.cend())
+            ));
+        }
+
+        return result;
     }
 }
 

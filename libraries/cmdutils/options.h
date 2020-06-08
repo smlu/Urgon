@@ -1,13 +1,16 @@
 #ifndef CMDUTILS_OPTIONS_H
 #define CMDUTILS_OPTIONS_H
+#include <charconv>
 #include <cstdint>
-#include <cstring>
 #include <string>
 #include <unordered_map>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
+
+#include <libim/utils/utils.h>
 
 class CmdArgs
 {
@@ -81,6 +84,26 @@ public:
             return arg.at(0);
         }
         return "";
+    }
+
+    uint64_t uintArg(std::string_view argKey) const
+    {
+        using namespace std::string_literals;
+        auto it = m_args.find(std::string(argKey));
+        if(it == m_args.end()) {
+            throw std::out_of_range("Argument \'"s + std::string(argKey) + "\' doesn't exist"s );
+        }
+        if (it->second.empty()) {
+            throw std::out_of_range("Missing numeric value for argument \'"s + std::string(argKey) + "\'"s);
+        }
+
+        uint64_t num;
+        const auto& str = it->second.at(0);
+        if (auto [p, ec] = std::from_chars(str.data(), str.data()+str.size(), num); ec != std::errc()) {
+            throw std::invalid_argument("Invalid value '" + str + "' for argument '"s + std::string(argKey) + "'");
+        }
+
+        return num;
     }
 
     std::vector<std::string> unspecified() const

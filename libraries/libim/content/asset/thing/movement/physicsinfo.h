@@ -12,7 +12,7 @@ namespace libim::content::asset {
             None                         = 0x0,
             UseGravity                   = 0x1,
             UseThrust                    = 0x2,
-            AlignOrientWithSurface       = 0x10,
+            AlignToSurface               = 0x10,
             BounceOffSurface             = 0x20,
             SticksToFloor                = 0x40,
             SticksToWall                 = 0x80,
@@ -27,10 +27,12 @@ namespace libim::content::asset {
             IsCrouching                  = 0x10000,
             DoNotRotateVelocity          = 0x20000,
             PartialGravity               = 0x40000,   // half of world gravity
+            Uknown_800000                = 0x800000,  // 11_pyr_kidvsindy_2.cog
             TreadingWater                = 0x100000,
             NotAffectedByThrust          = 0x400000,
-            Rafting                      = 0x2000000, // mentioned in pru_lagoon.cog
-            Unknown_4000000              = 0x4000000,
+            MineCar                      = 0x1000000, // bab killtruck, sol mineplayer - minecar
+            Raft                         = 0x2000000, // mentioned in pru_lagoon.cog, 02_riv - raftplayer
+            Jeep                         = 0x4000000,
             Unknown_40000000             = 0x40000000
         };
 

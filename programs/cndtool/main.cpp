@@ -46,9 +46,12 @@ constexpr static auto scmdMaterial  = "material"sv;
 constexpr static auto optAnimations        = "--animations"sv;
 constexpr static auto optConvertToBmp      = "--bmp"sv;
 constexpr static auto optConvertToBmpShort = "-b"sv;
-constexpr static auto optConvertToWav      = "--wav"sv;
-constexpr static auto optConvertToWavShort = "-w"sv;
+constexpr static auto optMaxTex            = "--max-tex"sv;
+constexpr static auto optMipmap            = "--mipmap"sv;
 constexpr static auto optMaterials         = "--materials"sv;
+constexpr static auto optNoAnimations      = "--no-animations"sv;
+constexpr static auto optNoMaterials       = "--no-materials"sv;
+constexpr static auto optNoSounds          = "--no-sounds"sv;
 constexpr static auto optOutputDir         = "--output-dir"sv;
 constexpr static auto optOutputDirShort    = "-o"sv;
 constexpr static auto optReplace           = "--replace"sv;
@@ -56,11 +59,36 @@ constexpr static auto optReplaceShort      = "-r"sv;
 constexpr static auto optSounds            = "--sounds"sv;
 constexpr static auto optVerbose           = "--verbose"sv;
 constexpr static auto optVerboseShort      = "-v"sv;
+constexpr static auto optConvertToWav      = "--wav"sv;
+constexpr static auto optConvertToWavShort = "-w"sv;
 
 
 constexpr static auto kFailed  = "FAILED"sv;
 constexpr static auto kSuccess = "SUCCESS"sv;
 
+
+
+struct ExtractOptions final
+{
+    bool verboseOutput;
+    struct {
+        bool extract;
+    } key;
+
+    struct
+    {
+        bool extract;
+        bool convertToBmp;
+        std::optional<uint64_t> maxTex;
+        bool convertMipMap;
+    } mat;
+
+    struct
+    {
+        bool extract;
+        bool convertToWav;
+    } sound;
+};
 
 bool hasOptVerbose(const CndToolArgs& args)
 {
@@ -82,10 +110,10 @@ int execCmd(std::string_view cmd, const CndToolArgs& args);
 
 // Functions for extracting assets from level
 int execCmdExtract(const CndToolArgs& args);
-void extractAssets(const std::string& cndFile, std::string outDir, bool convertMaterials, bool convertSoundsToWav, bool verbose = false);
-std::size_t extractAnimations(const InputStream& istream, const std::string& outDir, bool verbose);
-std::size_t extractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials , bool verbose);
-std::size_t extractSounds(const InputStream& istream, const std::string& outDir, bool convetToWav, bool verbose);
+void extractAssets(const std::string& cndFile, std::string outDir, const ExtractOptions& opt);
+std::size_t extractAnimations(const InputStream& istream, const std::string& outDir, const ExtractOptions& opt);
+std::size_t extractMaterials(const InputStream& istream, const std::string& outDir, const ExtractOptions& opt);
+std::size_t extractSounds(const InputStream& istream, const std::string& outDir, const ExtractOptions& opt);
 
 // Functions for adding assets to level
 int execCmdAdd(std::string_view scmd, const CndToolArgs& args);
@@ -307,8 +335,13 @@ void printHelp(std::string_view cmd, std::string_view subcmd)
         std::cout << "  Usage: cndtool extract [options] <cnd-file-path>" << std::endl << std::endl;
         std::cout << "Option:        Long option:        Description:\n";
         std::cout << "  " << optConvertToBmpShort << SETW(18, ' ') << optConvertToBmp << SETW(63, ' ') << "Convert extracted material assets to BMP format\n";
-        std::cout << "  " << optConvertToWavShort << SETW(18, ' ') << optConvertToWav << SETW(67, ' ') << "Convert extracted IndyWV sound assets to WAV format\n";
-
+        std::cout << "  " <<                         SETW(24, ' ') << optMaxTex       << SETW(70, ' ') << "Max number of textures to convert from each material file.\n";
+        std::cout <<                                                                     SETW(67, ' ') << "By default all are converted.\n";
+        std::cout << "  " <<                         SETW(23, ' ') << optMipmap       << SETW(65, ' ') << "Convert mipmap LOD textures from each material file\n\n";
+        std::cout << "  " << optConvertToWavShort << SETW(18, ' ') << optConvertToWav << SETW(68, ' ') << "Convert extracted IndyWV sound assets to WAV format\n\n";
+        std::cout << "  " <<                         SETW(30, ' ') << optNoAnimations << SETW(36, ' ') << "Don't extract animation assets\n";
+        std::cout << "  " <<                         SETW(29, ' ') << optNoMaterials  << SETW(36, ' ') << "Don't extract material assets\n";
+        std::cout << "  " <<                         SETW(26, ' ') << optNoSounds     << SETW(37, ' ') << "Don't extract sound assets\n\n";
         std::cout << "  " << optOutputDirShort    << SETW(25, ' ') << optOutputDir    << SETW(22, ' ') << "Output folder\n";
         std::cout << "  " << optVerboseShort      << SETW(22, ' ') << optVerbose      << SETW(43, ' ') << "Verbose printout to the console\n";
     }
@@ -480,65 +513,92 @@ int execCmdList(const CndToolArgs& args)
 
 int execCmdExtract(const CndToolArgs& args)
 {
-    std::string inputFile = args.cndFile();
-    if(!fileExists(inputFile))
-    {
-        printErrorInvalidCnd(inputFile, cmdExtract);
-        return 1;
-    }
-
-    std::string outDir;
-    if(args.hasArg(optOutputDirShort)){
-        outDir = args.arg(optOutputDirShort);
-    }
-    else if(args.hasArg(optOutputDir)){
-        outDir = args.arg(optOutputDir);
-    }
-    else {
-        outDir += getBaseName(inputFile);
-    }
-
-    const bool bVerboseOutput      = args.hasArg(optVerboseShort) || args.hasArg(optVerbose) ;
-    const bool bConvertMatToBmp    = args.hasArg(optConvertToBmpShort) || args.hasArg(optConvertToBmp);
-    const bool bConvertIndyWVToWav = args.hasArg(optConvertToWavShort) || args.hasArg(optConvertToWav);
-
     try
     {
+        std::string inputFile = args.cndFile();
+        if(!fileExists(inputFile))
+        {
+            printErrorInvalidCnd(inputFile, cmdExtract);
+            return 1;
+        }
+
+        std::string outDir;
+        if(args.hasArg(optOutputDirShort)){
+            outDir = args.arg(optOutputDirShort);
+        }
+        else if(args.hasArg(optOutputDir)){
+            outDir = args.arg(optOutputDir);
+        }
+        else {
+            outDir += getBaseName(inputFile);
+        }
+
+        ExtractOptions opt;
+        opt.verboseOutput      = hasOptVerbose(args);
+        opt.key.extract        = !args.hasArg(optNoAnimations);
+        opt.mat.extract        = !args.hasArg(optNoMaterials);
+        opt.mat.convertToBmp   = args.hasArg(optConvertToBmpShort) || args.hasArg(optConvertToBmp);
+        opt.mat.convertMipMap  = args.hasArg(optMipmap);
+        if(args.hasArg(optMaxTex)) {
+            opt.mat.maxTex = args.uintArg(optMaxTex);
+        }
+        opt.sound.extract      = !args.hasArg(optNoSounds);
+        opt.sound.convertToWav = args.hasArg(optConvertToWavShort) || args.hasArg(optConvertToWav);
+
         /* Extract animations, materials & sounds */
-        extractAssets(inputFile, std::move(outDir), bConvertMatToBmp, bConvertIndyWVToWav, bVerboseOutput);
+        extractAssets(inputFile, std::move(outDir), opt);
         return 0;
     }
     catch(const std::exception& e)
     {
         std::cerr << "\nERROR: Failed to extract assets from CND file!" << std::endl;
-        std::cerr << "       Reason: " << e.what();
+        std::cerr << "       Reason: " << e.what() << std::endl;
         return 1;
     }
 }
 
-void extractAssets(const std::string& cndFile, std::string outDir, bool convertMaterials, bool convertSoundsToWav, bool verbose)
+void extractAssets(const std::string& cndFile, std::string outDir, const ExtractOptions& opt)
 {
+
+    if(!opt.key.extract &&
+       !opt.mat.extract &&
+       !opt.sound.extract)
+    {
+        std::cout << "Nothing to do!\n";
+        return;
+    }
+
     InputFileStream ifstream(cndFile);
 
-    auto nExtAnimFiles = extractAnimations(ifstream, outDir, verbose);
-    auto nExtMatFiles  = extractMaterials(ifstream, outDir, convertMaterials, verbose);
-    auto nExtSndFiles  = extractSounds(ifstream, outDir, convertSoundsToWav, verbose);
+    auto nExtAnimFiles = extractAnimations(ifstream, outDir, opt);
+    auto nExtMatFiles  = extractMaterials(ifstream, outDir, opt);
+    auto nExtSndFiles  = extractSounds(ifstream, outDir, opt);
 
     std::cout << "\n-------------------------------------\n";
-    std::cout << "Total extracted animations: " << nExtAnimFiles << std::endl;
-    std::cout << "Total extracted materials:  " << nExtMatFiles << std::endl;
-    std::cout << "Total extracted sounds:     " << nExtSndFiles << std::endl;
+    if(opt.key.extract) {
+        std::cout << "Total extracted animations: " << nExtAnimFiles << std::endl;
+    }
+    if(opt.mat.extract) {
+        std::cout << "Total extracted materials:  " << nExtMatFiles << std::endl;
+    }
+    if(opt.sound.extract) {
+        std::cout << "Total extracted sounds:     " << nExtSndFiles << std::endl;
+    }
 }
 
-std::size_t extractAnimations(const InputStream& istream, const std::string& outDir, bool verbose)
+std::size_t extractAnimations(const InputStream& istream, const std::string& outDir, const ExtractOptions& opt)
 {
+    if(!opt.key.extract) {
+        return 0;
+    }
+
     std::cout << "Extracting animations... " << std::flush;
     auto mapAnimations = CND::readKeyframes(istream);
 
     std::string keyDir;
     if(!mapAnimations.isEmpty())
     {
-        if(verbose) {
+        if(opt.verboseOutput) {
             std::cout << "\nFound: " << mapAnimations.size() << std::endl;
         }
 
@@ -554,7 +614,7 @@ std::size_t extractAnimations(const InputStream& istream, const std::string& out
 
     for(const auto& key : mapAnimations)
     {
-        if(verbose){
+        if(opt.verboseOutput){
             std::cout << "Extracting animation: " << key.name() << std::endl;
         }
 
@@ -567,8 +627,12 @@ std::size_t extractAnimations(const InputStream& istream, const std::string& out
     return mapAnimations.size();
 }
 
-std::size_t extractMaterials(const InputStream& istream, const std::string& outDir, bool convertMaterials, bool verbose)
+std::size_t extractMaterials(const InputStream& istream, const std::string& outDir, const ExtractOptions& opt)
 {
+    if(!opt.mat.extract) {
+        return 0;
+    }
+
     std::cout << "Extracting materials... " << std::flush;
     auto materials = CND::readMaterials(istream);
 
@@ -576,14 +640,14 @@ std::size_t extractMaterials(const InputStream& istream, const std::string& outD
     std::string bmpDir;
     if(!materials.isEmpty())
     {
-        if(verbose) {
+        if(opt.verboseOutput) {
             std:: cout << " Found: " << materials.size() << std::endl;
         }
 
         matDir = outDir + (outDir.empty() ? "" : "/" ) + "mat";
         makePath(matDir);
 
-        if(convertMaterials)
+        if(opt.mat.convertToBmp)
         {
             bmpDir = outDir + (outDir.empty() ? "" : "/" ) + "bmp";
             makePath(bmpDir);
@@ -591,41 +655,51 @@ std::size_t extractMaterials(const InputStream& istream, const std::string& outD
     }
 
     /* Save extracted materials to files */
+    const bool convert    = opt.mat.convertToBmp;
+    const uint64_t maxTex = opt.mat.maxTex.value_or(std::numeric_limits<uint64_t>::max());
+    if(convert && maxTex == 0) {
+        std::cout << "Warning: Materials won't be converted because option '" << optMaxTex << "' is 0!\n";
+    }
+
     for(const auto& mat : materials)
     {
-        if(verbose) {
+        if(opt.verboseOutput) {
             std::cout << "Extracting material: " <<  mat.name() << std::endl;
         }
 
         std::string matFilePath(matDir + "/" + mat.name());
         mat.serialize(OutputFileStream(std::move(matFilePath)));
 
-        if(verbose)
+        if(opt.verboseOutput)
         {
             std::cout << "  ================== Material Info ===================" << std::endl;
             printMaterialInfo(mat);
         }
 
         /* Print material mipmaps info and convert to bmp */
-        if(convertMaterials || verbose)
+        if(convert || opt.verboseOutput)
         {
-            uint32_t mmIdx = 0;
+            uint32_t texIdx = 0;
             for(const auto& mipmap : mat.mipmaps())
             {
-                if(verbose) {
-                    printMipmapInfo(mipmap, mmIdx);
+                if(opt.verboseOutput) {
+                    printMipmapInfo(mipmap, texIdx);
+                }
+                else if(texIdx >= maxTex) {
+                    break;
                 }
 
                 /* Save as bmp */
-                if(convertMaterials)
+                if(convert && texIdx < maxTex)
                 {
-                    for(std::size_t mipmapIdx = 0; mipmapIdx < mipmap.size(); mipmapIdx++)
+                    const std::size_t mmCount = opt.mat.convertMipMap ? mipmap.size() : 1;
+                    for(std::size_t mmIdx = 0; mmIdx < mmCount; mmIdx++)
                     {
-                        const std::string sufix = (mat.mipmaps().size() > 1 ? "_" + std::to_string(mmIdx) : "") + ".bmp";
-                        const std::string infix = mipmap.size() > 1 ? "_" + std::to_string(mipmapIdx) : "";
+                        const std::string sufix = (mat.mipmaps().size() > 1 && maxTex > 1 ? "_" + std::to_string(texIdx) : "") + ".bmp";
+                        const std::string infix = mmCount > 1 ? "_lod" + std::to_string(mmIdx) : "";
                         const std::string fileName = bmpDir + "/" + getBaseName(mat.name()) + infix + sufix;
 
-                        if(!SaveBmpToFile(fileName, mipmap.at(mipmapIdx).toBmp()))
+                        if(!SaveBmpToFile(fileName, mipmap.at(mmIdx).toBmp()))
                         {
                             std::cout << kFailed << std::endl;
                             return -1;
@@ -633,24 +707,28 @@ std::size_t extractMaterials(const InputStream& istream, const std::string& outD
                     }
                 }
 
-                mmIdx++;
+                texIdx++;
             }
         }
 
-        if(verbose) {
+        if(opt.verboseOutput) {
             std::cout << "  =============== Material Info End =================\n\n\n";
         }
     }
 
-    if(!verbose) {
+    if(!opt.verboseOutput) {
         std::cout << kSuccess << std::endl;
     }
 
     return materials.size();
 }
 
-std::size_t extractSounds(const InputStream& istream, const std::string& outDir, bool convetToWav, bool verbose)
+std::size_t extractSounds(const InputStream& istream, const std::string& outDir, const ExtractOptions& opt)
 {
+    if(!opt.sound.extract) {
+        return 0;
+    }
+
     std::cout << "Extracting sounds... " << std::flush;
     SoundBank sb(2);
     sb.importTrack(0, istream);
@@ -661,14 +739,14 @@ std::size_t extractSounds(const InputStream& istream, const std::string& outDir,
 
     if(!sounds.isEmpty())
     {
-        if(verbose) {
+        if(opt.verboseOutput) {
             std::cout << "\nFound: " << sounds.size() << std::endl;
         }
 
         outPath = outDir + (outDir.empty() ? "" : "/" ) + "sound";
         makePath(outPath);
 
-        if(convetToWav)
+        if(opt.sound.convertToWav)
         {
             wavDir = outDir + (outDir.empty() ? "" : "/" ) + "wav";
             makePath(wavDir);
@@ -677,7 +755,7 @@ std::size_t extractSounds(const InputStream& istream, const std::string& outDir,
 
     for (const auto& s : sounds)
     {
-        if(verbose) {
+        if(opt.verboseOutput) {
             std::cout << "Extracting sound: " << s.name() << std::endl;
         }
 
@@ -686,7 +764,7 @@ std::size_t extractSounds(const InputStream& istream, const std::string& outDir,
         outPath = outPath.parent_path();
 
         /* Save in WAV format */
-        if(convetToWav)
+        if(opt.sound.convertToWav)
         {
             OutputFileStream ofs(wavDir.append(s.name()));
             s.serialize(ofs, Sound::SerializeFormat::WAV);

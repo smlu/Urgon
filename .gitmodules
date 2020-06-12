@@ -1,0 +1,6 @@
+[submodule "libraries/3rdparty/libpng"]
+	path = libraries/3rdparty/libpng
+	url = git://git.code.sf.net/p/libpng/code
+[submodule "libraries/3rdparty/zlib/zlib"]
+	path = libraries/3rdparty/zlib/zlib
+	url = https://github.com/madler/zlib

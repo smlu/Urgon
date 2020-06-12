@@ -25,11 +25,16 @@ add_library(${PROJECT_NAME} STATIC
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC "../")
+target_include_directories(${PROJECT_NAME} PUBLIC ${ZLIB_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${PNG_INCLUDE_DIR})
+
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX  "")
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 # GCC < 9
 target_link_libraries(${PROJECT_NAME} PUBLIC
-    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs>
-    $<$<AND:$<CXX_COMPILER_ID:Clang>>:stdc++fs>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs> # std::filesystem GCC < 9
+    $<$<AND:$<CXX_COMPILER_ID:Clang>>:stdc++fs> # std::filesystem clang
+    png_static
+    zlibstatic
 )

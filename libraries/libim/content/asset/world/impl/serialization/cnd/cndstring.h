@@ -15,7 +15,7 @@ namespace libim::content::asset {
     template<std::size_t N>
     struct CndString : std::array<char, N> {
         using base_type = std::array<char, N>;
-        using typename base_type::array;
+        using std::array<char, N>::array;
         constexpr CndString() : base_type{ 0 } {}
         constexpr CndString(base_type a) : base_type(std::move(a))
         {

@@ -136,8 +136,8 @@ namespace libim::content::asset {
         * Parses sounds section.
         * Offset of istream has to be at the beginning of sound section.
         *
-        * @param Reference to the SbTrack
-        * @param Const reference to the InputStream
+        * @param istream - const reference to the InputStream
+        * @param track   - const reference to the SbTrack
         * @return Returns last sound file ID nonce
         */
         static uint32_t parseSection_Sounds(const InputStream& istream, audio::impl::SbTrack& track);

@@ -77,7 +77,7 @@ namespace libim {
     /**
     * Returns casted integral number of type T2 to type T1.
     *
-    * @param Number to cast.
+    * @param value - number to cast.
     * @returns Casted input number.
     * @throws bad_safe_cast if type T2 cannot be casted to type T1 due to overflow.
     */
@@ -92,6 +92,6 @@ namespace libim {
             std::numeric_limits<T2>::is_signed,
             std::numeric_limits<T1>::is_signed
         >::template cast<T1>(value);
-    };
+    }
 }
 #endif // LIBIM_SAFE_CAST_H

@@ -22,7 +22,7 @@ namespace libim::content::asset {
             Normal                   = 0x00,
             TwoSided                 = 0x01,
             Translucent              = 0x02,
-            Unknown_4                = 0x04,
+            Unknown_4                = 0x04, // collision?
         };
 
         struct VertexIdx

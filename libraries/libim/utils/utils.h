@@ -323,10 +323,10 @@ namespace libim::utils {
     /**
      * Splits input string view by delim string and returns
      *
-     * @param str - input string to split.
+     * @param str    - input string to split.
      * @param delims - optional string of deliminators by which to split input string.
      *                 By default input string is splitted by space character.
-     * @param max - optional the maximum number of splits.
+     * @param optMax - optional the maximum number of splits.
      * @return std::vector of std::string_view elements
      * */
     [[nodiscard]] inline std::vector<std::string_view>

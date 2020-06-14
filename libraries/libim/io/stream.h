@@ -40,7 +40,6 @@ namespace libim {
     }
 
 
-
     class Stream
     {
     public:
@@ -112,8 +111,6 @@ namespace libim {
 
             return readsome(data, length);
         }
-
-
 
 
     //    template<class T>
@@ -204,11 +201,12 @@ namespace libim {
             return tell() >= size();
         }
 
-        virtual void seek(std::size_t position) const = 0; // Set new absolute position relative to beginning of the stream
+        virtual void seek(std::size_t offset) const = 0; //!< Set new absolute offset relative to beginning of the stream.
         virtual std::size_t size() const  = 0;
         virtual std::size_t tell() const  = 0;
         virtual bool canRead() const  = 0;
         virtual bool canWrite() const = 0;
+        virtual void flush() = 0; //!< If implementation uses buffering it writes uncommitted changes to the underlying output sequence.
 
         void setName(std::string name)
         {
@@ -284,10 +282,13 @@ namespace libim {
     };
 
 
-
+    /*
+        Fix typed classes for Stream to represent only input or output stream.
+    */
     class InputStream : public virtual Stream
     {
     private:
+        using Stream::flush;
         using Stream::write;
     };
 
@@ -296,9 +297,6 @@ namespace libim {
     private:
         using Stream::read;
     };
-
-
-
 
     //template<> inline Stream& Stream::write(const InputStream& stream)
     //{
@@ -313,6 +311,7 @@ namespace libim {
 
 
 
+    /* Specialization of template member functions */
     template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type>
     T Stream::_read(tag<T>&&) const
     {

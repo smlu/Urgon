@@ -23,14 +23,42 @@ namespace libim {
         explicit FileStream(std::string filePath, bool truncate, Mode mode = ReadWrite);
         explicit FileStream(const std::filesystem::path& filePath, Mode mode = ReadWrite);
         explicit FileStream(const std::filesystem::path& filePath, bool truncate, Mode mode = ReadWrite);
+
+        /**
+         * Destructor
+         * @note File stream is closed automatically.
+         * @throw can throw if call to close() throws.
+         *        See close()
+         */
         virtual ~FileStream() override;
 
-        virtual void seek(std::size_t position) const override;
+        /**
+         * Move current reading or writing cursor position in file to new offset.
+         *
+         * @note When stream is writable it calls flush() before moving cursor.
+         * @param offset - new cursor offset relative to beginning of the stream.
+         * @throw FileStreamError - if call to flush() fails or
+         *        unable to move cursor e.g. offset out of file size bounds.
+        */
+        virtual void seek(std::size_t offset) const override;
+
         virtual std::size_t size() const override;
         virtual std::size_t tell() const override;
         virtual bool canRead() const override;
         virtual bool canWrite() const override;
+
+        /**
+         * Closes file stream.
+         * @note  Before file is closed the flush() member function is called.
+         * @throw Can throw under a debugger on windows if CloseHandle fails.
+         */
         virtual void close();
+
+        /**
+         * Writes data from output buffer to file
+         * @throw FileStreamError if unable to write or flush data to file.
+         */
+        virtual void flush() override;
 
     protected:
         virtual std::size_t readsome(byte_t* data, std::size_t length) const override;
@@ -59,6 +87,7 @@ namespace libim {
         {}
 
     private:
+        using FileStream::flush;
         using FileStream::write;
     };
 

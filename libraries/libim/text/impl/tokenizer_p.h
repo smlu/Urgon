@@ -66,6 +66,7 @@ namespace libim::text {
         }
 
     private:
+        virtual void flush() override {}
         virtual std::size_t readsome(byte_t* data, std::size_t length) const override
         {
             std::size_t  totalRead = 0;

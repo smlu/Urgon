@@ -24,6 +24,7 @@ namespace libim {
         virtual bool canWrite() const override;
 
     protected:
+        virtual void flush() override {}
         virtual std::size_t readsome(byte_t* data, std::size_t length) const override;
         virtual std::size_t writesome(const byte_t* data, std::size_t length) override;
 

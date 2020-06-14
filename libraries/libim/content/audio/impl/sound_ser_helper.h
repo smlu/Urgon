@@ -33,8 +33,8 @@ namespace libim::content::audio {
         IndyWVFileHeader wv;
         wv.sampleRate     = safe_cast<decltype(wv.sampleRate)>(sampleRate);
         wv.sampleBitSize  = safe_cast<decltype(wv.sampleBitSize)>(bitsPerSample);
-        wv.numChannels    = numChannels;
-        wv.dataSize       = dataSize;
+        wv.numChannels    = safe_cast<decltype(wv.numChannels)>(numChannels);
+        wv.dataSize       = safe_cast<decltype(wv.dataSize)>(dataSize);
 
         // Write to output
         ostream.write(wv);

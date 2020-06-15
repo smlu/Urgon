@@ -20,15 +20,15 @@ namespace libim {
             ss << format;
         }
 
-        template<typename T, typename... Targs>
-        static void ss_printf(std::stringstream& ss, const char* format, T value, Targs&&... Fargs) // recursive variadic function
+        template<typename T, typename... TArgs>
+        static void ss_printf(std::stringstream& ss, const char* format, T value, TArgs&&... FArgs) // recursive variadic function
         {
             for ( ; *format != '\0'; format++ )
             {
                 if( *format == '%' )
                 {
                    ss << value;
-                   ss_printf(ss, format + 1, Fargs...);
+                   ss_printf(ss, format + 1, FArgs...);
                    return;
                 }
                 ss << *format;
@@ -63,22 +63,23 @@ namespace libim {
     }
 }
 
-#define LOG_WITH_LEVEL(l, msg, ...) \
-    libim::writeLog(__FILE__, __LINE__, l, msg, ##__VA_ARGS__)
 
-#define LOG_VERBOSE(msg, ...) \
-    LOG_WITH_LEVEL(libim::LogLevel::Verbose, msg, ##__VA_ARGS__)
+#define LOG_WITH_LEVEL(l, ...) \
+    libim::writeLog(__FILE__, __LINE__, l, __VA_ARGS__)
 
-#define LOG_DEBUG(msg, ...) \
-    LOG_WITH_LEVEL(libim::LogLevel::Debug, msg, ##__VA_ARGS__)
+#define LOG_VERBOSE(...) \
+    LOG_WITH_LEVEL(libim::LogLevel::Verbose, __VA_ARGS__)
 
-#define LOG_INFO(msg, ...) \
-    LOG_WITH_LEVEL(libim::LogLevel::Info, msg, ##__VA_ARGS__)
+#define LOG_DEBUG(...) \
+    LOG_WITH_LEVEL(libim::LogLevel::Debug, __VA_ARGS__)
 
-#define LOG_WARNING(msg, ...) \
-    LOG_WITH_LEVEL(libim::LogLevel::Warning, msg, ##__VA_ARGS__)
+#define LOG_INFO(...) \
+    LOG_WITH_LEVEL(libim::LogLevel::Info, __VA_ARGS__)
 
-#define LOG_ERROR(msg, ...) \
-    LOG_WITH_LEVEL(libim::LogLevel::Error, msg, ##__VA_ARGS__)
+#define LOG_WARNING(...) \
+    LOG_WITH_LEVEL(libim::LogLevel::Warning, __VA_ARGS__)
+
+#define LOG_ERROR(...) \
+    LOG_WITH_LEVEL(libim::LogLevel::Error, __VA_ARGS__)
 
 #endif // LOG_H

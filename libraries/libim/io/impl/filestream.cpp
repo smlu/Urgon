@@ -205,7 +205,7 @@ struct FileStream::FileStreamImpl
 
             if(sync)
             {
-            #ifdef OS_WINDOW
+            #ifdef OS_WINDOWS
                 if(!FlushFileBuffers(hFile)) {
             #else // Unix
                 if (fsync(fd) != 0) {

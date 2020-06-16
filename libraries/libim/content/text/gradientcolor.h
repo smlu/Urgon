@@ -1,11 +1,11 @@
-#ifndef LIBIM_GRADIANTCOLOR_H
-#define LIBIM_GRADIANTCOLOR_H
+#ifndef LIBIM_GRADIENTCOLOR_H
+#define LIBIM_GRADIENTCOLOR_H
 #include "../../math/color.h"
 #include <string>
 
 namespace libim::content::text {
 
-    struct GradiantColor final
+    struct GradientColor final
     {
         Color top;
         Color middle;
@@ -24,13 +24,13 @@ namespace libim::content::text {
             return top.isZero() && middle.isZero() && bottomLeft.isZero() && bottomRight.isZero();
         }
 
-        constexpr inline bool operator == (const GradiantColor& rhs) const noexcept
+        constexpr inline bool operator == (const GradientColor& rhs) const noexcept
         {
             return top == rhs.top && middle == rhs.middle &&
                    bottomLeft == rhs.bottomLeft && bottomRight == rhs.bottomRight;
         };
 
-        constexpr inline bool operator != (const GradiantColor& rhs) const noexcept {
+        constexpr inline bool operator != (const GradientColor& rhs) const noexcept {
             return !(*this == rhs);
         }
 
@@ -51,4 +51,4 @@ namespace libim::content::text {
     };
 
 }
-#endif // LIBIM_GRADIANTCOLOR_H
+#endif // LIBIM_GRADIENTCOLOR_H

@@ -14,7 +14,7 @@
 #include <libim/content/asset/thing/particle.h>
 #include <libim/content/asset/thing/thing.h>
 #include <libim/content/asset/thing/weapon.h>
-#include <libim/content/text/gradiantcolor.h>
+#include <libim/content/text/gradientcolor.h>
 #include <libim/math/color.h>
 #include <libim/math/rotator.h>
 #include <libim/math/vector3.h>

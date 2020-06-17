@@ -86,11 +86,14 @@ public:
         return "";
     }
 
-    uint64_t uintArg(std::string_view argKey) const
+
+    uint64_t uintArg(std::string_view argKey, std::optional<uint64_t> optValue = std::nullopt) const
     {
         using namespace std::string_literals;
         auto it = m_args.find(std::string(argKey));
-        if(it == m_args.end()) {
+        if(it == m_args.end())
+        {
+            if(optValue) return optValue.value();
             throw std::out_of_range("Argument \'"s + std::string(argKey) + "\' doesn't exist"s );
         }
         if (it->second.empty()) {

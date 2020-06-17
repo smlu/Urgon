@@ -40,7 +40,7 @@ namespace libim {
         SharedRef(std::shared_ptr<DT> ptr)
         {
             if(!ptr) {
-                std::runtime_error("SharedRef: ptr is null");
+                std::invalid_argument("SharedRef: ptr is null");
             }
             ptr_ = ptr;
         }

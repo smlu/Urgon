@@ -49,7 +49,7 @@ namespace libim::content::asset {
         CogSymbolValue& operator[](const Id& id)
         {
             if(id == defaultId && !contains(defaultId)) {
-                throw std::runtime_error("Cannot insert default value into CogVTable via operator[]");
+                throw std::invalid_argument("Cannot insert default value into CogVTable via operator[]");
             }
             return base_::operator[](to_key(id));
         }

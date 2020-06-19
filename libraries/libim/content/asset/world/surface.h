@@ -29,15 +29,17 @@ namespace libim::content::asset {
             Metal                    = 0x10000,
             DeepWater                = 0x20000,
             ShallowWater             = 0x40000,
-            Dirt                     = 0x80000,
+            Earth                    = 0x80000,
             Web                      = 0x100000,   // Jones engine
             Lava                     = 0x200000,
-            Unknown_400000           = 0x400000,
+            Snow                     = 0x400000,
+            Wood                     = 0x800000,
             Hangable                 = 0x1000000,  // Player can hang on the ledge of this surface. In: tem_bossflood.cog, vol_block_ledgecontrol.cog
             WaterClimbOutLedge       = 0x2000000,
             UnknownCouldBeWhipSurf   = 0x10000000, // vol_lekk_door.cog
-            Wood                     = 0x40800000,
-            Vine                     = 0x80480000
+            Echo                     = 0x20000000, // indoor surface (eg jumphardecho sound class mode)
+            WoodEcho                 = 0x40000000, // indoor wood surface (eg jumpwood sound class mode)
+            EarthEcho                = 0x80000000  // indoor earth surface - vine surface has this flag set (eg jumpearthecho sound class mode)
             //missing flag for stone
         };
 

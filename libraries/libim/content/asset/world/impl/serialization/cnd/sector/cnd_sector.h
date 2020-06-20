@@ -10,11 +10,11 @@ namespace libim::content::asset {
     struct CndSectorHeader final
     {
         Flags<Sector::Flag> flags;
-        Color    ambientLight;
-        Color    extraLight;
-        ColorRgb tint; // tint rgb color
+        LinearColor    ambientLight;
+        LinearColor    extraLight;
+        LinearColorRgb tint; // tint rgb color
         Vector3f avgLightPos;
-        Color    avgLightInt; // average light intensity
+        LinearColor    avgLightInt; // average light intensity
         Vector2f avgLightFalloff;
         Box3f    collideBox;
         Box3f    boundBox;

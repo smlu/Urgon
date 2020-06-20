@@ -48,7 +48,7 @@ namespace libim::content::asset {
         Vector4f LOD_Distances;
         struct {
             int32_t enabled;
-            Color color;
+            LinearColor color;
             float startDepth;
             float endDepth;
         } fog;

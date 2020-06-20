@@ -48,7 +48,7 @@ namespace libim::content::asset {
         Id id;
         Flags<SurfaceFlag> surflags;
         std::optional<std::size_t> adjoinIdx;
-        std::vector<Color> vecIntensities;     // verticies color. Color of each vertex is applied over surface's texture and
+        std::vector<LinearColor> vecIntensities;     // verticies color. Color of each vertex is applied over surface's texture and
                                                // can give surface an additional ambient color e.g. underwater blue color.
     };
 

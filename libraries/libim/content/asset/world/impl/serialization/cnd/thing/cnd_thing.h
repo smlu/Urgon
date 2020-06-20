@@ -60,8 +60,8 @@ namespace libim::content::asset {
 
     struct CndThingLight final
     {
-        Color color;
-        Color emitColor;
+        LinearColor color;
+        LinearColor emitColor;
     };
 
 
@@ -127,8 +127,8 @@ namespace libim::content::asset {
         float maxHeadPitch;
         Vector3f fireOffset;
         Vector3f lightOffset;
-        Color lightIntensity;
-        GradiantColor voiceColor;
+        LinearColor lightIntensity;
+        GradientColor voiceColor;
         CndResourceName explodeTemplateName;
     };
     static_assert (sizeof(CndActorInfo) == 284);

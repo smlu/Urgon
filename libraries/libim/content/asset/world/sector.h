@@ -34,7 +34,7 @@ namespace libim::content::asset {
         Id id;
 
         Flags<Flag> flags;
-        ColorRgb tint;
+        LinearColorRgb tint;
 
         int32_t  pvsIdx;
         Vector3f center;
@@ -44,11 +44,11 @@ namespace libim::content::asset {
         Box3f boundBox;
         Box3f collideBox;
 
-        Color ambientLight;
-        Color extraLight;
-        Vector3f avgLightPos;  // average light position
-        Color    avgLightInt;  // average light intensity
-        Vector2f avgLightFalloff;
+        LinearColor ambientLight;
+        LinearColor extraLight;
+        Vector3f    avgLightPos;  // average light position
+        LinearColor avgLightInt;  // average light intensity
+        Vector2f    avgLightFalloff;
 
         struct AmbientSound {
             std::string sound;

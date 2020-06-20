@@ -7,10 +7,10 @@ namespace libim::content::text {
 
     struct GradientColor final
     {
-        Color top;
-        Color middle;
-        Color bottomLeft;
-        Color bottomRight;
+        LinearColor top;
+        LinearColor middle;
+        LinearColor bottomLeft;
+        LinearColor bottomRight;
 
         constexpr inline bool isValid() const noexcept {
              return top.red() != -1.0f && top.green() != -1.f && top.blue() != -1.f && top.alpha() != -1.0f;

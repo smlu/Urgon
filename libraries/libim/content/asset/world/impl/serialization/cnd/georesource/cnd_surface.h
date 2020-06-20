@@ -18,7 +18,7 @@ namespace libim::content::asset {
         GeoMode    geoMode;
         LightMode  lightMode;
         int32_t    adjoinIdx;  // -1, if no surface adjoin
-        Color      extraLight; // surface additional light
+        LinearColor      extraLight; // surface additional light
         Vector3f   normal;
         uint32_t   numVerts;
     };
@@ -28,7 +28,7 @@ namespace libim::content::asset {
     {
         uint32_t vertIdx;
         int32_t texIdx;
-        Color color;       // vertex color
+        LinearColor color;       // vertex color
     };
     static_assert(sizeof(CndSurfaceVerts) == 24);
 

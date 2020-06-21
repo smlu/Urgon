@@ -28,9 +28,9 @@ namespace libim::content::asset {
 
     enum class CndWorldFlag : uint32_t
     {
-        StaticWorld      = 0x1, // jones3dstatic.cnd
-        WorldInitialized = 0x2,
-        WorldHasFog      = 0x4
+        StaticWorld          = 0x1, // jones3dstatic.cnd
+        WorldInitialized     = 0x2,
+        UpdateFogRenderState = 0x4
     };
 
     struct CndHeader final

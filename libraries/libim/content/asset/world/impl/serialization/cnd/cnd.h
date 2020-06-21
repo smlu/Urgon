@@ -146,7 +146,6 @@ namespace libim::content::asset {
         static HashMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.
         static HashMap<Material> readMaterials(const InputStream& istream);
         static void writeSection_Materials(OutputStream& ostream, const HashMap<Material>& materials);
-        [[deprecated]] static bool replaceMaterial(const Material& mat, const std::string& filename);
 
         static std::size_t getOffset_Georesource(const InputStream& istream, const CndHeader& header);
         static Georesource parseSection_Georesource(const InputStream& istream, const CndHeader& cndHeader);

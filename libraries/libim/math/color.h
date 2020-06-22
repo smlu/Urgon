@@ -109,12 +109,12 @@ namespace libim {
         return LinearColor{{{{ LinearColor::clamp(rgb.red()), LinearColor::clamp(rgb.green()), LinearColor::clamp(rgb.blue()), LinearColor::clamp(alpha) }}}};
     }
 
-    constexpr inline LinearColorRgb makeColorRgb(float red, float green, float blue)
+    constexpr inline LinearColorRgb makeLinearColorRgb(float red, float green, float blue)
     {
         return LinearColorRgb{{{{ LinearColorRgb::clamp(red), LinearColorRgb::clamp(green), LinearColorRgb::clamp(blue) }}}};
     }
 
-    constexpr inline LinearColorRgb makeColorRgb(const LinearColor& rgba)
+    constexpr inline LinearColorRgb makeLinearColorRgb(const LinearColor& rgba)
     {
         return LinearColorRgb{{{{ LinearColorRgb::clamp(rgba.red()), LinearColorRgb::clamp(rgba.green()), LinearColorRgb::clamp(rgba.blue()) }}}};
     }

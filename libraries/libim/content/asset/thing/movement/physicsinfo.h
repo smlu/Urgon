@@ -28,7 +28,7 @@ namespace libim::content::asset {
             DoNotRotateVelocity          = 0x20000,
             PartialGravity               = 0x40000,   // half of world gravity
             Uknown_800000                = 0x800000,  // 11_pyr_kidvsindy_2.cog
-            TreadingWater                = 0x100000,
+            TreadingWater                = 0x100000,  // swimming in water?
             NotAffectedByThrust          = 0x400000,
             MineCar                      = 0x1000000, // bab killtruck, sol mineplayer - minecar
             Raft                         = 0x2000000, // mentioned in pru_lagoon.cog, 02_riv - raftplayer

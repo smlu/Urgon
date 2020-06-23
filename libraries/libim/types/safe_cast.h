@@ -78,8 +78,8 @@ namespace libim {
     * Returns casted integral number of type T2 to type T1.
     *
     * @param value - number to cast.
-    * @returns Casted input number.
-    * @throws bad_safe_cast if type T2 cannot be casted to type T1 due to overflow.
+    * @return Casted input number.
+    * @throw bad_safe_cast if type T2 cannot be casted to type T1 due to overflow.
     */
     template <typename T1, typename T2>
     [[nodiscard]] constexpr inline auto safe_cast(T2 value) ->

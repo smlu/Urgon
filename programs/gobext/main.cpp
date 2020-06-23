@@ -18,7 +18,7 @@ static constexpr auto OPT_VERBOSE_SHORT   ("-v");
 static constexpr auto OPT_HELP            ("--help");
 static constexpr auto OPT_HELP_SHORT      ("-h");
 
-
+using namespace cmdutils;
 using namespace gobext;
 using namespace libim;
 

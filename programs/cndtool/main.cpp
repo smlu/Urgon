@@ -21,7 +21,7 @@
 #define SETW(n, f)  std::right << std::setfill(f) << std::setw(n)
 #define SET_VINFO_LW(n) SETW(32 + n, '.')
 
-
+using namespace cmdutils;
 using namespace cndtool;
 using namespace libim;
 using namespace libim::content::audio;

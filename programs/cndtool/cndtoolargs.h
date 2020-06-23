@@ -5,7 +5,7 @@
 #include <libim/utils/utils.h>
 #include <cmdutils/options.h>
 namespace cndtool {
-    class CndToolArgs : public CmdArgs
+    class CndToolArgs : public cmdutils::CmdArgs
     {
     public:
         CndToolArgs(std::size_t argc, const char *argv[])

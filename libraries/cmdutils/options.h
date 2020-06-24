@@ -16,7 +16,7 @@ namespace cmdutils {
     class CmdArgs
     {
     protected:
-        constexpr static std::string_view ARG_UNSPECIFIED_KEY = "_unspecified_";
+        constexpr static std::string_view kKeyPosArgs = "_positional_args_";
         CmdArgs() = default;
 
     public:
@@ -87,7 +87,6 @@ namespace cmdutils {
             return "";
         }
 
-
         uint64_t uintArg(std::string_view argKey, std::optional<uint64_t> optValue = std::nullopt) const
         {
             using namespace std::string_literals;
@@ -97,7 +96,9 @@ namespace cmdutils {
                 if(optValue) return optValue.value();
                 throw std::out_of_range("Argument \'"s + std::string(argKey) + "\' doesn't exist"s );
             }
-            if (it->second.empty()) {
+            if (it->second.empty())
+            {
+                if(optValue) return optValue.value();
                 throw std::out_of_range("Missing numeric value for argument \'"s + std::string(argKey) + "\'"s);
             }
 
@@ -110,9 +111,10 @@ namespace cmdutils {
             return num;
         }
 
-        std::vector<std::string> unspecified() const
+        /** Returns list of positional arguments that were not parsed */
+        std::vector<std::string> positionalArgs() const
         {
-            return args(ARG_UNSPECIFIED_KEY);
+            return args(kKeyPosArgs);
         }
 
         const std::string& exePath() const
@@ -149,7 +151,7 @@ namespace cmdutils {
                 m_args.at(std::string(arg)).emplace_back(token);
             }
             else  {
-                m_args[std::string(ARG_UNSPECIFIED_KEY)].emplace_back(token);
+                m_args[std::string(kKeyPosArgs)].emplace_back(token);
             }
 
             return "";

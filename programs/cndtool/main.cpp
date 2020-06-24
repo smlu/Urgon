@@ -142,8 +142,8 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
     std::cout << "Patching CND file... "  << std::flush;
 
     std::vector<AssetT> newAssets;
-    newAssets.reserve(args.unspecified().size());
-    for (const auto& assetFile : args.unspecified())
+    newAssets.reserve(args.positionalArgs().size());
+    for (const auto& assetFile : args.positionalArgs())
     {
         try
         {
@@ -233,7 +233,7 @@ bool execCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndW
         auto mapAssets = cndReadAssets(ifstream);
         ifstream.close();
 
-        for(const auto& asset : args.unspecified())
+        for(const auto& asset : args.positionalArgs())
         {
             if(mapAssets.contains(asset)) {
                 mapAssets.erase(asset);

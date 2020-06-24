@@ -32,13 +32,13 @@ int main(int argc, const char *argv[])
     if(argc < 2 ||
        opt.hasArg(OPT_HELP) ||
        opt.hasArg(OPT_HELP_SHORT) ||
-       opt.unspecified().empty())
+       opt.positionalArgs().empty())
     {
         printHelp();
         return 1;
     }
 
-    std::string inputFile = opt.unspecified().at(0);
+    std::string inputFile = opt.positionalArgs().at(0);
     if(!fileExists(inputFile))
     {
         std::cerr << "Error: File \"" << inputFile << "\" does not exists!";

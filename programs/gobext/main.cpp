@@ -120,7 +120,7 @@ bool extractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outD
             }
 
             /* Open output file stream */
-            OutputFileStream ofs(outPath);
+            OutputFileStream ofs(outPath, /*truncate=*/true);
 
             /* Write entry to file */
             ByteArray buffer(4096);

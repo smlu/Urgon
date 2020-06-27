@@ -619,7 +619,7 @@ std::size_t extractAnimations(const InputStream& istream, const std::string& out
         }
 
         std::string keyFilePath(keyDir + "/" + key.name());
-        OutputFileStream ofs(std::move(keyFilePath));
+        OutputFileStream ofs(std::move(keyFilePath), /*truncate=*/true);
         key.serialize(TextResourceWriter(ofs), keyHeaderComment);
     }
 
@@ -668,7 +668,7 @@ std::size_t extractMaterials(const InputStream& istream, const std::string& outD
         }
 
         std::string matFilePath(matDir + "/" + mat.name());
-        mat.serialize(OutputFileStream(std::move(matFilePath)));
+        mat.serialize(OutputFileStream(std::move(matFilePath), /*truncate=*/true));
 
         if(opt.verboseOutput)
         {
@@ -759,14 +759,14 @@ std::size_t extractSounds(const InputStream& istream, const std::string& outDir,
             std::cout << "Extracting sound: " << s.name() << std::endl;
         }
 
-        OutputFileStream ofs(outPath.append(s.name()));
+        OutputFileStream ofs(outPath.append(s.name()), /*truncate=*/true);
         s.serialize(ofs, Sound::SerializeFormat::IndyWV);
         outPath = outPath.parent_path();
 
         /* Save in WAV format */
         if(opt.sound.convertToWav)
         {
-            OutputFileStream ofs(wavDir.append(s.name()));
+            OutputFileStream ofs(wavDir.append(s.name()), /*truncate=*/true);
             s.serialize(ofs, Sound::SerializeFormat::WAV);
             wavDir = wavDir.parent_path();
         }

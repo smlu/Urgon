@@ -25,7 +25,7 @@ using namespace libim::utils;
 
             /* Open new output cnd file */
             const std::string patchedCndFile = cndFile + ".patched";
-            OutputFileStream ofstream(patchedCndFile);
+            OutputFileStream ofstream(patchedCndFile, /*truncate=*/true);
 
             /* Copy input cnd file to output stream until materials section */
             const auto matSectionOffset = CND::getOffset_Materials(ifstream);
@@ -78,7 +78,7 @@ using namespace libim::utils;
 
             /* Open new output cnd file */
             const std::string patchedCndFile = cndFile + ".patched";
-            OutputFileStream ofstream(patchedCndFile);
+            OutputFileStream ofstream(patchedCndFile, /*truncate=*/true);
 
             /* Copy input cnd file to output stream until materials section */
             const auto keySectionOffset = CND::getOffset_Keyframes(ifstream, cndHeader);

@@ -69,10 +69,6 @@ struct FileStream::FileStreamImpl
         mode(mode),
         filePath(std::move(fp))
     {
-        if(truncate && mode != Read) {
-            std::filesystem::remove(filePath);
-        }
-
         auto flags = [&]()
         {
             switch (mode)
@@ -85,12 +81,11 @@ struct FileStream::FileStreamImpl
                 return static_cast<DWORD>(-1);
             #else
             case Read:      return O_RDONLY;
-            case Write:     return O_WRONLY | O_CREAT | O_TRUNC;
-            case ReadWrite: return O_RDWR   | O_CREAT | O_TRUNC;
+            case Write:     return O_WRONLY | O_CREAT;
+            case ReadWrite: return O_RDWR   | O_CREAT;
             default:
                 return -1;
             #endif
-
             }
         }();
 
@@ -105,15 +100,15 @@ struct FileStream::FileStreamImpl
            to flag param of function CreateFileX.
            See: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers#remarks
         */
+        DWORD dwCreationDisposition = flags == GENERIC_READ ? OPEN_EXISTING : OPEN_ALWAYS;
         #if _WIN32_WINNT >= _WIN32_WINNT_WIN8
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
             std::wstring wPath = converter.from_bytes(filePath.c_str());
-
             hFile = CreateFile2(
                         wPath.c_str(),
                         flags,
                         FILE_SHARE_READ,
-                        (flags == GENERIC_READ ? OPEN_EXISTING : OPEN_ALWAYS),
+                        dwCreationDisposition,
                         nullptr
                     );
         #else
@@ -121,14 +116,19 @@ struct FileStream::FileStreamImpl
                         filePath.c_str(),
                         flags,
                         FILE_SHARE_READ,
-                        NULL,
-                        (flags == GENERIC_READ ? OPEN_EXISTING : OPEN_ALWAYS),
+                        nullptr,
+                        dwCreationDisposition,
                         FILE_ATTRIBUTE_NORMAL,
-                        NULL
+                        nullptr
                     );
         #endif
 
         if (hFile == INVALID_HANDLE_VALUE) {
+            throw FileStreamError(getLastErrorAsString());
+        }
+
+        /* Truncate file if writable */
+        if ((flags & GENERIC_WRITE) && truncate && !SetEndOfFile(hFile)) {
             throw FileStreamError(getLastErrorAsString());
         }
 
@@ -144,8 +144,12 @@ struct FileStream::FileStreamImpl
             fileSize = lSize.LowPart;
         #endif
 
-    #else // Not Win
+    #else // Unix
         /* Open file */
+        if (mode != Read && truncate) {
+            flags |= O_TRUNC;
+        }
+
         fd = open(filePath.c_str(), flags, (mode_t)0600);
         if (fd == -1) {
             throw FileStreamError(strerror(errno));
@@ -257,7 +261,7 @@ struct FileStream::FileStreamImpl
     #ifdef OS_WINDOWS
         LARGE_INTEGER li;
         li.QuadPart = offset;
-        li.LowPart = SetFilePointer(hFile, li.LowPart, &li.HighPart, FILE_BEGIN);
+        li.LowPart  = SetFilePointer(hFile, li.LowPart, &li.HighPart, FILE_BEGIN);
         if (li.LowPart == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR) {
     #else
         auto off = lseek(fd, offset, SEEK_SET);

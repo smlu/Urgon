@@ -16,7 +16,7 @@ namespace libim {
     inline LogLevel gLogLevel = LogLevel::Debug;
 
     namespace detail {
-        inline  void ss_printf(std::stringstream& ss, const char* format) {
+        inline void ss_printf(std::stringstream& ss, const char* format) {
             ss << format;
         }
 
@@ -25,7 +25,7 @@ namespace libim {
         {
             for ( ; *format != '\0'; format++ )
             {
-                if( *format == '%' )
+                if ( *format == '%' )
                 {
                    ss << value;
                    ss_printf(ss, format + 1, FArgs...);

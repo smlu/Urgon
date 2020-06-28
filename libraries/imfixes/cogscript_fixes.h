@@ -8,7 +8,7 @@
 #include <libim/utils/utils.h>
 
 namespace imfixes {
-    namespace details {
+    namespace detail {
         using namespace libim::content::asset;
         using namespace libim::utils;
 
@@ -52,13 +52,13 @@ namespace imfixes {
 
     bool isMalformedCogScript(const libim::content::asset::CogScript& s)
     {
-        using namespace  details;
+        using namespace  detail;
         return get_cog_script_fix(s.name()) != kCogScriptFixes.end();
     }
 
     void fixCogScript(libim::content::asset::CogScript& s)
     {
-        using namespace  details;
+        using namespace  detail;
         auto it = get_cog_script_fix(s.name());
         if( it != kCogScriptFixes.end() ) {
             it->second(s);

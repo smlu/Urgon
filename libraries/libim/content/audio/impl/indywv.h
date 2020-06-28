@@ -47,7 +47,7 @@ namespace libim::content::audio {
         static ByteArray inflate(const InputStream& istream)
         {
             std::size_t mode = 1;
-            IndyVWHeader header;
+            IndyVWHeader header{};
 
             std::size_t infSize  = istream.read<uint32_t>();
             auto unknown1 = istream.read<int8_t>();
@@ -72,7 +72,7 @@ namespace libim::content::audio {
 
             if(mode == 2 &&
                header.unknown2 == 0x1111 &&
-               header.unknown3 == 0x64 &&
+               header.unknown3 == 0x64   &&
                header.unknown4 == 0x2222 &&
                istream.peek<decltype(kWvsmId)>() == kWvsmId)
             {

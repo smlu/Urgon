@@ -593,13 +593,13 @@ namespace libim {
     template <typename T>
     std::unique_ptr<T> Stream::_read(tag<std::unique_ptr<T>>&&) const
     {
-        return std::unique_ptr<T>(new T(this->read<T>()));
+        return std::make_unique<T>(this->read<T>());
     }
 
     template <typename T>
     std::unique_ptr<T> Stream::_read(std::size_t lenHint, tag<std::unique_ptr<T>>&&) const
     {
-        return std::unique_ptr<T>(new T(this->read<T>(lenHint)));
+        return std::make_unique<T>(this->read<T>(lenHint));
     }
 
     template <typename T>
@@ -612,13 +612,13 @@ namespace libim {
     template <typename T>
     std::shared_ptr<T> Stream::_read(tag<std::shared_ptr<T>>&&) const
     {
-        return std::shared_ptr<T>(new T(this->read<T>()));
+        return std::make_shared<T>(this->read<T>());
     }
 
     template <typename T>
     std::shared_ptr<T> Stream::_read(std::size_t lenHint, tag<std::shared_ptr<T>>&&) const
     {
-        return std::shared_ptr<T>(new T(this->read<T>(lenHint)));
+        return std::make_shared<T>(this->read<T>(lenHint));
     }
 
     template <typename T>

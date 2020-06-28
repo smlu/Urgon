@@ -90,19 +90,9 @@ namespace libim {
             const auto nDirSize = ifs->read<uint32_t>();
 
             /* Read Directory */
-            auto directory = std::make_shared<GobFileDirectory>();
+            auto directory     = std::make_shared<GobFileDirectory>();
             directory->entries = ifs->read<std::vector<GobFileEntry>>(nDirSize);
-
-            // TODO: measure if below method is faster
-    //       // directory->entries.resize(nDirSize);
-    //        const auto nToRead = nDirSize * sizeof(GobFileEntry);
-    //        if(!ifs->read(reinterpret_cast<byte_t*>(directory->entries.data()), nDirSize * sizeof(GobFileEntry)))
-    //        {
-    //            std::cerr << "GOB file error could not read directory: " << IosErrorStr(ifs) << "!\n";
-    //            return nullptr;
-    //        }
-
-            directory->stream = std::move(ifs);
+            directory->stream  = std::move(ifs);
             return directory;
 
         }

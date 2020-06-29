@@ -216,30 +216,53 @@ namespace libim {
         return svpext == ext;
     }
 
-    inline bool isFilePath(const std::string& path)
+    inline bool isFilePath(const std::filesystem::path& path, OptionalRef<std::error_code> ec = std::nullopt)
     {
-        return path.find_last_of(".") != std::string::npos;
+        using namespace std::filesystem;
+        if (ec) {
+            return is_regular_file(path, *ec) || path.has_extension();
+        }
+        return is_regular_file(path) || path.has_extension();
+    }
+
+    inline bool isFilePath(const std::string& path, OptionalRef<std::error_code> ec)
+    {
+        return isFilePath(std::filesystem::path(path), ec);
     }
 
     inline bool fileExists(const std::filesystem::path& filePath)
     {
-        if(filePath.empty()) {
+        if(filePath.empty() || !isFilePath(filePath)) {
             return false;
         }
 
         return std::filesystem::exists(filePath);
     }
 
+    inline bool isDirPath(const std::filesystem::path& path, OptionalRef<std::error_code> ec = std::nullopt)
+    {
+        using namespace std::filesystem;
+        if (ec) {
+            return is_directory(path, *ec) || !isFilePath(path);
+        }
+        return is_directory(path) || !isFilePath(path);
+    }
+
+    inline bool isDirPath(const std::string& path, OptionalRef<std::error_code> ec)
+    {
+        return isDirPath(std::filesystem::path(path), ec);
+    }
+
     inline bool dirExists(const std::filesystem::path& dirPath)
     {
-        if(dirPath.empty()) {
+        if(dirPath.empty() || isFilePath(dirPath)) {
             return false;
         }
         else if(!isNativePath(dirPath.string())) {
             return dirExists(getNativePath(dirPath.string()));
         }
 
-         return std::filesystem::exists(dirPath);
+        return std::filesystem::exists(dirPath);
     }
 
     inline bool makeDir(const std::filesystem::path& dirName)
@@ -298,7 +321,7 @@ namespace libim {
         return removeFile(file, ec);
     }
 
-    inline bool renameFile(const std::filesystem::path& from, const std::filesystem::path&& to, bool override = true)
+    inline bool renameFile(const std::filesystem::path& from, const std::filesystem::path& to, bool override = true)
     {
         if(fileExists(to) && !override) {
             return false;

@@ -337,22 +337,5 @@ namespace libim {
             return false;
         }
     }
-
-    inline std::string iosErrorStr(const std::ios& ios)
-    {
-        std::string error = "No error";
-        if(ios.eof()){
-            error = "End of stream reached";
-        }
-        else if(ios.bad()) {
-            error = "I/O stream error!";
-        }
-        else if(ios.fail()) {
-            error = "Internal stream error";
-        }
-
-        return error;
-    }
-
 }
 #endif // LIBIM_COMMON_H

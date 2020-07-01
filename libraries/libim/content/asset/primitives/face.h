@@ -28,7 +28,7 @@ namespace libim::content::asset {
         struct VertexIdx
         {
             std::size_t vertIdx;
-            std::optional<std::size_t> texIdx;
+            std::optional<std::size_t> uvIdx;  // index in UV list
         };
 
         Flags<Flag> flags;
@@ -43,7 +43,7 @@ namespace libim::content::asset {
 
 
     inline bool operator == (const Face::VertexIdx& lhs, const Face::VertexIdx& rhs) {
-        return lhs.vertIdx == rhs.vertIdx && lhs.texIdx == rhs.texIdx;
+        return lhs.vertIdx == rhs.vertIdx && lhs.uvIdx == rhs.uvIdx;
     }
 
     inline bool operator != (const Face::VertexIdx& lhs, const Face::VertexIdx& rhs) {

@@ -119,8 +119,8 @@ Georesource CND::parseSection_Georesource(const InputStream& istream, const CndH
             s.vecIntensities.reserve(h.numVerts);
             for (auto& v : s.verts)
             {
-                v.vertIdx   = safe_cast<decltype(v.vertIdx)>(itVerts->vertIdx);
-                v.texIdx    = makeOptionalIdx(itVerts->texIdx);
+                v.vertIdx = safe_cast<decltype(v.vertIdx)>(itVerts->vertIdx);
+                v.uvIdx   = makeOptionalIdx(itVerts->uvIdx);
                 s.vecIntensities.push_back(std::move(itVerts->color));
                 ++itVerts;
             }
@@ -192,7 +192,7 @@ void CND::writeSection_Georesource(OutputStream& ostream, const Georesource& geo
             {
                 vecSurfVerts.push_back({
                     safe_cast<decltype(CndSurfaceVerts::vertIdx)>(v.vertIdx),
-                    fromOptionalIdx(v.texIdx),
+                    fromOptionalIdx(v.uvIdx),
                     s.vecIntensities.at(idx)
                 });
             }

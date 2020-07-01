@@ -27,7 +27,7 @@ namespace libim::content::asset {
     struct CndSurfaceVerts
     {
         uint32_t vertIdx;
-        int32_t texIdx;
+        int32_t uvIdx;
         LinearColor color;       // vertex color
     };
     static_assert(sizeof(CndSurfaceVerts) == 24);

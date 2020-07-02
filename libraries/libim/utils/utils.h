@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstring>
 #include <iomanip>
+#include <iterator>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -15,10 +16,12 @@
 #include <utility>
 #include <vector>
 
+#include <libim/types/safe_cast.h>
+
 #define CONCATENATE_DIRECT(s1, s2) s1##s2
 #define CONCATENATE(s1, s2) CONCATENATE_DIRECT(s1, s2)
 
-// Annonymous variable
+// Anonymous variable
 #ifdef _MSC_VER
 # define ANOVAR(str) CONCATENATE(str, __COUNTER__)
 #else
@@ -174,8 +177,9 @@ namespace libim::utils {
     template<typename SourceIt, typename T>
     SourceIt copy(SourceIt srcIt, const std::size_t count, T& dest)
     {
+        using dt = typename std::iterator_traits<SourceIt>::difference_type;
         dest.reserve(count);
-        auto srcEnd = std::next(srcIt, count);
+        auto srcEnd = std::next(srcIt, safe_cast<dt>(count));
         std::copy(srcIt, srcEnd, std::back_inserter(dest));
         return srcEnd;
     }
@@ -218,7 +222,7 @@ namespace libim::utils {
     using underlying_type_t = typename underlying_type<T>::type;
 
 
-    /* Returns number of digits in the number. */
+    /* Returns number of digits in the unsigned number. */
     template<typename T>
     [[nodiscard]] inline std::size_t numdigits(T i)
     {
@@ -309,7 +313,7 @@ namespace libim::utils {
         return s.size() >= x.size() && s.compare(s.size() - x.size(), s.npos, x) == 0;
     }
 
-    /** Case Insensitive check if string s ends with x */
+    /** Case insensitive check if string s ends with x */
     [[nodiscard]] inline bool iends_with(const std::string& s, std::string_view x)
     {
         auto it = x.begin();
@@ -320,17 +324,16 @@ namespace libim::utils {
             });
     }
 
-
     /**
      * Splits input string view by delim string and returns
      *
      * @param str    - input string to split.
-     * @param delims - optional string of deliminators by which to split input string.
-     *                 By default input string is splitted by space character.
+     * @param delims - optional string of deliminator chars by which to split input string.
+     *                 By default input string is splitted by whitespace character.
      * @param optMax - optional the maximum number of splits.
      * @return std::vector of std::string_view elements
      * */
-    [[nodiscard]] inline std::vector<std::string_view>
+    [[nodiscard]] static std::vector<std::string_view>
     split(std::string_view str, std::string_view delims = "\t\n\v\f\r ", std::optional<std::size_t> optMax = std::nullopt)
     {
         assert(!optMax || optMax.value() > 0);
@@ -344,24 +347,24 @@ namespace libim::utils {
             {
                 result.emplace_back(
                     str.substr(
-                        std::distance(str.cbegin(), first),
-                        std::distance(first, second)
+                        safe_cast<std::size_t>(std::distance(str.cbegin(), first)),
+                        safe_cast<std::size_t>(std::distance(first, second))
                 ));
                 first = second; // Needed for if statement before return.
             }
 
             if (second == str.end()) break;
-            if(optMax) optMax = optMax.value() - 1;
+            if (optMax) optMax = optMax.value() - 1;
             first = std::next(second);
         }
 
-        // If optMax and not whole string was parsed
-        // add remaining string to the list.
+        // Add remaining string to the list
+        // if optMax and not whole string was parsed
         if (first != str.end()) {
             result.emplace_back(
                 str.substr(
-                    std::distance(str.cbegin(), first),
-                    std::distance(first, str.cend())
+                    safe_cast<std::size_t>(std::distance(str.cbegin(), first)),
+                    safe_cast<std::size_t>(std::distance(first, str.cend()))
             ));
         }
 

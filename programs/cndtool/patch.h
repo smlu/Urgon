@@ -1,5 +1,6 @@
-#ifndef PATCH_H
-#define PATCH_H
+#ifndef CNDTOOL_PATCH_H
+#define CNDTOOL_PATCH_H
+#include <filesystem>
 #include <string>
 
 #include <libim/content/asset/material/material.h>
@@ -13,9 +14,10 @@ using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::utils;
 
-    namespace cndtool {
-    bool patchCndMaterials(const std::string& cndFile, const HashMap<Material>& materials)
+namespace cndtool {
+    bool patchCndMaterials(const std::filesystem::path& cndFile, const HashMap<Material>& materials)
     {
+        const std::filesystem::path patchedCndFile = cndFile.u8string() + ".patched";
         try
         {
             InputFileStream ifstream(cndFile);
@@ -24,7 +26,6 @@ using namespace libim::utils;
             auto cndHeader = CND::readHeader(ifstream);
 
             /* Open new output cnd file */
-            const std::string patchedCndFile = cndFile + ".patched";
             OutputFileStream ofstream(patchedCndFile, /*truncate=*/true);
 
             /* Copy input cnd file to output stream until materials section */
@@ -46,7 +47,7 @@ using namespace libim::utils;
             /* Update materials info in CND header */
             ofstream.seek(offsetof(CndHeader, numMaterials));
             ofstream.write(safe_cast<uint32_t>(materials.size())); // numMaterials field
-            if(cndHeader.sizeMaterials < materials.size()) {
+            if (cndHeader.sizeMaterials < materials.size()) {
                 ofstream.write(safe_cast<uint32_t>(materials.size())); // sizeMaterials field
             }
 
@@ -62,13 +63,14 @@ using namespace libim::utils;
         {
             std::cerr << "ERROR: Failed to patch material section!\n";
             std::cerr << "       Reason: " << e.what() << std::endl;
-            deleteFile(cndFile + ".patched");
+            deleteFile(patchedCndFile);
             return false;
         }
     }
 
-    bool patchCndAnimations(const std::string& cndFile, const HashMap<Animation>& animations)
+    bool patchCndAnimations(const std::filesystem::path& cndFile, const HashMap<Animation>& animations)
     {
+        const std::filesystem::path patchedCndFile = cndFile.u8string() + ".patched";
         try
         {
             InputFileStream ifstream(cndFile);
@@ -77,7 +79,6 @@ using namespace libim::utils;
             auto cndHeader = CND::readHeader(ifstream);
 
             /* Open new output cnd file */
-            const std::string patchedCndFile = cndFile + ".patched";
             OutputFileStream ofstream(patchedCndFile, /*truncate=*/true);
 
             /* Copy input cnd file to output stream until materials section */
@@ -120,9 +121,9 @@ using namespace libim::utils;
         {
             std::cerr << "ERROR: Failed to patch keyframe section!\n";
             std::cerr << "       Reason: " << e.what() << std::endl;
-            deleteFile(cndFile + ".patched");
+            deleteFile(patchedCndFile);
             return false;
         }
     }
 }
-#endif // PATCH_H
+#endif // CNDTOOL_PATCH_H

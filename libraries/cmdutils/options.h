@@ -22,8 +22,8 @@ namespace cmdutils {
     public:
         CmdArgs(std::size_t argc, const char *argv[])
         {
-            parse(argc, argv, [&](auto tp, auto t, auto a){
-                return parseToken(tp, t, a);
+            parse(argc, argv, [&](auto tp, auto t){
+                parseToken(tp, t);
             });
         }
 
@@ -61,10 +61,9 @@ namespace cmdutils {
         {
             std::vector<std::string> args;
             auto it = m_args.find(argKey);
-            if(it != m_args.end()){
+            if (it != m_args.end()){
                 args = it->second;
             }
-
             return args;
         }
 
@@ -81,7 +80,7 @@ namespace cmdutils {
         std::string arg(const std::string& argKey) const
         {
             auto arg = args(argKey);
-            if(!arg.empty()) {
+            if (!arg.empty()) {
                 return arg.at(0);
             }
             return "";
@@ -91,9 +90,9 @@ namespace cmdutils {
         {
             using namespace std::string_literals;
             auto it = m_args.find(std::string(argKey));
-            if(it == m_args.end())
+            if (it == m_args.end())
             {
-                if(optValue) return optValue.value();
+                if (optValue) return optValue.value();
                 throw std::out_of_range("Argument \'"s + std::string(argKey) + "\' doesn't exist"s );
             }
             if (it->second.empty())
@@ -127,34 +126,29 @@ namespace cmdutils {
         void parse(std::size_t argc, const char *argv[], Lambda&& pf)
         {
             std::string_view token;
-            std::string_view arg;
-            for(std::size_t i = 0; i < argc; i++)
+            for (std::size_t i = 0; i < argc; i++)
             {
                 token = argv[i];
-                arg = pf(i, token, arg);
+                pf(i, token);
             }
         }
 
-        std::string_view parseToken(std::size_t tokenPos, std::string_view token, std::string_view arg)
+        void parseToken(std::size_t tokenPos, std::string_view token)
         {
-            if(tokenPos == 0) {
+            if (tokenPos == 0) {
                 m_exePath = token;
             }
-            else if(token.compare(0, 1, "-") == 0 || token.compare(0, 2, "--") == 0)
+            else if (token.compare(0, 1, "-") == 0 || token.compare(0, 2, "--") == 0)
             {
                 auto s = libim::utils::split(token, "=", 1);
-                auto v = s.size() > 1 ? std::vector<std::string>{ std::string(s.at(1)) } : std::vector<std::string>();
+                auto v = s.size() > 1
+                         ? std::vector<std::string>{ std::string(s.at(1)) }
+                         : std::vector<std::string>();
                 m_args.emplace(s.at(0), std::move(v));
-                return s.at(0);
-            }
-            else if(!arg.empty()) {
-                m_args.at(std::string(arg)).emplace_back(token);
             }
             else  {
                 m_args[std::string(kKeyPosArgs)].emplace_back(token);
             }
-
-            return "";
         }
 
     protected:

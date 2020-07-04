@@ -10,8 +10,8 @@ namespace cndtool {
     public:
         CndToolArgs(std::size_t argc, const char *argv[])
         {
-            parse(argc, argv, [&](auto tp, auto t, auto a){
-                return parseToken(tp, t, a);
+            parse(argc, argv, [&](auto tp, auto t){
+                parseToken(tp, t);
             });
         }
 
@@ -31,7 +31,7 @@ namespace cndtool {
         }
 
     private:
-        std::string_view parseToken(std::size_t tokenPos, std::string_view token, std::string_view arg)
+        void parseToken(std::size_t tokenPos, std::string_view token)
         {
             if(libim::fileExtMatch(token, ".cnd"))
             {
@@ -50,10 +50,8 @@ namespace cndtool {
                 scmd_ = token;
             }
             else {
-                return CmdArgs::parseToken(tokenPos, token, arg);
+                CmdArgs::parseToken(tokenPos, token);
             }
-
-            return "";
         }
 
     private:

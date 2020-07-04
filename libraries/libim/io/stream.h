@@ -282,11 +282,18 @@ namespace libim {
     };
 
 
-    /*
-        Fix typed classes for Stream to represent only input or output stream.
-    */
+    /**
+     * Specialized classes for Stream to represent only input or output stream.
+     */
+
     class InputStream : public virtual Stream
     {
+    public:
+        inline std::size_t remaining() const
+        {
+            return size() - tell();
+        }
+
     private:
         using Stream::flush;
         using Stream::write;

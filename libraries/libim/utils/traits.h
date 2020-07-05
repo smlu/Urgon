@@ -2,6 +2,9 @@
 #define LIBIM_TRAITS_H
 #include <libim/types/flags.h>
 #include <libim/types/typemask.h>
+#include <libim/math/abstract_vector.h>
+
+#include <array>
 #include <type_traits>
 
 namespace libim::utils {
@@ -49,10 +52,35 @@ namespace libim::utils {
         struct is_flags<Flags<T>> : std::true_type {};
 
         template<typename>
+        struct is_std_array : std::false_type {};
+
+        template<typename T, std::size_t N>
+        struct is_std_array<std::array<T, N>> : std::true_type {};
+
+        template<typename>
+        struct is_numeric_std_array : std::false_type {};
+
+        template<typename T, std::size_t N>
+        struct is_numeric_std_array<std::array<T, N>> : std::is_arithmetic<T> {};
+
+        template<typename>
         struct is_typemask : std::false_type {};
 
         template<typename T>
         struct is_typemask<TypeMask<T>> : std::true_type {};
+
+        template<typename>
+        struct array_size;
+
+        template<typename T, size_t N>
+        struct array_size<std::array<T,N>> {
+            static constexpr size_t size = N;
+        };
+
+        template<typename T, size_t N>
+        struct array_size<T[N]> {
+            static size_t const size = N;
+        };
     }
 
 
@@ -67,7 +95,7 @@ namespace libim::utils {
         typename Container::value_type
     >;
 
-    // Triats
+    /* Triats */
 
     // Does C have member function 'capacity'
     template<typename C>
@@ -85,16 +113,28 @@ namespace libim::utils {
     template<typename C>
     constexpr bool has_mf_reserve = detail::has_reserve<C>::value;
 
+    // Is T of type std::array<T,N>
+    template<typename T>
+    constexpr bool isStdArray = detail::is_std_array<T>::value;
+
+    // Is T numeric std::array<T, N> type
+    template<typename T>
+    constexpr bool isNumericStdArray = detail::is_numeric_std_array<T>::value;
+
     // Is T of type Flags
     template<typename T>
-    constexpr bool is_flags = detail::is_flags<T>::value;
+    constexpr bool isFlags = detail::is_flags<T>::value;
 
     // Is T of type TypeMask
     template<typename T>
-    constexpr bool is_typemask = detail::is_typemask<T>::value;
+    constexpr bool isTypeMask = detail::is_typemask<T>::value;
 
     // is T of type enum or Flags or TypeMask
     template<typename T>
-    constexpr bool is_enum = std::is_enum_v<T> || is_flags<T> || is_typemask<T>;
+    constexpr bool isEnum = std::is_enum_v<T> || isFlags<T> || isTypeMask<T>;
+
+    /* Utility type triats */
+    template<typename T>
+    constexpr std::size_t arraySize = detail::array_size<T>::size;
 }
 #endif // LIBIM_TRAITS_H

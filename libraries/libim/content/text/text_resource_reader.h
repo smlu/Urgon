@@ -30,7 +30,7 @@ namespace libim::content::text {
         void assertKeyValue(std::string_view key, T v)
         {
             using DT =  typename std::decay_t<T>;
-            if constexpr (utils::is_enum<DT>){
+            if constexpr (utils::isEnum<DT>){
                 return assertKeyValue(key, utils::to_underlying(v));
             }
 
@@ -56,7 +56,7 @@ namespace libim::content::text {
         template<typename T, typename DT = typename std::decay_t<T>>
         DT readFlags()
         {
-            static_assert(utils::is_enum<DT>,
+            static_assert(utils::isEnum<DT>,
                 "T must be either enum, Flags or TypeMask type"
             );
             return getFlags<DT>();
@@ -160,7 +160,7 @@ namespace libim::content::text {
 
                 if constexpr(!hasListSize && utils::has_mf_capacity<Container>)
                 {
-                    if(result.capacity() < 10) {
+                    if (result.capacity() < 10) {
                         reserve(result, 256);
                     }
                 }

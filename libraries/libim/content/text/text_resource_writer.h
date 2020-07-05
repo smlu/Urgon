@@ -32,7 +32,7 @@ namespace libim::content::text {
             indent = indent - (std::signbit(n) ? 1 : 0);
 
             std::size_t digits = 0;
-            if constexpr(std::is_unsigned_v<T>) {
+            if constexpr (std::is_unsigned_v<T>) {
                 digits = utils::numdigits(static_cast<uint64_t>(n));
             }
             else {
@@ -80,14 +80,14 @@ namespace libim::content::text {
         template<std::size_t precision = 0,
             typename T,
             bool isArithmetic = std::is_arithmetic_v<T>,
-            typename = std::enable_if_t<isArithmetic || utils::is_enum<T>>
+            typename = std::enable_if_t<isArithmetic || utils::isEnum<T>>
         >
         TextResourceWriter& writeKeyValue(std::string_view key, T value, std::size_t indent = 1)
         {
             constexpr std::size_t p = [&](){
                 // Set default precision for float and enum type
                 if constexpr(precision == 0 &&
-                    (std::is_floating_point_v<T> || utils::is_enum<T>))
+                    (std::is_floating_point_v<T> || utils::isEnum<T>))
                 {
                     if constexpr (std::is_floating_point_v<T>) {
                         return std::size_t(6);
@@ -168,7 +168,7 @@ namespace libim::content::text {
             }
 
 
-            for(auto[i, v] : utils::enumerate(list))
+            for (auto[i, v] : utils::enumerate(list))
             {
                 auto pos = tell();
                 writeRow(*this, i, v); // TODO: detect via function trait the return type of row writer function.

@@ -34,7 +34,7 @@ namespace libim::text {
         template <typename T, typename DT = std::decay_t<T>>
         DT getFlags()
         {
-            static_assert(utils::is_enum<DT>,
+            static_assert(utils::isEnum<DT>,
                 "T must be either enum, Flags or TypeMask type"
             );
             auto tkn = getNextToken();

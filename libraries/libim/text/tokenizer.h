@@ -69,6 +69,20 @@ namespace libim::text {
         bool reportEol() const;
 
         const InputStream& istream() const;
+        std::size_t size() const
+        {
+            return istream().size();
+        }
+
+        std::size_t tell() const
+        {
+            return istream().tell();
+        }
+
+        std::size_t remaining() const
+        {
+            return istream().remaining();
+        }
 
     protected:
         void getNextToken(Token& out);

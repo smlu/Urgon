@@ -31,18 +31,22 @@ namespace libim {
         }
     }
 
+
+    template<typename T, typename = std::enable_if<std::is_floating_point_v<T>>>
+    static constexpr T epsilon = std::numeric_limits<T>::epsilon();
+
     // Compares two floats and returns true if equal
-    inline constexpr bool cmpf(float f1, float f2, float e = FLT_EPSILON) {
+    inline constexpr bool cmpf(float f1, float f2, float e = epsilon<float>) {
         return detail::cmpf_impl(f1, f2, e);
     }
 
     // Compares two doubles and returns true if equal
-    inline constexpr bool cmpf(double f1, double f2, double e = DBL_EPSILON) {
+    inline constexpr bool cmpf(double f1, double f2, double e = epsilon<double>) {
         return detail::cmpf_impl(f1, f2, e);
     }
 
     // Compares two long doubles and returns true if equal
-    inline constexpr bool cmpf(long double f1, long double f2, long double e = LDBL_EPSILON) {
+    inline constexpr bool cmpf(long double f1, long double f2, long double e = epsilon<long double>) {
         return detail::cmpf_impl(f1, f2, e);
     }
 }

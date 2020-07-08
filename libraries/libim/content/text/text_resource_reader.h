@@ -65,11 +65,17 @@ namespace libim::content::text {
         template<typename T, typename DT = std::decay_t<T>>
         DT readKey(std::string_view key)
         {
-            using U = utils::underlying_type_t<DT>;
-            if constexpr(isVector<DT>)
+            using namespace utils;
+            using U = underlying_type_t<DT>;
+            if constexpr (isVector<DT>)
             {
                 assertKey(key);
                 return readVector<DT>();
+            }
+            else if constexpr (isNumericStdArray<DT>)
+            {
+                assertKey(key);
+                return readNumericArray<typename DT::value_type, arraySize<DT>>();
             }
             else
             {
@@ -182,19 +188,29 @@ namespace libim::content::text {
             return readList<Container, hasRowIdxs, false>("", std::forward<Lambda>(rowReader));
         }
 
-        template<typename T, typename DT = typename std::decay_t<T>>
-        DT readVector()
+        template<typename T, std::size_t N, typename DT = typename std::decay_t<T>>
+        std::array<T, N> readNumericArray()
         {
-            static_assert (isVector<DT> &&
-                           std::is_default_constructible_v<DT>, "T must be derivative of type AbstractVector and default constructable");
-
-            DT result;
-            for(typename DT::size_type i = 0; i < result.size(); i++) {
-                result[i] = getNumber<typename DT::value_type>();
+            static_assert(std::is_arithmetic_v<DT>, "T must be an arithmetic type!");
+            std::array<DT, N> result;
+            for (std::size_t i = 0; i < result.size(); i++) {
+                result[i] = getNumber<DT>();
             }
             return result;
         }
 
+        template<typename T, typename DT = typename std::decay_t<T>>
+        DT readVector()
+        {
+            using namespace utils;
+            static_assert(isVector<DT> && std::is_default_constructible_v<DT>,
+                "T must be derivative of type AbstractVector and default constructable!"
+            );
+
+            return static_cast<DT &&>(
+                readNumericArray<typename DT::value_type, DT::size()>()
+            );
+        }
 
         template<typename B, typename DB = typename std::decay_t<B>>
         DB readBox()
@@ -206,7 +222,6 @@ namespace libim::content::text {
             result.v1 = readVector<decltype(result.v1)>();
             return result;
         }
-
 
         std::string readSection();
         std::size_t readRowIdx();

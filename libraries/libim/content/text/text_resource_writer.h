@@ -7,6 +7,7 @@
 #include <libim/utils/utils.h>
 #include <libim/types/flags.h>
 
+#include <array>
 #include <cmath>
 #include <sstream>
 #include <string_view>
@@ -112,12 +113,12 @@ namespace libim::content::text {
             }
         }
 
-        template<typename T, std::size_t S, typename Tag>
-        TextResourceWriter& writeKeyValue(std::string_view key, const AbstractVector<T, S, Tag>& v, std::size_t indent = 0)
+        template<typename T, std::size_t S, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+        TextResourceWriter& writeKeyValue(std::string_view key, const std::array<T, S>& a, std::size_t indent = 0)
         {
             write(key);
             this->indent(indent);
-            writeVector(v, 1);
+            writeNumericArray(a, 1);
             return writeEol();
         }
 
@@ -207,18 +208,24 @@ namespace libim::content::text {
             return *this;
         }
 
-        TextResourceWriter& writeRowIdx(std::size_t idx, std::size_t indent);
-        TextResourceWriter& writeSection(std::string_view section, bool overline = true);
-
-        template<typename T, std::size_t S, typename Tag>
-        TextResourceWriter& writeVector(const AbstractVector<T, S, Tag>& v, std::size_t indent = 4)
+        template<typename T, std::size_t S, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+        TextResourceWriter& writeNumericArray(const std::array<T, S>& a, std::size_t indent = 4)
         {
-            for(const auto e : v)
+            for (const auto e : a)
             {
                 this->indent(getNumberIndent(indent, e));
                 writeNumber<10, 8>(e);
             }
             return *this;
+        }
+
+        TextResourceWriter& writeRowIdx(std::size_t idx, std::size_t indent);
+        TextResourceWriter& writeSection(std::string_view section, bool overline = true);
+
+        template<typename T, std::size_t S, typename Tag>
+        inline TextResourceWriter& writeVector(const AbstractVector<T, S, Tag>& v, std::size_t indent = 4)
+        {
+            return writeNumericArray(v, indent);
         }
 
         void setIndentCh(char ch)

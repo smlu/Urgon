@@ -1,5 +1,6 @@
 #include "../text_resource_writer.h"
 #include "text_resource_literals.h"
+#include <libim/math/math.h>
 
 using namespace libim;
 using namespace libim::text;
@@ -26,11 +27,8 @@ TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx, std::size_t
     const auto strIdx = utils::to_string(idx);
     if(indent > 0)
     {
-        const auto strIdxLen =  strIdx.size(); // Note: Do not change this!
-                                               //       clang7 and gcc 8 try to optimize out strIdx.size()
-                                               //       in std::minmax which then returns garbage
-        indent = indent -  std::min(strIdxLen, indent);
-        this->indent(indent);
+        auto[min, max] = minmax(indent, strIdx.size());
+        this->indent(max - min);
     }
 
     ostream_ << strIdx << kResLabelPunc;
@@ -47,15 +45,15 @@ TextResourceWriter& TextResourceWriter::write(std::string_view text, std::size_t
 {
     write(text);
 
-    auto[min, max] = std::minmax(fieldWidth, std::clamp(text.size(), minSep, fieldWidth));
-    auto indw = std::max(minSep, max - min);
+    auto[min, max] = minmax(fieldWidth, clamp(text.size(), minSep, fieldWidth));
+    auto indw      = ::max(minSep, max - min);
     indent(indw, indentChar);
     return *this;
 }
 
 TextResourceWriter& TextResourceWriter::writeCommentLine(std::string_view comment)
 {
-    if(!comment.empty())
+    if (!comment.empty())
     {
         ostream_ << ChComment << ChSpace << comment;
         writeEol();
@@ -92,7 +90,7 @@ TextResourceWriter& TextResourceWriter::writeLine(std::string_view line)
 
 TextResourceWriter& TextResourceWriter::writeSection(std::string_view section, bool overline)
 {
-    if(overline) {
+    if (overline) {
         writeLine(kResSectionHeader);
     }
     return writeLabel(kResName_Section, section);

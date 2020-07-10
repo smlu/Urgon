@@ -7,6 +7,8 @@
 #include "../diagnostic_location.h"
 #include "../../io/stream.h"
 
+#include <libim/math/math.h>
+
 #include <array>
 #include <cctype>
 #include <functional>
@@ -35,7 +37,7 @@ namespace libim::text {
             }
             else
             {
-                auto[p, q] = std::minmax(istream_.tell() - position, end_);
+                auto[p, q] = minmax(istream_.tell() - position, end_);
                 pos_ = q - p;
             }
         }

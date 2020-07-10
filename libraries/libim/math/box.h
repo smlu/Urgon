@@ -5,8 +5,9 @@
 #include <vector>
 #include <tuple>
 
-#include "vector.h"
+#include "math.h"
 #include "size.h"
+#include "vector.h"
 
 namespace libim {
     template <typename T, std::size_t N> class Box
@@ -80,8 +81,8 @@ namespace libim {
 
             for(; v0_it != v0.end(); ++v0_it, ++v1_it, ++b0_it, ++b1_it, ++nv0_it, ++nv1_it)
             {
-                *nv0_it = std::max(*v0_it, *b0_it);
-                *nv1_it = std::min(*v1_it, *b1_it);
+                *nv0_it = max(*v0_it, *b0_it);
+                *nv1_it = min(*v1_it, *b1_it);
             }
 
             return Box(nv0, nv1);

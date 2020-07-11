@@ -45,7 +45,7 @@ namespace libim::content::asset {
         float    horizonDistance;
         Vector2f horizonSkyOffset; // x,y
         Vector2f ceilingSkyOffset; // x,y
-        Vector4f LOD_Distances;
+        std::array<float, 4> lodDistances; // list of distances to change level of detail
         struct {
             int32_t enabled;
             LinearColor color;

@@ -139,7 +139,7 @@ namespace libim::content::text {
             {
                 auto len = readKey<std::size_t>(expectedName);
                 reserve(result, len);
-                isAtEnd = [&]() { return rowIdx >= len; };
+                isAtEnd = [&, len]() { return rowIdx >= len; };
             }
             else
             {

@@ -48,7 +48,7 @@ namespace libim {
     static constexpr std::size_t INT64_BYTE  = 8;
     static constexpr std::size_t FLOAT_BYTE  = 4;
     static constexpr std::size_t DOUBLE_BYTE = 8;
-    static constexpr std::size_t BYTE_BIT = CHAR_BIT;
+    static constexpr std::size_t BYTE_BIT    = CHAR_BIT;
 
     using byte_t    = uint8_t;
     using ByteArray = std::vector<byte_t>;
@@ -70,8 +70,7 @@ namespace libim {
         return (mask ^ val) - mask;
     }
 
-    inline constexpr uint32_t bbs(uint32_t bits) //Bits byte size
-    {
+    inline constexpr uint32_t bbs(uint32_t bits) { //Bits byte size
         return bits / BYTE_BIT;
     }
 

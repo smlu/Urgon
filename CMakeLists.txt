@@ -6,13 +6,18 @@ project(
 )
 
 # Global constants
-set(PM_CNDEXT  "cndext")
+set(PM_CNDEXT  "cndext" )
 set(PM_CNDTOOL "cndtool")
-set(PM_GOBEXT  "gobext")
+set(PM_GOBEXT  "gobext" )
 set(PM_IMFIXES "imfixes")
 set(PM_LIBCMD  "libcmd")
 set(PM_LIBIM   "libim")
-set(PM_TEST    "test")
+set(PM_LIBIM   "libim"  )
+set(PM_TEST    "test"   )
+
+set(PM_LIB_DIR     "${CMAKE_SOURCE_DIR}/libraries")
+set(PM_PROGRAM_DIR "${CMAKE_SOURCE_DIR}/programs" )
+set(PM_TEST_DIR    "${CMAKE_SOURCE_DIR}/tests"    )
 
 # Compiler flags
 set(CMAKE_CXX_STANDARD 17) # c++17
@@ -52,6 +57,6 @@ endif()
 
 add_definitions("-D__STDC_WANT_LIB_EXT1__=1")
 
-add_subdirectory( libraries )
-add_subdirectory( programs )
-add_subdirectory( tests )
+add_subdirectory( ${PM_LIB_DIR}     )
+add_subdirectory( ${PM_PROGRAM_DIR} )
+add_subdirectory( ${PM_TEST_DIR}    )

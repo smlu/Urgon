@@ -37,7 +37,7 @@ namespace libim {
     }
 
     template<typename ...Args>
-    static void writeLog(const char* file, int line, LogLevel level, std::string_view msg, Args&&... args)
+    static void writeLog(const char* file, int /*line*/, LogLevel level, std::string_view msg, Args&&... args)
     {
         if(gLogLevel < level) {
             return;

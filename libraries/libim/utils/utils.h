@@ -333,8 +333,10 @@ namespace libim::utils {
      * @param optMax - optional the maximum number of splits.
      * @return std::vector of std::string_view elements
      * */
-    [[nodiscard]] static std::vector<std::string_view>
-    split(std::string_view str, std::string_view delims = "\t\n\v\f\r ", std::optional<std::size_t> optMax = std::nullopt)
+    [[maybe_unused]][[nodiscard]] static std::vector<std::string_view>
+    split(std::string_view str,
+        std::string_view delims = "\t\n\v\f\r ",
+        std::optional<std::size_t> optMax = std::nullopt)
     {
         assert(!optMax || optMax.value() > 0);
         std::vector<std::string_view> result;

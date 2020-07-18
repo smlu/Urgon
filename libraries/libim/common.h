@@ -53,14 +53,6 @@ namespace libim {
     using byte_t    = uint8_t;
     using ByteArray = std::vector<byte_t>;
 
-    using Bitmap    = ByteArray;
-    using BitmapPtr = std::shared_ptr<Bitmap>;
-
-    inline BitmapPtr makeBitmapPtr(std::size_t size) {
-        return std::make_shared<Bitmap>(size);
-    }
-
-
     template <typename T,
         typename R = std::enable_if_t<std::is_integral<T>::value,
         typename std::make_unsigned<T>::type>>
@@ -72,33 +64,6 @@ namespace libim {
 
     inline constexpr uint32_t bbs(uint32_t bits) { //Bits byte size
         return bits / BYTE_BIT;
-    }
-
-    inline constexpr uint32_t getBitmapSize(int32_t width, int32_t height, uint32_t bpp)
-    {
-        return abs(height * width) * bbs(bpp);
-    }
-
-    inline constexpr uint32_t getRowSize(int32_t width, uint32_t bpp)
-    {
-        return abs(width) * bbs(bpp);
-    }
-
-    inline constexpr uint32_t getMipmapPixelDataSize(std::size_t numTextures, int32_t width, int32_t height, uint32_t bpp)
-    {
-        uint32_t size = 0;
-        while(numTextures --> 0)
-        {
-            size += getBitmapSize(width, height, bpp);
-            width  = width  >> 1;
-            height = height >> 1;
-        }
-        return size;
-    }
-
-    inline constexpr uint32_t rgbMask(uint32_t bitsPerColor, uint32_t colorLeftShift)
-    {
-        return ((1 << bitsPerColor) - 1) << colorLeftShift;
     }
 
     static std::vector<std::string> splitString(const std::string& string, const std::string& delim)

@@ -1,83 +1,38 @@
-#include "../material.h"
-
-using namespace libim;
-using namespace libim::content::asset;
+ #include "../material.h"
+ #include <algorithm>
 
 
-inline Bitmap::const_iterator libim::content::asset::copyMipmapFromBuffer(Mipmap& mipmap, const Bitmap& buffer, uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo)
+ using namespace libim;
+ using namespace libim::content::asset;
+
+
+Material& Material::addCel(Texture cel)
 {
-    auto itBitmapBegin = buffer.begin();
-    auto itBitmapEnd   = buffer.end();
-    for(uint32_t mmIdx = 0; mmIdx < textureCount; mmIdx++) // Mipmap textures
-    {
-        /* Calculate texture size according to the mipmap index */
-        uint32_t texWidth  = width >> mmIdx;
-        uint32_t texHeight = height >> mmIdx;
-
-        /* Init texture bitmap buffer */
-        uint32_t bitmapSize = getBitmapSize(texWidth, texHeight, colorInfo.bpp);
-        auto bitmap = makeBitmapPtr(bitmapSize);
-
-        /* Copy texture's bitmap from buffer */
-        itBitmapEnd = std::next(itBitmapBegin, bitmapSize);
-        std::copy(itBitmapBegin, itBitmapEnd, bitmap->begin());
-
-        Texture tex(
-            texWidth,
-            texHeight,
-            colorInfo,
-            std::move(bitmap)
-        );
-        mipmap.emplace_back(std::move(tex));
-        itBitmapBegin = itBitmapEnd;
+    if (!isValidCel(cel)) {
+        throw MaterialError("Can't add invalid cel texture to material");
     }
-
-    return itBitmapEnd;
+    cells_.push_back(std::move(cel));
+    return *this;
 }
 
-Mipmap libim::content::asset::moveMipmapFromBuffer(Bitmap& buffer, uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo)
+Material& Material::setCells(std::vector<Texture> cells)
 {
-    Mipmap mipmap;
-    for(uint32_t mmIdx = 0; mmIdx < textureCount; mmIdx++) // Mipmap's textures
-    {
-        /* Calculate texture's size according to the mipmap index */
-        uint32_t texWidth  = width >> mmIdx;
-        uint32_t texHeight = height >> mmIdx;
-
-        /* Init texture bitmap buffer */
-        uint32_t bitmapSize = getBitmapSize(texWidth, texHeight, colorInfo.bpp);
-        auto bitmap = std::make_shared<Bitmap>(bitmapSize);
-
-        /* Copy texture's bitmap from buffer */
-        auto itBitmapEnd = std::next(buffer.begin(), bitmapSize);
-        std::copy(buffer.begin(), itBitmapEnd, bitmap->begin());
-        buffer.erase(buffer.begin(), itBitmapEnd);
-
-        Texture tex(
-            texWidth,
-            texHeight,
-            colorInfo,
-            std::move(bitmap)
-        );
-        mipmap.emplace_back(std::move(tex));
+    const auto validCells = std::all_of(cells.begin(), cells.end(),
+        [&](const auto&c) { return isValidCel(c); });
+    if (!validCells) {
+        throw MaterialError("Can't set material cells, invalid cel texture in list");
     }
 
-    return mipmap;
+    cells_ = std::move(cells);
+    return *this;
 }
 
-template<> Mipmap Stream::read<Mipmap, uint32_t, uint32_t, uint32_t, const ColorFormat&>(uint32_t textureCount, uint32_t width, uint32_t height, const ColorFormat& colorInfo) const
+bool Material::isValidCel(const Texture& cel)
 {
-    Mipmap mipmap;
-    for(uint32_t mmIdx = 0; mmIdx < textureCount; mmIdx++) // Mipmap's textures
-    {
-        /* Calculate texture size according to the mipmap index */
-        uint32_t texWidth  = width >> mmIdx;
-        uint32_t texHeight = height >> mmIdx;
-
-        /* Read Texture */
-        auto tex = this->read<Texture, uint32_t, uint32_t, const ColorFormat&>(texWidth, texHeight, colorInfo);
-        mipmap.emplace_back(std::move(tex));
-    }
-
-    return mipmap;
+    if (cells_.empty()) return !cel.isEmpty();
+    const Texture& fcel = cells_.at(0);
+    return cel.width()  == fcel.width()  &&
+           cel.height() == fcel.height() &&
+           cel.format() == fcel.format() &&
+           fcel.mipLevels() == cel.mipLevels();
 }

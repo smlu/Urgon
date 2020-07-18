@@ -12,7 +12,7 @@ namespace libim::content::asset {
 
     struct ColorFormat final
     {
-        ColorMode colorMode;
+        ColorMode mode;
         uint32_t bpp;        // Color bit depth per pixel
 
         uint32_t redBPP  ;
@@ -33,23 +33,41 @@ namespace libim::content::asset {
     };
     static_assert(sizeof(ColorFormat) == 56);
 
-    // Predefined color formats
-    static constexpr ColorFormat RGB_565   { ColorMode::RGB,   16,   5, 6, 5,   11,  5,  0,   3, 2, 3,   0,  0, 0 };
-    static constexpr ColorFormat RGBA_4444 { ColorMode::RGBA,  16,   4, 4, 4,   12,  8,  4,   4, 4, 4,   4,  0, 4 };
-    static constexpr ColorFormat ARGB_4444 { ColorMode::RGBA,  16,   4, 4, 4,    8,  4,  0,   4, 4, 4,   4, 12, 4 };
-    static constexpr ColorFormat RGBA_5551 { ColorMode::RGBA,  16,   5, 5, 5,   11,  6,  1,   3, 3, 3,   1,  0, 7 };
-    static constexpr ColorFormat ARGB_5551 { ColorMode::RGBA,  16,   5, 5, 5,   10,  5,  0,   3, 3, 3,   1, 15, 7 };
-    static constexpr ColorFormat RGB_888   { ColorMode::RGB,   24,   8, 8, 8,   16,  8,  0,   0, 0, 0,   0,  0, 0 };
-    static constexpr ColorFormat BGR_888   { ColorMode::RGB,   24,   8, 8, 8,    0,  8, 16,   0, 0, 0,   0,  0, 0 };
-    static constexpr ColorFormat RGBA_8888 { ColorMode::RGBA,  32,   8, 8, 8,   24, 16,  8,   0, 0, 0,   8,  0, 0 };
-    static constexpr ColorFormat ARGB_8888 { ColorMode::RGBA,  32,   8, 8, 8,   16,  8,  0,   0, 0, 0,   8, 24, 0 };
-    static constexpr ColorFormat ABGR_8888 { ColorMode::RGBA,  32,   8, 8, 8,    0,  8, 16,   0, 0, 0,   8, 24, 0 };
 
-    // Helper functions
+    // Predefined color formats
+    // Naming is done in little-endian byte order.
+    // Suffix 'be' names color format in big-endian byte order
+    static constexpr ColorFormat RGB555     { ColorMode::RGB,   16,   5, 5, 5,   10,  5,  0,   3, 3, 3,   0,  0, 0 };
+    static constexpr ColorFormat RGB555be   { ColorMode::RGB,   16,   5, 5, 5,    0,  5, 10,   3, 3, 3,   0,  0, 0 };
+
+    static constexpr ColorFormat RGB565     { ColorMode::RGB,   16,   5, 6, 5,   11,  5,  0,   3, 2, 3,   0,  0, 0 };
+    static constexpr ColorFormat RGB565be   { ColorMode::RGB,   16,   5, 6, 5,    0,  5, 11,   3, 2, 3,   0,  0, 0 };
+
+    static constexpr ColorFormat RGBA4444   { ColorMode::RGBA,  16,   4, 4, 4,   12,  8,  4,   4, 4, 4,   4,  0, 4 };
+    static constexpr ColorFormat RGBA4444be { ColorMode::RGBA,  16,   4, 4, 4,    0,  4,  8,   4, 4, 4,   4, 12, 4 };
+    static constexpr ColorFormat ARGB4444   { ColorMode::RGBA,  16,   4, 4, 4,    8,  4,  0,   4, 4, 4,   4, 12, 4 };
+    static constexpr ColorFormat ARGB4444be { ColorMode::RGBA,  16,   4, 4, 4,    4,  8, 12,   4, 4, 4,   4,  0, 4 };
+
+    static constexpr ColorFormat RGBA5551   { ColorMode::RGBA,  16,   5, 5, 5,   11,  6,  1,   3, 3, 3,   1,  0, 7 };
+    static constexpr ColorFormat RGBA5551be { ColorMode::RGBA,  16,   5, 5, 5,    0,  5, 10,   3, 3, 3,   1, 15, 7 };
+    static constexpr ColorFormat ARGB1555   { ColorMode::RGBA,  16,   5, 5, 5,   10,  5,  0,   3, 3, 3,   1, 15, 7 };
+    static constexpr ColorFormat ARGB1555be { ColorMode::RGBA,  16,   5, 5, 5,    1,  6, 11,   3, 3, 3,   1,  0, 7 };
+
+    // RGB888
+    static constexpr ColorFormat RGB24      { ColorMode::RGB,   24,   8, 8, 8,   16,  8,  0,   0, 0, 0,   0,  0, 0 };
+    static constexpr ColorFormat RGB24be    { ColorMode::RGB,   24,   8, 8, 8,    0,  8, 16,   0, 0, 0,   0,  0, 0 };
+
+    // RGBA8888
+    static constexpr ColorFormat RGBA32     { ColorMode::RGBA,  32,   8, 8, 8,   24, 16,  8,   0, 0, 0,   8,  0, 0 };
+    static constexpr ColorFormat RGBA32be   { ColorMode::RGBA,  32,   8, 8, 8,    0,  8, 16,   0, 0, 0,   8, 24, 0 };
+    static constexpr ColorFormat ARGB32     { ColorMode::RGBA,  32,   8, 8, 8,   16,  8,  0,   0, 0, 0,   8, 24, 0 };
+    static constexpr ColorFormat ARGB32be   { ColorMode::RGBA,  32,   8, 8, 8,    8, 16, 24,   0, 0, 0,   8,  0, 0 };
+
+    // ColorFormat helper functions
     inline bool operator ==(const ColorFormat& lci, const ColorFormat& rci)
     {
-        return lci.colorMode == rci.colorMode &&
-               lci.bpp == rci.bpp             &&
+        return lci.mode == rci.mode           &&
+               lci.bpp  == rci.bpp            &&
 
                lci.redBPP == rci.redBPP       &&
                lci.redShl == rci.redShl       &&

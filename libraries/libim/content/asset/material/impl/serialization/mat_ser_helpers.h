@@ -8,7 +8,7 @@
 #include "mat_structs.h"
 #include "../../material.h"
 #include "../../colorformat.h"
-#include "../../../../../io/stream.h"
+#include <libim/io/stream.h>
 
 /* Defines stream io overloads to serialize mat structs from stream */
 
@@ -71,26 +71,23 @@ namespace libim {
         return *this;
     }
 
-
-    // Mat mipmap header
-    template<> inline MatMipmapHeader Stream::read<MatMipmapHeader>() const
+    // Mat texture header
+    template<> inline MatTextureHeader Stream::read<MatTextureHeader>() const
     {
-        MatMipmapHeader mipmapHeader;
-        auto nRead = this->readsome(reinterpret_cast<byte_t*>(&mipmapHeader), sizeof(MatMipmapHeader));
-        if(nRead != sizeof(MatMipmapHeader)) {
-            throw StreamError("Error reading MatMipmapHeader from stream");
+        MatTextureHeader texHeader;
+        auto nRead = this->readsome(reinterpret_cast<byte_t*>(&texHeader), sizeof(MatTextureHeader));
+        if(nRead != sizeof(MatTextureHeader)) {
+            throw StreamError("Error reading MatTextureHeader from stream");
         }
-
-        return mipmapHeader;
+        return texHeader;
     }
 
-    template<> inline Stream& Stream::write(const MatMipmapHeader& mipmapHeader)
+    template<> inline Stream& Stream::write(const MatTextureHeader& texHeader)
     {
-        auto nWritten = this->write(reinterpret_cast<const byte_t*>(&mipmapHeader), sizeof(MatMipmapHeader));
-        if(nWritten != sizeof(MatMipmapHeader)) {
-            throw StreamError("Error writing MatMipmapHeader to stream");
+        auto nWritten = this->write(reinterpret_cast<const byte_t*>(&texHeader), sizeof(MatTextureHeader));
+        if(nWritten != sizeof(MatTextureHeader)) {
+            throw StreamError("Error writing MatTextureHeader to stream");
         }
-
         return *this;
     }
 }

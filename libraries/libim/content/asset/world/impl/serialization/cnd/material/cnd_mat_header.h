@@ -10,8 +10,8 @@ namespace libim::content::asset {
         CndResourceName name;
         int width;
         int height;
-        int mipmapCount;
-        int texturesPerMipmap;
+        int celCount;           // number of cells
+        int mipLevels;          // number of mipmap LOD levels in each texture
         ColorFormat colorInfo;
     };
     static_assert(sizeof(CndMatHeader) == 136);

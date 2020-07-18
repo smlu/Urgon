@@ -1,18 +1,27 @@
 #ifndef LIBIM_MATERIAL_H
 #define LIBIM_MATERIAL_H
 #include <cstdint>
+ #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "texture.h"
 #include "../asset.h"
+#include "texture.h"
+
 #include <libim/common.h>
 #include <libim/io/stream.h>
 
 namespace libim::content::asset {
-    struct Mipmap : public std::vector<Texture>{};
 
+    struct MaterialError : public std::runtime_error {
+        using std::runtime_error::runtime_error;
+    };
+
+    /**
+     * Material is an image with celluloid textures aka cells.
+     * All textures have the same width, height and color format.
+     */
     class Material final : public Asset
     {
     public:
@@ -40,116 +49,119 @@ namespace libim::content::asset {
         bool serialize(OutputStream&& ostream) const;
         bool serialize(OutputStream& ostream) const;
 
-        Material& setWidth(uint32_t width)
-        {
-            m_width = width;
-            return *this;
-        }
-
+        /**
+         * Returns texture width of material cells.
+         * If material is empty 0 is returned.
+         */
         uint32_t width() const
         {
-            return m_width;
+            return isEmpty() ? 0 : cells_.at(0).width();
         }
 
-        Material& setHeight(uint32_t height)
-        {
-            m_height = height;
-            return *this;
-        }
-
+        /**
+         * Returns texture hight of material cells.
+         * If material is empty 0 is returned.
+         */
         uint32_t height() const
         {
-            return m_height;
+            return isEmpty() ? 0 : cells_.at(0).height();
         }
 
-        Material& setSize(uint32_t width, uint32_t height)
+        /**
+         * Returns texture color format of material cells.
+         * @return const reference to the ColorFormat.
+         * @throw MaterialError if material is empty.
+         */
+        const ColorFormat& format() const
         {
-            m_width = width;
-            m_height = height;
+            if (isEmpty()) {
+                throw MaterialError("Empty material");
+            }
+            return cells_.at(0).format();
+        }
+
+        /** Returns true if material doesn't contain any cel. */
+        bool isEmpty() const
+        {
+            return cells_.empty();
+        }
+
+        /**
+         * Returns number of material cells.
+         * @return std::size_t of number of material cells.
+         */
+        std::size_t count() const
+        {
+            return cells_.size();
+        }
+
+        /**
+         * Returns cel texture.
+         *
+         * @param optCelIdx - optional index of cel to return texture of.
+         *                    If not set the default cel texture is returned.
+         * @return const reference to cel texture.
+         * @throw std::out_of_range if optCelIdx is invalid.
+         */
+        const Texture& cel(std::optional<std::size_t> optCelIdx) const
+        {
+            return cells_.at(optCelIdx.value_or(celIdx_));
+        }
+
+        /**
+         * Returns list of all aterial celluloid textures.
+         * @return const reference to std::vector<Texture>
+         */
+        const std::vector<Texture>& cells() const
+        {
+            return cells_;
+        }
+
+        /**
+         * Adds celluloid texture to material.
+         *
+         * @param cel - celluloid texture to add.
+         * @return reference to this
+         * @throw MaterialError if cel texture width, height, ColorFormat
+         *        or number of MipMap levels is not the same as this material.
+         */
+        Material& addCel(Texture cel);
+
+        /**
+         * Sets material celluloid textures.
+         *
+         * @param cells - std::vector of textures.
+         * @return reference to this
+         * @throw MaterialError if any texture has different width, height or ColorFormat
+         *  or if the first cel in list is empty.
+         */
+        Material& setCells(std::vector<Texture> cells);
+
+        /**
+         * Sets default cel index.
+         * Default cel index is used when member function cel() is called
+         * without passing an optional cel index argument.
+         *
+         * @param idx - cel index.
+         * @return reference to this
+         * @throw MaterialError if idx is out of range.
+         */
+        Material& setDefaultCel(std::size_t idx)
+        {
+            if (idx >= count()) {
+                throw MaterialError("Can't set default material cel, invalid index");
+            }
+            celIdx_ = idx;
             return *this;
-        }
-
-        Material& setColorFormat(const ColorFormat& colorFormat)
-        {
-            m_colorFormat = colorFormat;
-            return *this;
-        }
-
-        const ColorFormat& colorFormat() const
-        {
-            return m_colorFormat;
-        }
-
-        Material& setMipmaps(const std::vector<Mipmap>& mipmaps)
-        {
-            m_mipmaps = mipmaps;
-            return *this;
-        }
-
-        Material& setMipmaps(std::vector<Mipmap> && mipmaps) noexcept
-        {
-            m_mipmaps = std::move(mipmaps);
-            return *this;
-        }
-
-        Material& addMipmap(const Mipmap& mipmap)
-        {
-            m_mipmaps.push_back(mipmap);
-            return *this;
-        }
-
-        Material& addMipmap(Mipmap&& mipmap)
-        {
-            m_mipmaps.emplace_back(std::move(mipmap));
-            return *this;
-        }
-
-        const std::vector<Mipmap>& mipmaps() const
-        {
-            return m_mipmaps;
         }
 
     private:
-        uint32_t m_width;
-        uint32_t m_height;
-        ColorFormat m_colorFormat;
-        std::vector<Mipmap> m_mipmaps;
+        bool isValidCel(const Texture& cel);
+
+    private:
+        std::size_t celIdx_ = 0; // default cel
+        std::vector<Texture> cells_;
     };
-
-
-    Bitmap::const_iterator
-    copyMipmapFromBuffer(
-        Mipmap& mipmap,
-        const Bitmap& buffer,
-        uint32_t textureCount,
-        uint32_t width,
-        uint32_t height,
-        const ColorFormat& colorInfo
-    );
-
-    Mipmap moveMipmapFromBuffer(
-        Bitmap& buffer,
-        uint32_t textureCount,
-        uint32_t width,
-        uint32_t height,
-        const ColorFormat& colorInfo
-    );
-}
-
-namespace libim {
-    template<> content::asset::Mipmap
-    Stream::read<
-        content::asset::Mipmap,
-        uint32_t,
-        uint32_t,
-        uint32_t,
-        const content::asset::ColorFormat&>
-    (
-        uint32_t textureCount,
-        uint32_t width,
-        uint32_t height,
-        const content::asset::ColorFormat& colorInfo
-    ) const;
 }
 
 #endif // LIBIM_MATERIAL_H

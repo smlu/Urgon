@@ -1,9 +1,12 @@
-#ifndef CNDTOOLARGS_H
-#define CNDTOOLARGS_H
+#ifndef CNDTOOL_CNDTOOLARGS_H
+#define CNDTOOL_CNDTOOLARGS_H
+#include <filesystem>
 #include <stdexcept>
+
 #include <libim/common.h>
 #include <libim/utils/utils.h>
 #include <cmdutils/options.h>
+
 namespace cndtool {
     class CndToolArgs : public cmdutils::CmdArgs
     {
@@ -25,7 +28,7 @@ namespace cndtool {
             return scmd_;
         }
 
-        const std::string& cndFile() const
+        const std::filesystem::path& cndFile() const
         {
             return cndfile_;
         }
@@ -57,7 +60,7 @@ namespace cndtool {
     private:
         std::string cmd_;
         std::string scmd_;
-        std::string cndfile_;
+        std::filesystem::path cndfile_;
     };
 }
-#endif // CNDTOOLARGS_H
+#endif // CNDTOOL_CNDTOOLARGS_H

@@ -1,0 +1,9 @@
+#ifndef MATOOL_CONFIG_H
+#define MATOOL_CONFIG_H
+#include <string_view>
+
+namespace matool {
+    constexpr std::string_view kProgramName = "@PROJECT_NAME@";
+    constexpr std::string_view kVersion     = "@PROJECT_VERSION@";
+}
+#endif //MATOOL_CONFIG_H

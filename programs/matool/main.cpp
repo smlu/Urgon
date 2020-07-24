@@ -44,7 +44,7 @@ constexpr static auto optExtractAsBmpShort = "-b"sv;
 constexpr static auto optEncoding          = "--encoding"sv;
 constexpr static auto optEncodingShort     = "-e"sv;
 constexpr static auto optMaxTex            = "--max-tex"sv;
-constexpr static auto optExtractLod            = "--mipmap"sv;
+constexpr static auto optExtractLod        = "--mipmap"sv;
 constexpr static auto optNoSRGB            = "--no-srgb"sv;
 constexpr static auto optOutputDir         = "--output-dir"sv;
 constexpr static auto optOutputDirShort    = "-o"sv;
@@ -82,10 +82,9 @@ const auto kEncodingToColorFormat = std::map<std::string, ColorFormat> {
 bool getColorFormat(std::string cfstr, ColorFormat& cf) {
     to_lower(cfstr);
     auto it = kEncodingToColorFormat.find(cfstr);
-    if(it == kEncodingToColorFormat.end()) {
+    if (it == kEncodingToColorFormat.end()) {
         return false;
     }
-
     cf = it->second;
     return true;
 }
@@ -100,7 +99,7 @@ fs::path getOptOutputDir(const MatoolArgs& args, std::optional<fs::path> optPath
     if (args.hasArg(optOutputDirShort)){
         return args.arg(optOutputDirShort);
     }
-    else if(args.hasArg(optOutputDir)){
+    else if (args.hasArg(optOutputDir)){
         return args.arg(optOutputDir);
     }
     return optPath.value_or(fs::path());
@@ -131,8 +130,9 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
         else
         {
             std::cout << "Convert BMP or PNG image files to MAT file format." << std::endl;
-            std::cout << "Images to convert must have the same size (width, height) or conversion will fail." << std::endl << std::endl;
-            std::cout << "  Usage: matool convert [options] <encoding> <path-to-image> [path-to-images] ..." << std::endl << std::endl;
+            std::cout << "Images to convert to MAT format must have the same size (width, height) or conversion will fail." << std::endl << std::endl;
+            std::cout << "  Usage: matool convert [options] <encoding> <path-to-image> [path-to-images] ..." << std::endl;
+            std::cout << "         matool convert <sub-command>" << std::endl << std::endl;
 
             printPositionalArgHeader("Encoding");
             printPositionalArg( "rgb555"    , "Encode textures in RGB555 format"                           );
@@ -155,13 +155,13 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
             printPositionalArg( "argb32be"  , "Encode textures in big-endian byte order ARGB8888 format\n" );
 
             printOptionHeader();
-            printOption( optExtractLod   , ""               , "Number of MipMap levels to generate."                        );
-            printOption( ""          , ""               , "If no value is provided or value is 0 then"                  );
-            printOption( ""          , ""               , "max number of levels will be generated."                     );
-            printOption( ""          , ""               , "If this option is not provided MipMap won't be generated.\n" );
-            printOption( optNoSRGB   , ""               , "No sRGB conversion when generating MipMap.\n"                );
-            printOption( optOutputDir, optOutputDirShort, "Output folder"                                               );
-            printOption( optVerbose  , optVerboseShort  , "Verbose printout to the console\n"                           );
+            printOption( optExtractLod , ""               , "Number of MipMap levels to generate."                        );
+            printOption( ""            , ""               , "If no value is provided or value is 0 then"                  );
+            printOption( ""            , ""               , "max number of levels will be generated."                     );
+            printOption( ""            , ""               , "If this option is not provided MipMap won't be generated.\n" );
+            printOption( optNoSRGB     , ""               , "No sRGB conversion when generating MipMap.\n"                );
+            printOption( optOutputDir  , optOutputDirShort, "Output folder"                                               );
+            printOption( optVerbose    , optVerboseShort  , "Verbose printout to the console\n"                           );
 
             printSubCommandHeader();
             printSubCommand( scmdBatch, "Convert images in bulk" );
@@ -176,7 +176,7 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
         printOption( ""             , ""                  , "By default images are extrected in PNG format."                     );
         printOption( optMaxTex      , ""                  , "Max number of textures to extract from MAT file."                   );
         printOption( ""             , ""                  , "By default all are extracted."                                      );
-        printOption( optExtractLod      , ""                  , "Extract also mipmap LOD images from MAT file."                      );
+        printOption( optExtractLod  , ""                  , "Extract also mipmap LOD images from MAT file."                      );
         printOption( ""             , ""                  , "By default only top image at LOD 0 is extracted from each texture." );
         printOption( optOutputDir   , optOutputDirShort   , "Output folder"                                                      );
         printOption( optVerbose     , optVerboseShort     , "Verbose printout to the console"                                    );
@@ -193,17 +193,17 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
         std::cout << "Modify and update existing MAT file.\nAt least one mod option must be provided." << std::endl << std::endl;
         std::cout << "  Usage: matool modify <options> <mat-file-path>" << std::endl << std::endl;
 
-        std::cout << "Mod Option:    Long option:        Description:\n";
-        printOption( optEncoding, optEncodingShort, "Change encoding color format."                                   );
-        printOption( ""          , ""             , "Supported formats:"                                              );
-        printOption( ""          , ""             , "  rgb24    | rgb24be    "                                        );
-        printOption( ""          , ""             , "  rgb555   | rgb555be   | rgb565   | rgb565be"                   );
-        printOption( ""          , ""             , "  rgba4444 | rgba4444be | argb4444 | argb4444be"                 );
-        printOption( ""          , ""             , "  rgba5551 | rgba5551be | argb1555 | argb1555be"                 );
-        printOption( ""          , ""             , "  rgba32   | rgba32be   | argb32   | argb32be\n"                 );
-        printOption( optExtractLod   , ""             , "Change number of MipMap levels."                                 );
-        printOption( ""          , ""             , "If no value is provided or value is 0 then"                      );
-        printOption( ""          , ""             , "MipMap chain with max number of LOD levels will be generated.\n" );
+        printOptionHeader("Mod Option");
+        printOption( optEncoding, optEncodingShort, "Change encoding color format."                                     );
+        printOption( ""            , ""             , "Supported formats:"                                              );
+        printOption( ""            , ""             , "  rgb24    | rgb24be    "                                        );
+        printOption( ""            , ""             , "  rgb555   | rgb555be   | rgb565   | rgb565be"                   );
+        printOption( ""            , ""             , "  rgba4444 | rgba4444be | argb4444 | argb4444be"                 );
+        printOption( ""            , ""             , "  rgba5551 | rgba5551be | argb1555 | argb1555be"                 );
+        printOption( ""            , ""             , "  rgba32   | rgba32be   | argb32   | argb32be\n"                 );
+        printOption( optExtractLod , ""             , "Change number of MipMap levels."                                 );
+        printOption( ""            , ""             , "If no value is provided or value is 0 then"                      );
+        printOption( ""            , ""             , "MipMap chain with max number of LOD levels will be generated.\n" );
 
         printOptionHeader();
         printOption( optNoSRGB   , ""             , "No sRGB conversion when generating MipMap." );
@@ -227,7 +227,7 @@ void printMatFilePathError(const fs::path& matPath, std::string_view cmd = ""sv,
     if (matPath.empty()) {
         std::cerr << "ERROR: A valid MAT file path required!\n\n";
     } else {
-        std::cerr << "ERROR: MAT file \"" << matPath << "\" does not exist!\n\n";
+        std::cerr << "ERROR: MAT file " << matPath << " doesn't exist!\n\n";
     }
     printHelp(cmd, subcmd);
 }
@@ -462,13 +462,13 @@ int execCmdConvert(const MatoolArgs& args)
         }
         else if (args.positionalArgs().empty())
         {
-            std::cerr << "ERROR: Missing encoding argument!\n\n";
+            std::cerr << "ERROR: Missing positional argument for encoding or sub-command!\n\n";
             printHelp(cmdConvert);
             return 1;
         }
         else if (!getColorFormat(args.positionalArgs().at(0), cf))
         {
-            std::cerr << "ERROR: Invalid encoding argument '" << args.subcmd() << "'!\n\n";
+            std::cerr << "ERROR: Invalid encoding argument or sub-command: '" << args.subcmd() << "'\n\n";
             printHelp(cmdConvert);
             return 1;
         }
@@ -520,7 +520,7 @@ int execCmdExtract(const MatoolArgs& args)
 
         if (!fileExists(input) && !dirExists(input))
         {
-            std::cerr << "ERROR: Invalid positional argument for file|folder path!\n\n";
+            std::cerr << "ERROR: Invalid positional argument for input MAT file|folder path!\n\n";
             printHelp(cmdExtract);
             return 1;
         }
@@ -633,9 +633,8 @@ int execCmdModify(const MatoolArgs& args)
             return 1;
         }
 
-
         std::optional<ColorFormat> optFormat;
-        if ( args.hasArg(optEncodingShort) || args.hasArg(optEncoding))
+        if (args.hasArg(optEncodingShort) || args.hasArg(optEncoding))
         {
             ColorFormat cf;
             auto enc = args.hasArg(optEncodingShort) ? args.arg(optEncodingShort) : args.arg(optEncoding);
@@ -724,7 +723,7 @@ int main(int argc, const char *argv[])
     {
         std::cout << "\nIndiana Jones and The Infernal Machine MAT file tool v" << kVersion << std::endl;
         MatoolArgs args(argc, argv);
-        if(argc < 2)
+        if (argc < 2)
         {
             printHelp();
             return 1;

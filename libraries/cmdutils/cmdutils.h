@@ -51,9 +51,10 @@ namespace cmdutils {
         printCommand(arg, desc, width);
     }
 
-    inline void printOptionHeader()
+    inline void printOptionHeader(std::string_view t = "Option")
     {
-        std::cout << "Option:              Short:       Description:\n";
+        auto[min, max] = libim::minmax<std::size_t>(t.size(), 45);
+        std::cout << t << ": " << CMDUTILS_SETW(max - min, ' ') << "Short:       Description:\n";
     }
 
     static void printOption(std::string_view option, std::string_view shortOption, std::string_view desc)

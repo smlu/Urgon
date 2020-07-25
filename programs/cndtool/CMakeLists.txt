@@ -1,7 +1,7 @@
 project(
     ${PM_CNDTOOL}
     LANGUAGES CXX
-    VERSION 0.4.2
+    VERSION 0.5.0
 )
 
 configure_file(config.h.in config.h)
@@ -10,6 +10,7 @@ set(CNDTOOL_SRC_FILES
     "config.h"
     "cndtoolargs.h"
     "main.cpp"
+    "obj.h"
     "patch.h"
 )
 

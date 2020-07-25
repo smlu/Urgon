@@ -22,6 +22,7 @@
 
 #include "config.h"
 #include "cndtoolargs.h"
+#include "obj.h"
 #include "patch.h"
 
 using namespace cmdutils;
@@ -40,6 +41,7 @@ static constexpr auto kExtKey = ".key"sv;
 static constexpr auto kExtMat = ".mat"sv;
 
 constexpr static auto cmdAdd     = "add"sv;
+constexpr static auto cmdConvert = "convert"sv;
 constexpr static auto cmdExtract = "extract"sv;
 constexpr static auto cmdList    = "list"sv;
 constexpr static auto cmdRemove  = "remove"sv;
@@ -47,6 +49,7 @@ constexpr static auto cmdHelp    = "help"sv;
 
 constexpr static auto scmdAnimation = "animation"sv;
 constexpr static auto scmdMaterial  = "material"sv;
+constexpr static auto scmdObj       = "obj"sv;
 
 constexpr static auto optAnimations        = "--key"sv;
 constexpr static auto optExtractAsBmp      = "--mat-bmp"sv;
@@ -133,6 +136,25 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
             printSubCommandHeader();
             printSubCommand( scmdAnimation, "Add animation assets" );
             printSubCommand( scmdMaterial , "Add material assets"  );
+        }
+    }
+    else if (cmd == cmdConvert)
+    {
+        if (subcmd == scmdObj)
+        {
+            std::cout << "Extract level geometry from CND file and convert to Wavefront OBJ file format." << std::endl << std::endl;
+            std::cout << "  Usage: cndtool convert obj [options] <cnd-file-path>" << std::endl << std::endl;
+            printOptionHeader();
+            printOption( optNoMaterials, ""               , "Don't extract material assets"   );
+            printOption( optOutputDir  , optOutputDirShort, "Output folder"                   );
+            printOption( optVerbose    , optVerboseShort  , "Verbose printout to the console" );
+        }
+        else
+        {
+            std::cout << "Convert CND level file to another format." << std::endl << std::endl;
+            std::cout << "  Usage: cndtool convert <sub-command> " << std::endl << std::endl;
+            printSubCommandHeader();
+            printSubCommand( scmdObj, "Extract level geometry and convert to Wavefront OBJ file format." );
         }
     }
     else if (cmd == cmdExtract)
@@ -347,6 +369,66 @@ int execCmdAdd(std::string_view scmd, const CndToolArgs& args)
     }
 
     printHelp(cmdAdd);
+    return 1;
+}
+
+int execCmdConvertToObj(const CndToolArgs& args)
+{
+    try
+    {
+        const fs::path inputFile = args.cndFile();
+        if (!fileExists(inputFile))
+        {
+            printErrorInvalidCnd(inputFile, cmdConvert, args.subcmd());
+            return 1;
+        }
+
+        fs::path outDir;
+        if (args.hasArg(optOutputDirShort)){
+            outDir = args.arg(optOutputDirShort);
+        }
+        else if (args.hasArg(optOutputDir)){
+            outDir = args.arg(optOutputDir);
+        }
+        else {
+            outDir = getBaseName(inputFile.u8string());
+        }
+
+        if (!isDirPath(outDir))
+        {
+            std::cerr << "ERROR: Output path is not directory!\n";
+            return 1;
+        }
+
+        std::cout << "Converting level geometry to OBJ ... " << std::flush;
+        convertCndToObj(inputFile, outDir, !args.hasArg(optNoMaterials));
+        std::cout << kSuccess << std::endl;
+        return 0;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "\nERROR: Failed to convert level geometry to OBJ file format!" << std::endl;
+        if (hasOptVerbose(args)) {
+            std::cerr << "       Reason: " << e.what() << std::endl;
+        }
+        return 1;
+    }
+}
+
+int execCmdConvert(std::string_view scmd, const CndToolArgs& args)
+{
+    if (scmd == scmdObj) {
+        return execCmdConvertToObj(args);
+    }
+
+    if (scmd.empty()) {
+        std::cerr << "ERROR: Subcommand required!\n\n";
+    }
+    else {
+        std::cerr << "ERROR: Unknown subcommand \"" << scmd << "\"!\n\n";
+    }
+
+    printHelp(cmdConvert);
     return 1;
 }
 
@@ -780,7 +862,7 @@ int execCmd(std::string_view cmd, const CndToolArgs& args)
     return 1;
 }
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     gLogLevel = LogLevel::Warning;
 

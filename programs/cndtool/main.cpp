@@ -166,7 +166,7 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
         printOption( optConvertToPng, optConvertToPngShort, "Convert extracted material assets to PNG format."                );
         printOption( optMaxTex      , ""                  , "Max number of images to convert from each material file."        );
         printOption( ""             , ""                  , "By default all are converted."                                   );
-        printOption( optExtractLod  , ""                  , "Extract also MipMap LOD images when converting material file.\n" );
+        printOption( optExtractLod  , ""                  , "Extract also mipmap LOD images when converting material file.\n" );
         printOption( optConvertToWav, optConvertToWavShort, "Convert extracted IndyWV sound assets to WAV format\n"           );
         printOption( optNoAnimations, ""                  , "Don't extract animation assets."                                 );
         printOption( optNoMaterials , ""                  , "Don't extract material assets."                                  );
@@ -210,15 +210,15 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
     }
     else
     {
-        std::cout << "\nCommand line interface tool to extract and modify\ngame assets stored in a CND level file.\n\n";
+        std::cout << "\nCommand-line interface tool to extract and modify\ngame assets stored in a CND level file.\n\n";
         std::cout << "  Usage: cndtool <command> [sub-command] [options]" << std::endl << std::endl;
         printCommandHeader();
-        printCommand( cmdAdd    , "Add or replace game assets"                     );
-        printCommand( cmdConvert, "Convert CND file"                               );
-        printCommand( cmdExtract, "Extract game assets"                            );
-        printCommand( cmdList   , "Print to the console stored game assets"        );
-        printCommand( cmdRemove , "Remove one or more game assets"                 );
-        printCommand( cmdHelp   , "Show this message or help for specific command" );
+        printCommand( cmdAdd    , "Add or replace game assets"                       );
+        printCommand( cmdConvert, "Convert CND file"                                 );
+        printCommand( cmdExtract, "Extract game assets"                              );
+        printCommand( cmdList   , "Print to the console stored game assets"          );
+        printCommand( cmdRemove , "Remove one or more game assets"                   );
+        printCommand( cmdHelp   , "Show this message or help for a specific command" );
     }
 }
 

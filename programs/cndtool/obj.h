@@ -57,6 +57,9 @@ namespace cndtool {
         InputFileStream icnds(inCndPath);
         auto mats   = CND::readMaterials(icnds);
         auto geores = CND::readGeoresource(icnds);
+        if (geores.verts.empty()) {
+            throw std::runtime_error("CND file has no geometry resources");
+        }
 
         // Write mtl
         const auto mtlPath = kMtlFolder / fs::path(inCndPath).filename().replace_extension(".mtl");

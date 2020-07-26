@@ -31,7 +31,7 @@ using namespace std::string_view_literals;
 
 namespace fs = std::filesystem;
 
-constexpr static auto cmdConvert = "convert"sv;
+constexpr static auto cmdCreate  = "create"sv;
 constexpr static auto cmdExtract = "extract"sv;
 constexpr static auto cmdHelp    = "help"sv;
 constexpr static auto cmdInfo    = "info"sv;
@@ -107,21 +107,22 @@ fs::path getOptOutputDir(const MatoolArgs& args, std::optional<fs::path> optPath
 
 void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
 {
-    if (cmd == cmdConvert)
+    if (cmd == cmdCreate)
     {
         if (subcmd == scmdBatch)
         {
-            std::cout << "Convert BMP or PNG image files to MAT file format in bulk using existing MAT files as a reference." << std::endl << std::endl;
-            std::cout << "By default images are converted only if coresponding reference MAT file can be found" << std::endl;
-            std::cout << "and the number of images to go into MAT file match the referenced MAT file." << std::endl;
-            std::cout << "The images to be used in one MAT file must have the same size (width, height) and" << std::endl;
-            std::cout << "file name must be suffixed with '__cel_'x, where x is the position number in the MAT file starting with 0." << std::endl;
+            std::cout << "Create new MAT files in bulk from BMP or PNG image files using existing MAT files as a reference." << std::endl << std::endl;
+            std::cout << "By default, the new MAT file is created only if a corresponding reference MAT file can be found," << std::endl;
+            std::cout << "and the number of images to go into the new MAT file match the referenced MAT file." << std::endl;
+            std::cout << "The images to be used in the new MAT file must have the same size (width, height), and" << std::endl;
+            std::cout << "the file  name must be suffixed with '__cel_'x  where 'x' represents the positional number" << std::endl;
+            std::cout << "to place the image in the new MAT file starting with 0." << std::endl;
             std::cout << "  e.g.: test__cel_0.png test__cel_1.bmp test__cel_2.png ..." << std::endl << std::endl;
-            std::cout << "  Usage: matool convert batch [options] <path-to-image-folder> <path-to-mat-ref-folder>" << std::endl << std::endl;
+            std::cout << "  Usage: matool create batch [options] <path-to-image-folder> <path-to-mat-ref-folder>" << std::endl << std::endl;
 
             printOptionHeader();
             printOption( optSRGB        , ""                  , "Do sRGB conversion when generating MipMaps."       );
-            printOption( ""             , ""                  , "By default no sRGB conversion is done."            );
+            printOption( ""             , ""                  , "By default, no sRGB conversion is done."           );
             printOption( optForce8bpc   , ""                  , "Use RGB24 or RGBA32 color format for encoding"     );
             printOption( ""             , ""                  , "instead of color format from referenced MAT file." );
             printOption( optOutputDir   , optOutputDirShort   , "Output folder"                                     );
@@ -129,42 +130,43 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
         }
         else
         {
-            std::cout << "Convert BMP or PNG image files to MAT file format." << std::endl;
-            std::cout << "Images to convert to MAT format must have the same size (width, height) or conversion will fail." << std::endl << std::endl;
-            std::cout << "  Usage: matool convert [options] <encoding> <path-to-image> [path-to-images] ..." << std::endl;
-            std::cout << "         matool convert <sub-command>" << std::endl << std::endl;
+            std::cout << "Create a new MAT file using BMP or PNG images." << std::endl;
+            std::cout << "Images to use in the new MAT file must all have the same size (width, height)," << std::endl;
+            std::cout << "or the generation will fail." << std::endl << std::endl;
+            std::cout << "  Usage: matool create [options] <encoding> <path-to-image> [path-to-images] ..." << std::endl;
+            std::cout << "         matool create <sub-command>" << std::endl << std::endl;
 
             printPositionalArgHeader("Encoding");
-            printPositionalArg( "rgb555"    , "Encode textures in RGB555 format"                           );
-            printPositionalArg( "rgb555be"  , "Encode textures in big-endian byte order RGB555 format\n"   );
-            printPositionalArg( "rgb565"    , "Encode textures in RGB565 format"                           );
-            printPositionalArg( "rgb565be"  , "Encode textures in big-endian byte order RGB565 format\n"   );
-            printPositionalArg( "rgba4444"  , "Encode textures in RGBA4444 format"                         );
-            printPositionalArg( "rgba4444be", "Encode textures in big-endian byte order RGBA4444 format"   );
-            printPositionalArg( "argb4444"  , "Encode textures in ARGB4444 format"                         );
-            printPositionalArg( "argb4444be", "Encode textures in big-endian byte order ARGB4444 format\n" );
-            printPositionalArg( "rgba5551"  , "Encode textures in RGBA5551 format"                         );
-            printPositionalArg( "rgba5551be", "Encode textures in big-endian byte order RGBA5551 format"   );
-            printPositionalArg( "argb1555"  , "Encode textures in ARGB1555 format"                         );
-            printPositionalArg( "argb1555be", "Encode textures in big-endian byte order ARGB1555 format\n" );
-            printPositionalArg( "rgb24"     , "Encode textures in RGB888 format"                           );
-            printPositionalArg( "rgb24be"   , "Encode textures in big-endian byte order RGB888 format\n"   );
-            printPositionalArg( "rgba32"    , "Encode textures in RGBA8888 format"                         );
-            printPositionalArg( "rgba32be"  , "Encode textures in big-endian byte order RGBA8888 format"   );
-            printPositionalArg( "argb32"    , "Encode textures in ARGB8888 format"                         );
-            printPositionalArg( "argb32be"  , "Encode textures in big-endian byte order ARGB8888 format\n" );
+            printPositionalArg( "rgb555"    , "Encode images in RGB555 format"                           );
+            printPositionalArg( "rgb555be"  , "Encode images in big-endian byte order RGB555 format\n"   );
+            printPositionalArg( "rgb565"    , "Encode images in RGB565 format"                           );
+            printPositionalArg( "rgb565be"  , "Encode images in big-endian byte order RGB565 format\n"   );
+            printPositionalArg( "rgba4444"  , "Encode images in RGBA4444 format"                         );
+            printPositionalArg( "rgba4444be", "Encode images in big-endian byte order RGBA4444 format"   );
+            printPositionalArg( "argb4444"  , "Encode images in ARGB4444 format"                         );
+            printPositionalArg( "argb4444be", "Encode images in big-endian byte order ARGB4444 format\n" );
+            printPositionalArg( "rgba5551"  , "Encode images in RGBA5551 format"                         );
+            printPositionalArg( "rgba5551be", "Encode images in big-endian byte order RGBA5551 format"   );
+            printPositionalArg( "argb1555"  , "Encode images in ARGB1555 format"                         );
+            printPositionalArg( "argb1555be", "Encode images in big-endian byte order ARGB1555 format\n" );
+            printPositionalArg( "rgb24"     , "Encode images in RGB888 format"                           );
+            printPositionalArg( "rgb24be"   , "Encode images in big-endian byte order RGB888 format\n"   );
+            printPositionalArg( "rgba32"    , "Encode images in RGBA8888 format"                         );
+            printPositionalArg( "rgba32be"  , "Encode images in big-endian byte order RGBA8888 format"   );
+            printPositionalArg( "argb32"    , "Encode images in ARGB8888 format"                         );
+            printPositionalArg( "argb32be"  , "Encode images in big-endian byte order ARGB8888 format\n" );
 
             printOptionHeader();
-            printOption( optExtractLod , ""               , "Number of MipMap levels to generate."                        );
-            printOption( ""            , ""               , "If no value is provided or value is 0 then"                  );
-            printOption( ""            , ""               , "max number of levels will be generated."                     );
+            printOption( optExtractLod , ""               , "Number of mipmap levels to generate."                        );
+            printOption( ""            , ""               , "If no value is provided or value is 0,"                      );
+            printOption( ""            , ""               , "then max number of levels will be generated."                );
             printOption( ""            , ""               , "If this option is not provided MipMap won't be generated.\n" );
             printOption( optNoSRGB     , ""               , "No sRGB conversion when generating MipMap.\n"                );
             printOption( optOutputDir  , optOutputDirShort, "Output folder"                                               );
             printOption( optVerbose    , optVerboseShort  , "Verbose printout to the console\n"                           );
 
             printSubCommandHeader();
-            printSubCommand( scmdBatch, "Convert images in bulk" );
+            printSubCommand( scmdBatch, "Create multiple MAT files in bulk" );
         }
     }
     else if (cmd == cmdExtract)
@@ -172,14 +174,14 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
         std::cout << "Extract images from MAT files." << std::endl;
         std::cout << "  Usage: matool extract [options] <path-mat-file|folder>" << std::endl << std::endl;
         printOptionHeader();
-        printOption( optExtractAsBmp, optExtractAsBmpShort, "Extract images in BMP format."                                      );
-        printOption( ""             , ""                  , "By default images are extrected in PNG format."                     );
-        printOption( optMaxTex      , ""                  , "Max number of textures to extract from MAT file."                   );
-        printOption( ""             , ""                  , "By default all are extracted."                                      );
-        printOption( optExtractLod  , ""                  , "Extract also mipmap LOD images from MAT file."                      );
-        printOption( ""             , ""                  , "By default only top image at LOD 0 is extracted from each texture." );
-        printOption( optOutputDir   , optOutputDirShort   , "Output folder"                                                      );
-        printOption( optVerbose     , optVerboseShort     , "Verbose printout to the console"                                    );
+        printOption( optExtractAsBmp, optExtractAsBmpShort, "Extract images in BMP format."                                       );
+        printOption( ""             , ""                  , "By default, images are extracted in PNG format."                     );
+        printOption( optMaxTex      , ""                  , "Max number of cel images to extract from MAT file."                  );
+        printOption( ""             , ""                  , "By default, all images are extracted."                               );
+        printOption( optExtractLod  , ""                  , "Extract also mipmap LOD images from MAT file."                       );
+        printOption( ""             , ""                  , "By default, only top image at LOD 0 is extracted from each texture." );
+        printOption( optOutputDir   , optOutputDirShort   , "Output folder"                                                       );
+        printOption( optVerbose     , optVerboseShort     , "Verbose printout to the console"                                     );
     }
     else if (cmd == cmdInfo)
     {
@@ -194,30 +196,31 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
         std::cout << "  Usage: matool modify <options> <mat-file-path>" << std::endl << std::endl;
 
         printOptionHeader("Mod Option");
-        printOption( optEncoding, optEncodingShort, "Change encoding color format."                                     );
-        printOption( ""            , ""             , "Supported formats:"                                              );
-        printOption( ""            , ""             , "  rgb24    | rgb24be    "                                        );
-        printOption( ""            , ""             , "  rgb555   | rgb555be   | rgb565   | rgb565be"                   );
-        printOption( ""            , ""             , "  rgba4444 | rgba4444be | argb4444 | argb4444be"                 );
-        printOption( ""            , ""             , "  rgba5551 | rgba5551be | argb1555 | argb1555be"                 );
-        printOption( ""            , ""             , "  rgba32   | rgba32be   | argb32   | argb32be\n"                 );
-        printOption( optExtractLod , ""             , "Change number of MipMap levels."                                 );
-        printOption( ""            , ""             , "If no value is provided or value is 0 then"                      );
-        printOption( ""            , ""             , "MipMap chain with max number of LOD levels will be generated.\n" );
+        printOption( optEncoding, optEncodingShort, "Change encoding color format."                         );
+        printOption( ""            , ""             , "Supported formats:"                                  );
+        printOption( ""            , ""             , "  rgb24    | rgb24be    "                            );
+        printOption( ""            , ""             , "  rgb555   | rgb555be   | rgb565   | rgb565be"       );
+        printOption( ""            , ""             , "  rgba4444 | rgba4444be | argb4444 | argb4444be"     );
+        printOption( ""            , ""             , "  rgba5551 | rgba5551be | argb1555 | argb1555be"     );
+        printOption( ""            , ""             , "  rgba32   | rgba32be   | argb32   | argb32be\n"     );
+        printOption( optExtractLod , ""             , "Change number of mipmap levels."                     );
+        printOption( ""            , ""             , "If no value is provided or value is 0,"              );
+        printOption( ""            , ""             , "then the mipmap chain with max number of LOD levels" );
+        printOption( ""            , ""             , "will be generated.\n"                                );
 
         printOptionHeader();
-        printOption( optNoSRGB   , ""             , "No sRGB conversion when generating MipMap." );
+        printOption( optNoSRGB   , ""             , "No sRGB conversion when generating mipmap." );
         printOption( optVerbose, optVerboseShort  , "Verbose printout to the console"            );
     }
     else
     {
-        std::cout << "Command line interface tool for MAT image format.\n\n";
+        std::cout << "Command-line interface tool for MAT image format.\n\n";
         std::cout << "  Usage: matool <command> [sub-command] [options]" << std::endl << std::endl;
         printCommandHeader();
-        printCommand( cmdConvert, "Convert image file to MAT file"                  );
+        printCommand( cmdCreate , "Create new MAT file"                             );
         printCommand( cmdExtract, "Extract images from MAT file"                    );
         printCommand( cmdInfo   , "Print to the console information about MAT file" );
-        printCommand( cmdModify , "Modify existing MAT file" );
+        printCommand( cmdModify , "Modify existing MAT file"                        );
         printCommand( cmdHelp   , "Show this message"                               );
     }
 }
@@ -284,12 +287,12 @@ Material imagesToMaterial(const std::vector<fs::path>& imgFiles, std::string mat
     return mat;
 }
 
-int execCmdConvertBatch(const MatoolArgs& args)
+int execCmdCreateBatch(const MatoolArgs& args)
 {
     if (args.positionalArgs().size() < 3)
     {
         std::cerr << "ERROR: missing positional arguments for paths to the image and mat reference folders!\n\n";
-        printHelp(cmdConvert, scmdBatch);
+        printHelp(cmdCreate, scmdBatch);
         return 1;
     }
 
@@ -345,7 +348,7 @@ int execCmdConvertBatch(const MatoolArgs& args)
 
             if (mapImgs.empty())
             {
-                std::cout << "No images found to convert to MAT!\n";
+                std::cout << "No images were found to generate new MAT files!\n";
                 return 0;
             }
         }
@@ -370,11 +373,11 @@ int execCmdConvertBatch(const MatoolArgs& args)
             }
         }
 
-        /* Convert found images to mat */
+        /* Convert found images to MAT */
         fs::path outDir = getOptOutputDir(args, "out_mat");
-        for (auto[idx, pair]: enumerate(mapImgs))
+        for (auto[idx, pair] : enumerate(mapImgs))
         {
-            printProgress("Converting... ", idx + 1, mapImgs.size());
+            printProgress("Generating... ", idx + 1, mapImgs.size());
 
             auto&[name, setImgPaths] = pair;
             auto itMat = mapMats.find(name);
@@ -382,7 +385,7 @@ int execCmdConvertBatch(const MatoolArgs& args)
             {
                 std::cerr << "\rERROR: No reference MAT file found for image: "
                           << *setImgPaths.begin() << std::endl;
-                continue; // Skip converting
+                continue; // Skip generation process
             }
 
             /* Load Material and verify found images*/
@@ -397,20 +400,20 @@ int execCmdConvertBatch(const MatoolArgs& args)
                         std::cerr << "         "  << img << std::endl;
                     }
                 }
-                continue; // Skip converting
+                continue; // Skip generation process
             }
             else if (setImgPaths.size() < refMat.count())
             {
-                std::cerr << "\rERROR: Not enough images found to convert to MAT file: " << name << std::endl;
+                std::cerr << "\rERROR: Not enough images found to create a new MAT file: " << name << std::endl;
                 if (hasOptVerbose(args)) {
                     std::cerr << "       " << "Ref MAT tex count: " << refMat.count() << " found images: " << setImgPaths.size() << std::endl;
                 }
-                continue; // Skip converting
+                continue; // Skip generation process
             }
             else if (setImgPaths.size() > refMat.count()) // Too many images for ref Material?
             {
                 std::cerr
-                    << "\rWARNING: Not all images will be converted because too many images were found to convert to reference MAT file: "
+                    << "\rWARNING: Not all images will be used due to more images found than needed by the referenced MAT file: "
                     << name << std::endl;
                 if (hasOptVerbose(args))
                 {
@@ -439,12 +442,12 @@ int execCmdConvertBatch(const MatoolArgs& args)
             mat.serialize(OutputFileStream(outPath, /*truncate=*/true));
         }
 
-        std::cout << "\rConverting... FINISHED\n";
+        std::cout << "\nGenerating... FINISHED\n";
         return 0;
     }
     catch (const std::exception& e)
     {
-        std::cerr << "\nERROR: An exception was encountered while converting images to MAT file format!\n";
+        std::cerr << "\nERROR: An exception was encountered while generating MAT files!\n";
         if (hasOptVerbose(args)) {
             std::cerr << "       error: " << e.what() << std::endl;
         }
@@ -452,24 +455,24 @@ int execCmdConvertBatch(const MatoolArgs& args)
     }
 }
 
-int execCmdConvert(const MatoolArgs& args)
+int execCmdCreate(const MatoolArgs& args)
 {
     try
     {
         ColorFormat cf;
         if (args.subcmd() == scmdBatch) {
-            return execCmdConvertBatch(args);
+            return execCmdCreateBatch(args);
         }
         else if (args.positionalArgs().empty())
         {
             std::cerr << "ERROR: Missing positional argument for encoding or sub-command!\n\n";
-            printHelp(cmdConvert);
+            printHelp(cmdCreate);
             return 1;
         }
         else if (!getColorFormat(args.positionalArgs().at(0), cf))
         {
             std::cerr << "ERROR: Invalid encoding argument or sub-command: '" << args.subcmd() << "'\n\n";
-            printHelp(cmdConvert);
+            printHelp(cmdCreate);
             return 1;
         }
 
@@ -477,11 +480,11 @@ int execCmdConvert(const MatoolArgs& args)
         if (imgFiles.empty())
         {
             std::cerr << "ERROR: Missing position argument of image file paths!\n\n";
-            printHelp(cmdConvert);
+            printHelp(cmdCreate);
             return 1;
         }
 
-        std::cout << "Converting images... " << std::flush;
+        std::cout << "Creating MAT file... " << std::flush;
         const auto mipLevels = args.hasArg(optExtractLod) ? args.uintArg(optExtractLod, 0) : 1;
         const auto bSRGBConv = !args.hasArg(optNoSRGB);
         const auto matName   = imgFiles.begin()->filename().replace_extension(kExtMat).u8string();
@@ -615,7 +618,7 @@ int execCmdInfo(const MatoolArgs& args)
     catch (const std::exception& e)
     {
         std::cerr << "ERROR: Invalid MAT file!" << std::endl;
-        if(hasOptVerbose(args)) {
+        if (hasOptVerbose(args)) {
             std::cerr << "Reason: " << e.what() << std::endl;
         }
         return 1;
@@ -641,7 +644,7 @@ int execCmdModify(const MatoolArgs& args)
             if (!getColorFormat(enc, cf))
             {
                 std::cerr << "ERROR: Invalid encoding argument '" << enc << "'!\n\n";
-                printHelp(cmdConvert);
+                printHelp(cmdCreate);
                 return 1;
             }
             optFormat = std::move(cf);
@@ -684,7 +687,7 @@ int execCmdModify(const MatoolArgs& args)
     catch (const std::exception& e)
     {
         std::cerr << kFailed << std::endl;
-        if(hasOptVerbose(args)) {
+        if (hasOptVerbose(args)) {
             std::cerr << "ERROR: " << e.what() << std::endl;
         }
         return 1;
@@ -693,8 +696,8 @@ int execCmdModify(const MatoolArgs& args)
 
 int execCmd(std::string_view cmd, const MatoolArgs& args)
 {
-    if (cmd == cmdConvert) {
-        return execCmdConvert(args);
+    if (cmd == cmdCreate) {
+        return execCmdCreate(args);
     }
     else if (cmd == cmdExtract) {
         return execCmdExtract(args);
@@ -707,17 +710,17 @@ int execCmd(std::string_view cmd, const MatoolArgs& args)
     }
     else
     {
-        if(cmd != cmdHelp) {
+        if (cmd != cmdHelp) {
             std::cerr << "ERROR: Unknown command\n\n";
         }
-        auto scmd = args.positionalArgs().size() > 1 ?  args.positionalArgs().at(1) : "";
+        auto scmd = args.positionalArgs().size() > 1 ? args.positionalArgs().at(1) : "";
         printHelp(args.subcmd(), scmd);
     }
 
     return 1;
 }
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     try
     {

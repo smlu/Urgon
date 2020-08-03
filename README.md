@@ -1,88 +1,54 @@
 # Indiana Jones and the Infernal Machine Mod Tools
-This repository contains command line tools (`gobext` and `cndtool`) which can be used to extract and import/replace game resources from `GOB` resource files and `CND` compact level files.
+This repository contains command command-line tools: [**gobext**](programs/gobext), [**cndtool**](programs/cndtool) and [**matool**](programs/matool) for extracting and modifying game assets of the game Indiana Jones and the Infernal Machine.
 Tools can be downloaded from [Releases](https://github.com/smlu/ProjectMarduk/releases) page.
 
-If you need tool to edit `3do` models and `key` animations use blender add-on: [blender-ijim](https://github.com/smlu/blender-ijim).
-To edit `mat` material files use gimp plugin: [gimp-ijim](https://github.com/smlu/gimp-ijim).
+If you need tools to edit `3DO` models and `KEY` animations use blender add-on: [blender-ijim](https://github.com/smlu/blender-ijim).  
+To edit `MAT` texture files use gimp plugin: [gimp-ijim](https://github.com/smlu/gimp-ijim).
 
-## Getting Started
-  1. Extract to any directory the `.zip` file downloaded from the [Releases](https://github.com/smlu/ProjectMarduk/releases) page .
-  2. Run terminal window. (On windows use `cmd.exe`)
-  3. In the opened terminal window change current directory to the root directory of extracted files.
-     **Windows example**
-     If extracted files are located in `C:\Users\<username>\Desktop\imtools` you would type into terminal window:
-        ```
-     cd "C:\Users\<username>\Desktop\imtools"
-     ```
+<img src="docs/images/cyn.png" alt="Canyonlands opened in Blender" width="600"/>  
 
-## Usage
-  To run selected tool just enter its name in terminal window and press enter. e.g. `gobext` or `cndtool`.
+*(Canyonlands imported into Blender)*
 
-### gobext
-This tool can extract all game resource files ( e.g.: models, scripts, level files etc..) stored in a `*.gob` file.
-*Note: For the extracted files to be used in the game they must be put in the `Resource` folder located in root folder where game is installed.*
+## Content
+  ### Libraries
+  - [**libim**](libraries/libim) - C++ library for parsing and writing game resources (CND, GOB, MAT, KEY).
 
-**Using gobext:**
-```
- gobext <path_to_gob_file>
-```
+  ### Programs
+  - [**cndtool**](programs/cndtool) - A multi-purpose command-line tool for CND level files. It can add, extract or replace `animation`/`texture`/`sound` game assets. Tool can also extract and convert the level geometry to [Wavefront OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) file format.  
+  For more info see [README](programs/cndtool/README.md).
 
-To extract files to a specific folder use `-o` flag:
-```
- gobext <path_to_gob_file> -o <path_to_output_folder>
-```
+  - [**gobext**](programs/gobext) - A command-line tool for extracting all game resource files (e.g.: models, scripts, level files etc..) from `*.gob` files.  
+  For more info see [README](programs/gobext/README.md).
 
-### cndtool
-Multi purpose tool for compact game level files (`.cnd`).
-Tool can list, extract, add, replace or remove game resources stored in a `.cnd` file.
+  - [**matool**](programs/matool) - A command-line tool for editing and generating `MAT` texture files.  
+  For more info see [README](programs/matool/README.md).
 
-Extract:
- - animation files (`.key`)
-  - material files (`.mat`)
-  - sound files (`.wav`)
+## Building from Scratch
 
-Modify:
- - animation files (`.key`)
- - material files (`.mat`)
+### Prerequisites
+  - [**git**](https://git-scm.com/) scm
+  - [**CMake**](https://cmake.org/download/) >= 3.15
+  - **C++17** supported compiler (gcc, clang, VisualStudio)
 
-**Using cndtool:**
-```
-Indiana Jones and the Infernal Machine CND file tool v0.2.0
-
-Command line interface tool to extract and modify game
-resources stored in a CND archive file.
-
-  Usage: cndtool <command> [sub-command] [options]
-
-Commands:                      Description:
-  add                            Add or replace game resource
-  extract                        Extract game resources
-  list                           Print to the console stored game resources
-  remove                         Remove one or more game resource
-  help                           Show this message
-```
-
-Usage example:
-   1. Extract resources:
-   ```
-     cndtool extract <path_to_cnd_file>
- ```
-  2. Replace existing material:
+### Configure and Build
+  1. Clone repository and dependencies:  
   ```
-     cndtool add material --replace <path_to_cnd_file> <path_to_mat_file>
- ```
-
-## Building
-To compile tools from source code a **C++17** compiler and **CMake** >= 3.6 is required.
-How to compile on Linux and macOS:
-  1. make sub-directory `build` in the root folder of source code
-  2. cd to `build` folder and run:
-   ```cmake -DCMAKE_BUILD_TYPE=Release ..```
-   3. to compile run: ```make```
-
-How to compile on Windows using VisualStudio 2019:
-  1. make subdirectory `build` in the root folder of source code
-  2. cd to `build` folder and run:
-   ```cmake -DCMAKE_BUILD_TYPE=Release ..```
-  3. open generated `.sln` project file with VisualStudio and
-  4. compile project in VisualStudio
+     git clone -b develop --recursive https://github.com/smlu/ProjectMarduk
+  ```
+  2. Move into directory `ProjectMarduk`:
+  ```
+     cd ProjectMarduk
+  ```
+  3. Make subdirectory `build`: 
+  ```
+     mkdir build
+  ```
+  4. Run cmake configure:
+  ```
+    cmake -DCMAKE_BUILD_TYPE=Release -B build
+  ```
+  5. Compile
+  <pre>
+  cmake --build build
+  <i>Note: On Windows, when using <b>VisualStudio</b> to configure cmake you can
+        open generated <b>*.sln</b> project in VisualStudio and compile it there.</i></pre>

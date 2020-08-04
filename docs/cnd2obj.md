@@ -23,11 +23,11 @@ The command should take a few seconds to finish. After it completes, you should 
 2. The imported level object will be rotated for 90 degrees on the `x` axis. We have to rotate it and set viewport shading to solid texture with backface culling:
  ![Image of tutorial step 2](images/shsobj2.png)
 
-    1. Select the level object.
-    2. Go to the object edit tab.
-    3. Set `Rotation` on the `x` axis to 0 degrees.
-    4. Click the "+"  sign in the top right corner of the viewport window (or press "`n`" on the keyboard) to open the `Transform` window. In the transform window, move down to `Shading` options and make sure the option `Backface Culling` is checked.
-    5. Set viewport shading to `Texture`.
+    1\. Select the level object.  
+    2\. Go to the object edit tab.  
+    3\. Set `Rotation` on the `x` axis to 0 degrees.  
+    4\. Click the "+"  sign in the top right corner of the viewport window (or press "`n`" on the keyboard) to open the `Transform` window. In the transform window, move down to `Shading` options and make sure the option `Backface Culling` is checked.  
+    5\. Set viewport shading to `Texture`.  
 
 3. Change the navigation mode to `Walk Navigation` then move around and inside of the level's object.  
 Use the mouse to rotate and keys `W`, `A`, `S`, `D` to move around.  

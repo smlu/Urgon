@@ -505,7 +505,7 @@ std::size_t extractMaterials(const InputStream& istream, const fs::path& outDir,
 
         if (opt.mat.convertToPng)
         {
-            pngDir = outDir /" png";
+            pngDir = outDir / "png";
             makePath(pngDir);
         }
     }

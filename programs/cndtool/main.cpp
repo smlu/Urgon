@@ -227,7 +227,7 @@ void printErrorInvalidCnd(const fs::path cndPath, std::string_view cmd, std::str
     if (cndPath.empty()) {
         std::cerr << "ERROR: A valid CND file path required!\n\n";
     } else {
-        std::cerr << "ERROR: CND file \"" << cndPath << "\" does not exist!\n\n";
+        std::cerr << "ERROR: CND file " << cndPath << " doesn't exist!\n\n";
     }
     printHelp(cmd, subcmd);
 }
@@ -251,7 +251,7 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
     {
         try
         {
-            const bool bValidFile = fileExtMatch(assetFile, assetFileExt);
+            const bool bValidFile  = fileExtMatch(assetFile, assetFileExt);
             const bool bFileExists = bValidFile && fileExists(assetFile);
             if (!bValidFile)
             {
@@ -261,7 +261,7 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
             }
             else if (!bFileExists)
             {
-                std::cerr << "ERROR: " << "File '" << assetFile << "' does not exists!\n\n";
+                std::cerr << "ERROR: " << "File '" << assetFile << "' doesn't exist!\n\n";
                 printHelp(cmdAdd, args.subcmd());
                 return false;
             }

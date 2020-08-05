@@ -46,8 +46,9 @@ constexpr static auto optEncodingShort     = "-e"sv;
 constexpr static auto optMaxTex            = "--max-tex"sv;
 constexpr static auto optExtractLod        = "--mipmap"sv;
 constexpr static auto optNoSRGB            = "--no-srgb"sv;
+constexpr static auto optOutput            = "--output"sv;
 constexpr static auto optOutputDir         = "--output-dir"sv;
-constexpr static auto optOutputDirShort    = "-o"sv;
+constexpr static auto optOutputShort       = "-o"sv;
 constexpr static auto optSRGB              = "--srgb"sv;
 constexpr static auto optForce8bpc         = "--force-8bpc"sv;
 constexpr static auto optVerbose           = "--verbose"sv;
@@ -96,14 +97,26 @@ bool hasOptVerbose(const MatoolArgs& args)
 
 fs::path getOptOutputDir(const MatoolArgs& args, std::optional<fs::path> optPath = std::nullopt)
 {
-    if (args.hasArg(optOutputDirShort)){
-        return args.arg(optOutputDirShort);
+    if (args.hasArg(optOutputShort)){
+        return args.arg(optOutputShort);
     }
     else if (args.hasArg(optOutputDir)){
         return args.arg(optOutputDir);
     }
     return optPath.value_or(fs::path());
 }
+
+fs::path getOptOutput(const MatoolArgs& args, std::optional<fs::path> optPath = std::nullopt)
+{
+    if (args.hasArg(optOutputShort)){
+        return args.arg(optOutputShort);
+    }
+    else if (args.hasArg(optOutput)){
+        return args.arg(optOutput);
+    }
+    return optPath.value_or(fs::path());
+}
+
 
 void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
 {
@@ -121,12 +134,12 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
             std::cout << "  Usage: matool create batch [options] <path-to-image-folder> <path-to-mat-ref-folder>" << std::endl << std::endl;
 
             printOptionHeader();
-            printOption( optSRGB        , ""                  , "Do sRGB conversion when generating MipMaps."       );
-            printOption( ""             , ""                  , "By default, no sRGB conversion is done."           );
-            printOption( optForce8bpc   , ""                  , "Use RGB24 or RGBA32 color format for encoding"     );
-            printOption( ""             , ""                  , "instead of color format from referenced MAT file." );
-            printOption( optOutputDir   , optOutputDirShort   , "Output folder"                                     );
-            printOption( optVerbose     , optVerboseShort     , "Verbose printout to the console\n"                 );
+            printOption( optSRGB     , ""             , "Do sRGB conversion when generating MipMaps."       );
+            printOption( ""          , ""             , "By default, no sRGB conversion is done."           );
+            printOption( optForce8bpc, ""             , "Use RGB24 or RGBA32 color format for encoding"     );
+            printOption( ""          , ""             , "instead of color format from referenced MAT file." );
+            printOption( optOutputDir, optOutputShort , "Output folder"                                     );
+            printOption( optVerbose  , optVerboseShort, "Verbose printout to the console\n"                 );
         }
         else
         {
@@ -157,13 +170,13 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
             printPositionalArg( "argb32be"  , "Encode images in big-endian byte order ARGB8888 format\n" );
 
             printOptionHeader();
-            printOption( optExtractLod , ""               , "Number of mipmap levels to generate."                        );
-            printOption( ""            , ""               , "If no value is provided or value is 0,"                      );
-            printOption( ""            , ""               , "then max number of levels will be generated."                );
-            printOption( ""            , ""               , "If this option is not provided MipMap won't be generated.\n" );
-            printOption( optNoSRGB     , ""               , "No sRGB conversion when generating MipMap.\n"                );
-            printOption( optOutputDir  , optOutputDirShort, "Output folder"                                               );
-            printOption( optVerbose    , optVerboseShort  , "Verbose printout to the console\n"                           );
+            printOption( optExtractLod, ""             , "Number of mipmap levels to generate."                        );
+            printOption( ""           , ""             , "If no value is provided or value is 0,"                      );
+            printOption( ""           , ""             , "then max number of levels will be generated."                );
+            printOption( ""           , ""             , "If this option is not provided MipMap won't be generated.\n" );
+            printOption( optNoSRGB    , ""             , "No sRGB conversion when generating MipMap.\n"                );
+            printOption( optOutput    , optOutputShort , "Output file"                                                 );
+            printOption( optVerbose   , optVerboseShort, "Verbose printout to the console\n"                           );
 
             printSubCommandHeader();
             printSubCommand( scmdBatch, "Create multiple MAT files in bulk" );
@@ -180,7 +193,7 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
         printOption( ""             , ""                  , "By default, all images are extracted."                               );
         printOption( optExtractLod  , ""                  , "Extract also mipmap LOD images from MAT file."                       );
         printOption( ""             , ""                  , "By default, only top image at LOD 0 is extracted from each texture." );
-        printOption( optOutputDir   , optOutputDirShort   , "Output folder"                                                       );
+        printOption( optOutputDir   , optOutputShort      , "Output folder"                                                       );
         printOption( optVerbose     , optVerboseShort     , "Verbose printout to the console"                                     );
     }
     else if (cmd == cmdInfo)
@@ -196,21 +209,21 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
         std::cout << "  Usage: matool modify <options> <mat-file-path>" << std::endl << std::endl;
 
         printOptionHeader("Mod Option");
-        printOption( optEncoding, optEncodingShort, "Change encoding color format."                         );
-        printOption( ""            , ""             , "Supported formats:"                                  );
-        printOption( ""            , ""             , "  rgb24    | rgb24be    "                            );
-        printOption( ""            , ""             , "  rgb555   | rgb555be   | rgb565   | rgb565be"       );
-        printOption( ""            , ""             , "  rgba4444 | rgba4444be | argb4444 | argb4444be"     );
-        printOption( ""            , ""             , "  rgba5551 | rgba5551be | argb1555 | argb1555be"     );
-        printOption( ""            , ""             , "  rgba32   | rgba32be   | argb32   | argb32be\n"     );
-        printOption( optExtractLod , ""             , "Change number of mipmap levels."                     );
-        printOption( ""            , ""             , "If no value is provided or value is 0,"              );
-        printOption( ""            , ""             , "then the mipmap chain with max number of LOD levels" );
-        printOption( ""            , ""             , "will be generated.\n"                                );
+        printOption( optEncoding   , optEncodingShort, "Change encoding color format."                       );
+        printOption( ""            , ""              , "Supported formats:"                                  );
+        printOption( ""            , ""              , "  rgb24    | rgb24be    "                            );
+        printOption( ""            , ""              , "  rgb555   | rgb555be   | rgb565   | rgb565be"       );
+        printOption( ""            , ""              , "  rgba4444 | rgba4444be | argb4444 | argb4444be"     );
+        printOption( ""            , ""              , "  rgba5551 | rgba5551be | argb1555 | argb1555be"     );
+        printOption( ""            , ""              , "  rgba32   | rgba32be   | argb32   | argb32be\n"     );
+        printOption( optExtractLod , ""              , "Change number of mipmap levels."                     );
+        printOption( ""            , ""              , "If no value is provided or value is 0,"              );
+        printOption( ""            , ""              , "then the mipmap chain with max number of LOD levels" );
+        printOption( ""            , ""              , "will be generated.\n"                                );
 
         printOptionHeader();
-        printOption( optNoSRGB   , ""             , "No sRGB conversion when generating mipmap." );
-        printOption( optVerbose, optVerboseShort  , "Verbose printout to the console"            );
+        printOption( optNoSRGB , ""             , "No sRGB conversion when generating mipmap." );
+        printOption( optVerbose, optVerboseShort, "Verbose printout to the console"            );
     }
     else
     {
@@ -490,9 +503,12 @@ int execCmdCreate(const MatoolArgs& args)
         const auto matName   = imgFiles.begin()->filename().replace_extension(kExtMat).u8string();
         auto mat = imagesToMaterial(imgFiles, matName, cf, safe_cast<uint32_t>(mipLevels), bSRGBConv);
 
-        fs::path outPath = getOptOutputDir(args);
-        outPath = outPath / mat.name();
+        fs::path outPath = getOptOutput(args);
+        if (outPath.empty()) {
+            outPath = mat.name();
+        }
         makePath(outPath);
+
         mat.serialize(OutputFileStream(outPath, /*truncate=*/true));
         std::cout << kSuccess << std::endl;
 

@@ -34,7 +34,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 # GCC < 9
 target_link_libraries(${PROJECT_NAME} PUBLIC
     $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs> # std::filesystem GCC < 9
-    $<$<AND:$<CXX_COMPILER_ID:Clang>>:stdc++fs> # std::filesystem clang
+    $<$<AND:$<CXX_COMPILER_ID:Clang>,$<NOT:$<PLATFORM_ID:Windows>>>:stdc++fs> # std::filesystem clang
     png_static
     zlibstatic
 )

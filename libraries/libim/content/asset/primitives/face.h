@@ -19,10 +19,13 @@ namespace libim::content::asset {
     {
         enum Flag : uint32_t
         {
-            Normal                   = 0x00,
-            TwoSided                 = 0x01,
-            Translucent              = 0x02,
-            Unknown_4                = 0x04, // collision?
+            Normal             = 0x00,
+            DoubleSided        = 0x01, // disables face backface culling
+            Unknown            = 0x02,
+            ScaleUV_x          = 0x04, // 2x scales UV x coordinate 
+            ScaleUV_y          = 0x08, // 2x scales UV y coordinate 
+            ScaleTex           = 0x10, // 2x scales face texture
+            Translucent        = 0x20  // face is transparent
         };
 
         struct VertexIdx

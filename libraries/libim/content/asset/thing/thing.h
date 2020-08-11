@@ -31,7 +31,7 @@ namespace libim::content::asset {
             EmitsLight              = 0x1,       // When set the Light property in sithThing is initialized
             Dead                    = 0x2,
             NoWeaponCollide         = 0x4,
-            PartOfWorldGeometery    = 0x8,       // whip climb in shs_whip.cog
+            WhipClimbable           = 0x8,       // on the WhipAim surface player can mount whip on thing and climb up the whip. e.g.: shs_whip.cog  Note: if sert, thing can't have flag WhipSwingable
             Invisible               = 0x10,      // but touchable unlike hidden
             CanStandOn              = 0x40,      // nub_lightning.cog
             Mountable               = 0x80,      // pyr_fixminecar.cog, shs_barrel.cog
@@ -57,7 +57,7 @@ namespace libim::content::asset {
             DestroyedInAir          = 0x10000000, // class_mine.cog
             GeneratesSplash         = 0x20000000, // sends splash message to cog
             Movable                 = 0x40000000, // pushable/movable
-            Whippable               = 0x80000000
+            WhipSwingable           = 0x80000000  // on the WhipAim surface player can whip swing using thing as whip mount point. e.g.: in 00_cyn thing whip_branch
         };
     };
 }

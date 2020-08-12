@@ -19,13 +19,13 @@ namespace libim::content::asset {
     {
         enum Flag : uint32_t
         {
-            Normal             = 0x00,
-            DoubleSided        = 0x01, // disables face backface culling
-            Unknown            = 0x02,
-            ScaleUV_x          = 0x04, // 2x scales UV x coordinate 
-            ScaleUV_y          = 0x08, // 2x scales UV y coordinate 
-            ScaleTex           = 0x10, // 2x scales face texture
-            Translucent        = 0x20  // face is transparent
+            Normal          = 0x00,
+            DoubleSided     = 0x01, // "disables" face backface culling
+            Unknown         = 0x02, // web surfaces has this flag set to make the transparent web image being correctly rendered
+            TexClamp_x      = 0x04, // mapped texture is clamped in x instead of being repeated
+            TexClamp_y      = 0x08, // mapped texture is clamped in y instead of being repeated
+            TexScale        = 0x10, // 2x scales face texture
+            Translucent     = 0x20  // face is transparent
         };
 
         struct VertexIdx

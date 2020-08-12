@@ -11,16 +11,16 @@ namespace libim::content::asset {
     struct Surface final : public Face
     {
         enum SurfaceFlag : uint32_t
-        {   
+        {
             None                     = 0x0,
             Floor                    = 0x1,
             CogLinked                = 0x2,
-            Passable                 = 0x4,        // Thing can step on this surface
+            Collision                = 0x4,        // Surface has collision
             AiCannotWalkOnFloor      = 0x8,        // Ai won't walk on this surface
             DoubletextureScale       = 0x10,
             HalftextureScale         = 0x20,
             EighthtextureScale       = 0x40,
-            NoFallingDamage          = 0x80,
+            Aetherium                = 0x80,       // If surface is hit or walk on by a thing it produces "aetherium" enviornment effect sound (e.g.: fol_in_lrunaet.wav, fol_in_rrunaet.wav)
             HorizonSky               = 0x200,
             CeilingSky               = 0x400,
             Scrolling                = 0x800,
@@ -37,10 +37,10 @@ namespace libim::content::asset {
             Wood                     = 0x800000,
             Hangable                 = 0x1000000,  // Player can hang on the ledge of this surface. In: tem_bossflood.cog, vol_block_ledgecontrol.cog
             WaterClimbOutLedge       = 0x2000000,
-            WhipAim                  = 0x10000000, // Player starts aming at whippable object on this surface. e.g.: vol_lekk_door.cog, 00_cyn surface no. 1460
-            Echo                     = 0x20000000, // indoor surface (eg jumphardecho sound class mode)
-            WoodEcho                 = 0x40000000, // indoor wood surface (eg jumpwood sound class mode)
-            EarthEcho                = 0x80000000  // indoor earth surface - vine surface has this flag set (e.g: jumpearthecho sound class mode)
+            WhipAim                  = 0x10000000, // Player starts aiming at whippable object on this surface. e.g.: vol_lekk_door.cog, 00_cyn surface no. 1460
+            Echo                     = 0x20000000, // indoor surface with echo effect when players move on this surface (eg jumphardecho sound class mode)
+            WoodEcho                 = 0x40000000, // indoor wood surface with echo effect when players move on this surface (e.g.: jumpwood sound class mode)
+            EarthEcho                = 0x80000000  // indoor earth surface with echo effect when players move on this surface - vine surface has this flag set (e.g.: jumpearthecho sound class mode)
             //missing flag for stone
         };
 

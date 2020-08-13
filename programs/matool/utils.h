@@ -197,7 +197,7 @@ namespace matool {
         const bool extractAsBmp = false)
     {
         using namespace libim;
-        const auto maxCelCount = min(mat.count(), optMaxCel.value_or(mat.count()));
+        const auto maxCelCount = min<std::size_t>(mat.count(), optMaxCel.value_or(mat.count()));
         for (const auto [celNum, tex] : utils::enumerate(mat.cells()))
         {
             if(celNum >= maxCelCount) break;

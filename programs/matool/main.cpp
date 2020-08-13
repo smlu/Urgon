@@ -587,7 +587,7 @@ int execCmdExtract(const MatoolArgs& args)
         for (const auto [idx, file] : enumerate(matFiles))
         {
             auto mat = Material(InputFileStream(file));
-            const uint64_t numImgs = min(maxCelCount, mat.count());
+            const uint64_t numImgs = min<std::size_t>(maxCelCount, mat.count());
             if (bVerbose) {
                 std::cout << "Extracting " << numImgs << " image(s) from file: "
                           << file.filename() << " ... " << std::flush;

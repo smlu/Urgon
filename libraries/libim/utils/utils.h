@@ -73,7 +73,6 @@ namespace libim::utils {
             static_assert (std::is_arithmetic_v<T>);
             return +i;
         }
-
     } // detail
 
 
@@ -371,6 +370,32 @@ namespace libim::utils {
         }
 
         return result;
+    }
+
+    template<typename StringStream>
+    inline void ssprintf(StringStream& ss, const char* format) {
+        ss << format;
+    }
+
+    template<typename StringStream, typename First, typename... Rest>
+    static void ssprintf(StringStream& ss, const char* format, First first, Rest&&... rest) // recursive variadic function
+    {
+        for ( ; *format != '\0'; format++ )
+        {
+            if ( *format == '%' )
+            {
+                ss << first;
+                ssprintf(ss, format + 1, rest...);
+                return;
+            }
+            ss << *format;
+        }
+    }
+
+    template<typename StringStream, typename... Args>
+    inline void ssprintf(StringStream& ss, std::string_view format, Args&&... args) // recursive variadic function
+    {
+        ssprintf(ss, format.data(), std::forward<Args>(args)...);
     }
 }
 

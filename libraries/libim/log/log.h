@@ -1,6 +1,7 @@
 #ifndef LIBIM_LOG_H
 #define LIBIM_LOG_H
 #include "log_level.h"
+#include <libim/utils/utils.h>
 
 #include <algorithm>
 #include <iostream>
@@ -14,27 +15,6 @@ namespace libim {
     };
 
     inline LogLevel gLogLevel = LogLevel::Debug;
-
-    namespace detail {
-        inline void ss_printf(std::stringstream& ss, const char* format) {
-            ss << format;
-        }
-
-        template<typename T, typename... TArgs>
-        static void ss_printf(std::stringstream& ss, const char* format, T value, TArgs&&... FArgs) // recursive variadic function
-        {
-            for ( ; *format != '\0'; format++ )
-            {
-                if ( *format == '%' )
-                {
-                   ss << value;
-                   ss_printf(ss, format + 1, FArgs...);
-                   return;
-                }
-                ss << *format;
-            }
-        }
-    }
 
     template<typename ...Args>
     static void writeLog(const char* file, int line, LogLevel level, std::string_view msg, Args&&... args)
@@ -50,7 +30,7 @@ namespace libim {
         std::stringstream prefix;
 
         ss << "[" << level.toString() << "]" << " ";
-        detail::ss_printf(ss, msg.data(), args...);
+        utils::ssprintf(ss, msg.data(), args...);
         if(level <= LogLevel::Warning)
         {
 #ifndef NDEBUG

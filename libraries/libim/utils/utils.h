@@ -301,9 +301,9 @@ namespace libim::utils {
      */
     inline void to_lower(std::string& str)
     {
-        std::transform(str.begin(), str.end(), str.begin(),
-            [](unsigned char c){ return std::tolower(c); }
-        );
+        std::transform(str.begin(), str.end(), str.begin(), [](char c) {
+            return static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        });
     }
 
     /* Checks if string s ends with x */

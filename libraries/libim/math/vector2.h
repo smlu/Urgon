@@ -42,6 +42,8 @@ namespace libim {
         using Vector2<float>::Vector2;
     };
 
+    using Point2f = Vector2f;
+
     struct Point : public Vector2<int32_t> {
         using Vector2<int32_t>::Vector2;
     };

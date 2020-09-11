@@ -6,12 +6,12 @@ namespace libim::content::asset {
     enum class DamageType : uint32_t
     {
         None             = 0x00,
-        Impact           = 0x01,       // actor_robotboss.cog
+        Impact           = 0x01,       // for example bullet damage, granate damage, fall damage, found in actor_robotboss.cog
         Energy           = 0x02,       // actor_robotsc.cog
         Fire             = 0x04,       // actor_robotsc.cog
         Fists            = 0x08,       // or punch - actor_robotguard.cog
         Whip             = 0x10,       // actor_robotguard.cog
-        Crunch           = 0x20,       // actor_boomthingwood.cog
+        Crunch           = 0x20,       // for example machete damage, found in actor_boomthingwood.cog
         Drown            = 0x40,       // engine
         Crush            = 0x80,       // actor_floateraet.cog
         Poison           = 0x100,      // actor_indy.cog
@@ -27,7 +27,7 @@ namespace libim::content::asset {
         Vehicle          = 0x2000000,  // jeep, mine car
         Bonk             = 0x4000000,  // actor_indymine.cog
         Debris           = 0x8000000,  // 00_cny debris template's weapon info
-        Unknown_10000000 = 0x10000000, // game engine
+        ImpBlast         = 0x10000000, // damage inflicted to player by Urgon and Nub IM part (part 1&4) when part's energy is not ful
         IceMonster       = 0x20000000, // actor_iceboss.cog
         ColdWater        = 0x40000000, // actor_indy.cog
         Chicken          = 0x80000000  // actor_lavaguy.cog

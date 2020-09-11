@@ -103,7 +103,7 @@ namespace libim::content::asset {
          * @return const reference to cel texture.
          * @throw std::out_of_range if optCelIdx is invalid.
          */
-        const Texture& cel(std::optional<std::size_t> optCelIdx) const
+        const Texture& cel(std::optional<std::size_t> optCelIdx = std::nullopt) const
         {
             return cells_.at(optCelIdx.value_or(celIdx_));
         }

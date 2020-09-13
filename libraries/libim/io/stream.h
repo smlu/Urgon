@@ -237,7 +237,7 @@ namespace libim {
         typename std::enable_if<!std::is_trivially_copyable<T>::value, Stream>::type&
         _write(const T&, tag<T>&&) = delete;
 
-        /* POD type sepcialization */
+        /* POD type specialization */
         template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type = 0>
         T _read(tag<T>&&) const;
 

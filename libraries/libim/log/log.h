@@ -30,7 +30,7 @@ namespace libim {
         std::stringstream prefix;
 
         ss << "[" << level.toString() << "]" << " ";
-        utils::ssprintf(ss, msg.data(), args...);
+        utils::ssprintf(ss, msg, args...);
         if(level <= LogLevel::Warning)
         {
 #ifndef NDEBUG

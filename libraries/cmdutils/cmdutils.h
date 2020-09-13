@@ -8,7 +8,7 @@
 
 #include <libim/math/math.h>
 #include <libim/types/safe_cast.h>
-
+#include <libim/utils/utils.h>
 
 /**
  * Header file provides cmd utility functions for printing
@@ -77,6 +77,14 @@ namespace cmdutils {
     {
         std::cout << "\r" << message << std::fixed << std::setprecision(2)
             << (double(progress) / double(total)) * 100.00  << "%" << std::flush;
+    }
+
+    template<typename ...Args>
+    inline void printError(std::string_view errorMsg, Args&& ... args)
+    {
+        std::cerr << "ERROR: ";
+        libim::utils::ssprintf(std::cerr, errorMsg, std::forward<Args>(args)...);
+        std::cerr << "\n";
     }
 }
 

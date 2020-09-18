@@ -94,7 +94,7 @@ namespace libim::content::asset{
 
         bool isEmpty() const
         {
-            return ptrPixdata_->empty();
+            return !ptrPixdata_ || ptrPixdata_->empty();
         }
 
         /**

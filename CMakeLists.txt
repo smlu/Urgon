@@ -19,41 +19,66 @@ set(PM_LIB_DIR     "${CMAKE_SOURCE_DIR}/libraries")
 set(PM_PROGRAM_DIR "${CMAKE_SOURCE_DIR}/programs" )
 set(PM_TEST_DIR    "${CMAKE_SOURCE_DIR}/tests"    )
 
-# Compiler flags
 set(CMAKE_CXX_STANDARD 17) # c++17
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# CFlags
-if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /sdl")
-    add_definitions("-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING=1")
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:DebugDLL>$<$<CONFIG:Release>:>")
-    if(${MSVC_VERSION} GREATER_EQUAL 1914)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /diagnostics:caret")
+# Compiler flags
+if(WIN32)
+    if(MINGW)
+        add_compile_options(
+            -Wpedantic
+            -pedantic-errors
+            -Werror=return-type
+            -Wall -Wextra
+            -Wdouble-promotion
+            -fvisibility=hidden
+            -fPIC
+            -pipe
+            $<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion -Wsign-conversion -static>
+        )
+    else(MSVC)
+        if(MSVC_VERSION LESS 1914 AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+            message(FATAL_ERROR "Only Visual Studio 2017 version 15.7 or newer is supported!")
+        endif()
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:DebugDLL>$<$<CONFIG:Release>:>")
+        add_definitions("-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING=1")
+        add_compile_options(
+            /utf-8
+            /Zc:__cplusplus
+            /diagnostics:caret
+            /sdl
+            $<$<NOT:$<CXX_COMPILER_ID:Clang>>:/MP>
+        )
     endif()
-elseif(MINGW)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fPIC -pipe -static")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -pedantic-errors -Werror=return-type -Wall -Wextra -Wdouble-promotion -fvisibility=hidden -fPIC -pipe -static")
 elseif(NOT WIN32)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fPIC -pipe")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -static")
-    set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} -static")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -pedantic-errors -Wthread-safety -Werror=return-type -Waddress-of-temporary -Wdouble-promotion -Wpedantic -fvisibility=hidden -fPIC -pipe")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wconversion -Wsign-conversion -static")
-    set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Wconversion -Wsign-conversion -static")
+    add_compile_options(
+        -Wall
+        -Wextra
+        -Wpedantic
+        -pedantic-errors
+        -Wthread-safety
+        -Werror=return-type
+        -Waddress-of-temporary
+        -Wdouble-promotion
+        -Wpedantic
+        -fvisibility=hidden
+        -fPIC
+        -pipe
+        $<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion -Wsign-conversion -static>
+    )
 endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wdocumentation")
+    add_compile_options($<$<CONFIG:Debug>:-Wdocumentation>)
     if(NOT MSVC)
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -glldb")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -glldb")
+        add_compile_options($<$<CONFIG:Debug>:-glldb>)
     endif()
     if(NOT (APPLE OR MSVC))
         option(CLANG_LINK_LIBCPP "Link libc++" $<$<CONFIG:Debug>:OFF>$<$<CONFIG:Release>:ON>)
         if(CLANG_LINK_LIBCPP)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld -lc++abi -pthread")
+            add_compile_options(-stdlib=libc++)
+            add_link_options(-fuse-ld=lld -lc++abi -pthread)
         endif()
     endif()
 endif()

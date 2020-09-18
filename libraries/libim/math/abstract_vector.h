@@ -155,6 +155,6 @@ namespace libim {
     }
 
     template <typename T>
-    constexpr bool isVector = detail::isVector<T>::value;
+    constexpr bool isVector = libim::detail::isVector<T>::value;
 }
 #endif // LIBIM_ABSTRACT_VECTOR_H

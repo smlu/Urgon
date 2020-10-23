@@ -241,9 +241,9 @@ void printHelp(std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
 void printMatFilePathError(const fs::path& matPath, std::string_view cmd = ""sv, std::string_view subcmd = ""sv)
 {
     if (matPath.empty()) {
-        std::cerr << "ERROR: A valid MAT file path required!\n\n";
+        printError("A valid MAT file path required!\n");
     } else {
-        std::cerr << "ERROR: MAT file " << matPath << " doesn't exist!\n\n";
+        printError(" MAT file % doesn't exist!\n", matPath);
     }
     printHelp(cmd, subcmd);
 }
@@ -271,7 +271,7 @@ Material imagesToMaterial(const std::vector<fs::path>& imgFiles, std::string mat
                 tex = pngReadTexture(InputFileStream(file));
             }
             else {
-                throw std::runtime_error("ERROR: Invalid image file '" + file.u8string() + "'");
+                throw std::runtime_error("Invalid image file '" + file.u8string() + "'");
             }
 
             if (mipLevels != 1)
@@ -304,7 +304,7 @@ int execCmdCreateBatch(const MatoolArgs& args)
 {
     if (args.positionalArgs().size() < 3)
     {
-        std::cerr << "ERROR: missing positional arguments for paths to the image and mat reference folders!\n\n";
+        printError("Missing positional arguments for paths to the image and mat reference folders!\n");
         printHelp(cmdCreate, scmdBatch);
         return 1;
     }
@@ -312,25 +312,25 @@ int execCmdCreateBatch(const MatoolArgs& args)
     auto imgFolder = args.positionalArgs().at(1);
     if (!dirExists(imgFolder))
     {
-        std::cerr << "ERROR: invalid or non-existing path to the image folder!\n\n";
+        printError("Invalid or non-existing path to the image folder!\n");
         return 1;
     }
 
     if (args.positionalArgs().size() < 2)
     {
-        std::cerr << "ERROR: missing positional argument for path to the MAT reference folder!\n\n";
+        printError("Missing positional argument for path to the MAT reference folder!\n");
         return 1;
     }
 
     auto matFolder = args.positionalArgs().at(2);
     if (!dirExists(matFolder))
     {
-        std::cerr << "ERROR: invalid or non-existing path to the MAT reference folder!\n\n";
+        printError("Invalid or non-existing path to the MAT reference folder!\n");
         return 1;
     }
     else if (matFolder == imgFolder)
     {
-        std::cerr << "ERROR: " << "Path to the images folder is the same as path to ref MAT folder!";
+        printError("Path to the images folder is the same as path to ref MAT folder!\n");
         return 1;
     }
 
@@ -381,7 +381,7 @@ int execCmdCreateBatch(const MatoolArgs& args)
             }
             if (mapMats.empty())
             {
-                std::cout << "ERROR: No reference MAT files found in folder: " << matFolder << std::endl << std::endl;
+                printError("No reference MAT files found in folder: %\n", matFolder);
                 return 1;
             }
         }
@@ -396,8 +396,8 @@ int execCmdCreateBatch(const MatoolArgs& args)
             auto itMat = mapMats.find(name);
             if (itMat == mapMats.end())
             {
-                std::cerr << "\rERROR: No reference MAT file found for image: "
-                          << *setImgPaths.begin() << std::endl;
+                std::cerr << "\r";
+                printError("No reference MAT file found for image: %", *setImgPaths.begin());
                 continue; // Skip generation process
             }
 
@@ -405,7 +405,8 @@ int execCmdCreateBatch(const MatoolArgs& args)
             const auto refMat = Material(InputFileStream(itMat->second));
             if (refMat.isEmpty())
             {
-                std::cerr << "\rERROR: Reference MAT file is empty: " << name << std::endl;
+                std::cerr << "\r";
+                printError("Reference MAT file is empty: %", name);
                 if (hasOptVerbose(args))
                 {
                     std::cerr << "       " << "Skipped images: " << std::endl;
@@ -417,7 +418,8 @@ int execCmdCreateBatch(const MatoolArgs& args)
             }
             else if (setImgPaths.size() < refMat.count())
             {
-                std::cerr << "\rERROR: Not enough images found to create a new MAT file: " << name << std::endl;
+                std::cerr << "\r";
+                printError("Not enough images found to create a new MAT file: %", name);
                 if (hasOptVerbose(args)) {
                     std::cerr << "       " << "Ref MAT tex count: " << refMat.count() << " found images: " << setImgPaths.size() << std::endl;
                 }
@@ -460,7 +462,8 @@ int execCmdCreateBatch(const MatoolArgs& args)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "\nERROR: An exception was encountered while generating MAT files!\n";
+        std::cerr << std::endl;
+        printError("An exception was encountered while generating MAT files!");
         if (hasOptVerbose(args)) {
             std::cerr << "       error: " << e.what() << std::endl;
         }
@@ -478,13 +481,13 @@ int execCmdCreate(const MatoolArgs& args)
         }
         else if (args.positionalArgs().empty())
         {
-            std::cerr << "ERROR: Missing positional argument for encoding or sub-command!\n\n";
+            printError("Missing positional argument for encoding or sub-command!\n");
             printHelp(cmdCreate);
             return 1;
         }
         else if (!getColorFormat(args.positionalArgs().at(0), cf))
         {
-            std::cerr << "ERROR: Invalid encoding argument or sub-command: '" << args.subcmd() << "'\n\n";
+            printError("Invalid encoding argument or sub-command: '%'\n", args.subcmd());
             printHelp(cmdCreate);
             return 1;
         }
@@ -492,7 +495,7 @@ int execCmdCreate(const MatoolArgs& args)
         const auto& imgFiles = args.imageFiles();
         if (imgFiles.empty())
         {
-            std::cerr << "ERROR: Missing position argument of image file paths!\n\n";
+            printError("Missing position argument of image file paths!\n");
             printHelp(cmdCreate);
             return 1;
         }
@@ -522,7 +525,7 @@ int execCmdCreate(const MatoolArgs& args)
     {
         std::cerr << kFailed << std::endl;
         if (hasOptVerbose(args)) {
-            std::cerr << "ERROR: " << e.what() << std::endl;
+            printError("%", e.what());
         }
         return 1;
     }
@@ -539,7 +542,7 @@ int execCmdExtract(const MatoolArgs& args)
 
         if (!fileExists(input) && !dirExists(input))
         {
-            std::cerr << "ERROR: Invalid positional argument for input MAT file|folder path!\n\n";
+            printError("Invalid positional argument for input MAT file|folder path!\n");
             printHelp(cmdExtract);
             return 1;
         }
@@ -547,7 +550,7 @@ int execCmdExtract(const MatoolArgs& args)
         fs::path outDir = getOptOutputDir(args, "extracted");
         if (!isDirPath(outDir))
         {
-            std::cerr << "ERROR: Output dir path is not directory!\n";
+            printError("Output dir path is not directory!");
             return 1;
         }
 
@@ -577,7 +580,7 @@ int execCmdExtract(const MatoolArgs& args)
         const uint64_t maxCelCount = args.uintArg(optMaxTex, std::numeric_limits<uint64_t>::max());
         if (maxCelCount == 0)
         {
-            std::cerr << "ERROR: Option '" << optMaxTex << "' must not be 0!\n";
+            printError("Option '%' must not be 0!", optMaxTex);
             return 1;
         }
 
@@ -606,8 +609,10 @@ int execCmdExtract(const MatoolArgs& args)
     catch (const std::exception& e)
     {
         std::cerr << kFailed << std::endl;
-        if (hasOptVerbose(args)) {
-            std::cerr << "\nERROR: " << e.what() << std::endl;
+        if (hasOptVerbose(args))
+        {
+            std::cerr << std::endl;
+            printError("%", e.what());
         }
         return 1;
     }
@@ -633,7 +638,7 @@ int execCmdInfo(const MatoolArgs& args)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "ERROR: Invalid MAT file!" << std::endl;
+        printError("Invalid MAT file!");
         if (hasOptVerbose(args)) {
             std::cerr << "Reason: " << e.what() << std::endl;
         }
@@ -659,7 +664,7 @@ int execCmdModify(const MatoolArgs& args)
             auto enc = args.hasArg(optEncodingShort) ? args.arg(optEncodingShort) : args.arg(optEncoding);
             if (!getColorFormat(enc, cf))
             {
-                std::cerr << "ERROR: Invalid encoding argument '" << enc << "'!\n\n";
+                printError("Invalid encoding argument '%'!\n", enc);
                 printHelp(cmdCreate);
                 return 1;
             }
@@ -671,7 +676,7 @@ int execCmdModify(const MatoolArgs& args)
 
         if (!optMipLevels && !optFormat)
         {
-            std::cerr << "ERROR: Missing an option!\n\n";
+            printError("Missing an option!\n");
             printHelp(cmdModify);
             return 1;
         }
@@ -704,7 +709,7 @@ int execCmdModify(const MatoolArgs& args)
     {
         std::cerr << kFailed << std::endl;
         if (hasOptVerbose(args)) {
-            std::cerr << "ERROR: " << e.what() << std::endl;
+            printError("%", e.what());
         }
         return 1;
     }
@@ -727,7 +732,7 @@ int execCmd(std::string_view cmd, const MatoolArgs& args)
     else
     {
         if (cmd != cmdHelp) {
-            std::cerr << "ERROR: Unknown command\n\n";
+            printError("Unknown command '%'!\n", cmd);
         }
         auto scmd = args.positionalArgs().size() > 1 ? args.positionalArgs().at(1) : "";
         printHelp(args.subcmd(), scmd);
@@ -752,7 +757,7 @@ int main(int argc, const char* argv[])
     }
     catch (const std::exception& e)
     {
-        std::cerr << "ERROR: " << e.what() << std::endl;
+        printError("%", e.what());
         return 1;
     }
 }

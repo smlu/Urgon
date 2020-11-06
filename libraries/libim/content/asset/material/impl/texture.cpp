@@ -127,6 +127,7 @@ Texture& Texture::convert(const ColorFormat& format)
 
         ptrPixdata_ = convertPixdata(ptrPixdata_, width, height, cf_, format);
         cf_         = format;
+        stride_     = calcStride(width_, cf_);
     }
     return *this;
 }

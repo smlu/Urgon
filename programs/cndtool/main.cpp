@@ -225,9 +225,9 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
 void printErrorInvalidCnd(const fs::path cndPath, std::string_view cmd, std::string_view subcmd = ""sv)
 {
     if (cndPath.empty()) {
-        std::cerr << "ERROR: A valid CND file path required!\n\n";
+        printError("A valid CND file path required!\n");
     } else {
-        std::cerr << "ERROR: CND file " << cndPath << " doesn't exist!\n\n";
+        printError("CND file % doesn't exist!\n", cndPath);
     }
     printHelp(cmd, subcmd);
 }
@@ -255,13 +255,13 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
             const bool bFileExists = bValidFile && fileExists(assetFile);
             if (!bValidFile)
             {
-                std::cerr << "ERROR: " << "Invalid file '" << assetFile << "', expected file with an extension '" << assetFileExt << "'!\n\n";
+                printError("Invalid file '%', expected file with an extension '%'!\n", assetFile, assetFileExt);
                 printHelp(cmdAdd, args.subcmd());
                 return false;
             }
             else if (!bFileExists)
             {
-                std::cerr << "ERROR: " << "File '" << assetFile << "' doesn't exist!\n\n";
+                printError("File '%' doesn't exist!\n", assetFile);
                 printHelp(cmdAdd, args.subcmd());
                 return false;
             }
@@ -271,7 +271,7 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
         }
         catch (const std::exception& e)
         {
-            std::cerr << "ERROR: Failed to load asset file: " << assetFile << std::endl;
+            printError("Failed to load asset file: '%'!\n", assetFile);
             if (bVerbose) {
                 std::cerr << "Reason: " << e.what() << std::endl;
             }
@@ -280,7 +280,7 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
 
     if (newAssets.empty())
     {
-        std::cerr << "ERROR: Valid '" << assetFileExt << "' file path required!\n\n";
+        printError("A valid '%' file path required!", assetFileExt);
         printHelp(cmdAdd, args.subcmd());
         return false;
     }
@@ -295,8 +295,8 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
         {
             if (mapAssets.contains(asset.name()) && !hasOptReplace(args))
             {
-                std::cerr << "\nERROR: Asset '" << asset.name() << "' already exists in CND file and no '--replace' option was provided.\n";
-                std::cerr << "         CND file was not modified!\n\n";
+                std::cerr << std::endl;
+                printError("Asset '%' already exists in CND file and no '--replace' option was provided.\n       CND file was not modified!\n", asset.name());
                 return false;
             }
 
@@ -311,8 +311,7 @@ bool execCmdAddAssets(const CndToolArgs& args, std::string_view assetFileExt, Re
     }
     catch (const std::exception& e)
     {
-        std::cerr << "ERROR: Failed to patch CND file!\n";
-        std::cerr <<        "Reason: " << e.what() << std::endl << std::endl;
+        printError("Failed to patch CND file!\n       Reason: %\n", e.what());
         printHelp(cmdAdd, args.subcmd());
         return false;
     }
@@ -362,10 +361,10 @@ int execCmdAdd(std::string_view scmd, const CndToolArgs& args)
     }
 
     if (scmd.empty()) {
-        std::cerr << "ERROR: Subcommand required!\n\n";
+        printError("Subcommand required!\n");
     }
     else {
-        std::cerr << "ERROR: Unknown subcommand \"" << scmd << "\"!\n\n";
+        printError("Unknown subcommand '%'!\n", scmd);
     }
 
     printHelp(cmdAdd);
@@ -396,7 +395,7 @@ int execCmdConvertToObj(const CndToolArgs& args)
 
         if (!isDirPath(outDir))
         {
-            std::cerr << "ERROR: Output path is not directory!\n";
+            printError("Output path is not directory!\n");
             return 1;
         }
 
@@ -407,7 +406,8 @@ int execCmdConvertToObj(const CndToolArgs& args)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "\nERROR: Failed to convert level geometry to OBJ file format!" << std::endl;
+        std::cerr << std::endl;
+        printError("Failed to convert level geometry to OBJ file format!");
         if (hasOptVerbose(args)) {
             std::cerr << "       Reason: " << e.what() << std::endl;
         }
@@ -422,10 +422,10 @@ int execCmdConvert(std::string_view scmd, const CndToolArgs& args)
     }
 
     if (scmd.empty()) {
-        std::cerr << "ERROR: Subcommand required!\n\n";
+        printError("Subcommand required!\n");
     }
     else {
-        std::cerr << "ERROR: Unknown subcommand \"" << scmd << "\"!\n\n";
+        printError("Unknown subcommand '%'!\n", scmd);
     }
 
     printHelp(cmdConvert);
@@ -655,7 +655,7 @@ int execCmdExtract(const CndToolArgs& args)
 
         if (!isDirPath(outDir))
         {
-            std::cerr << "ERROR: Output path is not directory!\n";
+            printError("Output path is not directory!\n");
             return 1;
         }
 
@@ -678,7 +678,8 @@ int execCmdExtract(const CndToolArgs& args)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "\nERROR: Failed to extract assets from CND file!" << std::endl;
+        std::cerr << std::endl;
+        printError("Failed to extract assets from CND file!");
         std::cerr << "       Reason: " << e.what() << std::endl;
         return 1;
     }
@@ -779,8 +780,7 @@ bool execCmdRemoveAssets(const CndToolArgs& args, CndReadF&& cndReadAssets, CndW
     }
     catch (const std::exception& e)
     {
-        std::cerr << "ERROR: Failed to patch CND file!\n";
-        std::cerr <<        "Reason: " << e.what() << std::endl << std::endl;
+        printError("Failed to patch CND file!\n       Reason: %\n", e.what());
         return false;
     }
 }
@@ -821,10 +821,10 @@ int execCmdRemove(std::string_view scmd, const CndToolArgs& args)
     }
 
     if (scmd.empty()) {
-        std::cerr << "ERROR: Subcommand required!\n\n";
+        printError("Subcommand required!\n");
     }
     else {
-        std::cerr << "ERROR: Unknown subcommand \"" << scmd << "\"!\n\n";
+        printError("Unknown subcommand '%'!\n", scmd);
     }
 
     printHelp(cmdRemove);
@@ -852,7 +852,7 @@ int execCmd(std::string_view cmd, const CndToolArgs& args)
     else
     {
         if (cmd != cmdHelp) {
-            std::cerr << "ERROR: Unknown command\n\n";
+            printError("Unknown command '%'\n", cmd);
         }
 
         auto scmd = args.positionalArgs().empty() ? "" : args.positionalArgs().at(0);

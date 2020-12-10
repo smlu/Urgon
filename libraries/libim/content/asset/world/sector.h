@@ -25,8 +25,9 @@ namespace libim::content::asset {
             HideOnAutomap   = 0x10,
             NoActorEnter    = 0x20,
             Pit             = 0x40,
+            AdjointsNotSet  = 0x80,   // flag set when cog fuction SetSectorAdjoins(sector, visible=false) is called and unset with SetSectorAdjoins(sector, visible=true).
             Aetherium       = 0x100,
-            HasCollideBox   = 0x1000,
+            HasCollideBox   = 0x1000, // When this flag is set the engine verifies the object/point is within the sector by checking if position of object radius is within collision box (sithIntersect_IsSphereInSector)
             Seen            = 0x4000  // Sector has been seen by player/camera. See: sol_bluegem.cog, pru_lightspike.cog, pru_voicelinewhipeagle.cog, pru_voiceline.cog
         };
 
@@ -46,9 +47,9 @@ namespace libim::content::asset {
 
         LinearColor ambientLight;
         LinearColor extraLight;
-        Vector3f    avgLightPos;  // average light position
-        LinearColor avgLightInt;  // average light intensity
-        Vector2f    avgLightFalloff;
+        Vector3f    avgLightPos;  // point light position
+        LinearColor avgLightInt;  // point light intensity
+        Vector2f    avgLightFalloff; // point light falloff, x = 2 * radius in most cases
 
         struct AmbientSound {
             std::string sound;

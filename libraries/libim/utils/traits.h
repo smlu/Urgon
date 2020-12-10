@@ -81,6 +81,9 @@ namespace libim::utils {
         struct array_size<T[N]> {
             static size_t const size = N;
         };
+
+        template<typename T> struct is_shared_ptr : std::false_type {};
+        template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
     }
 
 
@@ -136,5 +139,8 @@ namespace libim::utils {
     /* Utility type triats */
     template<typename T>
     constexpr std::size_t arraySize = detail::array_size<T>::size;
+
+    template<typename T>
+    constexpr bool isSharedPtr = detail::is_shared_ptr<T>::value;
 }
 #endif // LIBIM_TRAITS_H

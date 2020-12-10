@@ -21,7 +21,7 @@ namespace libim::content::asset {
         {
             Normal          = 0x00,
             DoubleSided     = 0x01, // "disables" face backface culling
-            Unknown         = 0x02, // web surfaces has this flag set to make the transparent web image being correctly rendered
+            Transparent     = 0x02, // web surfaces has this flag set to make the transparent web image being correctly rendered
             TexClamp_x      = 0x04, // mapped texture is clamped in x instead of being repeated
             TexClamp_y      = 0x08, // mapped texture is clamped in y instead of being repeated
             TexScale        = 0x10, // 2x scales face texture
@@ -39,7 +39,7 @@ namespace libim::content::asset {
         LightMode lightMode;
         std::optional<std::size_t> matIdx;
         std::size_t matCelIdx = 0; // material texture to use (material mipmap idx)
-        LinearColor extraLight;          // face additional light color
+        LinearColor extraLight;    // face additional light color
         Vector3f normal;
         std::vector<VertexIdx> verts;
     };

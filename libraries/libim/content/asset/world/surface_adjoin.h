@@ -14,11 +14,12 @@ namespace libim::content::asset {
     {
         enum  Flag
         {
-            Visible            = 0x1,
+            Visible            = 0x1, // renders through to the other sector
             AllowMovement      = 0x2,
             AllowSound         = 0x4,
             AllowPlayerOnly    = 0x8,
-            AllowAiOnly        = 0x10
+            NoPlayerMove       = 0x10, // gen_slashweb.cog
+            AdjoinSetBySector  = 0x20 // flag is in connection with sector flag 0x80. This flag is set when cog fuction SetSectorAdjoins(sector, visible=false) is called and unset with SetSectorAdjoins(sector, visible=true).
         };
 
         Flags<Flag> flags;

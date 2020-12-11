@@ -1,6 +1,6 @@
 #ifndef LIBIM_CND_MAT_HEADER_H
 #define LIBIM_CND_MAT_HEADER_H
-#include "../cndstring.h"
+#include "../cnd.h"
 #include <cstddef>
 #include <libim/content/asset/material/colorformat.h>
 

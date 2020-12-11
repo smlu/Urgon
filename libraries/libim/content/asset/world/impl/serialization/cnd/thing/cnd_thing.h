@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <variant>
 
-#include "../cndstring.h"
+#include "../crn.h"
 #include <libim/content/asset/thing/actor.h>
 #include <libim/content/asset/thing/collide.h>
 #include <libim/content/asset/thing/explosion.h>

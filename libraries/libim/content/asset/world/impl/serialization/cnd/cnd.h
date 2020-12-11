@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "cnderror.h"
-#include "cndstring.h"
 #include "thing/cnd_thing.h"
 
 #include <libim/common.h>
@@ -25,7 +24,6 @@
 #include <libim/types/hashmap.h>
 
 namespace libim::content::asset {
-
     enum class CndWorldFlag : uint32_t
     {
         StaticWorld          = 0x1, // jones3dstatic.cnd
@@ -36,8 +34,8 @@ namespace libim::content::asset {
     struct CndHeader final
     {
         uint32_t fileSize;
-        CndString<1216> copyright;
-        CndString<kCndMaxNameLen> filePath;
+        FixedString<1216> copyright;
+        CndResourceName   filePath;
         CndWorldFlag flags; // World stored in cnd file usually has flags set to 0x0C. The static world has also flag 0x1 (StaticWorld) set and combined with other flags results in value 0x0D.
         uint32_t version;
         float    worldGravity;

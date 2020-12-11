@@ -1,6 +1,6 @@
 #ifndef LIBIM_CND_SECTOR_H
 #define LIBIM_CND_SECTOR_H
-#include "../cndstring.h"
+#include "../cnd.h"
 #include <cstdint>
 
 #include <libim/content/asset/world/sector.h>
@@ -13,8 +13,8 @@ namespace libim::content::asset {
         LinearColor    ambientLight;
         LinearColor    extraLight;
         LinearColorRgb tint; // tint rgb color
-        Vector3f avgLightPos;
-        LinearColor    avgLightInt; // average light intensity
+        Vector3f avgLightPos;       // point light position
+        LinearColor    avgLightInt; // point light intensity
         Vector2f avgLightFalloff;
         Box3f    collideBox;
         Box3f    boundBox;

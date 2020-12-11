@@ -15,7 +15,7 @@ namespace libim::content::asset {
 
     // Macros for base and param prediction. To be used in NdyWriteThingParamIf.
     #define ndyWriteIfBase(x) [&](const auto& base){ return x; }
-    #define ndyWriteIfPara(x) [&](){ return x; }
+    #define ndyWriteIfPara(x) [&](){ return (x); }
 
     // Macro defines new ndy serialization function to write thing parameter.
     // param: name            - name of function
@@ -147,7 +147,7 @@ namespace libim::content::asset {
 
     DefNdyWriteThingParamFuncEx(Light,
         t.light.color != base.light.color,
-        !t.light.color.isZero(),
+        t.light.color.isZero() == false,
         [&](TextResourceWriter&) {
             // Writes: light=(r/g/b/a) light=(r/g/b)
             ndyWriteThingParam(rw, NdyThingParam::Light, t.light.color.toString());
@@ -494,7 +494,7 @@ namespace libim::content::asset {
                ndyWriteThingParamIf(baseActorInfo,
                    ndyWriteIfBase(ai.lightIntensity != base.lightIntensity),
                    ndyWriteIfPara(!ai.lightIntensity.isZero()), [&] {
-                   ndyWriteThingParam(rw, NdyThingParam::LightIntensity, ai.lightIntensity.toString());
+                   ndyWriteThingParam(rw, NdyThingParam::LightIntensity, makeLinearColorRgb(ai.lightIntensity).toString());
                });
 
                // Param Explode

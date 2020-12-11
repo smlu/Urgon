@@ -15,19 +15,19 @@ namespace libim::content::asset {
         int32_t materialIdx;   // -1, if no surface material
         Flags<Surface::SurfaceFlag> surfflags;
         Flags<Face::Flag> faceflags;
-        GeoMode    geoMode;
-        LightMode  lightMode;
-        int32_t    adjoinIdx;  // -1, if no surface adjoin
-        LinearColor      extraLight; // surface additional light
-        Vector3f   normal;
-        uint32_t   numVerts;
+        GeoMode     geoMode;
+        LightMode   lightMode;
+        int32_t     adjoinIdx;  // -1, if no surface adjoin
+        LinearColor extraLight; // surface additional light
+        Vector3f    normal;
+        uint32_t    numVerts;
     };
     static_assert(sizeof(CndSurfaceHeader) == 56);
 
     struct CndSurfaceVerts
     {
-        uint32_t vertIdx;
-        int32_t uvIdx;
+        uint32_t    vertIdx;
+        int32_t     uvIdx;
         LinearColor color;       // vertex color
     };
     static_assert(sizeof(CndSurfaceVerts) == 24);

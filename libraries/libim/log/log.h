@@ -22,14 +22,10 @@ namespace libim {
         if(gLogLevel < level) {
             return;
         }
-
-        using namespace std::string_literals;
-        using namespace detail;
-
         std::stringstream ss;
         std::stringstream prefix;
 
-        ss << "[" << level.toString() << "]" << " ";
+        ss << std::boolalpha << "[" << level.toString() << "]" << " ";
         utils::ssprintf(ss, msg, args...);
         if(level <= LogLevel::Warning)
         {

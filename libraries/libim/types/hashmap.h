@@ -11,32 +11,20 @@
 
 namespace libim {
 
-    /** Sequence ordered list which elements are mapped to the key. */
+    /** Sequence ordered list which elements are indexed and mapped to the key. */
     template<typename T, typename KeyT = std::string>
     class HashMap
     {
-        struct ContainerElement
-        {
-            KeyT key;
-            T data;
-        };
-
-        using DataContainer = std::list<ContainerElement>;
-        using IndexType = std::deque<typename DataContainer::iterator>;
-        using MapType = std::unordered_map<
-            std::reference_wrapper<const KeyT>,
-            typename DataContainer::iterator,
-            std::hash<KeyT>,
-            std::equal_to<KeyT>
-        >;
-
-        template<typename>
+        template<typename, typename>
         class HashMapIterator;
-        template<typename> friend class HashMapIterator;
+        template<typename, typename> friend class HashMapIterator;
 
     public:
         using size_type = std::size_t;
         using Idx = size_type;
+
+        using ContainerElement = std::pair<KeyT, T>;
+        using ContainerType = std::list<ContainerElement>;
 
         using key_type = KeyT;
         using key_reference = key_type&;
@@ -46,12 +34,10 @@ namespace libim {
         using reference = value_type&;
         using const_reference =  const value_type&;
 
-
-        using iterator = HashMapIterator<typename DataContainer::iterator>;
-        using const_iterator = HashMapIterator<typename DataContainer::const_iterator>;
+        using iterator = HashMapIterator<T, typename ContainerType::iterator>;
+        using const_iterator = HashMapIterator<T, typename ContainerType::const_iterator>;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-
 
         HashMap() = default;
         HashMap(HashMap&&) = default;
@@ -133,32 +119,32 @@ namespace libim {
 
         reference at(key_const_reference key)
         {
-            return map_.at(key)->data;
+            return map_.at(key)->second;
         }
 
         const_reference at(key_const_reference key) const
         {
-            return map_.at(key)->data;
+            return map_.at(key)->second;
         }
 
         reference at(Idx idx)
         {
-            return index_.at(idx)->data;
+            return index_.at(idx)->second;
         }
 
         const_reference at(Idx idx) const
         {
-            return index_.at(idx)->data;
+            return index_.at(idx)->second;
         }
 
         reference operator[](Idx idx)
         {
-            return index_.at(idx)->data;
+            return index_.at(idx)->second;
         }
 
         const_reference operator[](Idx idx) const
         {
-            return index_.at(idx)->data;
+            return index_.at(idx)->second;
         }
 
         reference operator[](key_const_reference key)
@@ -167,7 +153,7 @@ namespace libim {
             if(it == map_.end()) {
                 return *emplaceBack(key).first;
             }
-            return it->second->data;
+            return it->second->second;
         }
 
         reference operator[](key_rvalue key)
@@ -176,7 +162,7 @@ namespace libim {
             if(it == map_.end()) {
                 return *emplaceBack(std::move(key)).first;
             }
-            return it->second->data;
+            return it->second->second;
         }
 
         const_reference operator[](key_const_reference key) const
@@ -185,7 +171,7 @@ namespace libim {
             if(it == map_.end()) {
                 data_.at(data_.size()); // should throw std::out_of_range
             }
-            return it->data;
+            return it->second;
         }
 
         iterator find(key_const_reference key)
@@ -265,7 +251,7 @@ namespace libim {
                 it = --data_.end();
             }
 
-            map_[std::cref(it->key)] = it;
+            map_[std::cref(it->first)] = it;
             index_.insert(iit, it);
             return { it, true };
         }
@@ -291,7 +277,7 @@ namespace libim {
                 it = --data_.end();
             }
 
-            map_[std::cref(it->key)] = it;
+            map_[std::cref(it->first)] = it;
             index_.insert(iit, it);
             return { it, true };
         }
@@ -370,6 +356,11 @@ namespace libim {
             return data_.size();
         }
 
+        inline const ContainerType& container() const // !< returns list of ContainerElements
+        {
+            return data_;
+        }
+
         void reserve(size_type n)
         {
             map_.reserve(n);
@@ -383,7 +374,7 @@ namespace libim {
         }
 
     private:
-        Idx get_itr_idx(typename DataContainer::const_iterator itr) const
+        Idx get_itr_idx(typename ContainerType::const_iterator itr) const
         {
             return std::distance(data_.begin(), itr);
         }
@@ -394,7 +385,7 @@ namespace libim {
             if(idx < index_.size())
             {
                 it = index_.at(idx);
-                map_.erase(it.it_->key);
+                map_.erase(it.it_->first);
                 index_.erase(index_.begin() + idx);
                 it = data_.erase(it.it_);
             }
@@ -409,60 +400,65 @@ namespace libim {
             map_.reserve(data_.size());
             for(auto it = data_.begin(); it != data_.end(); it++)
             {
-                map_[std::cref(it->key)] = it;
+                map_[std::cref(it->first)] = it;
                 index_.push_back(it);
             }
         }
 
     private:
-        DataContainer data_;
+        using IndexType = std::deque<typename ContainerType::iterator>;
+        using MapType = std::unordered_map<
+            std::reference_wrapper<const KeyT>,
+            typename ContainerType::iterator,
+            std::hash<KeyT>,
+            std::equal_to<KeyT>
+        >;
+
+        ContainerType data_;
         IndexType index_;
         MapType map_;
     };
 
 
-
     template<typename T,typename KeyT>
-    template <typename DataIterator>
+    template <typename ValueT, typename ContainerIterator>
     class HashMap<T, KeyT>::HashMapIterator
     {
-        using MapType = HashMap<T, KeyT>;
-        using IterTriats = std::iterator_traits<DataIterator>;
-        DataIterator it_;
+        using IterTriats = std::iterator_traits<ContainerIterator>;
+        ContainerIterator it_;
 
-        friend class HashMap<T, KeyT>;
-        operator DataIterator() const
+        operator ContainerIterator() const
         {
             return it_;
         }
 
-        HashMapIterator(DataIterator it) : it_(it)
-        {}
+        friend class HashMap<T, KeyT>;
+        HashMapIterator(ContainerIterator it) : it_(it) {}
 
     public:
         using iterator_category = typename IterTriats::iterator_category;
-        using value_type = T;
+        using value_type = ValueT;
         using difference_type = typename IterTriats::difference_type;
-        using pointer = std::conditional_t<std::is_const_v<typename IterTriats::pointer>, const T*, T*>;
-        using reference = std::conditional_t<std::is_const_v<typename IterTriats::reference>, const T, T>&;
+        using pointer = std::conditional_t<std::is_const_v<typename IterTriats::pointer>, const value_type*, value_type*>;
+        using reference = std::conditional_t<std::is_const_v<typename IterTriats::reference>, const value_type, value_type>&;
 
-        template<typename U>
-        HashMapIterator(HashMapIterator<U> other) : it_(other.it_)
+        template<typename U, typename W>
+        HashMapIterator(HashMapIterator<U, W> other) : it_(other.it_)
         {}
 
         reference operator* () const
         {
-            return const_cast<reference>(it_->data);
+            return const_cast<reference>(it_->second);
         }
 
         pointer operator-> () const
         {
-            return const_cast<pointer>(&it_->data);
+            return const_cast<pointer>(&it_->second);
         }
 
         reference operator[] (difference_type n) const
         {
-            return it_.operator[](n)->data;
+            return it_.operator[](n)->second;
         }
 
         inline HashMapIterator operator+ (difference_type n) const

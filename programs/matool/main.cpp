@@ -732,7 +732,7 @@ int execCmd(std::string_view cmd, const MatoolArgs& args)
     else
     {
         if (cmd != cmdHelp) {
-            printError("Unknown command '%'!\n", cmd);
+            printError("Unknown command '%'\n", cmd);
         }
         auto scmd = args.positionalArgs().size() > 1 ? args.positionalArgs().at(1) : "";
         printHelp(args.subcmd(), scmd);

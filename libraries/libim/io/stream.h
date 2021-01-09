@@ -19,27 +19,6 @@ namespace libim {
     template<typename T>
     constexpr bool isStreamType = std::is_base_of<Stream, T>::value || std::is_same<T, Stream>::value;
 
-    template<class T, typename std::enable_if_t<isStreamType<T>, int> = 0>
-    using StreamPtr = std::shared_ptr<T>;
-
-    template<class T, class... Args, typename std::enable_if_t<isStreamType<T>, int> = 0>
-    StreamPtr<T> makeStreamPtr(Args&&... args) {
-        return std::make_shared<T>(std::forward<Args>(args)...);
-    }
-
-    template<typename T, typename U,
-             typename std::enable_if_t<std::is_same<T, Stream>::value && isStreamType<U>, int> = 0>
-    std::shared_ptr<T> stream_ptr_cast(const std::shared_ptr<U>& r) {
-        return std::static_pointer_cast<Stream>(r);
-    }
-
-    template<typename T, typename U,
-             typename std::enable_if_t<isStreamType<T> && isStreamType<U> && !std::is_same<Stream, T>::value, int> = 0>
-    std::shared_ptr<T> stream_ptr_cast(const std::shared_ptr<U>& r) {
-        return std::static_pointer_cast<T>(stream_ptr_cast<Stream>(r));
-    }
-
-
     class Stream
     {
     public:

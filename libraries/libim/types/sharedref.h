@@ -31,25 +31,29 @@ namespace libim {
             ptr_ = std::make_shared<DT>(std::move(v));
         }
 
-        template<typename... Args>
-        SharedRef(Args&& ... args)
-        {
-            ptr_ = std::make_shared<DT>(std::forward<Args>(args)...);
-        }
-
-        SharedRef(std::shared_ptr<DT> ptr)
-        {
-            if(!ptr) {
-                std::invalid_argument("SharedRef: ptr is null");
-            }
-            ptr_ = ptr;
-        }
+        // template<typename... Args, typename std::enable_if_t<!std::is_same_v<Args..., SharedRef<DT>>>* = nullptr>
+        // explicit SharedRef(Args&& ... args)
+        // {
+        //     ptr_ = std::make_shared<DT>(std::forward<Args>(args)...);
+        // }
 
         SharedRef(const SharedRef&) noexcept = default;
         SharedRef(SharedRef&&) noexcept = default;
 
         SharedRef& operator = (const SharedRef&) noexcept = default;
         SharedRef& operator = (SharedRef&&) noexcept = default;
+
+        template<typename U>
+        SharedRef(const SharedRef<U>& other)
+        {
+            ptr_ = other.ptr_;
+        }
+
+        template<typename U>
+        SharedRef(SharedRef<U>&& other)
+        {
+            ptr_ = std::move(other.ptr_);
+        }
 
         auto& get() const
         {
@@ -64,13 +68,6 @@ namespace libim {
         T* operator->() const
         {
             return ptr_.get();
-        }
-
-        void swap(std::shared_ptr<DT>& r) noexcept
-        {
-            if(r) {
-                std::swap(ptr_, r);
-            }
         }
 
         void swap(SharedRef& r) noexcept
@@ -89,10 +86,28 @@ namespace libim {
         }
 
     private:
+        template <typename>
+        friend class SharedRef;
         friend class WeakRef<DT>;
+        template<typename T, typename ... Args>
+        friend SharedRef<T> makeSharedRef(Args&& ...);
+        SharedRef(std::shared_ptr<T>&& ptr) :
+            ptr_(std::move(ptr))
+        {
+            assert(bool(ptr_));
+        }
+
         std::shared_ptr<DT> ptr_;
     };
 
+    template<typename T, typename ... Args>
+    SharedRef<T> makeSharedRef(Args&& ... args)
+    {
+        SharedRef<T> ref(
+            std::make_shared<T>(std::forward<Args>(args)...)
+        );
+        return ref;
+    }
 
 
     /** WeakRef represents non-owning non-nullable shared weak pointer **/

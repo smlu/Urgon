@@ -2,6 +2,7 @@
 #define LIBIM_STREAM_H
 #include "../common.h"
 #include "stremerror.h"
+#include <libim/types/sharedref.h>
 
 #include <climits>
 #include <cstdint>
@@ -84,7 +85,7 @@ namespace libim {
 
         std::size_t read(byte_t* data, const std::size_t length) const
         {
-            if(this->tell() + length > this->size()) {
+            if((this->tell() + length) > this->size()) {
                 throw StreamError("End of stream");
             }
 
@@ -121,6 +122,12 @@ namespace libim {
         Stream& write(const T& istream)
         {
             return write(istream, 0, istream.size());
+        }
+
+        template<class T, typename std::enable_if_t<isStreamType<T>, int> = 0>
+        Stream& write(const SharedRef<T>& istream)
+        {
+            return write(*istream, 0, istream->size());
         }
 
         virtual Stream& write(const ByteArray& data)

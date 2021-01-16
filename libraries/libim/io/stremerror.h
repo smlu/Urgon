@@ -10,6 +10,10 @@ namespace libim {
     struct FileStreamError : public StreamError {
         using StreamError::StreamError;
     };
+
+    struct VirtualFileError : public StreamError {
+        using StreamError::StreamError;
+    };
 }
 
 #endif // LIBIM_STREMERROR_H

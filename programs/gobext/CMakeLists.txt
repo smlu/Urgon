@@ -1,7 +1,7 @@
 project(
     ${PM_GOBEXT}
     LANGUAGES CXX
-    VERSION 1.0.0
+    VERSION 1.1.0
 )
 
 configure_file(config.h.in config.h)

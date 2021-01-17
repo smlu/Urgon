@@ -1,10 +1,12 @@
-#include <fstream>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 
-#include <libim/gob.h>
+#include <libim/io/vfstream.h>
 #include <libim/common.h>
 #include <libim/io/filestream.h>
+#include <libim/log/log.h>
+#include <cmdutils/cmdutils.h>
 #include <cmdutils/options.h>
 #include "config.h"
 
@@ -22,11 +24,55 @@ using namespace cmdutils;
 using namespace gobext;
 using namespace libim;
 
-void printHelp();
-bool extractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outDir, const bool verbose);
+namespace fs = std::filesystem;
+
+void printHelp()
+{
+    std::cout << "Extracts resources from CND file!\n";
+    std::cout << "  Usage: gobext <gob file> [options]" << std::endl << std::endl;
+
+    std::cout << "Option        Long option        Meaning\n";
+    std::cout << OPT_HELP_SHORT        << SETW(18, ' ') << OPT_HELP        << SETW(31, ' ') << "Show this message\n";
+    std::cout << OPT_OTPUT_DIR_SHORT   << SETW(24, ' ') << OPT_OTPUT_DIR   << SETW(34, ' ') << "Output folder <output dir>\n";
+    std::cout << OPT_VERBOSE_SHORT     << SETW(21, ' ') << OPT_VERBOSE     << SETW(25, ' ') << "Verbose output\n";
+}
+
+bool extractGob(const VfContainer c, const fs::path& outDir, const bool verbose)
+{
+    try
+    {
+        /* Save entries to files */
+        for(const auto& [filePath, file] : c)
+        {
+            std::cout << "Extracting file: " << filePath << std::endl;
+
+            /* Set entry file path */
+            auto outPath = outDir / filePath;
+            if(!makePath(outPath))
+            {
+                printError("Could not make file path %!", outPath);
+                return false;
+            }
+
+            /* Open output file stream */
+            OutputFileStream ofs(outPath, /*truncate=*/true);
+            ofs.write(file);
+        }
+
+        std::cout << (!verbose ? "\n" : "") << "--------------------------\nTotal files extracted: " << c.size() << std::endl << std::endl;
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        printError("An exception was thrown while extracting assets from GOB file: %", e.what());
+        return false;
+    }
+}
 
 int main(int argc, const char *argv[])
 {
+    gLogLevel = LogLevel::Error;
+
     std::cout << "\nIndiana Jones and The Infernal Machine GOB file extractor v" << kVersion << std::endl;
     CmdArgs opt(argc, argv);
     if(argc < 2 ||
@@ -38,10 +84,10 @@ int main(int argc, const char *argv[])
         return 1;
     }
 
-    std::string inputFile = opt.positionalArgs().at(0);
+    fs::path inputFile = opt.positionalArgs().at(0);
     if(!fileExists(inputFile))
     {
-        std::cerr << "Error: File \"" << inputFile << "\" does not exists!";
+        printError("File % does not exists!", inputFile);
         return 1;
     }
 
@@ -63,103 +109,23 @@ int main(int argc, const char *argv[])
 
     /* Extract files from gob file */
     int result = 0;
-    auto gobDir = loadGobFromFile(inputFile);
-    if(gobDir)
-    {
-        outdir += (outdir.empty() ? "" : "/") + getBaseName(inputFile) + "_GOB";
-        makePath(outdir);
-
-        if(!extractGob(gobDir, outdir, bVerboseOutput)) {
-            result = 1;
-        }
-    }
-    else
-    {
-        std::cerr << "Error reading GOB file!\n";
-        result =  1;
-    }
-
-    return result;
-}
-
-void printHelp()
-{
-    std::cout << "Extracts resources from CND file!\n";
-    std::cout << "  Usage: gobext <gob file> [options]" << std::endl << std::endl;
-
-    std::cout << "Option        Long option        Meaning\n";
-    std::cout << OPT_HELP_SHORT        << SETW(18, ' ') << OPT_HELP        << SETW(31, ' ') << "Show this message\n";
-    std::cout << OPT_OTPUT_DIR_SHORT   << SETW(24, ' ') << OPT_OTPUT_DIR   << SETW(34, ' ') << "Output folder <output dir>\n";
-    std::cout << OPT_VERBOSE_SHORT     << SETW(21, ' ') << OPT_VERBOSE     << SETW(25, ' ') << "Verbose output\n";
-}
-
-bool extractGob(std::shared_ptr<const GobFileDirectory> gobDir, std::string outDir, const bool verbose)
-{
     try
     {
-        /* Save entries to files */
-        for(const auto& entry : gobDir->entries)
-        {
-            std::cout << "Extracting file: " << entry.name << std::endl;
-            if(verbose)
-            {
-                std::string strSize = std::to_string(entry.size);
-                std::cout << "  offset in gob:"  << SET_FINFO_LW((14 - (strSize.size() + 6)) + 11) << std::hex << std::showbase << entry.offset << std::endl;
-                std::cout << "  file size:"      << SET_FINFO_LW(14) << std::dec << strSize<< " bytes\n";
-            }
 
-            /* Seek to entry offset */
-            gobDir->stream->seek(entry.offset);
+        auto vfs = gobLoad(inputFile);
 
-            /* Set entry file path */
-            auto outPath = outDir + '/' + entry.name;
-            if(!makePath(outPath))
-            {
-                std::cerr << "Error: could not make file path: " << outPath << "!\n";
-                return 1;
-            }
+        outdir += (outdir.empty() ? "" : "/") + inputFile.stem().u8string() + "_GOB";
+        makePath(outdir);
 
-            /* Open output file stream */
-            OutputFileStream ofs(outPath, /*truncate=*/true);
-
-            /* Write entry to file */
-            ByteArray buffer(4096);
-            std::size_t offEntryEnd = entry.offset + entry.size;
-            std::size_t nWritten = 0;
-
-            while(gobDir->stream->tell() < offEntryEnd && !gobDir->stream->atEnd())
-            {
-                if(gobDir->stream->tell() + buffer.size() >= offEntryEnd) {
-                    buffer.resize(offEntryEnd - gobDir->stream->tell());
-                }
-
-                if(gobDir->stream->read(reinterpret_cast<byte_t*>(buffer.data()), buffer.size()) != buffer.size())
-                {
-                    std::cerr << "Error reading GOB entry into buffer!\n";
-                    return false;
-                }
-
-                ofs.write(buffer);
-                nWritten += buffer.size();
-            }
-
-            if(verbose) {
-                std::cout << "  bytes written to disk:" << SET_FINFO_LW(2) << std::dec << nWritten << " bytes\n\n";
-            }
-
-            if(nWritten < entry.size) {
-                std::cerr << "  Warning: not all bytes were written to disk!\n\n";
-            } else if(nWritten > entry.size) {
-                std::cerr << "  Warning: too many bytes were written to disk!\n\n";
-            }
+        if(!extractGob(vfs, outdir, bVerboseOutput)) {
+            result = 1;
         }
 
-        std::cout << (!verbose ? "\n" : "") << "--------------------------\nTotal files extracted: " << gobDir->entries.size() << std::endl << std::endl;
-        return true;
     }
-    catch (const std::exception& e)
+    catch(const std::exception& e)
     {
-        std::cerr << "An exception was thrown while extracting GOB dir: " << e.what() << std::endl;
-        return false;
+        printError("Failed to read GOB file!\n  Error: %", e.what());
+        result =  1;
     }
+    return result;
 }

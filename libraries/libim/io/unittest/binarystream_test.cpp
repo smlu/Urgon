@@ -1,6 +1,6 @@
 #include "binarystream_test.h"
 #include "../binarystream.h"
-#include <libim/math/math.h>
+#include <libim/math/fmath.h>
 
 #include <assert.h>
 #include <cstdint>

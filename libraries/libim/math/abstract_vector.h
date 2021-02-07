@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include "math.h"
+#include "fmath.h"
 #include <libim/utils/utils.h>
 #include <libim/types/safe_cast.h>
 

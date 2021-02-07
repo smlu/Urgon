@@ -2,6 +2,10 @@
 #define LIBIM_VECTOR3_H
 #include "vector.h"
 
+#include <numeric>
+#include <vector>
+#include <type_traits>
+
 namespace libim {
 
     // Class represents 3D vector (x,y,z)
@@ -59,5 +63,17 @@ namespace libim {
     struct Vector3u : public Vector3<uint32_t> {
         using Vector3<uint32_t>::Vector3;
     };
+
+    // Calculate vertex normal over face normals of adjacent faces that contains the vertex.
+    // Vertex normal is calculated by averiging face normals (unweighted averaging).
+    template<typename V3T, typename = std::enable_if_t<std::is_base_of_v<Vector3<V3T::value_type>, V3T>>>
+    static V3T unweightedVertexNormal(const std::vector<V3T>& faceNormals)
+    {
+        V3T vn;
+        if (!faceNormals.empty()) {
+            vn = std::accumulate(faceNormals.begin(), faceNormals.end(), vn) / faceNormals.size();
+        }
+        return vn;
+    }
 }
 #endif // LIBIM_VECTOR3_H

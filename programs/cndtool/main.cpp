@@ -864,9 +864,9 @@ int execCmd(std::string_view cmd, const CndToolArgs& args)
 
 int main(int argc, const char* argv[])
 {
-    gLogLevel = LogLevel::Warning;
-
     std::cout << "\nIndiana Jones and the Infernal Machine CND file tool v" << kVersion << std::endl;
+    std::cout << kProgramUrl << std::endl << std::endl;
+
     CndToolArgs args(argc, argv);
     if (argc < 2 ||
        args.cmd().empty())

@@ -5,5 +5,6 @@
 namespace gobext {
     constexpr std::string_view kProgramName = "@PROJECT_NAME@";
     constexpr std::string_view kVersion     = "@PROJECT_VERSION@";
+    constexpr std::string_view kProgramUrl  = "@PROJECT_HOMEPAGE_URL@";
 }
 #endif //GOBEXT_CONFIG_H

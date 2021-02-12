@@ -74,6 +74,8 @@ int main(int argc, const char *argv[])
     gLogLevel = LogLevel::Error;
 
     std::cout << "\nIndiana Jones and The Infernal Machine GOB file extractor v" << kVersion << std::endl;
+    std::cout << kProgramUrl << std::endl << std::endl;
+
     CmdArgs opt(argc, argv);
     if(argc < 2 ||
        opt.hasArg(OPT_HELP) ||

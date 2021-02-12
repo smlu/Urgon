@@ -2,6 +2,7 @@ project(
     ${PM_GOBEXT}
     LANGUAGES CXX
     VERSION 1.1.0
+    HOMEPAGE_URL ${CMAKE_PROJECT_HOMEPAGE_URL}
 )
 
 configure_file(config.h.in config.h)

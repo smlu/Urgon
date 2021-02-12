@@ -746,6 +746,8 @@ int main(int argc, const char* argv[])
     try
     {
         std::cout << "\nIndiana Jones and The Infernal Machine MAT file tool v" << kVersion << std::endl;
+        std::cout << kProgramUrl << std::endl << std::endl;
+
         MatoolArgs args(argc, argv);
         if (argc < 2)
         {

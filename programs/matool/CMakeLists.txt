@@ -2,6 +2,7 @@ project(
     ${PM_MATOOL}
     LANGUAGES CXX
     VERSION 1.0.0
+    HOMEPAGE_URL ${CMAKE_PROJECT_HOMEPAGE_URL}
 )
 
 configure_file(config.h.in config.h)

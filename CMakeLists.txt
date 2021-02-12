@@ -3,6 +3,7 @@ project(
     ProjectMarduk
     LANGUAGES CXX
     VERSION 0.9
+    HOMEPAGE_URL  "https://github.com/smlu/ProjectMarduk"
 )
 
 # Global constants

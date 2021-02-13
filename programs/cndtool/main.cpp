@@ -875,5 +875,10 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
+    gLogLevel = LogLevel::Error;
+    if (hasOptVerbose(args)) {
+        gLogLevel = LogLevel::Verbose;
+    }
+
     return execCmd(args.cmd(), args);
 }

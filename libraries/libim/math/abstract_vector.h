@@ -12,6 +12,11 @@
 
 
 namespace libim {
+    struct math_vector_tag {};
+    template<typename Tag>
+    constexpr bool isMathVectorTag = std::is_base_of_v<math_vector_tag, Tag>;
+    template<typename Tag>
+    using requireMathVectorTag = std::enable_if_t<isMathVectorTag<Tag>>;
 
     template<typename T, std::size_t S, typename Tag>
     struct AbstractVector : public std::array<T, S>
@@ -103,6 +108,60 @@ namespace libim {
             return res;
         }
 
+        template<typename = requireMathVectorTag<Tag>>
+        constexpr inline auto& operator += (const AbstractVector& rhs)
+        {
+            for (std::size_t i = 0; i < this->size(); i++) {
+                this->at(i) += rhs.at(i);
+            }
+            return *this;
+        }
+
+        template<typename = requireMathVectorTag<Tag>>
+        constexpr inline auto& operator -= (const AbstractVector& rhs)
+        {
+            for (std::size_t i = 0; i < this->size(); i++) {
+                this->at(i) -= rhs.at(i);
+            }
+            return *this;
+        }
+
+        template<typename = requireMathVectorTag<Tag>>
+        constexpr inline auto& operator *= (const AbstractVector& rhs)
+        {
+            for (std::size_t i = 0; i < this->size(); i++) {
+                this->at(i) *= rhs.at(i);
+            }
+            return *this;
+        }
+
+        template<typename = requireMathVectorTag<Tag>>
+        constexpr inline auto& operator *= (float scalar)
+        {
+            for (float& c : *this) {
+                c *= scalar;
+            }
+            return *this;
+        }
+
+        template<typename = requireMathVectorTag<Tag>>
+        constexpr inline auto& operator /= (const AbstractVector& rhs)
+        {
+            for (std::size_t i = 0; i < this->size(); i++) {
+                this->at(i) /= rhs.at(i);
+            }
+            return *this;
+        }
+
+        template<typename = requireMathVectorTag<Tag>>
+        constexpr inline auto& operator /= (float scalar)
+        {
+            const float	invScalar = 1.0f / scalar;
+            for (float& c : *this) {
+                c *= invScalar;
+            }
+            return *this;
+        }
     };
 
     template<typename T, std::size_t S, typename Tag>
@@ -136,8 +195,7 @@ namespace libim {
         return !(v1 == v2);
     }
 
-
-    // Vector trait
+    // Vector trait && concept
     namespace detail {
         template<typename, typename = void>
         struct isVector : std::false_type {};
@@ -157,5 +215,67 @@ namespace libim {
 
     template <typename T>
     constexpr bool isVector = libim::detail::isVector<T>::value;
+
+    template<typename T>
+    using requireVector = std::enable_if_t<isVector<T>, T>;
+
+    template<typename MVT>
+    using requireMathVector = std::enable_if_t<isVector<MVT> && isMathVectorTag<typename MVT::tag_type>, MVT>;
+
+    // Math operation definitions for math vector type
+    template<typename MVT>
+    typename requireMathVector<MVT> operator + (const MVT& l, const MVT& r)
+    {
+        MVT rv;
+        using F = typename MVT::value_type;
+        std::transform(l.begin(), l.end(), r.begin(), rv.begin(), std::plus<F>());
+        return rv;
+    }
+
+    template<typename MVT>
+    typename requireMathVector<MVT> operator - (const MVT& l, const MVT& r)
+    {
+        MVT rv;
+        using F = typename MVT::value_type;
+        std::transform(l.begin(), l.end(), r.begin(), rv.begin(), std::minus<F>());
+        return rv;
+    }
+
+    template<typename MVT>
+    typename requireMathVector<MVT> operator * (typename MVT::value_type scalar, const MVT& v)
+    {
+        MVT rv;
+        using F = typename MVT::value_type;
+        std::transform(v.begin(), v.end(), rv.begin(), [scalar](F x) { return scalar * x; });
+        return rv;
+    }
+
+    template<typename MVT>
+    typename requireMathVector<MVT> operator * (const MVT& v, typename MVT::value_type scalar)
+    {
+        MVT rv;
+        using F = typename MVT::value_type;
+        std::transform(v.begin(), v.end(), rv.begin(), [scalar](F x) { return x * scalar; });
+        return rv;
+    }
+
+    template<typename MVT>
+    typename requireMathVector<MVT> operator / (const MVT& v, typename MVT::value_type scalar)
+    {
+        MVT rv;
+        using F = typename MVT::value_type;
+        const F	is = static_cast<F>(1) / scalar;
+        std::transform(v.begin(), v.end(), rv.begin(), [is](F x) { return x * is; });
+        return rv;
+    }
+
+    template<typename MVT>
+    typename requireMathVector<MVT> operator - (const MVT& v)
+    {
+        MVT rv;
+        using F = typename MVT::value_type;
+        std::transform(v.begin(), v.end(), rv.begin(), std::negate<F>());
+        return rv;
+    }
 }
 #endif // LIBIM_ABSTRACT_VECTOR_H

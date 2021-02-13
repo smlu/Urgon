@@ -4,7 +4,7 @@
 #include <utility>
 
 namespace libim {
-    struct position_vector_tag {};
+    struct position_vector_tag : math_vector_tag {};
 
     template<typename T, std::size_t N>
     struct Vector : public AbstractVector<T, N, position_vector_tag>

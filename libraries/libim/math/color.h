@@ -8,14 +8,13 @@
 #include <type_traits>
 
 namespace libim {
-    struct color_vector_tag {};
 
-    template<typename T, std::size_t N>
-    struct AbstractColor : public AbstractVector<T, N, color_vector_tag>
+    template<typename T, std::size_t N, typename ColorTag>
+    struct AbstractColor : public AbstractVector<T, N, ColorTag>
     {
         //using Base_ = AbstractVector<T, N, color_vector_tag>;
         //using Base_::AbstractVector;
-        using AbstractVector<T, N, color_vector_tag>::AbstractVector;
+        using AbstractVector<T, N, ColorTag>::AbstractVector;
 
         static_assert(N  == 3 || N == 4);
         static_assert(std::is_floating_point_v<T> || std::is_unsigned_v<T>);
@@ -101,6 +100,8 @@ namespace libim {
     };
 
 
+    struct color_vector_tag {};
+
     /**
      * Represents non-linear (gamma space), 8-bit/component RGBA color.
      * @note: All mathematical operations should be done in linear space.
@@ -110,7 +111,7 @@ namespace libim {
      *        as 8 bits of precision is not enough to store linear space colors.
      *        Use helper function makeColor(linearColor, sRGB=true) in order to achieve this.
      */
-    struct Color : AbstractColor<uint8_t, 4> {};
+    struct Color : AbstractColor<uint8_t, 4, color_vector_tag> {};
 
     /**
      * Represents non-linear (gamma space), 8-bit/component RGB color.
@@ -121,12 +122,15 @@ namespace libim {
      *        as 8 bits of precision is not enough to store linear space colors.
      *        Use helper function makeColorRgb(linearColor, sRGB=true) in order to achieve this.
      */
-    struct ColorRgb : AbstractColor<uint8_t, 3> {};
+    struct ColorRgb : AbstractColor<uint8_t, 3, color_vector_tag> {};
 
+
+    struct linear_color_vector_tag : math_vector_tag {};
 
     /** Base class to represent linear, 32-bit/component floating point color. */
     template<class LColor, std::size_t N>
-    struct AbstractLinearColor : AbstractColor<float, N>
+    struct AbstractLinearColor :
+        AbstractColor<float, N, linear_color_vector_tag>
     {
         constexpr inline LColor clamped() const
         {
@@ -137,112 +141,8 @@ namespace libim {
             return color;
         }
 
-        constexpr inline LColor operator + (const LColor& rhs) const
-        {
-            LColor color;
-            for (std::size_t i = 0; i < this->size(); i++) {
-                color.at(i) = this->at(i) + rhs.at(i);
-            }
-            return color;
-        }
-
-        constexpr inline LColor& operator += (const LColor& rhs)
-        {
-            for (std::size_t i = 0; i < this->size(); i++) {
-                this->at(i) += rhs.at(i);
-            }
-            return *this;
-        }
-
-        constexpr inline LColor operator - (const LColor& rhs) const
-        {
-            LColor color;
-            for (std::size_t i = 0; i < this->size(); i++) {
-                color.at(i) = this->at(i) - rhs.at(i);
-            }
-            return color;
-        }
-
-        constexpr inline LColor& operator -= (const LColor& rhs)
-        {
-            for (std::size_t i = 0; i < this->size(); i++) {
-                this->at(i) -= rhs.at(i);
-            }
-            return *this;
-        }
-
-        constexpr inline LColor operator * (const LColor& rhs) const
-        {
-            LColor color;
-            for (std::size_t i = 0; i < this->size(); i++) {
-                color.at(i) = this->at(i) * rhs.at(i);
-            }
-            return color;
-        }
-
-        constexpr inline LColor& operator *= (const LColor& rhs)
-        {
-            for (std::size_t i = 0; i < this->size(); i++) {
-                this->at(i) *= rhs.at(i);
-            }
-            return *this;
-        }
-
-        constexpr inline LColor operator * (float scalar) const
-        {
-            LColor color;
-            for (std::size_t i = 0; i < this->size(); i++) {
-                color.at(i) = this->at(i) * scalar;
-            }
-            return color;
-        }
-
-        constexpr inline LColor& operator *= (float scalar)
-        {
-            for (float& c : *this) {
-                c *= scalar;
-            }
-            return *this;
-        }
-
-        constexpr inline LColor operator / (const LColor& rhs) const
-        {
-            LColor color;
-            for (std::size_t i = 0; i < this->size(); i++) {
-                color.at(i) = this->at(i) / rhs.at(i);
-            }
-            return color;
-        }
-
-        constexpr inline LColor& operator /= (const LColor& rhs)
-        {
-            for (std::size_t i = 0; i < this->size(); i++) {
-                this->at(i) /= rhs.at(i);
-            }
-            return *this;
-        }
-
-        constexpr inline LColor operator / (float scalar) const
-        {
-            const float	invScalar = 1.0f / scalar;
-            LColor color;
-            for (std::size_t i = 0; i < this->size(); i++) {
-                color.at(i) = this->at(i) * invScalar;
-            }
-            return color;
-        }
-
-        constexpr inline LColor& operator /= (float scalar)
-        {
-            const float	invScalar = 1.0f / scalar;
-            for (float& c : *this) {
-                c *= invScalar;
-            }
-            return *this;
-        }
-
     private:
-        using AbstractColor<float, N>::AbstractColor;
+        using AbstractColor<float, N, linear_color_vector_tag>::AbstractColor;
         friend LColor;
     };
 

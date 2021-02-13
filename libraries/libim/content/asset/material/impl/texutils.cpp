@@ -520,7 +520,7 @@ void libim::content::asset::boxFilterScale(Pixdata::const_iterator itSrc, uint32
             LinearColor px01 = makeLinearColor(readPixelAt(itSrc, gx , gy1, srcWidth, srcHeight, cf), sRGB);
             LinearColor px11 = makeLinearColor(readPixelAt(itSrc, gx1, gy1, srcWidth, srcHeight, cf), sRGB);
 
-            const auto pxd = (px00 + px01 + px10 + px11) * 0.25; // pixel averaging
+            const auto pxd = (px00 + px01 + px10 + px11) * 0.25f; // pixel averaging
             writePixelAt(makeColor(pxd, sRGB), itDest, x, y, destWidth, destHeight, cf);
         }
     }

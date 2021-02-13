@@ -13,7 +13,7 @@ namespace libim::content::text {
         LinearColor bottomRight;
 
         constexpr inline bool isValid() const noexcept {
-             return top.red() != -1.0f && top.green() != -1.f && top.blue() != -1.f && top.alpha() != -1.0f;
+            return top.red() != -1.0f && top.green() != -1.f && top.blue() != -1.f && top.alpha() != -1.0f;
         }
 
         constexpr explicit operator bool() const noexcept {

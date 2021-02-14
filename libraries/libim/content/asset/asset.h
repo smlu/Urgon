@@ -8,7 +8,7 @@ namespace libim::content::asset {
     {
     public:
         Asset() = default;
-        Asset(std::string name) : name_(std::move(name)) {}
+        explicit Asset(std::string name) : name_(std::move(name)) {}
         Asset(const Asset&) = default;
         Asset(Asset&&) noexcept = default;
         Asset& operator=(const Asset&) = default;

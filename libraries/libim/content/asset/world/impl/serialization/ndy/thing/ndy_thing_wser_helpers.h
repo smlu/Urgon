@@ -14,7 +14,7 @@
 namespace libim::content::asset {
 
     // Macros for base and param prediction. To be used in NdyWriteThingParamIf.
-    #define ndyWriteIfBase(x) [&](const auto& base){ return x; }
+    #define ndyWriteIfBase(x) [&](const auto& base){ return (x); }
     #define ndyWriteIfPara(x) [&](){ return (x); }
 
     // Macro defines new ndy serialization function to write thing parameter.
@@ -507,7 +507,7 @@ namespace libim::content::asset {
                // Param VoiceColor
                ndyWriteThingParamIf(baseActorInfo,
                    ndyWriteIfBase(ai.voiceColor != base.voiceColor),
-                   ndyWriteIfPara(ai.voiceColor.isValid()), [&] {
+                   ndyWriteIfPara(ai.voiceColor.isValid() && ai.voiceColor.isZero() == false), [&] {
                    ndyWriteThingParam(rw, NdyThingParam::VoiceColor, ai.voiceColor.toString());
                });
             },

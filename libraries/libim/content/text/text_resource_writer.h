@@ -24,8 +24,6 @@ namespace libim::content::text {
         TextResourceWriter& operator=(const TextResourceWriter&) = delete;
         TextResourceWriter operator=(TextResourceWriter&&) noexcept = delete;
 
-
-
         template<typename T>
         static inline std::size_t getNumberIndent(std::size_t indent, T n)
         {
@@ -73,9 +71,32 @@ namespace libim::content::text {
         TextResourceWriter& indent(std::size_t width);
         TextResourceWriter& write(std::string_view text);
         TextResourceWriter& write(std::string_view text, std::size_t fieldWidth, std::size_t minSep = 1, char indentChar = ' ');
-        TextResourceWriter& writeCommentLine(std::string_view comment);
-        TextResourceWriter& writeEol();
 
+        template<typename ...Args>
+        TextResourceWriter& writeCommentLine(std::string_view comment, Args&&... args)
+        {
+            if (!comment.empty())
+            {
+                std::ostringstream ss;
+                ss << chComment() << chSpace();
+                utils::ssprintf(ss, comment, std::forward<Args&&>(args)...);
+
+                // TODO: This is hack to get pointer to the underlying buffer and avoid copying.
+                //       When C++20 is supported use ss.view() to get std::sting_view from ss;
+                struct ssb : public std::basic_stringbuf<char>{
+                    char* eback() const { return std::basic_stringbuf<char>::eback(); }
+                    char* egptr() const { return std::basic_stringbuf<char>::egptr(); }
+                } b;
+                const auto s = ss.tellp();
+                std::swap(*ss.rdbuf(), b);
+                ostream_ << std::string_view(b.eback(), s);
+
+                writeEol();
+            }
+            return *this;
+        }
+
+        TextResourceWriter& writeEol();
         TextResourceWriter& writeKeyValue(std::string_view key, std::string_view value, std::size_t indent = 1);
 
         template<std::size_t precision = 0,
@@ -237,6 +258,10 @@ namespace libim::content::text {
         {
             return indch_;
         }
+
+    private:
+        char chComment() const;
+        char chSpace() const;
 
     private:
         OutputStream& ostream_;

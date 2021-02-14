@@ -51,17 +51,6 @@ TextResourceWriter& TextResourceWriter::write(std::string_view text, std::size_t
     return *this;
 }
 
-TextResourceWriter& TextResourceWriter::writeCommentLine(std::string_view comment)
-{
-    if (!comment.empty())
-    {
-        ostream_ << ChComment << ChSpace << comment;
-        writeEol();
-    }
-
-    return *this;
-}
-
 TextResourceWriter& TextResourceWriter::writeEol()
 {
     ostream_ << ChEol;
@@ -94,4 +83,14 @@ TextResourceWriter& TextResourceWriter::writeSection(std::string_view section, b
         writeLine(kResSectionHeader);
     }
     return writeLabel(kResName_Section, section);
+}
+
+char TextResourceWriter::chComment() const
+{
+    return ChComment;
+}
+
+char TextResourceWriter::chSpace() const
+{
+    return ChSpace;
 }

@@ -18,7 +18,7 @@ namespace libim {
     class Stream;
 
     template<typename T>
-    constexpr bool isStreamType = std::is_base_of<Stream, T>::value || std::is_same<T, Stream>::value;
+    constexpr bool isStreamType = std::is_base_of_v<Stream, T> || std::is_same_v<T, Stream>;
 
     class Stream
     {
@@ -79,7 +79,6 @@ namespace libim {
             if(nRead != size) {
                 throw StreamError("Error while reading stream");
             }
-
             return data;
         }
 
@@ -88,7 +87,6 @@ namespace libim {
             if((this->tell() + length) > this->size()) {
                 throw StreamError("End of stream");
             }
-
             return readsome(data, length);
         }
 
@@ -136,7 +134,6 @@ namespace libim {
             if(nWritten != data.size()) {
                 throw StreamError("Failed to write data to stream");
             }
-
             return *this;
         }
 
@@ -210,57 +207,72 @@ namespace libim {
         virtual std::size_t writesome(const byte_t* data, std::size_t length) = 0;
 
     private:
-        template <typename T> struct tag {};
+        template<typename T> struct tag {};
 
-        template <typename T> T _read(std::size_t lenHint, tag<T>&&) const = delete;
-        template <typename T, typename ...Args> T _read(Args&& ..., tag<T>&&) const = delete;
+        template<typename T> T _read(std::size_t lenHint, tag<T>&&) const = delete;
+        template<typename T, typename ...Args> T _read(Args&& ..., tag<T>&&) const = delete;
 
         /* Delete non-POD type version */
-        template <typename T, typename std::enable_if<!std::is_trivially_copyable<T>::value, int>::type = 0>
+        template<typename T, typename std::enable_if_t<std::is_trivially_copyable_v<T> == false, int> = 0>
         T _read(tag<T>&&) const = delete;
 
-        template <typename T>
-        typename std::enable_if<!std::is_trivially_copyable<T>::value, Stream>::type&
+        template<typename T>
+
+        typename std::enable_if_t<std::is_trivially_copyable_v<T> == false, Stream>&
         _write(const T&, tag<T>&&) = delete;
 
         /* POD type specialization */
-        template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type = 0>
+        template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
         T _read(tag<T>&&) const;
 
-        template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type = 0>
+        template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
         Stream& _write(const T&, tag<T>&&);
 
+        template<typename T, typename = std::enable_if_t<std::is_pointer_v<T>>>
+        T _read(tag<T>&&) const
+        {
+            static_assert(false, "Pointers can't be read from stream");
+            return *this;
+        }
+
+        template<typename T, typename = std::enable_if_t<std::is_pointer_v<T>>>
+        Stream& _write(const T&, tag<T>&&)
+        {
+            static_assert(false, "Pointers can't be written to stream");
+            return *this;
+        }
+
         /* std::unique_ptr specialization */
-        template <typename T>
+        template<typename T>
         std::unique_ptr<T> _read(tag<std::unique_ptr<T>>&&) const;
 
-        template <typename T>
+        template<typename T>
         std::unique_ptr<T> _read(std::size_t lenHint, tag<std::unique_ptr<T>>&&) const;
 
-        template <typename T>
+        template<typename T>
         Stream& _write(const std::unique_ptr<T>& ptr, tag<std::unique_ptr<T>>&&);
 
          /* std::shared_ptr specialization */
-        template <typename T>
+        template<typename T>
         std::shared_ptr<T> _read(tag<std::shared_ptr<T>>&&) const ;
 
-        template <typename T>
+        template<typename T>
         std::shared_ptr<T> _read(std::size_t lenHint, tag<std::shared_ptr<T>>&&) const;
 
-        template <typename T>
+        template<typename T>
         Stream& _write(const std::shared_ptr<T>& ptr, tag<std::shared_ptr<T>>&&);
 
          /* std::vector specialization */
-        template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable<T>::value, int> = 0>
+        template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
         std::vector<T, A> _read(std::size_t lenHint, tag<std::vector<T, A>>&&) const;
 
-        template<typename T, typename A, typename std::enable_if_t<!std::is_trivially_copyable<T>::value, int> = 0>
+        template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable_v<T> == false, int> = 0>
         std::vector<T, A> _read(std::size_t lenHint, tag<std::vector<T, A>>&&) const;
 
-        template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable<T>::value, int> = 0>
+        template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
         Stream& _write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&);
 
-        template<typename T, typename A, typename std::enable_if_t<!std::is_trivially_copyable<T>::value, int> = 0>
+        template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable_v<T> == false, int> = 0>
         Stream& _write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&);
 
     private:
@@ -305,7 +317,7 @@ namespace libim {
 
 
     /* Specialization of template member functions */
-    template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type>
+    template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int>>
     T Stream::_read(tag<T>&&) const
     {
         typename std::decay<T>::type pod{};
@@ -313,18 +325,16 @@ namespace libim {
         if(nRead != sizeof(pod)) {
             throw StreamError("Error reading trivially copyable type T from stream");
         }
-
         return pod;
     }
 
-    template <typename T, typename std::enable_if<std::is_trivially_copyable<T>::value, int>::type>
+    template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int>>
     Stream& Stream::_write(const T& pod, tag<T>&&)
     {
         auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(std::addressof(pod)), sizeof(pod));
         if(nWritten != sizeof(pod)) {
             throw StreamError("Error writing trivially copyable type T to stream");
         }
-
         return *this;
     }
 
@@ -336,7 +346,6 @@ namespace libim {
         if(nRead != CHAR_BYTE) {
             throw StreamError("Could not read char from stream");
         }
-
         return c;
     }
 
@@ -346,10 +355,8 @@ namespace libim {
         if(nWritten != CHAR_BYTE) {
             throw StreamError("Could not write char to stream");
         }
-
         return *this;
     }
-
 
     template<>
     inline int8_t Stream::read<int8_t>() const
@@ -359,7 +366,6 @@ namespace libim {
         if(nRead != INT8_BYTE) {
             throw StreamError("Could not read int8_t from stream");
         }
-
         return i8;
     }
 
@@ -369,7 +375,6 @@ namespace libim {
         if(nWritten != INT8_BYTE) {
             throw StreamError("Could not write int8_t to stream");
         }
-
         return *this;
     }
 
@@ -381,7 +386,6 @@ namespace libim {
         if(nRead != INT8_BYTE) {
             throw StreamError("Could not read uint8_t from stream");
         }
-
         return ui8;
     }
 
@@ -391,7 +395,6 @@ namespace libim {
         if(nWritten != INT8_BYTE) {
             throw StreamError("Could not write uint8_t to stream");
         }
-
         return *this;
     }
 
@@ -403,7 +406,6 @@ namespace libim {
         if(nRead != INT16_BYTE) {
             throw StreamError("Could not read int16_t from stream");
         }
-
         return i16;
     }
 
@@ -413,7 +415,6 @@ namespace libim {
         if(nWritten != INT16_BYTE) {
             throw StreamError("Could not write int16_t to stream");
         }
-
         return *this;
     }
 
@@ -425,7 +426,6 @@ namespace libim {
         if(nRead != INT16_BYTE) {
             throw StreamError("Could not read uint16_t from stream");
         }
-
         return ui16;
     }
 
@@ -435,7 +435,6 @@ namespace libim {
         if(nWritten != INT16_BYTE) {
             throw StreamError("Could not write uint16_t to stream");
         }
-
         return *this;
     }
 
@@ -447,7 +446,6 @@ namespace libim {
         if(nRead != INT32_BYTE) {
             throw StreamError("Could not read int32_t from stream");
         }
-
         return i32;
     }
 
@@ -457,7 +455,6 @@ namespace libim {
         if(nWritten != INT32_BYTE) {
             throw StreamError("Could not write int32_t to stream");
         }
-
         return *this;
     }
 
@@ -469,7 +466,6 @@ namespace libim {
         if(nRead != INT32_BYTE) {
             throw StreamError("Could not read uint32_t from stream");
         }
-
         return ui32;
     }
 
@@ -479,7 +475,6 @@ namespace libim {
         if(nWritten != INT32_BYTE) {
             throw StreamError("Could not write uint32_t to stream");
         }
-
         return *this;
     }
 
@@ -491,7 +486,6 @@ namespace libim {
         if(nRead != INT64_BYTE) {
             throw StreamError("Could not read int64_t from stream");
         }
-
         return i64;
     }
 
@@ -501,7 +495,6 @@ namespace libim {
         if(nWritten != INT64_BYTE) {
             throw StreamError("Could not write int64_t to stream");
         }
-
         return *this;
     }
 
@@ -513,7 +506,6 @@ namespace libim {
         if(nRead != INT64_BYTE) {
             throw StreamError("Could not read uint64_t from stream");
         }
-
         return ui64;
     }
 
@@ -523,7 +515,6 @@ namespace libim {
         if(nWritten != INT64_BYTE) {
             throw StreamError("Could not write uint64_t to stream");
         }
-
         return *this;
     }
 
@@ -535,7 +526,6 @@ namespace libim {
         if(nRead != FLOAT_BYTE) {
             throw StreamError("Could not read float from stream");
         }
-
         return f;
     }
 
@@ -545,7 +535,6 @@ namespace libim {
         if(nWritten != FLOAT_BYTE) {
             throw StreamError("Could not write float to stream");
         }
-
         return *this;
     }
 
@@ -557,7 +546,6 @@ namespace libim {
         if(nRead != DOUBLE_BYTE) {
             throw StreamError("Could not read double from stream");
         }
-
         return d;
     }
 
@@ -567,7 +555,6 @@ namespace libim {
         if(nWritten != DOUBLE_BYTE) {
             throw StreamError("Could not write double to stream");
         }
-
         return *this;
     }
 
@@ -583,45 +570,45 @@ namespace libim {
     }
 
     // std::uniqe_ptr
-    template <typename T>
+    template<typename T>
     std::unique_ptr<T> Stream::_read(tag<std::unique_ptr<T>>&&) const
     {
         return std::make_unique<T>(this->read<T>());
     }
 
-    template <typename T>
+    template<typename T>
     std::unique_ptr<T> Stream::_read(std::size_t lenHint, tag<std::unique_ptr<T>>&&) const
     {
         return std::make_unique<T>(this->read<T>(lenHint));
     }
 
-    template <typename T>
+    template<typename T>
     Stream& Stream::_write(const std::unique_ptr<T>& ptr, tag<std::unique_ptr<T>>&&)
     {
         return this->write<T>(*ptr);
     }
 
     // std::shared_ptr
-    template <typename T>
+    template<typename T>
     std::shared_ptr<T> Stream::_read(tag<std::shared_ptr<T>>&&) const
     {
         return std::make_shared<T>(this->read<T>());
     }
 
-    template <typename T>
+    template<typename T>
     std::shared_ptr<T> Stream::_read(std::size_t lenHint, tag<std::shared_ptr<T>>&&) const
     {
         return std::make_shared<T>(this->read<T>(lenHint));
     }
 
-    template <typename T>
+    template<typename T>
     Stream& Stream::_write(const std::shared_ptr<T>& ptr, tag<std::shared_ptr<T>>&&)
     {
         return this->write<T>(*ptr);
     }
 
     // std::vector
-    template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable<T>::value, int>>
+    template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable_v<T>, int>>
     std::vector<T, A> Stream::_read(std::size_t lenHint, tag<std::vector<T, A>>&&) const
     {
         std::vector<T, A> vec(lenHint);
@@ -629,11 +616,10 @@ namespace libim {
         if(nRead != lenHint * sizeof(T)) {
             throw StreamError(std::string("Could not read std::vector of type ") + typeid(T).name() + " from stream");
         }
-
         return vec;
     }
 
-    template<typename T, typename A, typename std::enable_if_t<!std::is_trivially_copyable<T>::value, int>>
+    template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable_v<T> == false, int>>
     std::vector<T, A> Stream::_read(std::size_t lenHint, tag<std::vector<T, A>>&&) const
     {
         std::vector<T, A> vec;
@@ -641,11 +627,10 @@ namespace libim {
         for(std::size_t i = 0; i < lenHint; i++) {
             vec.push_back(this->read<T>());
         }
-
         return vec;
     }
 
-    template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable<T>::value, int>>
+    template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable_v<T>, int>>
     Stream& Stream::_write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&)
     {
         const std::size_t nWrite = vec.size() * sizeof(T);
@@ -653,17 +638,15 @@ namespace libim {
         if(nWritten != nWrite) {
             throw StreamError(std::string("Could not write std::vector of type ") + typeid(T).name() + " to stream: " + name());
         }
-
         return *this;
     }
 
-    template<typename T, typename A, typename std::enable_if_t<!std::is_trivially_copyable<T>::value, int>>
+    template<typename T, typename A, typename std::enable_if_t<std::is_trivially_copyable_v<T> == false, int>>
     Stream& Stream::_write(const std::vector<T, A>& vec, tag<std::vector<T, A>>&&)
     {
         for(const auto& e : vec) {
             this->write<T>(e);
         }
-
         return *this;
     }
 
@@ -685,20 +668,19 @@ namespace libim {
         return res;
     }
 
-    template <>
+    template<>
     inline Stream& Stream::_write(const std::string& str, tag<std::string>&&)
     {
         return write(std::string_view(str));
     }
 
-    template <>
+    template<>
     inline Stream& Stream::_write(const std::string_view& sv, tag<std::string_view>&&)
     {
         const auto nWritten = this->write(reinterpret_cast<const byte_t*>(sv.data()), sv.size());
         if(nWritten != sv.size()) {
             throw StreamError("Could not write std::string_view to stream");
         }
-
         return *this;
     }
 }

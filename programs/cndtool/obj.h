@@ -299,7 +299,7 @@ namespace cndtool {
                 {
                     const auto matOutPath =  outFolder / kMtlPngFolder / (name + ".png");
                     makePath(matOutPath);
-                    pngWriteTexture(OutputFileStream(matOutPath, /*truncate=*/true), m.get().cells().at(0));
+                    pngWrite(OutputFileStream(matOutPath, /*truncate=*/true), m.get().cells().at(0));
                 }
 
                 rw.writeLine("newmtl " + name);

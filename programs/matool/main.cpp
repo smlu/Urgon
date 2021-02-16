@@ -265,10 +265,10 @@ Material imagesToMaterial(const std::vector<fs::path>& imgFiles, std::string mat
 
             Texture tex;
             if (fileExtMatch(file, kExtBmp)) {
-                tex = bmpReadTexture(InputFileStream(file));
+                tex = bmpLoad(InputFileStream(file));
             }
             else if (fileExtMatch(file, kExtPng)) {
-                tex = pngReadTexture(InputFileStream(file));
+                tex = pngLoad(InputFileStream(file));
             }
             else {
                 throw std::runtime_error("Invalid image file '" + file.u8string() + "'");

@@ -44,7 +44,7 @@ void pixdataFlipOverY(uint32_t bpp, uint32_t width, uint32_t height, Pixdata& pi
     }
 }
 
-Texture libim::content::asset::pngReadTexture(const InputStream& istream)
+Texture libim::content::asset::pngLoad(const InputStream& istream)
 {
     /* Read PNG file signature */
     auto pngsig = istream.read<std::array<png_byte, 8>>();
@@ -148,7 +148,7 @@ Texture libim::content::asset::pngReadTexture(const InputStream& istream)
     return Texture(width, height, 1, cf, std::move(ptrPixdata));
 }
 
-void libim::content::asset::pngWriteTexture(OutputStream& ostream, const TextureView& tex)
+void libim::content::asset::pngWrite(OutputStream& ostream, const TextureView& tex)
 {
     // Note: PNG file format stores pixel channels in big-endian RGB8 ot RGBA8 format.
     //       Texture which has color depth less then 24 BPP (e.g.16bit) is converted
@@ -172,7 +172,7 @@ void libim::content::asset::pngWriteTexture(OutputStream& ostream, const Texture
         auto destCi     = ci.mode == ColorMode::RGB ? RGB24be : RGBA32be;
         auto ptrPixData = convertPixdata(tex.begin(), tex.end(), tex.width(), tex.height(), ci, destCi);
         auto convTex    = Texture(tex.width(), tex.height(), 1, destCi, std::move(ptrPixData));
-        return pngWriteTexture(ostream, convTex);
+        return pngWrite(ostream, convTex);
     }
 
     png_structp pngPtr = png_create_write_struct(png_get_libpng_ver(nullptr), nullptr, nullptr, nullptr);
@@ -325,7 +325,7 @@ void bmpReadImageInfo(const InputStream& istream, int32_t& width, int32_t& heigh
     }
 }
 
-Texture libim::content::asset::bmpReadTexture(const InputStream& istream)
+Texture libim::content::asset::bmpLoad(const InputStream& istream)
 {
     /* Read header */
     BitmapFileHeader header{};
@@ -396,7 +396,7 @@ void bmpWriteInfoHeader(OutputStream& ostream, uint32_t width, int32_t height, c
     ostream.write(info);
 }
 
-void libim::content::asset::bmpWriteTexture(OutputStream& ostream, const TextureView& texView)
+void libim::content::asset::bmpWrite(OutputStream& ostream, const TextureView& texView)
 {
     if (texView.isEmpty()) {
         throw std::invalid_argument("Can't write empty texture as BMP file format to stream");

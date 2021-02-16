@@ -212,10 +212,10 @@ namespace matool {
                 const auto outPath = (outDir / fileName).replace_extension(extractAsBmp ? kExtBmp : kExtPng);
                 OutputFileStream ofs(outPath, /*truncate=*/true);
                 if (extractAsBmp) {
-                    bmpWriteTexture(ofs, tex.mipmap(lod));
+                    bmpWrite(ofs, tex.mipmap(lod));
                 }
                 else {
-                    pngWriteTexture(ofs, tex.mipmap(lod));
+                    pngWrite(ofs, tex.mipmap(lod));
                 }
             }
         }

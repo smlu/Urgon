@@ -16,64 +16,64 @@
 namespace libim::content::asset {
 
     /**
-     * Read Texture from PNG (Portable Network Graphics) file format stream.
+     * Loads Texture from PNG (Portable Network Graphics) file format stream.
      *
      * @param istream - input PNG file format stream.
      * @return Texture object.
      * @throw StreamError if invalid PNG file format stream or TextureError if texture can't be created.
      */
-    Texture pngReadTexture(const InputStream& istream);
+    Texture pngLoad(const InputStream& istream);
 
     /**
-     * Write Texture to stream as PNG (Portable Network Graphics) file format.
+     * Writes Texture to stream as PNG (Portable Network Graphics) file format.
      *
      * @param ostream - reference to output stream.
      * @param tex     - const reference to TextureView object to write to stream.
      */
-    void pngWriteTexture(OutputStream& ostream, const TextureView& tex);
+    void pngWrite(OutputStream& ostream, const TextureView& tex);
 
     /**
-     * Write Texture to stream as PNG (Portable Network Graphics) file format.
+     * Writes Texture to stream as PNG (Portable Network Graphics) file format.
      *
      * @param ostream - r-value reference to output stream.
      * @param tex     - const reference to TextureView object to write to stream.
      * @throw StreamError if tex is empty or tex can't be written to stream.
      */
-    inline void pngWriteTexture(OutputStream&& ostream, const TextureView& tex){
-        pngWriteTexture(ostream, tex);
+    inline void pngWrite(OutputStream&& ostream, const TextureView& tex) {
+        pngWrite(ostream, tex);
     }
 
     /**
-     * Read Texture from BMP (Bitmap) file format stream.
+     * Loads Texture from BMP (Bitmap) file format stream.
      *
      * @param istream - input BMP file format stream.
      * @return Texture object.
      * @throw StreamError if invalid PNG file format stream or TextureError if texture can't be created.
      */
-    Texture bmpReadTexture(const InputStream& istream);
+    Texture bmpLoad(const InputStream& istream);
 
     /**
-     * Write Texture to stream as BMP (Bitmap) file format.
+     * Writes Texture to stream as BMP (Bitmap) file format.
      *
      * @param ostream - reference to output stream.
      * @param tex     - const reference to TextureView object to write to stream.
      * @throw StreamError if tex is empty or tex can't be written to stream.
      */
-    void bmpWriteTexture(OutputStream& ostream, const TextureView& tex);
+    void bmpWrite(OutputStream& ostream, const TextureView& tex);
 
      /**
-     * Write Texture to stream as BMP (Bitmap) file format.
+     * Writes Texture to stream as BMP (Bitmap) file format.
      *
      * @param ostream - r-value reference to output stream.
      * @param tex     - const reference to TextureView object to write to stream.
      * @throw StreamError if tex is empty or tex can't be written to stream.
      */
-    inline void bmpWriteTexture(OutputStream&& ostream, const TextureView& tex) {
-        bmpWriteTexture(ostream, tex);
+    inline void bmpWrite(OutputStream&& ostream, const TextureView& tex) {
+        bmpWrite(ostream, tex);
     }
 
     /**
-     * Return PixdataPtr object of specific size.
+     * Returns PixdataPtr object of specific size.
      *
      * @param size - byte size of new PixdataPtr object.
      * @return PixdataPtr
@@ -83,7 +83,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Return PixdataPtr object with copied data from another Pixdata object.
+     * Returns PixdataPtr object with copied data from another Pixdata object.
      *
      * @param itFirst - const iterator to the begining of Pixdata to copy data from.
      * @param itLast  - const iterator to the end of Pixdata to copy data from.
@@ -94,7 +94,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Return image row stride.
+     * Returns image row stride.
      * Stride is calculated by multiplaying image width with color depth in bytes (BPP).
      *
      * @param width - image width.
@@ -106,7 +106,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Return maximum number of LOD levels MipMap can have at given width and height.
+     * Returns maximum number of LOD levels MipMap can have at given width and height.
      *
      * @param width  - image width.
      * @param height - image height.
@@ -117,7 +117,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Calculate size of image's pixel data.
+     * Calculates size of image's pixel data.
      *
      * @param width  - image width.
      * @param height - image height.
@@ -129,7 +129,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Calculate whole MipMap's pixel data size.
+     * Calculates whole MipMap's pixel data size.
      *
      * @param width     - MipMap width.
      * @param height    - MipMap height.
@@ -150,7 +150,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Get range of mipmaps from Pixdata iterator starting at lod.
+     * Returns range of mipmaps from Pixdata iterator starting at lod.
      *
      * @param lod       - first LOD level in itFirst to return begin iterator.
      * @param itFirst   - start const Pixdata iterator to get mipmaps from.
@@ -173,7 +173,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Read Texture from input pixel data range to reference argument and return end iterator.
+     * Reads Texture from input pixel data range to reference argument and return end iterator.
      *
      * @param first     - const iterator to the beginning of pixel data.
      * @param last      - const iterator to the end of pixel data.
@@ -199,7 +199,7 @@ namespace libim::content::asset {
     );
 
     /**
-     * Get color component bit mask.
+     * Returns color component bit mask.
      * @param bpc - bits per color component.
      * @return uint32_t color component bit mask.
      */
@@ -208,7 +208,7 @@ namespace libim::content::asset {
     }
 
      /**
-     * Get mask of color component.
+     * Returns mask of color component.
      * @param bpc  - bits per color component.
      * @param cshl - color component left bit shift.
      * @return color component bit mask.
@@ -218,7 +218,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Get bit count per color component from left shift pos mask
+     * Returns bit count per color component from left shift pos mask
      * @param mask - color mask
      *
      * @note reference implementation taken from stb lib:
@@ -235,7 +235,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Get color component left shit position from mask
+     * Returns color component left shit position from mask
      * @param mask - color mask
      */
     inline uint32_t getLeftShiftPosFromMask(uint32_t mask) {
@@ -243,7 +243,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Decode encoded pixel and returns it as Color object.
+     * Decodes the encoded pixel and returns it as Color object.
      *
      * @param encPixel - encoded pixel of type PT. PT should be integral type of size 4 bytes (eg.: uint32_t) or less.
      * @param ci       - color format of encoded pixel.
@@ -275,7 +275,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Encode pixel.
+     * Encodes pixel.
      *
      * @param pixel - Color object pixel to encode.
      * @param ci    - color format to encode pixel to.
@@ -301,7 +301,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Read pixel from buffer.
+     * Reads pixel from buffer.
      *
      * @param pPixdataSrc - byte_t pointer to buffer to read pixel from.
      * @param size        - available size to read. Argument is used to verify
@@ -337,7 +337,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Write pixel to buffer.
+     * Writes pixel to buffer.
      *
      * @param pixel        - non-linear space Color object to write to buffer.
      * @param pPixdataDest - byte_t pointer to buffer to write pixel to.
@@ -361,7 +361,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Read pixel from buffer at specific location defined by x,y coordinates.
+     * Reads pixel from buffer at specific location defined by x,y coordinates.
      *
      * @param itFirst - const iterator of Pixdata to read pixel from.
      *                  Iterator should point at the beginning of image.
@@ -388,7 +388,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Write pixel to buffer at specific location defined by x,y coordinates.
+     * Writes pixel to buffer at specific location defined by x,y coordinates.
      *
      * @param pixel   - non-linear space Color object to write to buffer.
      * @param itFirst - const iterator of Pixdata to write pixel to.
@@ -415,7 +415,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Convert pixeldata row to different ColorFormat.
+     * Converts pixeldata row to different ColorFormat.
      * Data pointed by source pixel data is not modified.
      *
      * @param pRowSrc    - const pointer to the source pixel data.
@@ -431,7 +431,7 @@ namespace libim::content::asset {
         byte_t* pRowDest, uint32_t rowLenDest, const ColorFormat& ciDest);
 
     /**
-     * Convert inputted pixdata to different ColorFormat and return new pixel data.
+     * Converts inputted pixdata to different ColorFormat and return new pixel data.
      * Data pointed by inputted pixel data is not modified.
      *
      * @param ptrPixdataSrc - input shared pointer to pixel data (PixdataPtr).
@@ -449,7 +449,7 @@ namespace libim::content::asset {
     convertPixdata(PixdataPtr ptrPixdataSrc, uint32_t width, uint32_t height, const ColorFormat& from, const ColorFormat& to);
 
     /**
-     * Convert inputted pixel data range iterators to different ColorFormat and return new pixel data.
+     * Converts inputted pixel data range iterators to different ColorFormat and return new pixel data.
      * Data pointed by range iterators is not modified.
      *
      * @param itSrcFirst - input const iterator to begining.
@@ -469,7 +469,7 @@ namespace libim::content::asset {
     convertPixdata(Pixdata::const_iterator itSrcFirst, Pixdata::const_iterator itSrcLast, uint32_t width, uint32_t height, const ColorFormat& from, const ColorFormat& to);
 
     /**
-     * Scale image using box-filtering algorithm (pixel-averaging)
+     * Scales image using box-filtering algorithm (pixel-averaging)
      *
      * @param itSrc      - source Pixdata const iterator.
      * @param srcWidth   - source Pixdata width.

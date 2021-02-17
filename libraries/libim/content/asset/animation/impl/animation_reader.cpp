@@ -61,16 +61,16 @@ void parseKeyframes(TextResourceReader& rr, Animation& anim)
     anim.setNodes(std::move(nodes));
 }
 
-
-Animation& Animation::deserialize(TextResourceReader& rr)
+Animation libim::content::asset::keyLoad(text::TextResourceReader& rr)
 {
+    Animation anim;
     rr.assertSection(kResName_Header);
-    parseHeader(rr, *this);
+    parseHeader(rr, anim);
 
     auto section = rr.readSection();
     if(section == kResName_Markers)
     {
-        parseMarkers(rr, *this);
+        parseMarkers(rr, anim);
         rr.assertSection(kResName_KfNodes);
     }
     else if(section != kResName_KfNodes)
@@ -79,12 +79,12 @@ Animation& Animation::deserialize(TextResourceReader& rr)
         throw TokenizerError("expected section: KEYFRAME NODES"sv, rr.currentToken().location());
     }
 
-    parseKeyframes(rr, *this);
-    this->setName(getFilename(rr.istream().name()));
-    return *this;
+    parseKeyframes(rr, anim);
+    anim.setName(getFilename(rr.istream().name()));
+    return anim;
 }
 
-Animation& Animation::deserialize(TextResourceReader&& rr)
+Animation libim::content::asset::keyLoad(text::TextResourceReader&& rr)
 {
-    return deserialize(rr);
+    return keyLoad(rr);
 }

@@ -20,21 +20,21 @@ void test_anim_file(const std::filesystem::path& filePath)
         {
             InputFileStream fs(filePath);
             TextResourceReader rr(fs);
-            anim.deserialize(rr);
+            anim = keyLoad(rr);
         }
 
         // Write animation to file
         {
             OutputFileStream ofs(testFile, /*truncate=*/true);
             TextResourceWriter trw(ofs);
-            anim.serialize(trw);
+            keyWrite(anim, trw);
         }
 
         // Load written animation
         Animation anim2;
         {
             InputFileStream fs(testFile);
-            anim2.deserialize(TextResourceReader(fs));
+            anim2 = keyLoad(TextResourceReader(fs));
 
             fs.close();
             removeFile(testFile);

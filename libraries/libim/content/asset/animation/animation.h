@@ -39,7 +39,7 @@ namespace libim::content::asset {
 
         enum class Flag : uint32_t
         {
-            Loop                = 0x0, //*
+            Loop                = 0x0,
             PausesOnFirstFrame  = 0x1,
             DoesNotLoop         = 0x2,
             PausesOnLastFrame   = 0x4,
@@ -52,16 +52,6 @@ namespace libim::content::asset {
         };
 
         using Asset::Asset;
-
-        Animation(text::TextResourceReader& rr)
-        {
-            deserialize(rr);
-        }
-
-        Animation(text::TextResourceReader&& rr)
-        {
-            deserialize(std::move(rr));
-        }
 
         void setFlags(Flags<Flag> flags)
         {
@@ -138,12 +128,6 @@ namespace libim::content::asset {
             return type_;
         }
 
-        Animation& deserialize(text::TextResourceReader& rr);
-        Animation& deserialize(text::TextResourceReader&& rr);
-
-        void serialize(text::TextResourceWriter& rw, std::string_view headerComment = "") const;
-        void serialize(text::TextResourceWriter&& rw, std::string_view headerComment = "") const;
-
     private:
         Flags<Flag> flags_  = Flag::Loop;
         Type        type_   = Unknown;
@@ -154,5 +138,29 @@ namespace libim::content::asset {
         std::vector<KeyMarker> markers_;
         std::vector<KeyNode> nodes_;
     };
+
+    /**
+     * Loads Animation from KEY text format from TextResourceReader
+     * @param rr - text resource reader to read Animation from
+    */
+    Animation keyLoad(text::TextResourceReader& rr);
+    Animation keyLoad(text::TextResourceReader&& rr);
+
+    /**
+     * Writes Animation to TextResourceWriter as KEY text format
+     * @param anim - Animation to write
+     * @param rw   - text resource writer to write anim to
+     * @param headerComments - (optional) additional header comments to write to KEY file
+     *
+    */
+    void keyWrite(const Animation& anim,
+        text::TextResourceWriter& rw,
+        const std::vector<std::string>& headerComments = {}
+    );
+
+    void keyWrite(const Animation& anim,
+        text::TextResourceWriter&& rw,
+        const std::vector<std::string>& headerComments = {}
+    );
 }
 #endif // LIBIM_ANIMATION_H

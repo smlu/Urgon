@@ -9,12 +9,14 @@ using namespace libim::content::text;
 
 constexpr static std::size_t vecIndent = 4;
 
-void writeHeader(TextResourceWriter& rw, const Animation& anim, std::string_view headerComment)
+void writeHeader(TextResourceWriter& rw, const Animation& anim, const std::vector<std::string>& headerComments)
 {
-    if(!headerComment.empty())
+    if(!headerComments.empty())
     {
-        rw.writeCommentLine(headerComment)
-          .writeEol();
+        for (const auto& comment : headerComments) {
+            rw.writeCommentLine(comment);
+        }
+        rw.writeEol();
     }
 
     rw.writeSection(kResName_Header)
@@ -91,14 +93,14 @@ void writeKeyframes(TextResourceWriter& rw, const Animation& anim)
       });
 }
 
-void Animation::serialize(TextResourceWriter& rw, std::string_view headerComment) const
+void libim::content::asset::keyWrite(const Animation& anim, text::TextResourceWriter& rw, const std::vector<std::string>& headerComments)
 {
-    writeHeader(rw, *this, headerComment);
-    writeMarkers(rw, *this);
-    writeKeyframes(rw, *this);
+    writeHeader(rw, anim, headerComments);
+    writeMarkers(rw, anim);
+    writeKeyframes(rw, anim);
 }
 
-void Animation::serialize(TextResourceWriter&& rw, std::string_view headerComment) const
+void libim::content::asset::keyWrite(const Animation& anim, text::TextResourceWriter&& rw, const std::vector<std::string>& headerComments)
 {
-    serialize(rw, headerComment);
+    keyWrite(anim, rw, headerComments);
 }

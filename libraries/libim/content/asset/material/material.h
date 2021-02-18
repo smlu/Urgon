@@ -27,27 +27,11 @@ namespace libim::content::asset {
     public:
         using Asset::Asset;
 
-        Material(const InputStream& istream)
-        {
-            deserialize(istream);
-        }
-
-        Material(InputStream&& istream)
-        {
-            deserialize(std::move(istream));
-        }
-
         Material(const Material&) = default;
         Material(Material&&) noexcept = default;
         Material& operator = (const Material&) = default;
         Material& operator = (Material&&) noexcept = default;
         virtual ~Material() override = default;
-
-
-        Material& deserialize(const InputStream& istream);
-        Material& deserialize(InputStream&& istream);
-        bool serialize(OutputStream&& ostream) const;
-        bool serialize(OutputStream& ostream) const;
 
         /**
          * Returns texture width of material cells.
@@ -162,6 +146,42 @@ namespace libim::content::asset {
         std::size_t celIdx_ = 0; // default cel
         std::vector<Texture> cells_;
     };
+
+    /**
+     * Loads Material as MAT file format from input stream.
+     * @param istream - input stream to read Material from
+     * @return Material
+     * @throw StreamError   - if invalid MAT file in the istream
+     *        MaterialError - if textures stored in MAT file are invalid i.e. either not the same size or don't have the same mip level.
+     */
+    Material matLoad(const InputStream& istream);
+
+    /**
+     * Loads Material from MAT file format.
+     * @param istream - input rvalue stream to read Material from
+     * @return Material
+     * @throw StreamError   - if invalid MAT file in the istream
+     *        MaterialError - if textures stored in MAT file are invalid i.e. either not the same size or don't have the same mip level.
+     */
+    Material matLoad(InputStream&& istream);
+
+    /**
+     * Writes Material as MAT file format to output stream.
+     * @param mat - Material to write to ostream
+     * @param ostream - output stream reference to write Material to
+     * @return true if writting took place, otherwise false
+     * @throw StreamError if error has occur while writting Material to stream.
+     */
+    bool matWrite(const Material& mat, OutputStream&& ostream);
+
+    /**
+     * Writes Material as MAT file format to output stream.
+     * @param mat - Material to write to ostream
+     * @param ostream - output rvalue stream reference to write Material to
+     * @return true if writting took place, otherwise false
+     * @throw StreamError if error has occur while writting Material to stream.
+     */
+    bool matWrite(const Material& mat, OutputStream& ostream);
 }
 
 #endif // LIBIM_MATERIAL_H

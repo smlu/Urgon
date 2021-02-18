@@ -20,12 +20,15 @@ using namespace libim;
 using namespace libim::content::asset;
 
 
-Material& Material::deserialize(InputStream&& istream)
+    Material& matLoad(const InputStream& istream);
+    Material& matLoad(InputStream&& istream);
+
+Material libim::content::asset::matLoad(InputStream&& istream)
 {
-    return deserialize(istream);
+    return matLoad(istream);
 }
 
-Material& Material::deserialize(const InputStream& istream)
+Material libim::content::asset::matLoad(const InputStream& istream)
 {
     /* Read header */
     auto header = istream.read<MatHeader>();
@@ -61,6 +64,7 @@ Material& Material::deserialize(const InputStream& istream)
     );
 
     /* Read textures */
+    Material mat;
     const auto celCount = safe_cast<std::size_t>(header.celCount);
     for (std::size_t i = 0; i < celCount; i++)
     {
@@ -71,27 +75,27 @@ Material& Material::deserialize(const InputStream& istream)
             safe_cast<uint32_t>(texHeader.mipLevels),
             header.colorInfo
         );
-        this->addCel(std::move(tex));
+        mat.addCel(std::move(tex));
     }
 
-    this->setName(getFilename(istream.name()));
-    return *this;
+    mat.setName(getFilename(istream.name()));
+    return mat;
 }
 
 
-bool Material::serialize(OutputStream&& ostream) const
+bool libim::content::asset::matWrite(const Material& mat, OutputStream&& ostream)
 {
-    return serialize(ostream);
+    return matWrite(mat, ostream);
 }
 
-bool Material::serialize(OutputStream& ostream) const
+bool libim::content::asset::matWrite(const Material& mat, OutputStream& ostream)
 {
-    if (cells().empty()) {
+    if (mat.cells().empty()) {
         return false;
     }
 
     /* Write MAT header to file */
-    int32_t celCount = safe_cast<int32_t>(count());
+    int32_t celCount = safe_cast<int32_t>(mat.count());
 
     MatHeader header{};
     header.magic        = MAT_FILE_SIG;
@@ -99,7 +103,7 @@ bool Material::serialize(OutputStream& ostream) const
     header.type         = MAT_TEXTURE_TYPE;
     header.recordCount  = celCount;
     header.celCount     = celCount;
-    header.colorInfo    = format();
+    header.colorInfo    = mat.format();
 
     ostream.write(header);
 
@@ -115,7 +119,7 @@ bool Material::serialize(OutputStream& ostream) const
 
     /* Write textures to stream */
     MatTextureHeader texHeader {};
-    for (const auto& tex : cells())
+    for (const auto& tex : mat.cells())
     {
         /* Write texture header & mipmap pixdata to stream */
         texHeader.width     = safe_cast<int32_t>(tex.width());

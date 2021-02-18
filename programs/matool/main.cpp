@@ -402,7 +402,7 @@ int execCmdCreateBatch(const MatoolArgs& args)
             }
 
             /* Load Material and verify found images*/
-            const auto refMat = Material(InputFileStream(itMat->second));
+            const auto refMat = matLoad(InputFileStream(itMat->second));
             if (refMat.isEmpty())
             {
                 std::cerr << "\r";
@@ -454,7 +454,7 @@ int execCmdCreateBatch(const MatoolArgs& args)
 
             /* Save to file */
             makePath(outPath);
-            mat.serialize(OutputFileStream(outPath, /*truncate=*/true));
+            matWrite(mat, OutputFileStream(outPath, /*truncate=*/true));
         }
 
         std::cout << "\nGenerating... FINISHED\n";
@@ -510,11 +510,10 @@ int execCmdCreate(const MatoolArgs& args)
         if (outPath.empty()) {
             outPath = mat.name();
         }
+
         makePath(outPath);
-
-        mat.serialize(OutputFileStream(outPath, /*truncate=*/true));
+        matWrite(mat, OutputFileStream(outPath, /*truncate=*/true));
         std::cout << kSuccess << std::endl;
-
         if (hasOptVerbose(args)) {
             matPrintInfo(mat);
         }
@@ -589,7 +588,7 @@ int execCmdExtract(const MatoolArgs& args)
         if (!bVerbose) std::cout << "Extracting... " << std::flush;
         for (const auto [idx, file] : enumerate(matFiles))
         {
-            auto mat = Material(InputFileStream(file));
+            auto mat = matLoad(InputFileStream(file));
             const uint64_t numImgs = min<std::size_t>(maxCelCount, mat.count());
             if (bVerbose) {
                 std::cout << "Extracting " << numImgs << " image(s) from file: "
@@ -632,7 +631,7 @@ int execCmdInfo(const MatoolArgs& args)
             return 1;
         }
 
-        auto mat = Material(InputFileStream(inputFile));
+        auto mat = matLoad(InputFileStream(inputFile));
         matPrintInfo(mat);
         return 0;
     }
@@ -683,7 +682,7 @@ int execCmdModify(const MatoolArgs& args)
 
         std::cout << "Updating... " << std::flush;
 
-        auto imat = Material(InputFileStream(inputFile));
+        auto imat = matLoad(InputFileStream(inputFile));
         auto omat = Material(imat.name());
         for (auto tex : imat.cells())
         {
@@ -701,7 +700,7 @@ int execCmdModify(const MatoolArgs& args)
             omat.addCel(std::move(tex));
         }
 
-        omat.serialize(OutputFileStream(inputFile));
+        matWrite(omat, OutputFileStream(inputFile));
         std::cout << kSuccess << std::endl;
         return 0;
     }

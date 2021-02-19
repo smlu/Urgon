@@ -78,24 +78,24 @@ constexpr static auto kSuccess = "SUCCESS"sv;
 
 struct ExtractOptions final
 {
-    bool verboseOutput;
+    bool verboseOutput = false;
     struct {
-        bool extract;
+        bool extract = false;
     } key;
 
     struct
     {
-        bool extract;
-        bool convertToBmp;
-        bool convertToPng;
+        bool extract = false;
+        bool convertToBmp = false;
+        bool convertToPng = false;
         std::optional<uint64_t> maxTex;
-        bool convertMipMap;
+        bool convertMipMap = false;
     } mat;
 
     struct
     {
-        bool extract;
-        bool convertToWav;
+        bool extract = false;
+        bool convertToWav = false;
     } sound;
 };
 
@@ -321,7 +321,7 @@ int execCmdAddAnimation(const CndToolArgs& args)
 {
     bool success = execCmdAddAssets<Animation>(args, kExtKey,
         [](const auto& istream){
-            return Animation(TextResourceReader(istream));
+            return keyLoad(TextResourceReader(istream));
         },
         [](const auto& istream){
             return CND::readKeyframes(istream);
@@ -338,7 +338,7 @@ int execCmdAddMaterial(const CndToolArgs& args)
 {
     bool success = execCmdAddAssets<Material>(args, kExtMat,
         [](const auto& istream){
-            return Material(istream);
+            return matLoad(istream);
         },
         [](const auto& istream){
             return CND::readMaterials(istream);
@@ -369,6 +369,138 @@ int execCmdAdd(std::string_view scmd, const CndToolArgs& args)
 
     printHelp(cmdAdd);
     return 1;
+}
+
+void writeAnimations(const HashMap<Animation> animations, const fs::path& outDir, const std::string& cndName, const ExtractOptions& opt)
+{
+    if (animations.isEmpty()) return;
+
+    auto keyDir = outDir / "key";
+    makePath(keyDir);
+
+    /* Save extracted animations to file */
+    const std::vector<std::string> headerComments = [&]() {
+        std::vector<std::string> cmt;
+        cmt.emplace_back("Extracted from CND file '"s + cndName + "' with " +
+            std::string(kProgramName) + " v" + std::string(kVersion)
+        );
+        cmt.emplace_back(kProgramUrl);
+        return cmt;
+    }();
+
+    for(const auto[idx, anim] : enumerate(animations))
+    {
+        if (opt.verboseOutput){
+            std::cout << "Extracting animation: " << anim.name() << std::endl;
+        }
+        else {
+            printProgress("Extracting animations... ", idx, animations.size());
+        }
+
+        fs::path keyFilePath = keyDir / anim.name();
+        OutputFileStream ofs(std::move(keyFilePath), /*truncate=*/true);
+        keyWrite(anim, TextResourceWriter(ofs), headerComments);
+    }
+
+    if (!opt.verboseOutput) std::cout << "\rExtracting animations... " << kSuccess << std::endl;
+}
+
+void writeMaterials(const HashMap<Material>& materials, const fs::path& outDir, const ExtractOptions& opt)
+{
+    if (materials.isEmpty()) return;
+
+    const fs::path matDir = outDir / "mat";
+    makePath(matDir);
+
+    fs::path bmpDir;
+    if (opt.mat.convertToBmp)
+    {
+        bmpDir = outDir / "bmp";
+        makePath(bmpDir);
+    }
+
+    fs::path pngDir;
+    if (opt.mat.convertToPng)
+    {
+        pngDir = outDir / "png";
+        makePath(pngDir);
+    }
+
+
+    /* Save extracted materials to persistent storage */
+    const bool convert = opt.mat.convertToBmp || opt.mat.convertToPng;
+    if (convert && opt.mat.maxTex && *opt.mat.maxTex == 0) {
+        std::cout << "Warning: Materials won't be converted because option '" << optMaxTex << "' is 0!\n";
+    }
+
+    for (const auto[idx, mat] : enumerate(materials))
+    {
+        if (opt.verboseOutput)
+        {
+            std::cout << "\nExtracting material: " <<  mat.name() << std::endl;
+            matool::matPrintInfo(mat);
+        }
+        else {
+            printProgress("Extracting materials... ", idx + 1, materials.size());
+        }
+
+        /* Save MAT file to disk */
+        const auto outMatFile = matDir / mat.name();
+        matWrite(mat, OutputFileStream(outMatFile, /*truncate=*/true));
+
+        /* Extract images from MAT file and save them to disk */
+        if (convert)
+        {
+            if (opt.mat.convertToBmp) {
+                matool::matExtractImages(mat, bmpDir, opt.mat.maxTex, opt.mat.convertMipMap, /*extractAsBmp*/true);
+            }
+            if (opt.mat.convertToPng) {
+                matool::matExtractImages(mat, pngDir, opt.mat.maxTex, opt.mat.convertMipMap);
+            }
+        }
+    }
+
+    if (!opt.verboseOutput) std::cout << "\rExtracting materials... " << kSuccess << std::endl;
+}
+
+void writeSounds(const HashMap<Sound>& sounds, const fs::path& outDir, const ExtractOptions& opt)
+{
+    if (sounds.isEmpty()) return;
+    if (!opt.verboseOutput) printProgress("Extracting sounds... ", 0, 1);
+
+    fs::path outPath = outDir / "sound";
+    makePath(outPath);
+
+    fs::path wavDir;
+    if (opt.sound.convertToWav)
+    {
+        wavDir = outDir / "wav";
+        makePath(wavDir);
+    }
+
+    for (const auto[idx, s] : enumerate(sounds))
+    {
+        if (opt.verboseOutput) {
+            std::cout << "Extracting sound: " << s.name() << std::endl;
+        }
+        else {
+            printProgress("Extracting sounds... ", idx + 1, sounds.size());
+        }
+
+        OutputFileStream ofs(outPath.append(s.name()), /*truncate=*/true);
+        s.serialize(ofs, Sound::SerializeFormat::IndyWV);
+        outPath = outPath.parent_path();
+
+        /* Save in WAV format */
+        if (opt.sound.convertToWav)
+        {
+            OutputFileStream ofs(wavDir.append(s.name()), /*truncate=*/true);
+            s.serialize(ofs, Sound::SerializeFormat::WAV);
+            wavDir = wavDir.parent_path();
+        }
+    }
+
+    if (!opt.verboseOutput) std::cout << "\rExtracting sounds... " << kSuccess << std::endl;
 }
 
 int execCmdConvertToObj(const CndToolArgs& args)
@@ -439,41 +571,15 @@ std::size_t extractAnimations(const InputStream& istream, const fs::path& outDir
     }
 
     if (!opt.verboseOutput) printProgress("Extracting animations... ", 1, 0);
-    auto mapAnimations = CND::readKeyframes(istream);
-
-    fs::path keyDir;
-    if (!mapAnimations.isEmpty())
+    auto animations = CND::readKeyframes(istream);
+    if (!animations.isEmpty())
     {
         if (opt.verboseOutput) {
-            std::cout << "\nFound: " << mapAnimations.size() << std::endl;
+            std::cout << "\nFound: " << animations.size() << std::endl;
         }
-
-        keyDir = outDir / "key";
-        makePath(keyDir);
+        writeAnimations(animations, outDir, istream.name(), opt);
     }
-
-    /* Save extracted animations to file */
-    const std::string keyHeaderComment = [&]() {
-        return "Extracted from CND file '"s + istream.name() + "' with " +
-            std::string(kProgramName) + " v" + std::string(kVersion);
-    }();
-
-    for(const auto[idx, key] : enumerate(mapAnimations))
-    {
-        if (opt.verboseOutput){
-            std::cout << "Extracting animation: " << key.name() << std::endl;
-        }
-        else {
-            printProgress("Extracting animations... ", idx, mapAnimations.size());
-        }
-
-        fs::path keyFilePath = keyDir / key.name();
-        OutputFileStream ofs(std::move(keyFilePath), /*truncate=*/true);
-        key.serialize(TextResourceWriter(ofs), keyHeaderComment);
-    }
-
-    if (!opt.verboseOutput) std::cout << "\rExtracting animations... " << kSuccess << std::endl;
-    return mapAnimations.size();
+    return animations.size();
 }
 
 std::size_t extractMaterials(const InputStream& istream, const fs::path& outDir, const ExtractOptions& opt)
@@ -483,67 +589,15 @@ std::size_t extractMaterials(const InputStream& istream, const fs::path& outDir,
     }
 
     if (!opt.verboseOutput) printProgress("Extracting materials... ", 0, 1);
-    auto materials = CND::readMaterials(istream);
 
-    fs::path matDir;
-    fs::path bmpDir;
-    fs::path pngDir;
+    auto materials = CND::readMaterials(istream);
     if (!materials.isEmpty())
     {
         if (opt.verboseOutput) {
             std:: cout << " Found: " << materials.size() << std::endl;
         }
-
-        matDir = outDir / "mat";
-        makePath(matDir);
-
-        if (opt.mat.convertToBmp)
-        {
-            bmpDir = outDir / "bmp";
-            makePath(bmpDir);
-        }
-
-        if (opt.mat.convertToPng)
-        {
-            pngDir = outDir / "png";
-            makePath(pngDir);
-        }
+        writeMaterials(materials, outDir, opt);
     }
-
-    /* Save extracted materials to persistent storage */
-    const bool convert    = opt.mat.convertToBmp || opt.mat.convertToPng;
-    if (convert && opt.mat.maxTex && *opt.mat.maxTex == 0) {
-        std::cout << "Warning: Materials won't be converted because option '" << optMaxTex << "' is 0!\n";
-    }
-
-    for (const auto[idx, mat] : enumerate(materials))
-    {
-        if (opt.verboseOutput)
-        {
-            std::cout << "\nExtracting material: " <<  mat.name() << std::endl;
-            matool::matPrintInfo(mat);
-        }
-        else {
-            printProgress("Extracting materials... ", idx + 1, materials.size());
-        }
-
-        /* Save MAT file to disk */
-        const auto outMatFile = matDir / mat.name();
-        mat.serialize(OutputFileStream(outMatFile, /*truncate=*/true));
-
-        /* Extract images from MAT file and save them to disk */
-        if (convert)
-        {
-            if (opt.mat.convertToBmp) {
-                matool::matExtractImages(mat, bmpDir, opt.mat.maxTex, opt.mat.convertMipMap, /*extractAsBmp*/true);
-            }
-            if (opt.mat.convertToPng) {
-                matool::matExtractImages(mat, pngDir, opt.mat.maxTex, opt.mat.convertMipMap);
-            }
-        }
-    }
-
-    if (!opt.verboseOutput) std::cout << "\rExtracting materials... " << kSuccess << std::endl;
     return materials.size();
 }
 
@@ -554,60 +608,26 @@ std::size_t extractSounds(const InputStream& istream, const fs::path& outDir, co
     }
 
     if (!opt.verboseOutput) printProgress("Extracting sounds... ", 0, 1);
+
     SoundBank sb(2);
     sb.importTrack(0, istream);
     auto& sounds = sb.getTrack(0);
-
-    fs::path outPath;
-    fs::path wavDir;
 
     if (!sounds.isEmpty())
     {
         if (opt.verboseOutput) {
             std::cout << "\nFound: " << sounds.size() << std::endl;
         }
-
-        outPath = outDir / "sound";
-        makePath(outPath);
-
-        if (opt.sound.convertToWav)
-        {
-            wavDir = outDir / "wav";
-            makePath(wavDir);
-        }
+        writeSounds(sounds, outDir, opt);
     }
-
-    for (const auto[idx, s] : enumerate(sounds))
-    {
-        if (opt.verboseOutput) {
-            std::cout << "Extracting sound: " << s.name() << std::endl;
-        }
-        else {
-            printProgress("Extracting sounds... ", idx + 1, sounds.size());
-        }
-
-        OutputFileStream ofs(outPath.append(s.name()), /*truncate=*/true);
-        s.serialize(ofs, Sound::SerializeFormat::IndyWV);
-        outPath = outPath.parent_path();
-
-        /* Save in WAV format */
-        if (opt.sound.convertToWav)
-        {
-            OutputFileStream ofs(wavDir.append(s.name()), /*truncate=*/true);
-            s.serialize(ofs, Sound::SerializeFormat::WAV);
-            wavDir = wavDir.parent_path();
-        }
-    }
-
-    if (!opt.verboseOutput) std::cout << "\rExtracting sounds... " << kSuccess << std::endl;
     return sounds.size();
 }
 
 void extractAssets(const fs::path& cndFile, const fs::path& outDir, const ExtractOptions& opt)
 {
     if (!opt.key.extract &&
-       !opt.mat.extract &&
-       !opt.sound.extract)
+        !opt.mat.extract &&
+        !opt.sound.extract)
     {
         std::cout << "Nothing to be done!\n";
         return;

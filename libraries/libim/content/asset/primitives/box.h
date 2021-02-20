@@ -5,11 +5,11 @@
 #include <vector>
 #include <tuple>
 
-#include "math.h"
-#include "size.h"
-#include "vector.h"
+#include <libim/math/math.h>
+#include <libim/math/size.h>
+#include <libim/math/vector.h>
 
-namespace libim {
+namespace libim::content::asset {
     template <typename T, std::size_t N> class Box
     {
         template <std::size_t m, std::size_t S, typename G>
@@ -21,26 +21,26 @@ namespace libim {
     public:
         using value_type = T;
 
-        Vector<T, N> v0, v1;
+        Vector<T, N> min, max;
 
         constexpr Box() {}
-        constexpr Box(const Vector<T, N>& v0, const Vector<T, N>& v1) :
-            v0(v0), v1(v1)
+        constexpr Box(const Vector<T, N>& min, const Vector<T, N>& max) :
+            min(min), max(max)
         {}
 
-        Box(const Vector<T, N>& v0, const Size<T, N>& sz) : v0(v0) {
-            std::transform(sz.begin(), sz.end(), v0.begin(), v1.begin(), std::plus<T>());
+        Box(const Vector<T, N>& min, const Size<T, N>& sz) : min(min) {
+            std::transform(sz.begin(), sz.end(), min.begin(), max.begin(), std::plus<T>());
         }
 
         constexpr bool isZero() const
         {
-            return v0.isZero() && v1.isZero();
+            return min.isZero() && max.isZero();
         }
 
         bool overlaps(const Box& b) const
         {
-            for(auto i0 = v0.begin(), i1 = v1.begin(), j0 = b.v0.begin(), j1 = b.v1.begin();
-                    i0 != v0.end();
+            for(auto i0 = min.begin(), i1 = max.begin(), j0 = b.min.begin(), j1 = b.max.begin();
+                    i0 != min.end();
                     ++i0, ++i1, ++j0, ++j1)
             {
                 if((*i0 < *j0 && *i1 < *j0) || (*i0 > *j1 && *i1 > *j1)) {
@@ -53,11 +53,11 @@ namespace libim {
 
         bool contains(const Vector<T, N>& v) const
         {
-            auto it = v0.begin();
-            auto jt = v1.begin();
+            auto it = min.begin();
+            auto jt = max.begin();
             auto rt = v.begin();
 
-            for(; it != v0.end(); ++it, ++jt, ++rt) {
+            for(; it != min.end(); ++it, ++jt, ++rt) {
                 if(*rt < *it || *rt > *jt) {
                     return false;
                 }
@@ -70,16 +70,16 @@ namespace libim {
         {
             Vector<T, N> nv0, nv1;
 
-            auto v0_it  = v0.begin();
-            auto v1_it  = v1.begin();
+            auto v0_it  = min.begin();
+            auto v1_it  = max.begin();
 
-            auto b0_it  = b.v0.begin();
-            auto b1_it  = b.v1.begin();
+            auto b0_it  = b.min.begin();
+            auto b1_it  = b.max.begin();
 
             auto nv0_it = nv0.begin();
             auto nv1_it = nv1.begin();
 
-            for(; v0_it != v0.end(); ++v0_it, ++v1_it, ++b0_it, ++b1_it, ++nv0_it, ++nv1_it)
+            for(; v0_it != min.end(); ++v0_it, ++v1_it, ++b0_it, ++b1_it, ++nv0_it, ++nv1_it)
             {
                 *nv0_it = max(*v0_it, *b0_it);
                 *nv1_it = min(*v1_it, *b1_it);
@@ -89,19 +89,19 @@ namespace libim {
         }
 
         Box operator+(const Vector<T, N>& v) const {
-            return box(v0 + v, v1 + v);
+            return box(min + v, max + v);
         }
 
         Box operator-(const Vector<T, N>& v) const {
-            return box(v0 - v, v1 - v);
+            return box(min - v, max - v);
         }
 
         bool operator==(const Box& b) const {
-            return v0 == b.v0 && v1 == b.v1;
+            return min == b.min && max == b.max;
         }
 
         bool operator!=(const Box& b) const {
-            return v0 != b.v0 || v1 != b.v1;
+            return min != b.min || max != b.max;
         }
     };
 
@@ -112,27 +112,27 @@ namespace libim {
 
 
     template <typename T, std::size_t N>
-    inline constexpr Box<T, N> makeBox(const Vector<T, N>& v0, const Vector<T, N>& v1) {
-        return Box<T, N>(v0, v1);
+    inline constexpr Box<T, N> makeBox(const Vector<T, N>& min, const Vector<T, N>& max) {
+        return Box<T, N>(min, max);
     }
 
     template <typename T, size_t N>
-    inline Box<T, N> makeBox(const Vector<T, N>& v0, const Size<T, N>& sz) {
-        return Box<T, N>(v0, sz);
+    inline Box<T, N> makeBox(const Vector<T, N>& min, const Size<T, N>& sz) {
+        return Box<T, N>(min, sz);
     }
 
     template <size_t m,  size_t n, typename T>
     std::tuple<T, T> getRange(const Box<T, n>& box)
     {
         static_assert(m < n, "box dimension out of bounds");
-        return std::make_tuple(std::get<m>(box.v0), std::get<m>(box.v1));
+        return std::make_tuple(std::get<m>(box.min), std::get<m>(box.max));
     }
 
     template <size_t m, size_t n, typename T>
     T getSize(const Box<T, n>& box)
     {
         static_assert(m < n, "box dimension out of bounds");
-        return std::get<m>(box.v1) - std::get<m>(box.v0);
+        return std::get<m>(box.max) - std::get<m>(box.min);
     }
 
 
@@ -145,10 +145,10 @@ namespace libim {
         struct isBox<T,
                 std::void_t<
                     typename T::value_type,
-                    decltype(std::declval<T>().v0),
-                    decltype(std::declval<T>().v1)>>
+                    decltype(std::declval<T>().min),
+                    decltype(std::declval<T>().max)>>
             : std::is_base_of<
-                Box<typename T::value_type, decltype(std::declval<T>().v0)::size()>,
+                Box<typename T::value_type, decltype(std::declval<T>().min)::size()>,
                 T
         > {};
     }

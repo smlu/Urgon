@@ -1,7 +1,7 @@
 #ifndef LIBIM_TEXT_RESOURCE_WRITER_H
 #define LIBIM_TEXT_RESOURCE_WRITER_H
 #include <libim/math/abstract_vector.h>
-#include <libim/math/box.h>
+#include <libim/content/asset/primitives/box.h>
 #include <libim/io/stream.h>
 #include <libim/utils/traits.h>
 #include <libim/utils/utils.h>
@@ -144,12 +144,12 @@ namespace libim::content::text {
         }
 
         template<typename T, std::size_t N>
-        TextResourceWriter& writeKeyValue(std::string_view key, const Box<T, N>& box, std::size_t indent = 0)
+        TextResourceWriter& writeKeyValue(std::string_view key, const asset::Box<T, N>& box, std::size_t indent = 0)
         {
             write(key);
             this->indent(indent);
-            writeVector(box.v0, 1);
-            writeVector(box.v1, 1);
+            writeVector(box.min, 1);
+            writeVector(box.max, 1);
             return writeEol();
         }
 

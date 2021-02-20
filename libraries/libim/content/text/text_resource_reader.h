@@ -2,7 +2,7 @@
 #define LIBIM_RESOURCE_READER_H
 #include <libim/log/log.h>
 #include <libim/math/abstract_vector.h>
-#include <libim/math/box.h>
+#include <libim/content/asset/primitives/box.h>
 #include <libim/text/tokenizer.h>
 #include <libim/utils/traits.h>
 #include <libim/utils/utils.h>
@@ -218,8 +218,8 @@ namespace libim::content::text {
             static_assert (isBox<DB>, "B must be of type Box");
 
             DB result;
-            result.v0 = readVector<decltype(result.v0)>();
-            result.v1 = readVector<decltype(result.v1)>();
+            result.min = readVector<decltype(result.min)>();
+            result.max = readVector<decltype(result.max)>();
             return result;
         }
 

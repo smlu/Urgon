@@ -1,7 +1,7 @@
 #ifndef LIBIM_SECTOR_H
 #define LIBIM_SECTOR_H
 #include <libim/content/audio/sound.h>
-#include <libim/math/box.h>
+#include <libim/content/asset/primitives/box.h>
 #include <libim/math/color.h>
 #include <libim/math/math.h>
 #include <libim/math/vector2.h>

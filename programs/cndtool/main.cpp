@@ -7,16 +7,23 @@
 #include <cmdutils/cmdutils.h>
 #include <matool/utils.h>
 
+#include <imfixes/cogscript_fixes.h>
+
 #include <libim/common.h>
 #include <libim/content/asset/animation/animation.h>
+#include <libim/content/asset/cog/cog.h>
+#include <libim/content/asset/cog/cogscript.h>
+#include <libim/content/asset/cog/impl/grammer/parse_utils.h>
 #include <libim/content/asset/material/material.h>
 #include <libim/content/asset/material/texture.h>
 #include <libim/content/asset/material/texture_view.h>
 #include <libim/content/asset/material/texutils.h>
 #include <libim/content/asset/world/impl/serialization/cnd/cnd.h>
+#include <libim/content/asset/world/impl/serialization/ndy/ndy.h>
 #include <libim/content/audio/soundbank.h>
 #include <libim/content/text/text_resource_writer.h>
 #include <libim/io/filestream.h>
+#include <libim/io/vfs.h>
 #include <libim/log/log.h>
 #include <libim/types/safe_cast.h>
 
@@ -30,6 +37,7 @@ using namespace cndtool;
 using namespace libim;
 using namespace libim::content::audio;
 using namespace libim::content::asset;
+using namespace libim::content::asset::impl;
 using namespace libim::content::text;
 
 using namespace std::string_literals;
@@ -49,6 +57,7 @@ constexpr static auto cmdHelp    = "help"sv;
 
 constexpr static auto scmdAnimation = "animation"sv;
 constexpr static auto scmdMaterial  = "material"sv;
+constexpr static auto scmdNdy       = "ndy"sv;
 constexpr static auto scmdObj       = "obj"sv;
 
 constexpr static auto optAnimations        = "--key"sv;
@@ -140,7 +149,18 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
     }
     else if (cmd == cmdConvert)
     {
-        if (subcmd == scmdObj)
+        if (subcmd == scmdNdy)
+        {
+            std::cout << "Convert CND to NDY file format." << std::endl << std::endl;
+            std::cout << "  Usage: cndtool convert ndy [options] <cnd-file-path> <cog-scripts-folder>" << std::endl << std::endl;
+            printOptionHeader();
+            printOption( optNoAnimations , ""               , "Don't extract animation assets"  );
+            printOption( optNoMaterials  , ""               , "Don't extract material assets"   );
+            printOption( optNoSounds     , ""               , "Don't extract sound assets"      );
+            printOption( optOutputDir    , optOutputDirShort, "Output folder"                   );
+            printOption( optVerbose      , optVerboseShort  , "Verbose printout to the console" );
+        }
+        else if (subcmd == scmdObj)
         {
             std::cout << "Extract level geometry from CND file and convert to Wavefront OBJ file format." << std::endl << std::endl;
             std::cout << "  Usage: cndtool convert obj [options] <cnd-file-path>" << std::endl << std::endl;
@@ -154,6 +174,7 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
             std::cout << "Convert CND level file to another format." << std::endl << std::endl;
             std::cout << "  Usage: cndtool convert <sub-command> " << std::endl << std::endl;
             printSubCommandHeader();
+            printSubCommand( scmdNdy, "Convert CND to NDY file format." );
             printSubCommand( scmdObj, "Extract level geometry and convert to Wavefront OBJ file format." );
         }
     }
@@ -210,7 +231,7 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
     }
     else
     {
-        std::cout << "\nCommand-line interface tool to extract and modify\ngame assets stored in a CND level file.\n\n";
+        std::cout << "Command-line interface tool to extract and modify\ngame assets stored in a CND level file.\n\n";
         std::cout << "  Usage: cndtool <command> [sub-command] [options]" << std::endl << std::endl;
         printCommandHeader();
         printCommand( cmdAdd    , "Add or replace game assets"                       );
@@ -364,7 +385,7 @@ int execCmdAdd(std::string_view scmd, const CndToolArgs& args)
         printError("Subcommand required!\n");
     }
     else {
-        printError("Unknown subcommand '%'!\n", scmd);
+        printError("Unknown subcommand '%'\n", scmd);
     }
 
     printHelp(cmdAdd);
@@ -503,7 +524,266 @@ void writeSounds(const HashMap<Sound>& sounds, const fs::path& outDir, const Ext
     if (!opt.verboseOutput) std::cout << "\rExtracting sounds... " << kSuccess << std::endl;
 }
 
-int execCmdConvertToObj(const CndToolArgs& args)
+[[nodiscard]] HashMap<SharedRef<CogScript>> loadCogScripts(const VirtualFileSystem& vfs, const std::vector<std::string>& scripts, bool bFixCogScripts)
+{
+    HashMap<SharedRef<CogScript>> stable;
+    stable.reserve(scripts.size());
+
+    for(const auto& sname : scripts)
+    {
+        auto optfs = vfs.findFile(fs::path("cog") / sname);
+        if (!optfs) {
+            if(optfs = vfs.findFile(sname); !optfs) {
+                throw std::runtime_error(std::string("Couldn't find cog script '" + sname + "'"));
+            }
+        }
+
+        stable.emplaceBack(
+            sname,
+            CogScript(
+                *optfs.value(),
+                /*load description*/true
+            )
+        );
+
+        if(bFixCogScripts) {
+            imfixes::fixCogScript((--stable.end())->get());
+        }
+    }
+    return stable;
+}
+
+void verifyCogsNonLocalRawInitValues(const std::vector<SharedRef<Cog>>& cogs)
+{
+    for (const auto [cidx, srCog]  : utils::enumerate(cogs)) {
+        for (const auto& sym : srCog->script->symbols) {
+            if (!sym.isLocal
+             && sym.vtable.contains(srCog->vtid)
+             && !is_valid_raw_init_value(sym.type, sym.vtable.at(srCog->vtid))) {
+                LOG_WARNING("verifyCogsNonLocalRawInitValues: In COG % invalid initial value for symbol '%' of type '%'", cidx, sym.name, sym.type);
+                throw std::runtime_error("Invalid initial COG symbol value of non-local symbol");
+            }
+        }
+    }
+}
+
+int convertToNdy(const CndToolArgs& args)
+{
+    fs::path ndyPath;
+    try
+    {
+        const fs::path cndPath = args.cndFile();
+        if (!fileExists(cndPath))
+        {
+            printErrorInvalidCnd(cndPath, cmdConvert, args.subcmd());
+            return 1;
+        }
+        else if (args.positionalArgs().empty()
+              || !isDirPath(args.positionalArgs().at(0)))
+        {
+            printError("% COG scripts folder path!\n", (args.positionalArgs().empty() ? "Missing" : "Invalid"));
+            printHelp(cmdConvert, args.subcmd());
+            return 1;
+        }
+        fs::path cogDir = args.positionalArgs().at(0);
+
+        fs::path outDir = getBaseName(cndPath.u8string());
+        if (args.hasArg(optOutputDirShort)){
+            outDir = args.arg(optOutputDirShort);
+        }
+        else if (args.hasArg(optOutputDir)){
+            outDir = args.arg(optOutputDir);
+        }
+
+        if (!isDirPath(outDir))
+        {
+            printError("Output path is not directory!\n");
+            return 1;
+        }
+
+        constexpr std::size_t total = 32;
+        constexpr auto progressTitle = "Converting to NDY ... "sv;
+        std::size_t progress = 0;
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        VirtualFileSystem vfs;
+        vfs.addSysFolder(cogDir);
+        if (!vfs.tryLoadGobContainer(cogDir / "cd1.gob")) {
+            vfs.tryLoadGobContainer(cogDir / "Resource\\cd1.gob");
+        }
+
+        if (!vfs.tryLoadGobContainer(cogDir / "cd2.gob")) {
+            vfs.tryLoadGobContainer(cogDir / "Resource\\cd2.gob");
+        }
+
+        LOG_DEBUG("Opening file stream and reading CND header of file %", cndPath);
+        InputFileStream icnds(cndPath);
+        auto header = CND::readHeader(icnds);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'Sounds' at offset: %", utils::to_string<16>(icnds.tell()));
+        SoundBank sb(1);
+        sb.importTrack(0, icnds);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'Materials' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto materials = CND::parseSection_Materials(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'GeoResource' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto geores = CND::parseSection_Georesource(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'Sectors' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto sectors = CND::parseSection_Sectors(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'AiClasses' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto aiclasses = CND::parseSection_AiClass(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'Models' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto modelNames = CND::parseSection_Models(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'Sprites' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto sprites = CND::parseSection_Sprites(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'Keyframes' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto keyframes = CND::parseSection_Keyframes(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'AnimClass' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto pupNames = CND::parseSection_AnimClass(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'SoundClass' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto sndNames = CND::parseSection_SoundClass(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'CogScripts' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto cogScriptNames = CND::parseSection_CogScripts(icnds, header);
+
+        LOG_DEBUG("Loading % cog scripts from VFS ...", utils::to_string(cogScriptNames.size()));
+        auto scripts = loadCogScripts(vfs, cogScriptNames, /*bFixCogScripts=*/true);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'Cogs' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto cogs = CND::parseSection_Cogs(icnds, header, scripts);
+
+        LOG_DEBUG("Verifying init symbol values for % cogs ...", utils::to_string(cogs.size()));
+        verifyCogsNonLocalRawInitValues(cogs);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'Templates' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto cndTemplates = CND::parseSection_Templates(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'Things' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto cndThings = CND::parseSection_Things(icnds, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Parsing CND section 'PVS' at offset: %", utils::to_string<16>(icnds.tell()));
+        auto pvs = CND::parseSection_PVS(icnds);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        // Write ndy file
+        ndyPath = outDir / "ndy" / cndPath.filename().replace_extension("ndy");
+        LOG_DEBUG("Creating output NDY file path %", ndyPath);
+        makePath(ndyPath);
+
+        LOG_DEBUG("Opening output NDY file %", ndyPath);
+        OutputFileStream osndy(ndyPath, /*truncate=*/true);
+        TextResourceWriter ndytw(osndy);
+
+        LOG_DEBUG("Writing NDY section 'Copyright' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Copyright(ndytw);
+        LOG_DEBUG("Writing NDY section 'Header' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Header(ndytw, header);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'Sounds' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Sounds(ndytw, header.numSounds, sb.getTrack(0));
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'Materials' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Materials(ndytw, materials);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'GeoResource' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Georesource(ndytw, geores);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'Sectors' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Sectors(ndytw, sectors);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'AiClass' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_AiClass(ndytw, header.sizeAiClasses, aiclasses);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'Models' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Models(ndytw, header.sizeModels, modelNames);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'Sprites' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Sprites(ndytw, header.sizeSprites, sprites);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'Keyframes' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Keyframes(ndytw, header.sizeKeyframes, keyframes);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'AnimClass' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_AnimClass(ndytw, header.sizePuppets, pupNames);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'SoundClass' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_SoundClass(ndytw, header.sizeSoundClasses, sndNames);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'CogScripts' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_CogScripts(ndytw, header.sizeCogScripts, cogScriptNames);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'Cogs' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Cogs(ndytw, header.sizeCogs, cogs);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'Templates' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Templates(ndytw, cndTemplates);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'Things' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_Things(ndytw, cndThings, cndTemplates);
+        if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
+
+        LOG_DEBUG("Writing NDY section 'PVS' at offset: %", utils::to_string<16>(osndy.tell()));
+        NDY::writeSection_PVS(ndytw, pvs, sectors);
+        if (!hasOptVerbose(args)) std::cout << "\r" << progressTitle << kSuccess << std::endl;
+
+        // Extract assets
+        ExtractOptions eopt{hasOptVerbose(args)};
+        eopt.key.extract   = !args.hasArg(optNoAnimations);
+        eopt.mat.extract   = !args.hasArg(optNoMaterials);
+        eopt.sound.extract = !args.hasArg(optNoSounds);
+
+        LOG_DEBUG("Extracting assets key:% mat:% sound:%", eopt.key.extract, eopt.mat.extract, eopt.sound.extract);
+        if (eopt.key.extract)   writeAnimations(keyframes, outDir, icnds.name(), eopt);
+        if (eopt.mat.extract)   writeMaterials(materials, outDir, eopt);
+        if (eopt.sound.extract) writeSounds(sb.getTrack(0), outDir, eopt);
+        return 0;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << std::endl;
+        printError("%", e.what());
+        return 1;
+    }
+}
+
+int convertToObj(const CndToolArgs& args)
 {
     try
     {
@@ -541,7 +821,7 @@ int execCmdConvertToObj(const CndToolArgs& args)
         std::cerr << std::endl;
         printError("Failed to convert level geometry to OBJ file format!");
         if (hasOptVerbose(args)) {
-            std::cerr << "       Reason: " << e.what() << std::endl;
+            std::cerr << "  Reason: " << e.what() << std::endl;
         }
         return 1;
     }
@@ -549,15 +829,18 @@ int execCmdConvertToObj(const CndToolArgs& args)
 
 int execCmdConvert(std::string_view scmd, const CndToolArgs& args)
 {
-    if (scmd == scmdObj) {
-        return execCmdConvertToObj(args);
+    if (scmd == scmdNdy) {
+        return convertToNdy(args);
+    }
+    else if (scmd == scmdObj) {
+        return convertToObj(args);
     }
 
     if (scmd.empty()) {
         printError("Subcommand required!\n");
     }
     else {
-        printError("Unknown subcommand '%'!\n", scmd);
+        printError("Unknown subcommand '%'\n", scmd);
     }
 
     printHelp(cmdConvert);
@@ -844,7 +1127,7 @@ int execCmdRemove(std::string_view scmd, const CndToolArgs& args)
         printError("Subcommand required!\n");
     }
     else {
-        printError("Unknown subcommand '%'!\n", scmd);
+        printError("Unknown subcommand '%'\n", scmd);
     }
 
     printHelp(cmdRemove);

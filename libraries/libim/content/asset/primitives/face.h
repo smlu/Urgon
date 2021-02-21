@@ -25,7 +25,7 @@ namespace libim::content::asset {
             TexClamp_x      = 0x04, // mapped texture is clamped in x instead of being repeated
             TexClamp_y      = 0x08, // mapped texture is clamped in y instead of being repeated
             TexScale        = 0x10, // 2x scales face texture
-            Translucent     = 0x20  // face is transparent
+            Translucent     = 0x20  // It could be that the depth buffer (ZWrite) is turned off for the polygon face
         };
 
         struct VertexIdx

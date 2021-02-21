@@ -7,7 +7,8 @@
 
 namespace libim::content::asset {
 
-    struct PathFrame final {
+    struct PathFrame final
+    {
         Vector3f pos;
         FRotator orient;
         std::string toString() const

@@ -11,7 +11,7 @@
 
 
 namespace libim::content::audio {
-    constexpr std::array<char, 4> kWvsmId = { 'W', 'V', 'S', 'M' };
+    constexpr std::array<char, 4> kWVSM = { 'W', 'V', 'S', 'M' };
     constexpr std::array<char, 6> kIndyWV = { 'I', 'N', 'D', 'Y', 'W', 'V' };
 
     PACKED(struct IndyWVFileHeader
@@ -74,9 +74,9 @@ namespace libim::content::audio {
                header.unknown2 == 0x1111 &&
                header.unknown3 == 0x64   &&
                header.unknown4 == 0x2222 &&
-               istream.peek<decltype(kWvsmId)>() == kWvsmId)
+               istream.peek<decltype(kWVSM)>() == kWVSM)
             {
-                istream.advance(kWvsmId.size());
+                istream.advance(kWVSM.size());
 
                 constexpr std::size_t nFrameSize = 4096;
                 for (std::size_t i = 0; i < infSize / nFrameSize; i++) {
@@ -98,15 +98,15 @@ namespace libim::content::audio {
     private:
         static void inflate_frame16(const InputStream& istream, std::size_t nFrameSize, OutputStream& dest)
         {
-            std::size_t nSemples = nFrameSize / 2;
-            if(nSemples == 0){
+            std::size_t nSamples = nFrameSize / 2;
+            if(nSamples == 0){
                 return;
             }
 
             [[maybe_unused]]auto unknown = istream.read<uint16_t>();
             const byte_t sampleExpander = istream.read<byte_t>();
-            const int16_t selo = sampleExpander & 0xF;
-            const int16_t sehi = sampleExpander >> 4;
+            const int16_t salo = sampleExpander & 0xF;
+            const int16_t sahi = sampleExpander >> 4;
 
             auto get_sample = [&](int16_t expander) -> int16_t
             {
@@ -122,11 +122,11 @@ namespace libim::content::audio {
                 return val;
             };
 
-            for(std::size_t i = 0; i < nSemples; i += 2)
+            for(std::size_t i = 0; i < nSamples; i += 2)
             {
-                dest << get_sample(sehi);
-                if( i + 1 >= nSemples) return;
-                dest << get_sample(selo);
+                dest << get_sample(sahi);
+                if( i + 1 >= nSamples) return;
+                dest << get_sample(salo);
             }
         }
     };

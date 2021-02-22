@@ -11,18 +11,12 @@ namespace libim::content::audio {
     class Sound
     {
     public:
-        enum class SerializeFormat {
-            WAV    = 1,
-            IndyWV = 2
-        };
-
         Sound() = default;
         Sound(std::weak_ptr<ByteArray> wptrBankData, std::size_t dirNameOffset, std::size_t nameOffset, std::size_t dataOffset, std::size_t dataSize);
         Sound(Sound&&) noexcept = default;
         Sound& operator =(Sound&&) noexcept = default;
         Sound(const Sound&) = default;
         Sound& operator =(const Sound&) = default;
-
 
         std::string_view name() const;
 
@@ -88,11 +82,6 @@ namespace libim::content::audio {
 
         bool isValid() const;
 
-        //Sound& deserialize(const InputStream& istream);
-        //Sound& deserialize(const InputStream&& istream);
-        void serialize(OutputStream&& ostream, SerializeFormat format = SerializeFormat::WAV) const;
-        void serialize(OutputStream& ostream, SerializeFormat format = SerializeFormat::WAV) const;
-
     private:
         std::shared_ptr<ByteArray> lockOrThrow() const;
         bool isValid(const ByteArray& data) const;
@@ -111,7 +100,18 @@ namespace libim::content::audio {
         bool isIndyWVFormat_;
 
         std::weak_ptr<ByteArray> wptrData_;
+
+        friend void wavWrite(OutputStream& ostream, const Sound& sound);
+        friend void wavWrite(OutputStream&& ostream, const Sound& sound);
+        friend void iwvWrite(OutputStream& ostream, const Sound& sound);
+        friend void iwvWrite(OutputStream&& ostream, const Sound& sound);
     };
+
+    void wavWrite(OutputStream& ostream, const Sound& sound);
+    void wavWrite(OutputStream&& ostream, const Sound& sound);
+
+    void iwvWrite(OutputStream& ostream, const Sound& sound);
+    void iwvWrite(OutputStream&& ostream, const Sound& sound);
 }
 
 

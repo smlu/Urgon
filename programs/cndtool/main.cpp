@@ -509,14 +509,14 @@ void writeSounds(const HashMap<Sound>& sounds, const fs::path& outDir, const Ext
         }
 
         OutputFileStream ofs(outPath.append(s.name()), /*truncate=*/true);
-        s.serialize(ofs, Sound::SerializeFormat::IndyWV);
+        iwvWrite(ofs, s);
         outPath = outPath.parent_path();
 
         /* Save in WAV format */
         if (opt.sound.convertToWav)
         {
             OutputFileStream ofs(wavDir.append(s.name()), /*truncate=*/true);
-            s.serialize(ofs, Sound::SerializeFormat::WAV);
+            wavWrite(ofs, s);
             wavDir = wavDir.parent_path();
         }
     }

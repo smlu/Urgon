@@ -51,46 +51,6 @@ bool Sound::isValid(const ByteArray& data) const
         numChannels_   > 0;
 }
 
-//Sound& Sound::deserialize(const InputStream& istream)
-//{
-//    return *this;
-//}
-
-//Sound& Sound::deserialize(const InputStream&& istream)
-//{
-
-//    return *this;
-//}
-
-void Sound::serialize(OutputStream&& ostream, SerializeFormat format) const
-{
-    serialize(ostream, format);
-}
-
-void Sound::serialize(OutputStream& ostream, SerializeFormat format) const
-{
-    switch (format) {
-        case SerializeFormat::WAV:
-        {
-            auto data = this->data();
-            if(data.empty() && dataSize_ > 0) {
-                std::logic_error("Cannot serialize invalid sound object as WAV");
-            }
-            soundSerializeAsWAV(ostream, numChannels_, sampleRate_, bitsPerSample_, std::move(data));
-        } break;
-        case SerializeFormat::IndyWV:
-        {
-            auto ptrData = lockOrThrow();
-            if(!isValid(*ptrData) || !isIndyWVFormat_) { // TODO: implement converting of data to indyWV format
-                std::logic_error("Cannot serialize invalid sound object as IndyWV");
-            }
-            soundSerializeAsIndyWV(ostream, numChannels_, sampleRate_, bitsPerSample_, ptrData, dataOffset_, dataSize_);
-        } break;
-        default:
-            std::logic_error("Cannot serialize sound, unknown serialization format");
-    }
-}
-
 ByteArray Sound::data() const
 {
     // Returns decompressed sound data.
@@ -113,4 +73,32 @@ ByteArray Sound::data() const
     }
 
     return bytes;
+}
+
+void libim::content::audio::wavWrite(OutputStream& ostream, const Sound& sound)
+{
+    auto data = sound.data();
+    if(data.empty() && sound.dataSize_ > 0) {
+        throw StreamError("Cannot write invalid sound to stream as WAV");
+    }
+    soundSerializeAsWAV(ostream, sound.channels(), sound.sampleRate(), sound.bitsPerSample(), std::move(data));
+}
+
+void libim::content::audio::wavWrite(OutputStream&& ostream, const Sound& sound)
+{
+    wavWrite(ostream, sound);
+}
+
+void libim::content::audio::iwvWrite(OutputStream& ostream, const Sound& sound)
+{
+     auto ptrData = sound.lockOrThrow();
+    if(!sound.isValid(*ptrData) || !sound.isIndyWVFormat()) { // TODO: implement converting of data to indyWV format
+        throw StreamError("Cannot write invalid sound to stream as IndyWV");
+    }
+    soundSerializeAsIndyWV(ostream, sound.channels(), sound.sampleRate(), sound.bitsPerSample(), ptrData, sound.dataOffset_, sound.dataSize_);
+}
+
+void libim::content::audio::iwvWrite(OutputStream&& ostream, const Sound& sound)
+{
+    iwvWrite(ostream, sound);
 }

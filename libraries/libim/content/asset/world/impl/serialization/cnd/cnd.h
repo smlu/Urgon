@@ -134,11 +134,11 @@ namespace libim::content::asset {
         * Parses sounds section.
         * Offset of istream has to be at the beginning of sound section.
         *
-        * @param istream - const reference to the InputStream
-        * @param track   - const reference to the SbTrack
-        * @return Returns last sound file ID nonce
+        * @param istream     - const reference to the InputStream
+        * @param track       - const reference to the SbTrack
+        * @param fileIdNonce - the nonce which is used to generate the next fileID from
         */
-        static uint32_t parseSection_Sounds(const InputStream& istream, audio::impl::SbTrack& track);
+        static void parseSection_Sounds(const InputStream& istream, audio::impl::SbTrack& track, uint32_t& fileIdNonce);
 
         static std::size_t getOffset_Materials(const InputStream& istream);
         static HashMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.

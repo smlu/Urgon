@@ -63,7 +63,8 @@ bool SoundBank::importTrack(std::size_t trackIdx, const InputStream& istream)
     auto& track = ptrImpl_->vecTracks.at(trackIdx);
     if(fileExtMatch(istream.name(), ".cnd"sv))
     {
-        auto nonce = CND::parseSection_Sounds(istream, track);
+        uint32_t nonce = 0;
+        CND::parseSection_Sounds(istream, track, nonce);
         LOG_DEBUG("Imported % sounds to track: %", track.sounds.size(), trackIdx);
 
         if(nonce == 0 && !track.sounds.isEmpty()) {

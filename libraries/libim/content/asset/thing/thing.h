@@ -31,11 +31,11 @@ namespace libim::content::asset {
             EmitsLight              = 0x1,       // When set the Light property in sithThing is initialized
             Dead                    = 0x2,
             NoWeaponCollide         = 0x4,
-            WhipClimbable           = 0x8,       // on the WhipAim surface player can mount whip on thing and climb up the whip. e.g.: shs_whip.cog  Note: if sert, thing can't have flag WhipSwingable
+            WhipClimbable           = 0x8,       // on the WhipAim surface player can mount whip on thing and climb up the whip. e.g.: shs_whip.cog  Note: if set, thing can't have flag WhipSwingable
             Invisible               = 0x10,      // but touchable unlike hidden
             CanStandOn              = 0x40,      // nub_lightning.cog
             Mountable               = 0x80,      // pyr_fixminecar.cog, shs_barrel.cog
-            Unknown_100             = 0x100,     // Possible: something with invinsible player thing
+            Unknown_100             = 0x100,     // Possible: disable sending cog messages to linked cog script. In corelation with 0x400 flag
             Killed                  = 0x200,
             CogLinked               = 0x400,
             NoCrush                 = 0x800,

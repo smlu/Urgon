@@ -18,7 +18,7 @@ namespace libim::content::asset {
             AttachToThing           = 0x800,
             CloseProximityTrigger   = 0x1000,
             InstantImpact           = 0x2000,
-            Unknown_4000            = 0x4000,   // Could be: Weapon uses damage decay
+            DemageDecay             = 0x4000,   // Damage decays with time to minDamage.
             ObjectTrail             = 0x8000,   // Weapon will have trailthings created after it.
             Unknown_20000           = 0x20000,  // inf_turnerhunt.cog
             Unknown_40000           = 0x40000,

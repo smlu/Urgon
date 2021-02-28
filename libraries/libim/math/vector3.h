@@ -38,7 +38,7 @@ namespace libim {
 
         constexpr inline void setY(T y)
         {
-            set(0, y);
+            set(1, y);
         }
 
         constexpr inline T z() const

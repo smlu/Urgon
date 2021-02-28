@@ -35,7 +35,7 @@ std::shared_ptr<ByteArray> Sound::lockOrThrow() const
 {
     auto ptrData = wptrData_.lock();
     if(!ptrData) {
-        std::logic_error("Dead sound object");
+        throw std::logic_error("Dead sound object");
     }
     return ptrData;
 }

@@ -29,8 +29,8 @@ namespace libim {
         utils::ssprintf(ss, msg, args...);
         if(level <= LogLevel::Warning)
         {
-#ifndef NDEBUG
-        ss << "\nfile: '" << file << "':" << line << " ";
+#ifdef DEBUG
+            ss << "\nfile: '" << file << "':" << line << " ";
 #endif
             std::cerr << ss.str() << std::endl;
         } else {
@@ -39,9 +39,13 @@ namespace libim {
     }
 }
 
-
-#define LOG_WITH_LEVEL(l, ...) \
-    libim::writeLog(__FILE__, __LINE__, l, __VA_ARGS__)
+#ifdef DEBUG
+    #define LOG_WITH_LEVEL(l, ...) \
+        libim::writeLog(__FILE__, __LINE__, l, __VA_ARGS__)
+#else
+    #define LOG_WITH_LEVEL(l, ...) \
+        libim::writeLog("", 0, l, __VA_ARGS__)
+#endif
 
 #define LOG_VERBOSE(...) \
     LOG_WITH_LEVEL(libim::LogLevel::Verbose, __VA_ARGS__)

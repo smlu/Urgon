@@ -84,7 +84,10 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     endif()
 endif()
 
-add_definitions("-D__STDC_WANT_LIB_EXT1__=1")
+add_compile_options(
+    "-D__STDC_WANT_LIB_EXT1__=1"
+    "$<$<CONFIG:DEBUG>:-DDEBUG>"
+)
 
 add_subdirectory( ${PM_LIB_DIR}     )
 add_subdirectory( ${PM_PROGRAM_DIR} )

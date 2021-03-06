@@ -20,12 +20,14 @@ namespace libim::content::asset {
         enum Flag : uint32_t
         {
             Normal          = 0x00,
-            DoubleSided     = 0x01, // "disables" face backface culling
-            Transparent     = 0x02, // web surfaces has this flag set to make the transparent web image being correctly rendered
-            TexClamp_x      = 0x04, // mapped texture is clamped in x instead of being repeated
-            TexClamp_y      = 0x08, // mapped texture is clamped in y instead of being repeated
-            TexScale        = 0x10, // 2x scales face texture
-            Translucent     = 0x20  // It could be that the depth buffer (ZWrite) is turned off for the polygon face
+            DoubleSided     = 0x01, // Disables face backface culling.
+            Transparent     = 0x02, // Web surfaces has this flag set to make the transparent web image being correctly rendered.
+                                    // Could be alpha blend mode.
+
+            TexClamp_x      = 0x04, // Mapped texture is clamped in x instead of being repeated.
+            TexClamp_y      = 0x08, // Mapped texture is clamped in y instead of being repeated.
+            TexScale        = 0x10, // 2x scales face texture.
+            Translucent     = 0x20  // It could be that the depth buffer (ZWrite) is turned off for the polygon face.
         };
 
         struct VertexIdx

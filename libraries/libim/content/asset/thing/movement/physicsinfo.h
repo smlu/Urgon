@@ -26,13 +26,13 @@ namespace libim::content::asset {
             Unknown_8000                 = 0x8000,
             IsCrouching                  = 0x10000,
             DoNotRotateVelocity          = 0x20000,
-            PartialGravity               = 0x40000,   // half of world gravity
+            PartialGravity               = 0x40000,   // Half of world gravity
             Uknown_800000                = 0x800000,  // 11_pyr_kidvsindy_2.cog
             TreadingWater                = 0x100000,  // swimming in water?
             NotAffectedByThrust          = 0x400000,
-            MineCar                      = 0x1000000, // bab killtruck, sol mineplayer - minecar
-            Raft                         = 0x2000000, // mentioned in pru_lagoon.cog, 02_riv - raftplayer
-            Jeep                         = 0x4000000,
+            MineCar                      = 0x1000000, // Thing moves on the track surface as mine car. bab killtruck, sol mineplayer - minecar
+            Raft                         = 0x2000000, // Thing moves on the water surface as raft. mentioned in pru_lagoon.cog, 02_riv - raftplayer
+            Jeep                         = 0x4000000, // Thing moves as jeep/car.
             Unknown_40000000             = 0x40000000
         };
 

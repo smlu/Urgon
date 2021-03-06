@@ -27,7 +27,7 @@ namespace libim::content::asset {
             Unknown_1000000  = 0x1000000,   // 13_nub_cinematic_end.cog
             Unknown_8000000  = 0x8000000,   // player has this flag set (00_cyn - shirtplayer template, _cutactor)
             FlayerMove       = 0x10000000,  // actor_mophia.cog
-            ElectrictWhip    = 0x40000000
+            ElectricWhip     = 0x40000000
         };
     };
 }

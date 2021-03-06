@@ -8,7 +8,7 @@ project(
 configure_file(config.h.in config.h)
 
 set(MATOOL_SRC_FILES
-    "config.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/config.h"
     "main.cpp"
 )
 

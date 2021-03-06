@@ -8,7 +8,7 @@ project(
 configure_file(config.h.in config.h)
 
 set(CNDTOOL_SRC_FILES
-    "config.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/config.h"
     "cndtoolargs.h"
     "main.cpp"
     "obj.h"

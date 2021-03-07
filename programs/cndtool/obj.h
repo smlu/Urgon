@@ -29,6 +29,14 @@ namespace cndtool {
     constexpr std::string_view kUseMtlDefault           = "usemtl dflt";
     constexpr std::string_view kMapKdDefault            = "map_Kd png/dflt.png";
 
+    constexpr std::size_t kVertexIdxMaxDigits          = 5; // e.g.: 65535
+    constexpr std::size_t kUVIdxMaxDigits              = 5; // e.g.: 65535
+    constexpr std::size_t kMaxFaceVerticies            = 256;
+    constexpr std::size_t kFaceLineMaxChars            = 8 + 64 + // usemtl <name>\n
+                                                         4 +      // f\t\n<sp>
+                                                         // <max_vert>*<vidx/uvidx/vnidx><sp>
+                                                         kMaxFaceVerticies * (kVertexIdxMaxDigits + 1 + kUVIdxMaxDigits + 1 + kVertexIdxMaxDigits + 1);
+
     constexpr std::array<unsigned char, 334> kImgTransparentPng = {
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
         0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x08, 0x06, 0x00, 0x00, 0x00, 0x5c, 0x72, 0xa8,
@@ -190,7 +198,8 @@ namespace cndtool {
             std::vector<std::vector<Vector3f>> fnormals(geores.verts.size()); // face normals that share the same vertex
 
             std::vector<byte_t> fbuffer;
-            fbuffer.reserve(geores.surfaces.size() * (/*usemtl + name*/6 + 64 + /*f*/ 2 + 4 + 4 + 4));
+            fbuffer.reserve(geores.surfaces.size() * kFaceLineMaxChars);
+
             OutputBinaryStream<decltype(fbuffer)> bs(fbuffer);
             TextResourceWriter brw(bs);
             for (const auto& s : geores.surfaces)

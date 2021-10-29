@@ -35,7 +35,7 @@ namespace libim::content::asset {
             Scrolling                = 0x800,
             KillFloor                = 0x1000,     // Player dies if it touches the surface. e.g.: cyn_killfloor.cog
             Climbable                = 0x2000,
-            MineCarTrack             = 0x4000,     // Mine car track.
+            Track                    = 0x4000,     // Surface is part railroad track, e.g.: minecart track.
                                                    //  e.g.: sol_ramp.cog, sol_ctrllever5.cog, sol_ctrllever4.cog, sol_ctrllever3.cog,
                                                    //        sol_ctrllever2.cog, sol_ctrllever1.cog, sol_comfalls.cog, sol_comentrance.cog
 

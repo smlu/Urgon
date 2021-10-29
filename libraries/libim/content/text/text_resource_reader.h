@@ -215,7 +215,7 @@ namespace libim::content::text {
         template<typename B, typename DB = typename std::decay_t<B>>
         DB readBox()
         {
-            static_assert (isBox<DB>, "B must be of type Box");
+            static_assert(asset::isBox<DB>, "B must be of type Box");
 
             DB result;
             result.min = readVector<decltype(result.min)>();

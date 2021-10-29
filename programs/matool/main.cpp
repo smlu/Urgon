@@ -495,7 +495,7 @@ int execCmdCreate(const MatoolArgs& args)
         const auto& imgFiles = args.imageFiles();
         if (imgFiles.empty())
         {
-            printError("Missing position argument of image file paths!\n");
+            printError("Missing position argument for image file path or unsupported image file!\n");
             printHelp(cmdCreate);
             return 1;
         }

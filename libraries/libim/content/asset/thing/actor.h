@@ -10,6 +10,7 @@ namespace libim::content::asset {
         {
             None              = 0x00,
             Unknown_1         = 0x01,
+            UseLightIntensity = 0x04,        // Actor light intensity is used.
             Invulnerable      = 0x08,        // Actor won't be harmed by other things/physics.
             HeadIsCentered    = 0x10,
             ExplodeWhenKilled = 0x20,        // Actor explodes when killed.
@@ -27,10 +28,11 @@ namespace libim::content::asset {
             NoTarget          = 0x100000,    // Player won't aim at thing with this flag set. actor_floateraet.cog
             Disabled          = 0x200000,
             PlayerKilled      = 0x400000,    // Set in game engine.
-            Unknown_1000000   = 0x1000000,   // 13_nub_cinematic_end.cog
+            Unknown_1000000   = 0x1000000,   // 13_nub_cinematic_end.cog, 
             Unknown_8000000   = 0x8000000,   // Player has this flag set (00_cyn - shirtplayer template, _cutactor).
             FlayerMove        = 0x10000000,  // actor_mophia.cog
-            ElectricWhip      = 0x40000000
+            ElectricWhip      = 0x40000000,
+            Arachnid          = 0x80000000  // Spider, scorpion. Flag causes the gen_a4sprite_blood_grn.mat and +vulcansplort to be created when actor is shot. 
         };
     };
 }

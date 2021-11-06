@@ -217,28 +217,27 @@ namespace libim {
         T _read(tag<T>&&) const = delete;
 
         template<typename T>
-
         typename std::enable_if_t<std::is_trivially_copyable_v<T> == false, Stream>&
         _write(const T&, tag<T>&&) = delete;
 
         /* POD type specialization */
-        template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
+        template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && !std::is_pointer_v<T>, int> = 0>
         T _read(tag<T>&&) const;
 
-        template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
+        template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && !std::is_pointer_v<T>, int> = 0>
         Stream& _write(const T&, tag<T>&&);
 
         template<typename T, typename = std::enable_if_t<std::is_pointer_v<T>>>
         T _read(tag<T>&&) const
         {
-            static_assert(false, "Pointers can't be read from stream");
-            return *this;
+            static_assert(std::is_pointer_v<T> == false, "Pointers can't be read from stream");
+            return nullptr;
         }
 
         template<typename T, typename = std::enable_if_t<std::is_pointer_v<T>>>
         Stream& _write(const T&, tag<T>&&)
         {
-            static_assert(false, "Pointers can't be written to stream");
+            static_assert(std::is_pointer_v<T> == false, "Pointers can't be written to stream");
             return *this;
         }
 
@@ -317,7 +316,7 @@ namespace libim {
 
 
     /* Specialization of template member functions */
-    template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int>>
+    template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && !std::is_pointer_v<T>, int>>
     T Stream::_read(tag<T>&&) const
     {
         typename std::decay<T>::type pod{};
@@ -328,7 +327,7 @@ namespace libim {
         return pod;
     }
 
-    template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int>>
+    template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && !std::is_pointer_v<T>, int>>
     Stream& Stream::_write(const T& pod, tag<T>&&)
     {
         auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(std::addressof(pod)), sizeof(pod));

@@ -89,8 +89,8 @@ namespace libim {
         template <typename>
         friend class SharedRef;
         friend class WeakRef<DT>;
-        template<typename T, typename ... Args>
-        friend SharedRef<T> makeSharedRef(Args&& ...);
+        template<typename TT, typename ... Args>
+        friend SharedRef<TT> makeSharedRef(Args&& ...);
         SharedRef(std::shared_ptr<T>&& ptr) :
             ptr_(std::move(ptr))
         {

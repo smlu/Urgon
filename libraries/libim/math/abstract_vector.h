@@ -13,8 +13,10 @@
 
 namespace libim {
     struct math_vector_tag {};
+    
     template<typename Tag>
     constexpr bool isMathVectorTag = std::is_base_of_v<math_vector_tag, Tag>;
+
     template<typename Tag>
     using requireMathVectorTag = std::enable_if_t<isMathVectorTag<Tag>>;
 
@@ -108,7 +110,7 @@ namespace libim {
             return res;
         }
 
-        template<typename = requireMathVectorTag<Tag>>
+        template<typename TTag = Tag, typename = requireMathVectorTag<TTag>>
         constexpr inline auto& operator += (const AbstractVector& rhs)
         {
             for (std::size_t i = 0; i < this->size(); i++) {
@@ -117,7 +119,7 @@ namespace libim {
             return *this;
         }
 
-        template<typename = requireMathVectorTag<Tag>>
+        template<typename TTag = Tag, typename = requireMathVectorTag<TTag>>
         constexpr inline auto& operator -= (const AbstractVector& rhs)
         {
             for (std::size_t i = 0; i < this->size(); i++) {
@@ -126,7 +128,7 @@ namespace libim {
             return *this;
         }
 
-        template<typename = requireMathVectorTag<Tag>>
+        template<typename TTag = Tag, typename = requireMathVectorTag<TTag>>
         constexpr inline auto& operator *= (const AbstractVector& rhs)
         {
             for (std::size_t i = 0; i < this->size(); i++) {
@@ -135,7 +137,7 @@ namespace libim {
             return *this;
         }
 
-        template<typename = requireMathVectorTag<Tag>>
+        template<typename TTag = Tag, typename = requireMathVectorTag<TTag>>
         constexpr inline auto& operator *= (float scalar)
         {
             for (float& c : *this) {
@@ -144,7 +146,7 @@ namespace libim {
             return *this;
         }
 
-        template<typename = requireMathVectorTag<Tag>>
+        template<typename TTag = Tag, typename = requireMathVectorTag<TTag>>
         constexpr inline auto& operator /= (const AbstractVector& rhs)
         {
             for (std::size_t i = 0; i < this->size(); i++) {
@@ -153,7 +155,7 @@ namespace libim {
             return *this;
         }
 
-        template<typename = requireMathVectorTag<Tag>>
+        template<typename TTag = Tag, typename = requireMathVectorTag<TTag>>
         constexpr inline auto& operator /= (float scalar)
         {
             const float	invScalar = 1.0f / scalar;
@@ -224,7 +226,7 @@ namespace libim {
 
     // Math operation definitions for math vector type
     template<typename MVT>
-    typename requireMathVector<MVT> operator + (const MVT& l, const MVT& r)
+    requireMathVector<MVT> operator + (const MVT& l, const MVT& r)
     {
         MVT rv;
         using F = typename MVT::value_type;
@@ -233,7 +235,7 @@ namespace libim {
     }
 
     template<typename MVT>
-    typename requireMathVector<MVT> operator - (const MVT& l, const MVT& r)
+    requireMathVector<MVT> operator - (const MVT& l, const MVT& r)
     {
         MVT rv;
         using F = typename MVT::value_type;
@@ -242,7 +244,7 @@ namespace libim {
     }
 
     template<typename MVT>
-    typename requireMathVector<MVT> operator * (typename MVT::value_type scalar, const MVT& v)
+    requireMathVector<MVT> operator * (typename MVT::value_type scalar, const MVT& v)
     {
         MVT rv;
         using F = typename MVT::value_type;
@@ -251,7 +253,7 @@ namespace libim {
     }
 
     template<typename MVT>
-    typename requireMathVector<MVT> operator * (const MVT& v, typename MVT::value_type scalar)
+    requireMathVector<MVT> operator * (const MVT& v, typename MVT::value_type scalar)
     {
         MVT rv;
         using F = typename MVT::value_type;
@@ -260,7 +262,7 @@ namespace libim {
     }
 
     template<typename MVT>
-    typename requireMathVector<MVT> operator / (const MVT& v, typename MVT::value_type scalar)
+    requireMathVector<MVT> operator / (const MVT& v, typename MVT::value_type scalar)
     {
         MVT rv;
         using F = typename MVT::value_type;
@@ -270,7 +272,7 @@ namespace libim {
     }
 
     template<typename MVT>
-    typename requireMathVector<MVT> operator - (const MVT& v)
+    requireMathVector<MVT> operator - (const MVT& v)
     {
         MVT rv;
         using F = typename MVT::value_type;

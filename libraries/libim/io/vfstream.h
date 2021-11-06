@@ -47,23 +47,23 @@ namespace libim {
             return pos_;
         }
 
-        virtual bool canRead() const
+        virtual bool canRead() const override
         {
             return true;
         }
 
-        virtual bool canWrite() const
+        virtual bool canWrite() const override
         {
             return false;
         }
 
-        virtual void flush()
+        virtual void flush() override
         {
             throw VirtualFileError("Flush not supported");
         }
 
     protected:
-        virtual std::size_t readsome(byte_t* data, std::size_t length) const
+        virtual std::size_t readsome(byte_t* data, std::size_t length) const override
         {
             if((tell() + length) > size_) {
                  throw VirtualFileError("Read beyond EOF");
@@ -74,7 +74,7 @@ namespace libim {
             return nRead;
         }
 
-        virtual std::size_t writesome(const byte_t* data, std::size_t length)
+        virtual std::size_t writesome(const byte_t* data, std::size_t length) override
         {
             throw VirtualFileError("Can't write into virtual file");
         }

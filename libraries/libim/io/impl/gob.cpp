@@ -19,13 +19,15 @@ static constexpr uint32_t           kGobFileVersion     = 0x14;
 static constexpr uint32_t           kGobFilePathMaxSize = 128;
 
 
-struct GobFileHeader {
+struct GobFileHeader
+{
     std::array<char,4> magic;
     uint32_t version         = 0;
     uint32_t directoryOffset = 0;
 };
 
-struct GobFileEntry {
+struct GobFileEntry
+{
     uint32_t offset = 0;
     uint32_t size   = 0;
     FixedString<kGobFilePathMaxSize> filePath;

@@ -21,7 +21,7 @@ namespace libim::content::asset {
             Boss              = 0x200,
             Deaf              = 0x400,       // Actor cannot hear other actors.
             Blind             = 0x800,       // Actor cannot see other actors.
-            Poisoned          = 0x2000,      // Actor was biten by snake, spider, scorpion etc. Shows death icon in player's HUD.
+            Poisoned          = 0x2000,      // Actor was bitten by snake, spider, scorpion etc. Shows death icon in player's HUD.
             Unknown_10000     = 0x10000,     // _cutactor in 00_cyn has this flag set
             DelayFire         = 0x20000,     // Actor_mophia.cog, actor_lavaboss.cog
             Immobile          = 0x40000,     // weap_ailasermophia.cog, vol_commie_elevswitch.cog, actor_stickyspider.cog, nub_robotboss.cog
@@ -32,7 +32,7 @@ namespace libim::content::asset {
             Unknown_8000000   = 0x8000000,   // Player has this flag set (00_cyn - shirtplayer template, _cutactor).
             FlayerMove        = 0x10000000,  // actor_mophia.cog
             ElectricWhip      = 0x40000000,
-            Arachnid          = 0x80000000  // Spider, scorpion. Flag causes the gen_a4sprite_blood_grn.mat and +vulcansplort to be created when actor is shot. 
+            Arachnid          = 0x80000000   // Spider, scorpion. Flag causes the gen_a4sprite_blood_grn.mat and +vulcansplort to be created when actor is shot.
         };
     };
 }

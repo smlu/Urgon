@@ -22,7 +22,7 @@ namespace libim::content::asset {
             NoDamageToShooter    = 0x40,
             RandomDebris         = 0x80,   // If set, the aDebrisThings field might be used
             FlashBlindsThings    = 0x100,
-            HasDebries           = 0x200,  // If set, the aDebrisThings field is used
+            HasDebris            = 0x200,  // If set, the aDebrisThings field is used
             DamageSet            = 0x400,  // If set, the damage field is used.
             ExpandTimeSet        = 0x800,
             FadeTimeSet          = 0x1000

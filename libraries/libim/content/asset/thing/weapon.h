@@ -28,5 +28,4 @@ namespace libim::content::asset {
         };
     };
 }
-
 #endif // LIBIM_WEAPON_H

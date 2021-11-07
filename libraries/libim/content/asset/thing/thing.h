@@ -32,36 +32,36 @@ namespace libim::content::asset {
             Dead                    = 0x2,
             NoWeaponCollide         = 0x4,
             WhipClimbable           = 0x8,       // On the WhipAim surface player can mount whip on thing and climb up the whip.
-                                                 // e.g.: shs_whip.cog  Note: if set, thing can't have flag WhipSwingable
+                                                 //   e.g.: shs_whip.cog  Note: if set, thing can't have flag WhipSwingable
 
             Invisible               = 0x10,      // Thing is invisible but touchable unlike hidden.
             CanStandOn              = 0x40,      // nub_lightning.cog
             Mountable               = 0x80,      // pyr_fixminecar.cog, shs_barrel.cog
             Unknown_100             = 0x100,     // Possible: disable sending cog messages to linked cog script. In corelation with 0x400 flag
             Dying                   = 0x200,     // Used in combination with 'LIFELEFT' Thing param. Usually used by the engine marking the Object has been killed and to be removed from the scene.
-            CogLinked               = 0x400,
+            CogLinked               = 0x400,     // Thing is used in COG.
             NoCrush                 = 0x800,
-            NotInEasy               = 0x1000,     // Unknown
+            Unknown_1000            = 0x1000,
             Wood                    = 0x2000,     // Thing is wood object
             HasShadow               = 0x4000,     // shadow on: 11_pyr_kidvsindy_2.cog, teo_introscene.cog, shs_ctladder.cog, pyr_openingcutscene.cog
-            NotInMultiPlayer        = 0x8000,     // Unknown
+            Unknown_8000            = 0x8000,
             Snow                    = 0x10000,    // Thing is snow object
-            SendingPulseEvent       = 0x20000,    // Sends pulse interval timeout event to its cog
-            SendingTimerEvent       = 0x40000,    // Sends timer timeout event to its cog
+            SendingPulseEvent       = 0x20000,    // Sends pulse interval timeout event to its COG
+            SendingTimerEvent       = 0x40000,    // Sends timer timeout event to its COG
             Hidden                  = 0x80000,    // sol_transformer.cog, sol_redgem.cog, teo_pool.cog, teo_spiderblock.cog, vol_co-op_room.cog, pru_whipspike.cog ...
             Seen                    = 0x100000,   // Mark Thing as seen by player. See: gen_bubblegen.cog, gen_watersplash.cog
             Metal                   = 0x400000,   // Thing is metal object
             Earth                   = 0x800000,   // Thing is earth (dirt) object
             NoSounds                = 0x1000000,
             Underwater              = 0x2000000,  // Swimming.
-                                                  // e.g.: weap_machete.cog, teo_drops.cog, nub_lightning.cog, pru_caveamb.cog
+                                                  //   e.g.: weap_machete.cog, teo_drops.cog, nub_lightning.cog, pru_caveamb.cog
             ClimbableCreate         = 0x4000000,  // lag_boomrotate.cog
-            DestroyedInWater        = 0x8000000,
-            DestroyedInAir          = 0x10000000, // class_mine.cog
-            GeneratesSplash         = 0x20000000, // Sends splash message to cog
+            DestroyedInWater        = 0x8000000,  // Thing is destroyed when enters the water sector
+            DestroyedInAir          = 0x10000000, // Thing is destroyed when exits water sector. class_mine.cog
+            GeneratesSplash         = 0x20000000, // Sends splash message to COG
             Movable                 = 0x40000000, // Thing is pushable/movable.
             WhipSwingable           = 0x80000000  // On the WhipAim surface player can whip swing using thing as whip mount point.
-                                                  // e.g.: In 00_cyn thing whip_branch
+                                                  //   e.g.: In 00_cyn thing whip_branch
         };
     };
 }

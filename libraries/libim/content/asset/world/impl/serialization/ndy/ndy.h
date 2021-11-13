@@ -97,7 +97,7 @@ namespace libim::content::asset {
         static void writeSection_Templates(text::TextResourceWriter& rw, const HashMap<CndThing>& templates);
         static void writeSection_Things(text::TextResourceWriter& rw, const std::vector<CndThing>& things, const HashMap<CndThing>& templates);
 
-        // Note: Section PVS is optional and it doesn't need to be write but performance will be degraded.
+        // Note: Section PVS is optional and it doesn't need to be written but performance will be degraded.
         static void writeSection_PVS(text::TextResourceWriter& rw, const ByteArray& pvs, const std::vector<Sector>& sectors);
 
     private:

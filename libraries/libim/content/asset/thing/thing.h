@@ -29,7 +29,7 @@ namespace libim::content::asset {
         {
             None                    = 0x0,
             EmitsLight              = 0x1,       // When set the Light property in sithThing is initialized
-            Dead                    = 0x2,
+            Destroyed               = 0x2,       // Thing is destroyed and will be removed from the game.
             NoWeaponCollide         = 0x4,
             WhipClimbable           = 0x8,       // On the WhipAim surface player can mount whip on thing and climb up the whip.
                                                  //   e.g.: shs_whip.cog  Note: if set, thing can't have flag WhipSwingable
@@ -38,7 +38,7 @@ namespace libim::content::asset {
             CanStandOn              = 0x40,      // nub_lightning.cog
             Mountable               = 0x80,      // pyr_fixminecar.cog, shs_barrel.cog
             Unknown_100             = 0x100,     // Possible: disable sending cog messages to linked cog script. In corelation with 0x400 flag
-            Dying                   = 0x200,     // Used in combination with 'LIFELEFT' Thing param. Usually used by the engine marking the Object has been killed and to be removed from the scene.
+            Dying                   = 0x200,     // Used in combination with 'LIFELEFT' Thing param. Usually used by the engine marking the Object has been killed and to be removed from the game.
             CogLinked               = 0x400,     // Thing is used in COG.
             NoCrush                 = 0x800,
             Unknown_1000            = 0x1000,

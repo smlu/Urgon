@@ -58,9 +58,10 @@ std::vector<Sector> CND::parseSection_Sectors(const InputStream& istream, const 
 
             s.ambientLight    = h.ambientLight;   //TODO: Alpha is probably 0, set it to 1.f
             s.extraLight      = h.extraLight;     //TODO: Alpha is probably 0, set it to 1.f
-            s.avgLightPos     = h.avgLightPos;
-            s.avgLightInt     = h.avgLightInt;    //TODO: Alpha is probably 0, set it to 1.f
-            s.avgLightFalloff = h.avgLightFalloff;
+            s.avgLight        = h.avgLight;
+            // s.avgLightPos     = h.avgLightPos;
+            // s.avgLightInt     = h.avgLightInt;    //TODO: Alpha is probably 0, set it to 1.f
+            // s.avgLightFalloff = h.avgLightFalloff;
 
             s.boundBox   = h.boundBox;
             s.collideBox = h.collideBox;
@@ -119,11 +120,12 @@ void CND::writeSection_Sectors(OutputStream& ostream, const std::vector<Sector>&
             h.center = s.center;
             h.radius = s.radius;
 
-            h.ambientLight    = s.ambientLight;
-            h.extraLight      = s.extraLight;
-            h.avgLightPos     = s.avgLightPos;
-            h.avgLightInt     = s.avgLightInt;
-            h.avgLightFalloff = s.avgLightFalloff;
+            h.ambientLight = s.ambientLight;
+            h.extraLight   = s.extraLight;
+            h.avgLight     = s.avgLight;
+            // h.avgLightPos     = s.avgLightPos;
+            // h.avgLightInt     = s.avgLightInt;
+            // h.avgLightFalloff = s.avgLightFalloff;
 
             h.collideBox = s.collideBox;
             h.boundBox   = s.boundBox;

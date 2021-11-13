@@ -13,6 +13,14 @@
 
 namespace libim::content::asset {
 
+    struct SectorLight final
+    {
+        Vector3f position;
+        LinearColor color;
+        float falloffMin; // light falloff, min = 2 * radius in most cases
+        float falloffMax;
+    };
+
     struct Sector final
     {
         enum Flag : uint32_t
@@ -48,9 +56,7 @@ namespace libim::content::asset {
 
         LinearColor ambientLight;
         LinearColor extraLight;
-        Vector3f    avgLightPos;     // point light position
-        LinearColor avgLightInt;     // point light intensity
-        Vector2f    avgLightFalloff; // point light falloff, x = 2 * radius in most cases
+        SectorLight avgLight; // point light info
 
         struct AmbientSound {
             std::string sound;
@@ -76,24 +82,25 @@ namespace libim::content::asset {
 
     inline bool operator == (const Sector& lhs, const Sector& rhs)
     {
-        return cmpf(lhs.radius, rhs.radius)                   &&
-               lhs.id                == rhs.id                &&
-               lhs.flags             == rhs.flags             &&
-               lhs.tint              == rhs.tint              &&
-               lhs.center            == rhs.center            &&
-               lhs.thrust            == rhs.thrust            &&
-               lhs.boundBox          == rhs.boundBox          &&
-               lhs.collideBox        == rhs.collideBox        &&
-               lhs.ambientLight      == rhs.ambientLight      &&
-               lhs.extraLight        == rhs.extraLight        &&
-               lhs.avgLightPos       == rhs.avgLightPos       &&
-               lhs.avgLightInt       == rhs.avgLightInt       &&
-               lhs.avgLightFalloff   == rhs.avgLightFalloff   &&
-               lhs.pvsIdx            == rhs.pvsIdx            &&
-               lhs.ambientSound      == rhs.ambientSound      &&
-               lhs.vertIdxs          == rhs.vertIdxs          &&
-               lhs.surfaces.count    == rhs.surfaces.count    &&
-               lhs.surfaces.firstIdx == rhs.surfaces.firstIdx;
+        return cmpf(lhs.radius, rhs.radius)                        &&
+               lhs.id                   == rhs.id                  &&
+               lhs.flags                == rhs.flags               &&
+               lhs.tint                 == rhs.tint                &&
+               lhs.center               == rhs.center              &&
+               lhs.thrust               == rhs.thrust              &&
+               lhs.boundBox             == rhs.boundBox            &&
+               lhs.collideBox           == rhs.collideBox          &&
+               lhs.ambientLight         == rhs.ambientLight        &&
+               lhs.extraLight           == rhs.extraLight          &&
+               lhs.avgLight.position    == rhs.avgLight.position   &&
+               lhs.avgLight.color       == rhs.avgLight.color      &&
+               lhs.avgLight.falloffMin  == rhs.avgLight.falloffMin &&
+               lhs.avgLight.falloffMax  == rhs.avgLight.falloffMax &&
+               lhs.pvsIdx               == rhs.pvsIdx              &&
+               lhs.ambientSound         == rhs.ambientSound        &&
+               lhs.vertIdxs             == rhs.vertIdxs            &&
+               lhs.surfaces.count       == rhs.surfaces.count      &&
+               lhs.surfaces.firstIdx    == rhs.surfaces.firstIdx;
     }
 
     inline bool operator != (const Sector& lhs, const Sector& rhs) {

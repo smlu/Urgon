@@ -58,19 +58,20 @@ std::vector<Sector> NDY::parseSection_Sectors(TextResourceReader& rr)
         // Optional light param
         if (keytkn.value() == kAvgLightInt)
         {
-            s.avgLightInt = makeLinearColor(rr.readVector<LinearColorRgb>(), 1.0f);
+            s.avgLight.color = makeLinearColor(rr.readVector<LinearColorRgb>(), 1.0f);
             readNextKey();
         }
 
         if (keytkn.value() == kAvgLightPos)
         {
-            s.avgLightPos= rr.readVector<decltype(s.avgLightPos)>();
+            s.avgLight.position = rr.readVector<decltype(s.avgLight.position)>();
             readNextKey();
         }
 
         if (keytkn.value() == kAvgLightFalloff)
         {
-            s.avgLightFalloff= rr.readVector<decltype(s.avgLightFalloff)>();
+            s.avgLight.falloffMin= rr.getNumber<float>();
+            s.avgLight.falloffMax= rr.getNumber<float>();
             readNextKey();
         }
 
@@ -153,16 +154,16 @@ void NDY::writeSection_Sectors(TextResourceWriter& rw, const std::vector<Sector>
         }
 
         // Optional light params
-        if (!s.avgLightInt.isZero()) {
-            rw.writeKeyValue(kAvgLightInt, makeLinearColorRgb(s.avgLightInt));
+        if (!s.avgLight.color.isZero()) {
+            rw.writeKeyValue(kAvgLightInt, makeLinearColorRgb(s.avgLight.color));
         }
 
-        if (!s.avgLightPos.isZero()) {
-            rw.writeKeyValue(kAvgLightPos, s.avgLightPos);
+        if (!s.avgLight.position.isZero()) {
+            rw.writeKeyValue(kAvgLightPos, s.avgLight.position);
         }
 
-        if (!s.avgLightFalloff.isZero()) {
-            rw.writeKeyValue(kAvgLightFalloff, s.avgLightFalloff);
+        if (s.avgLight.falloffMin != 0.0f || s.avgLight.falloffMax != 0.0f) {
+            rw.writeKeyValue(kAvgLightFalloff, Vector2f{ s.avgLight.falloffMin, s.avgLight.falloffMax });
         }
 
         // Bound box and collide box

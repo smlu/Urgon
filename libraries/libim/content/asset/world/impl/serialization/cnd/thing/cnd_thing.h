@@ -237,7 +237,7 @@ namespace libim::content::asset {
 
     // Array of sizes (number of elements) of each list
     // that is written after thing header list
-    struct CndThingSectorListSizes final
+    struct CndThingParamListSizes final
     {
         uint32_t sizePhysicsInfoList;
         uint32_t sizeNumPathFramesList;
@@ -252,7 +252,7 @@ namespace libim::content::asset {
         uint32_t sizeAiPathFrameList;
     };
 
-    static_assert(sizeof(CndThingSectorListSizes) == 44);
+    static_assert(sizeof(CndThingParamListSizes) == 44);
 }
 
 #endif //LIBIM_CNDTHING_H

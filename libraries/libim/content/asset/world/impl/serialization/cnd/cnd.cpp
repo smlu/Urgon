@@ -460,7 +460,7 @@ std::size_t CND::getOffset_PVS(const InputStream& istream, const CndHeader& head
     istream.seek(getOffset_Things(istream, header));
     istream.advance(sizeof(CndThingHeader) * header.numThings);
 
-    auto sizes = istream.read<CndThingSectorListSizes>();
+    auto sizes = istream.read<CndThingParamListSizes>();
     istream.advance(
         sizeof(CndPhysicsInfo)         * sizes.sizePhysicsInfoList    +
         sizeof(uint32_t)               * sizes.sizeNumPathFramesList  +

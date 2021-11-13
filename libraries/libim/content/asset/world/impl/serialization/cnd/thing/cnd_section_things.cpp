@@ -54,7 +54,7 @@ void parseThingList(const InputStream& istream, std::size_t numThings, Lambda&& 
 
     // Read list of thing headers and list of sizes for 11 lists following.
     auto headers        = istream.read<std::vector<CndThingHeader>>(numThings);
-    auto sizes          = istream.read<CndThingSectorListSizes>();
+    auto sizes          = istream.read<CndThingParamListSizes>();
 
     // Read list of phyisc infos
     auto physicsInfos   = istream.read<std::vector<CndPhysicsInfo>>(sizes.sizePhysicsInfoList);
@@ -304,7 +304,7 @@ void writeThingList(OutputStream& ostream, const Container& c)
     }
 
     // Construct list sizes struct
-    CndThingSectorListSizes sizes;
+    CndThingParamListSizes sizes;
     sizes.sizePhysicsInfoList   = safe_cast<uint32_t>(physicsInfos.size());
     sizes.sizeNumPathFramesList = safe_cast<uint32_t>(numPathFrames.size());
     sizes.sizePathFrameList     = safe_cast<uint32_t>(pathFrames.size());
@@ -403,7 +403,7 @@ std::size_t CND::getOffset_Things(const InputStream& istream, const CndHeader& h
     istream.seek(getOffset_Templates(istream, header));
     istream.advance(sizeof(CndThingHeader) * header.numThingTemplates);
 
-    auto sizes = istream.read<CndThingSectorListSizes>();
+    auto sizes = istream.read<CndThingParamListSizes>();
     istream.advance(
         sizeof(CndPhysicsInfo)         * sizes.sizePhysicsInfoList    +
         sizeof(uint32_t)               * sizes.sizeNumPathFramesList  +

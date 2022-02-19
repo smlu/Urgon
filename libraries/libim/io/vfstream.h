@@ -200,4 +200,4 @@ namespace libim {
      * @throw StreamError
      */
     VfContainer gobLoad(const std::filesystem::path& filePath);
-};
+}

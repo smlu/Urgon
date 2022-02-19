@@ -36,8 +36,9 @@ if(WIN32)
             -fvisibility=hidden
             -fPIC
             -pipe
-            $<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion -Wsign-conversion -static>
+            "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion;-Wsign-conversion>"
         )
+        add_link_options("$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-static>")
     else(MSVC)
         if(MSVC_VERSION LESS 1914 AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
             message(FATAL_ERROR "Only Visual Studio 2017 version 15.7 or newer is supported!")
@@ -49,7 +50,7 @@ if(WIN32)
             /Zc:__cplusplus
             /diagnostics:caret
             /sdl
-            $<$<NOT:$<CXX_COMPILER_ID:Clang>>:/MP>
+            "$<$<NOT:$<CXX_COMPILER_ID:Clang>>:/MP>"
         )
     endif()
 elseif(NOT WIN32)
@@ -58,25 +59,25 @@ elseif(NOT WIN32)
         -Wextra
         -Wpedantic
         -pedantic-errors
-        -Wthread-safety
         -Werror=return-type
-        -Waddress-of-temporary
         -Wdouble-promotion
         -Wpedantic
         -fvisibility=hidden
         -fPIC
         -pipe
-        $<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion -Wsign-conversion -static>
+        "$<$<CXX_COMPILER_ID:Clang>:-Waddress-of-temporary;-Wthread-safety>"
+        "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion;-Wsign-conversion>"
     )
+    add_link_options("$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-static>")
 endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    add_compile_options($<$<CONFIG:Debug>:-Wdocumentation>)
+    add_compile_options("$<$<CONFIG:Debug>:-Wdocumentation>")
     if(NOT MSVC)
-        add_compile_options($<$<CONFIG:Debug>:-glldb>)
+        add_compile_options("$<$<CONFIG:Debug>:-glldb>")
     endif()
     if(NOT (APPLE OR MSVC))
-        option(CLANG_LINK_LIBCPP "Link libc++" $<$<CONFIG:Debug>:OFF>$<$<CONFIG:Release>:ON>)
+        option(CLANG_LINK_LIBCPP "Link libc++" "$<$<CONFIG:Debug>:OFF>$<$<CONFIG:Release>:ON>")
         if(CLANG_LINK_LIBCPP)
             add_compile_options(-stdlib=libc++)
             add_link_options(-fuse-ld=lld -lc++abi -pthread)

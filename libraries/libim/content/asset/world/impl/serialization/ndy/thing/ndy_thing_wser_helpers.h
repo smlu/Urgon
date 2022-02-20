@@ -149,9 +149,9 @@ namespace libim::content::asset {
         t.light.color != base.light.color,
         t.light.color.isZero() == false,
         [&](TextResourceWriter&) {
-            // Writes: light=(r/g/b/a) light=(r/g/b)
-            ndyWriteThingParam(rw, NdyThingParam::Light, t.light.color.toString());
-            ndyWriteThingParam(rw, NdyThingParam::Light, makeLinearColorRgb(t.light.emitColor).toString());
+            // Writes: light=(r/g/b/a)(r/g/b)
+            // Note, the second rgb looks like is not used at all by the Jones engine
+            ndyWriteThingParam(rw, NdyThingParam::Light, t.light.color.toString() + makeLinearColorRgb(t.light.emitColor).toString());
         }
     )
 
@@ -508,7 +508,9 @@ namespace libim::content::asset {
                ndyWriteThingParamIf(baseActorInfo,
                    ndyWriteIfBase(ai.voiceColor != base.voiceColor),
                    ndyWriteIfPara(ai.voiceColor.isValid() && ai.voiceColor.isZero() == false), [&] {
-                   ndyWriteThingParam(rw, NdyThingParam::VoiceColor, ai.voiceColor.toString());
+                       if (ai.voiceColor.isValid()) {
+                           ndyWriteThingParam(rw, NdyThingParam::VoiceColor, ai.voiceColor.toString());
+                       }
                });
             },
             // WeaponInfo

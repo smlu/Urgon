@@ -2,7 +2,8 @@ cmake_minimum_required (VERSION 3.15 FATAL_ERROR)
 project(
     ProjectMarduk
     LANGUAGES CXX
-    VERSION 0.9
+    VERSION 0.9.99.99
+
     HOMEPAGE_URL  "https://github.com/smlu/ProjectMarduk"
 )
 

@@ -1178,7 +1178,7 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
-    gLogLevel = LogLevel::Error;
+    gLogLevel = LogLevel::Warning;
     if (hasOptVerbose(args)) {
         gLogLevel = LogLevel::Verbose;
     }

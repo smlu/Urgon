@@ -27,15 +27,15 @@ namespace libim::content::asset {
                                                    //   By default the animating surface matrix is resized to 320x320, this flag resizes it to 40x40
 
             Aetherium                = 0x80,       // Aetherium surface.
-                                                   //   If surface is hit or walk on by a thing it produces "aetherium" enviornment effect sound.
+                                                   //   If surface is hit or walk on by a thing it produces "aetherium" environment effect sound.
                                                    //   e.g.: fol_in_lrunaet.wav, fol_in_rrunaet.wav
 
-            HorizonSky               = 0x200,      // The surface is part of sky box. e.g.: defined in 02_riv
-            CeilingSky               = 0x400,      // The surface is part of ceiling sky. e.g.: defined in 00_cyn
+            HorizonSky               = 0x200,      // Surface is part of sky box. e.g.: defined in 02_riv
+            CeilingSky               = 0x400,      // Surface is part of ceiling sky. e.g.: defined in 00_cyn
             Scrolling                = 0x800,
             KillFloor                = 0x1000,     // Player dies if it touches the surface. e.g.: cyn_killfloor.cog
             Climbable                = 0x2000,
-            Track                    = 0x4000,     // Surface is part railroad track, e.g.: minecart track.
+            Track                    = 0x4000,     // Surface is part of a railroad track, e.g.: minecart track.
                                                    //  e.g.: sol_ramp.cog, sol_ctrllever5.cog, sol_ctrllever4.cog, sol_ctrllever3.cog,
                                                    //        sol_ctrllever2.cog, sol_ctrllever1.cog, sol_comfalls.cog, sol_comentrance.cog
 
@@ -48,8 +48,8 @@ namespace libim::content::asset {
             Lava                     = 0x200000,   // Lava or frozen water surface. In 02_riv freezing water has this flag set.
             Snow                     = 0x400000,   // Snow surface.
             Wood                     = 0x800000,   // Wood surface.
-            Hangable                 = 0x1000000,  // Player can hang on the ledge of this surface. In: tem_bossflood.cog, vol_block_ledgecontrol.cog
-            WaterClimbOutLedge       = 0x2000000,
+            Ledge                    = 0x1000000,  // Player can hang on the ledge of this surface. In: tem_bossflood.cog, vol_block_ledgecontrol.cog
+            WaterClimbOutLedge       = 0x2000000,  // Player will climb out of water at this ledge. in: 00_cyn.ndy
             QuaterSurfaceScale       = 0x4000000,  // When set, it affects SlideWall() cog function.
                                                    //   By default the animating surface matrix is resized to 320x320, this flag resizes it to 80x80
 

@@ -14,17 +14,22 @@ namespace libim::content::asset {
             AttachToWall            = 0x80,
             ExplodeAtTimerTimeout   = 0x100,
             ExplodeWhenDamaged      = 0x200,    // When damaged by an explosion
-            Unknown_400             = 0x400,    // Could be: weapon projectile will rebound/ricochet off of certain type of surface
+            ImpactSoundFx           = 0x400,    // When weapon has damage class = 0x20 - Crunch (machete) and has this flag set, the impacted world surface produces hit sound effect.
+                                                //  e.g. gen_machete_hit_metal.wav if surface is metal, gen_machete_hit_web.wav if surface is spider web etc ...
             AttachToThing           = 0x800,
             CloseProximityTrigger   = 0x1000,
             InstantImpact           = 0x2000,
             DemageDecay             = 0x4000,   // Damage decays with time to minDamage.
-            ObjectTrail             = 0x8000,   // Weapon will have trailthings created after it.
+            ObjectTrail             = 0x8000,   // Weapon will have trail things created after it.
             Unknown_20000           = 0x20000,  // inf_turnerhunt.cog
             Unknown_40000           = 0x40000,
-            RicochetOffWorldSurface = 0x80000,  // Rebounds/bounces off of any world surface
+            RicochetOffSurface      = 0x80000,  // Rebounds/bounces off of surface. Usually should hit COG thing which will produce bounce off sound fx.
             Unknown_200000          = 0x200000,
-            ExplodeOnWorldFloorHit  = 0x400000
+            ExplodeOnWorldFloorHit  = 0x400000,
+            MophiaBomb              = 0x800000  // Marduk weapon when he's in mophia form.
+                                                // When player holding mirror and projectile with this flag is set, it is reflected of the mirror by creating new projectile from `+mardukhit` template.
+                                                // Also hiting player without holding mirror plays 'aet_mr_hit_indy.wav'.
+                                                // i.e. `+mardukhit` template has this flag set
         };
     };
 }

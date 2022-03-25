@@ -52,10 +52,10 @@ namespace libim::content::asset {
             Seen                    = 0x100000,   // Mark Thing as seen by player. See: gen_bubblegen.cog, gen_watersplash.cog
             Metal                   = 0x400000,   // Thing is metal object
             Earth                   = 0x800000,   // Thing is earth (dirt) object
-            NoSounds                = 0x1000000,
+            NoSound                 = 0x1000000,  // Thing makes no sound
             Underwater              = 0x2000000,  // Swimming.
                                                   //   e.g.: weap_machete.cog, teo_drops.cog, nub_lightning.cog, pru_caveamb.cog
-            ClimbableCreate         = 0x4000000,  // lag_boomrotate.cog
+            ClimbableCreate         = 0x4000000,  // Player can clib onto Thing. e.g.: lag_boomrotate.cog
             DestroyedInWater        = 0x8000000,  // Thing is destroyed when enters the water sector
             DestroyedInAir          = 0x10000000, // Thing is destroyed when exits water sector. class_mine.cog
             GeneratesSplash         = 0x20000000, // Sends splash message to COG

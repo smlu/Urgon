@@ -8,9 +8,7 @@ namespace libim::content::asset {
         Unlit     = 0,
         Lit       = 1,
         Diffuse   = 2,
-        Gouraud   = 3,
-        Gouraud2  = 4,
-        Gouraud3  = 5
+        Gouraud   = 3
     };
 }
 #endif // LIBIM_LIGHT_MODE_H

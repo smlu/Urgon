@@ -6,7 +6,7 @@ namespace libim::content::asset {
     enum class GeoMode : uint32_t
     {
         NotDrawn    = 0,
-        Points      = 1,
+        Vertex      = 1,
         Wireframe   = 2,
         Solid       = 3,
         Textured    = 4,

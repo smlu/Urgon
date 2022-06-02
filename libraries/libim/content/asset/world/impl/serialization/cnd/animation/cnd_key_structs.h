@@ -60,7 +60,7 @@ namespace libim::content::asset
     {
         CndResourceName name;
         Flags<Animation::Flag> flags;
-        Animation::Type  type;
+        Flags<Animation::Type> type;
         uint32_t frames;
         float    fps;
         uint32_t numMarkers;

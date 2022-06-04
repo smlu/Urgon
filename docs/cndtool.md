@@ -44,13 +44,21 @@ To get help for a specific command enter `help` as command following by *command
       * **`animation`** - Add or replace stored animation assets (`.key`).
       * **`material`** - Add or replace stored texture assets (`.mat`).
 
-  * **`convert`** - Convert CND file format to another format.
-
+  * **`convert`** - Convert CND file format to another format.  
     **Sub-commands:**
       * **`obj`** - Extract level geometry and convert to [Wavefront .obj](https://en.wikipedia.org/wiki/Wavefront_.obj_file) file format.  
-      **Command options:**
+       **Command options:**
         * `--no-mat` - Don't extract texture assets in PNG format for level surfaces (walls, ground, sky).  
         *Note: Surface images have to be put manually into the **mtl** folder where the **.obj** file is created.*
+     
+     * **`ndy`** - Convert CND binary format to NDY text based level format and extract stored mat, key, sound resources.
+
+       **Command options:**
+        * `--no-key` - Don't extract animation assets from CND.
+        * `--no-mat` - Don't extract texture assets from CND.
+        * `--no-sound` - Don't extract sound assets from CND.
+        * `--output-dir` - Output directory.
+        * `--verbose` - Verbose log printout to the console.
 
   * **`extract`** - Extract animation (`.key`), texture (`.mat`) and sound (`.wav`) game assets from CND file.  
   *Note: Sound assets are by default extracted in IndyWV format.*
@@ -72,6 +80,18 @@ To get help for a specific command enter `help` as command following by *command
       * **`animation`** - Remove stored animation assets (`.key`).
       * **`material`** - Remove stored material assets (`.mat`).
 ## Usage examples:
+  - Convert level geometry to OBJ:  
+    *Note: See tutorial how to import OBJ converted level into Blender [here](cnd2obj.md).*
+  ```
+     cndtool convert obj <path_to_cnd_file>
+  ```
+
+  - Convert level to NDY file format:  
+    *Note: NDY file format docs can be found [here](https://github.com/Jones3D-The-Infernal-Engine/Documentation).*
+  ```
+     cndtool convert ndy <path_to_cnd_file> <path_to_COG_script_folder|path_to_GOB_file>
+  ```
+
   - Extract all game assets:
   ```
      cndtool extract <path_to_cnd_file>
@@ -100,8 +120,3 @@ To get help for a specific command enter `help` as command following by *command
     <i>Note: <b>&#60path_to_mat_file></b> can be multiple paths to *.mat files delimitated by space. 
     e.g.: 
     cndtool add material --replace &#60cnd_file> &#60mat_file_1> &#60mat_file_2> &#60mat_file_3> ...</i></pre>
-  - Convert level geometry to OBJ:  
-    *Note: See tutorial how to import OBJ converted level into Blender [here](cnd2obj.md).*
-  ```
-     cndtool convert obj <path_to_cnd_file>
-  ```

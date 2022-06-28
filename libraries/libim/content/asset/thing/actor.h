@@ -22,7 +22,10 @@ namespace libim::content::asset {
             Deaf              = 0x400,       // Actor cannot hear other actors.
             Blind             = 0x800,       // Actor cannot see other actors.
             Poisoned          = 0x2000,      // Actor was bitten by snake, spider, scorpion etc. Shows death icon in player's HUD.
-            Unknown_10000     = 0x10000,     // _cutactor in 00_cyn has this flag set
+            SlideSlope        = 0x10000,     // When set if world surface is tilted in z for  more than 39.53 degrees and less than 45.84 degrees
+                                             // then the thing object will slide down the slope. Applies default to player no need to set this flag.
+                                             // Example: _cutactor in 00_cyn has this flag set
+
             DelayFire         = 0x20000,     // Actor_mophia.cog, actor_lavaboss.cog
             Immobile          = 0x40000,     // weap_ailasermophia.cog, vol_commie_elevswitch.cog, actor_stickyspider.cog, nub_robotboss.cog
             NoTarget          = 0x100000,    // Player won't aim at thing with this flag set. actor_floateraet.cog

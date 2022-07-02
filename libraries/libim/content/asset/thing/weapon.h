@@ -19,12 +19,12 @@ namespace libim::content::asset {
             AttachToThing           = 0x800,
             CloseProximityTrigger   = 0x1000,
             InstantImpact           = 0x2000,
-            DemageDecay             = 0x4000,   // Damage decays with time to minDamage.
+            DamageDecay             = 0x4000,   // Damage decays with time to minDamage.
             ObjectTrail             = 0x8000,   // Weapon will have trail things created after it.
             Unknown_20000           = 0x20000,  // inf_turnerhunt.cog
             Unknown_40000           = 0x40000,
             RicochetOffSurface      = 0x80000,  // Rebounds/bounces off of surface. Usually should hit COG thing which will produce bounce off sound fx.
-            Unknown_200000          = 0x200000,
+            TriggerAiEvent          = 0x200000, // Triggers AI event for hit AI actor. e.g. if AI actor is sleeping it will be woken up & COG msg 0x1000 - EVENT_TARGETED will be sent to actor's cog script.
             ExplodeOnWorldFloorHit  = 0x400000,
             MophiaBomb              = 0x800000  // Marduk weapon when he's in mophia form.
                                                 // When player holding mirror and projectile with this flag is set, it is reflected of the mirror by creating new projectile from `+mardukhit` template.

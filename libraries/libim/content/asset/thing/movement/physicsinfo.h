@@ -19,7 +19,7 @@ namespace libim::content::asset {
             Unknown_100                  = 0x100,     // used when controlling jeep
             UseRotationVelocity          = 0x200,
             BanksWhenTurning             = 0x400,
-            Unknown_800                  = 0x800,
+            Unknown_800                  = 0x800,     // maybe marks in the engine that the flags has been changed
             UseAngularThrustToRotate     = 0x1000,
             Fly                          = 0x2000,
             AffectedByBlastForce         = 0x4000,
@@ -28,7 +28,7 @@ namespace libim::content::asset {
             DoNotRotateVelocity          = 0x20000,
             PartialGravity               = 0x40000,   // Half of world gravity
             Uknown_800000                = 0x800000,  // 11_pyr_kidvsindy_2.cog
-            TreadingWater                = 0x100000,  // swimming in water?
+            OnWaterSurface               = 0x100000,  // raft, swimming
             NotAffectedByThrust          = 0x400000,
             MineCar                      = 0x1000000, // Thing moves on the track surface as mine car. bab killtruck, sol mineplayer - minecar
             Raft                         = 0x2000000, // Thing moves on the water surface as raft. mentioned in pru_lagoon.cog, 02_riv - raftplayer

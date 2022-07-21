@@ -17,7 +17,7 @@ namespace libim::content::asset {
                                              // The `explode` Thing param must be set with explosion template.
 
             BreathUnderWater  = 0x40,        // Actor won't drawn under water.
-            Invinsible        = 0x80,        // Actor/player won't be seen/attacked by other actors.
+            Invisible         = 0x80,        // Actor/player won't be seen/attacked by other actors.
             Boss              = 0x200,
             Deaf              = 0x400,       // Actor cannot hear other actors.
             Blind             = 0x800,       // Actor cannot see other actors.

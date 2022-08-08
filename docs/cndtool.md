@@ -7,6 +7,7 @@ The tool can list, extract, add, replace, or remove game assets stored in a `CND
 
 **Convert**
   - CND to [Wavefront OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
+  - CND to [ndy level format](https://github.com/Jones3D-The-Infernal-Engine/Documentation/blob/main/ndy.md)
 
 **Extract**:
   - animation files (`.key`)
@@ -51,7 +52,7 @@ To get help for a specific command enter `help` as command following by *command
         * `--no-mat` - Don't extract texture assets in PNG format for level surfaces (walls, ground, sky).  
         *Note: Surface images have to be put manually into the **mtl** folder where the **.obj** file is created.*
      
-     * **`ndy`** - Convert CND binary format to NDY text based level format and extract stored mat, key, sound resources.
+     * **`ndy`** - Convert CND binary format to [NDY](https://github.com/Jones3D-The-Infernal-Engine/Documentation/blob/main/ndy.md) text based level format and extract stored mat, key, sound resources.
 
        **Command options:**
         * `--no-key` - Don't extract animation assets from CND.

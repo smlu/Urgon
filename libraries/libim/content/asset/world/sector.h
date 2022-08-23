@@ -36,8 +36,9 @@ namespace libim::content::asset {
             AdjointsNotSet  = 0x80,   // flag set when cog fuction SetSectorAdjoins(sector, visible=false) is called and unset with SetSectorAdjoins(sector, visible=true).
             Aetherium       = 0x100,
             HasCollideBox   = 0x1000, // When this flag is set the engine verifies the object/point is within the sector by checking if position of object radius is within collision box (sithIntersect_IsSphereInSector)
-            Seen            = 0x4000  // Sector has been seen by player/camera. 
+            Seen            = 0x4000, // Sector has been seen by player/camera. 
                                       //  See: sol_bluegem.cog, pru_lightspike.cog, pru_voicelinewhipeagle.cog, pru_voiceline.cog
+            SyncSector      = 0x8000  // Internal engine flag set when sector should be synchronized over net
         };
 
         using Id = std::size_t;

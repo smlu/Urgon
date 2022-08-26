@@ -38,7 +38,7 @@ namespace libim::content::asset {
             CanStandOn              = 0x40,      // nub_lightning.cog
             Mountable               = 0x80,      // pyr_fixminecar.cog, shs_barrel.cog
             Unknown_100             = 0x100,     // Possible: disable sending cog messages to linked cog script. In corelation with 0x400 flag
-            Dying                   = 0x200,     // Used in combination with 'LIFELEFT' Thing param. Usually used by the engine marking the Object has been killed and to be removed from the game.
+            ToBeRemoved             = 0x200,     // Used in combination with 'LIFELEFT' Thing param. Usually used by the engine marking the Object has been killed and to be removed from the game.
             CogLinked               = 0x400,     // Thing is used in COG.
             NoCrush                 = 0x800,
             Unknown_1000            = 0x1000,
@@ -50,6 +50,7 @@ namespace libim::content::asset {
             SendingTimerEvent       = 0x40000,    // Sends timer timeout event to its COG
             Hidden                  = 0x80000,    // sol_transformer.cog, sol_redgem.cog, teo_pool.cog, teo_spiderblock.cog, vol_co-op_room.cog, pru_whipspike.cog ...
             Seen                    = 0x100000,   // Mark Thing as seen by player. See: gen_bubblegen.cog, gen_watersplash.cog
+            Unknown_200000          = 0x200000,   // Internal engine flag
             Metal                   = 0x400000,   // Thing is metal object
             Earth                   = 0x800000,   // Thing is earth (dirt) object
             NoSound                 = 0x1000000,  // Thing makes no sound

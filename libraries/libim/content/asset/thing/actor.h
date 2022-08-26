@@ -10,6 +10,7 @@ namespace libim::content::asset {
         {
             None              = 0x00,
             Unknown_1         = 0x01,
+            Unknown_2         = 0x02,
             UseLightIntensity = 0x04,        // Actor light intensity is used.
             Invulnerable      = 0x08,        // Actor won't be harmed by other things/physics.
             HeadIsCentered    = 0x10,
@@ -30,7 +31,8 @@ namespace libim::content::asset {
             Immobile          = 0x40000,     // weap_ailasermophia.cog, vol_commie_elevswitch.cog, actor_stickyspider.cog, nub_robotboss.cog
             NoTarget          = 0x100000,    // Player won't aim at thing with this flag set. actor_floateraet.cog
             Disabled          = 0x200000,
-            PlayerKilled      = 0x400000,    // Set in game engine.
+            PlayerKilled      = 0x400000,    // Internal flag set by the engine
+            Unknown800000     = 0x800000,    // Found in engine
             Unknown_1000000   = 0x1000000,   // 13_nub_cinematic_end.cog, 
             Unknown_8000000   = 0x8000000,   // Player has this flag set (00_cyn - shirtplayer template, _cutactor).
             FlayerMove        = 0x10000000,  // actor_mophia.cog

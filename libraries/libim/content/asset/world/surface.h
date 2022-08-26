@@ -50,8 +50,8 @@ namespace libim::content::asset {
             Wood                     = 0x800000,   // Wood surface.
             Ledge                    = 0x1000000,  // Player can hang on the ledge of this surface. In: tem_bossflood.cog, vol_block_ledgecontrol.cog
             WaterClimbOutLedge       = 0x2000000,  // Player will climb out of water at this ledge. in: 00_cyn.ndy
-            QuaterSurfaceScale       = 0x4000000,  // When set, it affects SlideWall() cog function.
-                                                   //   By default the animating surface matrix is resized to 320x320, this flag resizes it to 80x80
+            QuarterSurfaceScale       = 0x4000000,  // When set, it affects SlideWall() cog function.
+                                                   //   By default the animating surface matrix is resized to 320x320, this flag resizes it to 80x80 i.e. 1/4 of 320x320
 
             QuadrupleSurfaceScale    = 0x8000000,  // When set, it affects SlideWall() cog function.
                                                    //   By default the animating surface matrix is resized to 320x320, this flag resizes it to 1280x1280.

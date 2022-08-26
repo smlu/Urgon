@@ -30,7 +30,7 @@ namespace libim::content::asset {
             Uknown_80000                 = 0x80000,   // 11_pyr_kidvsindy_2.cog
             OnWaterSurface               = 0x100000,  // raft, swimming
             NotAffectedByThrust          = 0x400000,
-            Uknown_800000                = 0x800000,   // 11_pyr_kidvsindy_2.cog
+            Uknown_800000                = 0x800000,  // Maybe disables physics for thing? found in: 11_pyr_kidvsindy_2.cog
             MineCar                      = 0x1000000, // Thing moves on the track surface as mine car. bab killtruck, sol mineplayer - minecar
             Raft                         = 0x2000000, // Thing moves on the water surface as raft. mentioned in pru_lagoon.cog, 02_riv - raftplayer
             Jeep                         = 0x4000000, // Thing moves as jeep/car.

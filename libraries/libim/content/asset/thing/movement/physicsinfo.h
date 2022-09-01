@@ -29,6 +29,7 @@ namespace libim::content::asset {
             PartialGravity               = 0x40000,   // Half of world gravity
             Uknown_80000                 = 0x80000,   // 11_pyr_kidvsindy_2.cog
             OnWaterSurface               = 0x100000,  // raft, swimming
+            Unknown_200000               = 0x200000,
             NotAffectedByThrust          = 0x400000,
             Uknown_800000                = 0x800000,  // Maybe disables physics for thing? found in: 11_pyr_kidvsindy_2.cog
             MineCar                      = 0x1000000, // Thing moves on the track surface as mine car. bab killtruck, sol mineplayer - minecar

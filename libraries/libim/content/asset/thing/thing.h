@@ -37,7 +37,7 @@ namespace libim::content::asset {
             Invisible               = 0x10,      // Thing is invisible but touchable unlike hidden.
             CanStandOn              = 0x40,      // nub_lightning.cog
             Mountable               = 0x80,      // pyr_fixminecar.cog, shs_barrel.cog
-            Unknown_100             = 0x100,     // Possible: disable sending cog messages to linked cog script. In corelation with 0x400 flag
+            Unknown_100             = 0x100,     // Possible: disables sending cog messages to linked cog script. In corelation with 0x400 flag
             ToBeRemoved             = 0x200,     // Used in combination with 'LIFELEFT' Thing param. Usually used by the engine marking the Object has been killed and to be removed from the game.
             CogLinked               = 0x400,     // Thing is used in COG.
             NoCrush                 = 0x800,

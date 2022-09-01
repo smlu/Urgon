@@ -9,7 +9,7 @@ namespace libim::content::asset {
         enum Flag: uint32_t
         {
             None              = 0x00,
-            Unknown_1         = 0x01,
+            CanRotateHead     = 0x01,        // Actor head joint can be rotated (e.g. through SetActorHeadPYR )
             Unknown_2         = 0x02,
             UseLightIntensity = 0x04,        // Actor light intensity is used.
             Invulnerable      = 0x08,        // Actor won't be harmed by other things/physics.
@@ -19,6 +19,8 @@ namespace libim::content::asset {
 
             BreathUnderWater  = 0x40,        // Actor won't drawn under water.
             Invisible         = 0x80,        // Actor/player won't be seen/attacked by other actors.
+            Droid             = 0x100,       // Actor is robot/droid. Produces robot hit sound fx.
+                                             //   e.g.: the 'small_robot' template in 14_inf.cnd has this flag set.
             Boss              = 0x200,
             Deaf              = 0x400,       // Actor cannot hear other actors.
             Blind             = 0x800,       // Actor cannot see other actors.
@@ -32,7 +34,7 @@ namespace libim::content::asset {
             NoTarget          = 0x100000,    // Player won't aim at thing with this flag set. actor_floateraet.cog
             Disabled          = 0x200000,
             PlayerKilled      = 0x400000,    // Internal flag set by the engine
-            Unknown800000     = 0x800000,    // Found in engine
+            Unknown_800000    = 0x800000,    // Found in engine
             Unknown_1000000   = 0x1000000,   // 13_nub_cinematic_end.cog, 
             Unknown_8000000   = 0x8000000,   // Player has this flag set (00_cyn - shirtplayer template, _cutactor).
             FlayerMove        = 0x10000000,  // actor_mophia.cog

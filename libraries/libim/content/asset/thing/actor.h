@@ -11,7 +11,7 @@ namespace libim::content::asset {
             None              = 0x00,
             CanRotateHead     = 0x01,        // Actor head joint can be rotated (e.g. through SetActorHeadPYR )
             Unknown_2         = 0x02,
-            UseLightIntensity = 0x04,        // Actor light intensity is used.
+            HasHeadLight      = 0x04,        // Actor light intensity is used.
             Invulnerable      = 0x08,        // Actor won't be harmed by other things/physics.
             HeadIsCentered    = 0x10,
             ExplodeWhenKilled = 0x20,        // Actor explodes when killed.

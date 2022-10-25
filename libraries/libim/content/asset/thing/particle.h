@@ -15,8 +15,8 @@ namespace libim::content::asset {
             RandomStartCel    = 0x04,
             FadeoutOverTime   = 0x08, // If set, the timeoutRate field is used
             EmitLight         = 0x10,
-            Flipped           = 0x20,
-            Unknown_40        = 0x40
+            RandomCelChange   = 0x20, // random mat cel change
+            UseTimeoutRate    = 0x40
         };
     };
 }

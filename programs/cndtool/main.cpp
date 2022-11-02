@@ -1039,7 +1039,7 @@ int execCmdList(const CndToolArgs& args)
         {
             std::cout << "  " << i++ << ": " << s.name() << std::endl;
                       // << SETW(38 - p.first.size(), ' ')
-                      // << " | fileId: " << p.second.id() << " idx: " << p.second.idx() << std::endl;
+                      // << " | handle: " << s.handle() << " idx: " << s.idx() << std::endl;
         }
         std::cout << std::endl;
     }

@@ -21,7 +21,7 @@ namespace libim::content::audio {
         WavDataChunk dataChunk;
         dataChunk.data = std::move(data);
         dataChunk.size = safe_cast<decltype(dataChunk.size)>(dataChunk.data.size());
-        wavHeader.size = 36 + dataChunk.size;
+        wavHeader.size = 36 + dataChunk.size; // 36 = sizeof(WavHeader) + sizeof riff header
 
         // Write to output
         ostream << wavHeader

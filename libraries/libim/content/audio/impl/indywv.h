@@ -25,15 +25,13 @@ namespace libim::content::audio {
     });
     static_assert(sizeof(IndyWVFileHeader) == 26);
 
-
-    struct IndyVWHeader
+    struct VWCompressorState
     {
         byte_t  unknown1;
         int16_t unknown2;
         byte_t  unknown3;
         int16_t unknown4;
     };
-
 
     struct IndyVW
     {
@@ -47,7 +45,7 @@ namespace libim::content::audio {
         static ByteArray inflate(const InputStream& istream)
         {
             std::size_t mode = 1;
-            IndyVWHeader header{};
+            VWCompressorState state{};
 
             std::size_t infSize  = istream.read<uint32_t>();
             auto unknown1 = istream.read<int8_t>();
@@ -55,15 +53,15 @@ namespace libim::content::audio {
 
             if(unknown1 < 0)
             {
-                header.unknown1 = ~unknown1;
+                state.unknown1 = ~unknown1;
                 mode = 2;
             }
 
-            header.unknown2 = swap16(unknown2);
+            state.unknown2 = swap16(unknown2);
             if(mode > 1)
             {
-                header.unknown3 = istream.read<byte_t>();
-                header.unknown4 = swap16(istream.read<int16_t>());
+                state.unknown3 = istream.read<byte_t>();
+                state.unknown4 = swap16(istream.read<int16_t>());
             }
 
             ByteArray data;
@@ -71,24 +69,25 @@ namespace libim::content::audio {
             OutputBinaryStream obs(data);
 
             if(mode == 2 &&
-               header.unknown2 == 0x1111 &&
-               header.unknown3 == 0x64   &&
-               header.unknown4 == 0x2222 &&
+               state.unknown2 == 0x1111 &&
+               state.unknown3 == 0x64   &&
+               state.unknown4 == 0x2222 &&
                istream.peek<decltype(kWVSM)>() == kWVSM)
             {
+                // WVSM decompression
                 istream.advance(kWVSM.size());
 
                 constexpr std::size_t nFrameSize = 4096;
                 for (std::size_t i = 0; i < infSize / nFrameSize; i++) {
-                    inflate_frame16(istream, nFrameSize, obs);
+                    wvsmInflateBlock(istream, nFrameSize, obs);
                 }
 
                 /* Read the remaining data, shorter than one frame */
-                inflate_frame16(istream, infSize % nFrameSize, obs);
+                wvsmInflateBlock(istream, infSize % nFrameSize, obs);
                 assert(obs.size() == infSize && obs.tell() == obs.size());
             }
             else {
-                // TODO: Implement other decompression methods
+                // TODO: Implement ADPCM decompression method
                 LOG_ERROR("IndyVW: Cannot inflate sound data, unknown compression mode!");
             }
 
@@ -96,7 +95,7 @@ namespace libim::content::audio {
         }
 
     private:
-        static void inflate_frame16(const InputStream& istream, std::size_t nFrameSize, OutputStream& dest)
+        static void wvsmInflateBlock(const InputStream& istream, std::size_t nFrameSize, OutputStream& dest)
         {
             std::size_t nSamples = nFrameSize / 2;
             if(nSamples == 0){

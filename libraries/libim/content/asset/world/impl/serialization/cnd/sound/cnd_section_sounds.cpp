@@ -14,7 +14,7 @@ using namespace libim::content::audio;
 using namespace libim::content::audio::impl;
 using namespace std::string_literals;
 
-void CND::parseSection_Sounds(const InputStream& istream, SbTrack& track, uint32_t& fileIdNonce)
+void CND::parseSection_Sounds(const InputStream& istream, SbTrack& track, uint32_t& nextHandle)
 {
     try
     {
@@ -53,12 +53,12 @@ void CND::parseSection_Sounds(const InputStream& istream, SbTrack& track, uint32
                 h.dataSize
             );
 
-            s.setId(h.fileID);
-            s.setIdx(h.index);
+            s.setHandle(h.hSnd);
+            s.setIdx(h.idx);
             s.setSampleRate(h.sampleRate);
             s.setBitsPerSample(h.bitsPerSample);
             s.setChannels(h.numChannels);
-            s.setIndyWVFormat(h.isIndyWVFormat);
+            s.setCompressed(h.bCompressed);
 
             std::string name(s.name());
             auto r = track.sounds.pushBack(name, std::move(s));
@@ -70,7 +70,7 @@ void CND::parseSection_Sounds(const InputStream& istream, SbTrack& track, uint32
         }
 
         /* Read next file ID nonce */
-        fileIdNonce = istream.read<uint32_t>();
+        nextHandle = istream.read<uint32_t>();
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {

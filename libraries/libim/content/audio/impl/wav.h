@@ -20,7 +20,6 @@ namespace libim::content::audio
     constexpr static uint32_t kDataChunkId = makeRiffTag("data");
 
 
-
     enum class AudioFormat : uint16_t
     {
         LPCM = 1
@@ -32,6 +31,7 @@ namespace libim::content::audio
         uint32_t tag = Tag;
         uint32_t size;
     };
+    static_assert( sizeof(RiffChunkHeader<0>) == 8 );
 
     struct WavFmt : RiffChunkHeader<kFmtChunkId>
     {
@@ -42,18 +42,19 @@ namespace libim::content::audio
          uint16_t    blockAlign;
          uint16_t    bitsPerSample;
     };
+    static_assert( sizeof(WavFmt) - sizeof(RiffChunkHeader<kFmtChunkId>) == 16 );
 
     struct WavHeader : RiffChunkHeader<kRiffChunkId>
     {
         uint32_t format = kWavFormatId;
         WavFmt fmt;
     };
+    static_assert( sizeof(WavHeader) - 2 * sizeof(RiffChunkHeader<kRiffChunkId>) == 20 );
 
     struct WavDataChunk : RiffChunkHeader<kDataChunkId>
     {
         ByteArray data;
     };
-
 
     Stream& operator << (Stream& s, const WavDataChunk& chunk)
     {

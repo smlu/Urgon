@@ -20,14 +20,14 @@ namespace libim::content::audio {
 
         std::string_view name() const;
 
-        uint32_t setId(uint32_t id)
+        uint32_t setHandle(uint32_t handle)
         {
-            return id_ = id;
+            return handle_ = handle;
         }
 
-        uint32_t id() const
+        uint32_t handle() const
         {
-            return id_;
+            return handle_;
         }
 
         void setIdx(uint32_t idx)
@@ -70,14 +70,14 @@ namespace libim::content::audio {
             return numChannels_;
         }
 
-        void setIndyWVFormat(bool isiwvFormat)
+        void setCompressed(bool bCompressed)
         {
-            isIndyWVFormat_ = isiwvFormat;
+            isCompressed_ = bCompressed;
         }
 
-        bool isIndyWVFormat() const
+        bool isCompressed() const
         {
-            return isIndyWVFormat_;
+            return isCompressed_;
         }
 
         bool isValid() const;
@@ -88,7 +88,7 @@ namespace libim::content::audio {
         ByteArray data() const;
 
     private:
-        uint32_t id_  = 0;
+        uint32_t handle_  = 0;
         uint32_t idx_ = 0;
         std::size_t dirNameOffset_;
         std::size_t nameOffset_;
@@ -97,7 +97,7 @@ namespace libim::content::audio {
         std::size_t sampleRate_;
         std::size_t bitsPerSample_;
         std::size_t numChannels_;
-        bool isIndyWVFormat_;
+        bool isCompressed_;
 
         std::weak_ptr<ByteArray> wptrData_;
 

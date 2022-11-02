@@ -63,7 +63,7 @@ ByteArray Sound::data() const
 
     auto itBegin = ptrData->begin() + dataOffset_; //TODO: safe cast to difference_type
     auto itEnd = itBegin + dataSize_; //TODO: safe cast to difference_type
-    if(isIndyWVFormat_) {
+    if(isCompressed_) {
         bytes = IndyVW::inflate(InputBinaryStream(*ptrData, itBegin, itEnd));
     }
     else
@@ -92,7 +92,7 @@ void libim::content::audio::wavWrite(OutputStream&& ostream, const Sound& sound)
 void libim::content::audio::iwvWrite(OutputStream& ostream, const Sound& sound)
 {
      auto ptrData = sound.lockOrThrow();
-    if(!sound.isValid(*ptrData) || !sound.isIndyWVFormat()) { // TODO: implement converting of data to indyWV format
+    if(!sound.isValid(*ptrData) || !sound.isCompressed()) { // TODO: implement converting of data to indyWV format
         throw StreamError("Cannot write invalid sound to stream as IndyWV");
     }
     soundSerializeAsIndyWV(ostream, sound.channels(), sound.sampleRate(), sound.bitsPerSample(), ptrData, sound.dataOffset_, sound.dataSize_);

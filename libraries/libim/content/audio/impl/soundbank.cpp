@@ -15,21 +15,20 @@ using namespace std::string_view_literals;
 
 struct SoundBank::SoundBankImpl
 {
-    uint32_t nonceFileId = 0;
+    uint32_t nextHandle = 0;
     std::vector<SbTrack> vecTracks;
 
-    uint32_t getNextFileId()
+    uint32_t getNextHandle()
     {
-        uint32_t v0 = nonceFileId;
-        if ( nonceFileId & 1 ){
-            v0 = (nonceFileId + 1) % 1111111;
+        uint32_t v0 = nextHandle;
+        if ( nextHandle & 1 ){
+            v0 = (nextHandle + 1) % 1111111;
         }
         uint32_t fileId = v0 + 1234;
-        nonceFileId = (v0 + 1) % 1111111;
+        nextHandle = (v0 + 1) % 1111111;
         return fileId;
     }
 };
-
 
 SoundBank::SoundBank(std::size_t nTracks)
 {
@@ -61,17 +60,17 @@ bool SoundBank::importTrack(std::size_t trackIdx, const InputStream& istream)
     }
 
     auto& track = ptrImpl_->vecTracks.at(trackIdx);
-    if(fileExtMatch(istream.name(), ".cnd"sv))
+    if( fileExtMatch(istream.name(), ".cnd"sv) )
     {
-        uint32_t nonce = 0;
-        CND::parseSection_Sounds(istream, track, nonce);
+        uint32_t handle = 0;
+        CND::parseSection_Sounds(istream, track, handle);
         LOG_DEBUG("Imported % sounds to track: %", track.sounds.size(), trackIdx);
 
-        if(nonce == 0 && !track.sounds.isEmpty()) {
+        if(handle == 0 && !track.sounds.isEmpty()) {
             return false;
         }
 
-        ptrImpl_->nonceFileId = nonce;
+        ptrImpl_->nextHandle = handle;
         return true;
     }
     else {

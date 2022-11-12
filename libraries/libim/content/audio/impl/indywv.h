@@ -44,7 +44,7 @@ namespace libim::content::audio {
 
         static ByteArray inflate(const InputStream& istream)
         {
-            std::size_t mode = 1;
+            std::size_t numChannels = 1;
             VWCompressorState state{};
 
             std::size_t infSize  = istream.read<uint32_t>();
@@ -54,11 +54,11 @@ namespace libim::content::audio {
             if(unknown1 < 0)
             {
                 state.unknown1 = ~unknown1;
-                mode = 2;
+                numChannels = 2;
             }
 
             state.unknown2 = swap16(unknown2);
-            if(mode > 1)
+            if(numChannels > 1)
             {
                 state.unknown3 = istream.read<byte_t>();
                 state.unknown4 = swap16(istream.read<int16_t>());
@@ -68,7 +68,7 @@ namespace libim::content::audio {
             data.reserve(infSize);
             OutputBinaryStream obs(data);
 
-            if(mode == 2 &&
+            if(numChannels == 2 &&
                state.unknown2 == 0x1111 &&
                state.unknown3 == 0x64   &&
                state.unknown4 == 0x2222 &&
@@ -77,13 +77,13 @@ namespace libim::content::audio {
                 // WVSM decompression
                 istream.advance(kWVSM.size());
 
-                constexpr std::size_t nFrameSize = 4096;
-                for (std::size_t i = 0; i < infSize / nFrameSize; i++) {
-                    wvsmInflateBlock(istream, nFrameSize, obs);
+                constexpr std::size_t blockSize = 4096;
+                for (std::size_t i = 0; i < infSize / blockSize; i++) {
+                    wvsmInflateBlock(istream, blockSize, obs);
                 }
 
-                /* Read the remaining data, shorter than one frame */
-                wvsmInflateBlock(istream, infSize % nFrameSize, obs);
+                /* Read the remaining data, shorter than 1 block */
+                wvsmInflateBlock(istream, infSize % blockSize, obs);
                 assert(obs.size() == infSize && obs.tell() == obs.size());
             }
             else {
@@ -95,19 +95,19 @@ namespace libim::content::audio {
         }
 
     private:
-        static void wvsmInflateBlock(const InputStream& istream, std::size_t nFrameSize, OutputStream& dest)
+        static void wvsmInflateBlock(const InputStream& istream, std::size_t blockSize, OutputStream& dest)
         {
-            std::size_t nSamples = nFrameSize / 2;
+            std::size_t nSamples = blockSize / 2;
             if(nSamples == 0){
                 return;
             }
 
-            [[maybe_unused]]auto unknown = istream.read<uint16_t>();
-            const byte_t sampleExpander = istream.read<byte_t>();
-            const int16_t salo = sampleExpander & 0xF;
-            const int16_t sahi = sampleExpander >> 4;
+            [[maybe_unused]]auto compressedSize = swap16(istream.read<uint16_t>()); // Note, big endian size
+            const byte_t  se  = istream.read<byte_t>(); // sample expander
+            const int16_t sel = se >> 4;
+            const int16_t ser = se & 0xF;
 
-            auto get_sample = [&](int16_t expander) -> int16_t
+            auto getChannelSample = [&](int16_t expander) -> int16_t
             {
                 int16_t val = istream.read<byte_t>();
                 if(val == 0x80)
@@ -123,9 +123,9 @@ namespace libim::content::audio {
 
             for(std::size_t i = 0; i < nSamples; i += 2)
             {
-                dest << get_sample(sahi);
+                dest << getChannelSample(sel);
                 if( i + 1 >= nSamples) return;
-                dest << get_sample(salo);
+                dest << getChannelSample(ser);
             }
         }
     };

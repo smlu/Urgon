@@ -149,9 +149,12 @@ namespace libim::content::asset {
         t.light.color != base.light.color,
         t.light.color.isZero() == false,
         [&](TextResourceWriter&) {
-            // Writes: light=(r/g/b/a)(r/g/b)
-            // Note, the second rgb looks like is not used at all by the Jones engine
-            ndyWriteThingParam(rw, NdyThingParam::Light, t.light.color.toString() + makeLinearColorRgb(t.light.emitColor).toString());
+            // Writes: light=(r/g/b/a) if alpha is not 0.0 else light=(r/g/b)
+            std::string light = t.light.color.toString();
+            if (t.light.color.alpha() == 0.0f) {
+                light = makeLinearColorRgb(t.light.emitColor).toString();
+            }
+            ndyWriteThingParam(rw, NdyThingParam::Light, light);
         }
     )
 

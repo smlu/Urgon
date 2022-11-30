@@ -182,7 +182,7 @@ namespace libim::content::asset {
     DefNdyWriteThingParamFunc(PerfLevel,
         t.perfLevel != base.perfLevel,
         t.perfLevel != 0,
-        NdyThingParam::Perflevel,
+        NdyThingParam::PerformanceLevel,
         t.perfLevel
     )
 
@@ -333,7 +333,7 @@ namespace libim::content::asset {
                 ndyWriteThingParamIf(physInfo,
                     ndyWriteIfBase(pi.flags != base.flags),
                     ndyWriteIfPara(pi.flags != PhysicsInfo::Flag::None), [&] {
-                    ndyWriteThingParam<16>(rw, NdyThingParam::Physflags, pi.flags);
+                    ndyWriteThingParam<16>(rw, NdyThingParam::PhysicsFlags, pi.flags);
                 });
 
                 // Param MaxRotVel
@@ -361,7 +361,7 @@ namespace libim::content::asset {
                 ndyWriteThingParamIf(physInfo,
                     ndyWriteIfBase(pi.angularVelocity != base.angularVelocity),
                     ndyWriteIfPara(!pi.angularVelocity.isZero()), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::Angvel, pi.angularVelocity.toString());
+                    ndyWriteThingParam(rw, NdyThingParam::AngularVel, pi.angularVelocity.toString());
                 });
 
                 // Param OrientSpeed
@@ -455,7 +455,7 @@ namespace libim::content::asset {
                ndyWriteThingParamIf(baseActorInfo,
                    ndyWriteIfBase(ai.flags != base.flags),
                    ndyWriteIfPara(ai.flags != 0), [&] {
-                   ndyWriteThingParam<16>(rw, NdyThingParam::Typeflags, ai.flags);
+                   ndyWriteThingParam<16>(rw, NdyThingParam::TypeFlags, ai.flags);
                });
 
                // Param EyeOffset
@@ -548,7 +548,7 @@ namespace libim::content::asset {
                 ndyWriteThingParamIf(baseWeaponInfo,
                     ndyWriteIfBase(wi.flags != base.flags),
                     ndyWriteIfPara(wi.flags != 0), [&] {
-                    ndyWriteThingParam<16>(rw, NdyThingParam::Typeflags, wi.flags);
+                    ndyWriteThingParam<16>(rw, NdyThingParam::TypeFlags, wi.flags);
                 });
 
                 // Param DamageClass
@@ -590,7 +590,7 @@ namespace libim::content::asset {
                 ndyWriteThingParamIf(baseExpInfo,
                     ndyWriteIfBase(ei.flags != base.flags),
                     ndyWriteIfPara(ei.flags != 0), [&] {
-                    ndyWriteThingParam<16>(rw, NdyThingParam::Typeflags, ei.flags);
+                    ndyWriteThingParam<16>(rw, NdyThingParam::TypeFlags, ei.flags);
                 });
 
                 // Param Damage
@@ -696,7 +696,7 @@ namespace libim::content::asset {
                 ndyWriteThingParamIf(baseItemInfo,
                     ndyWriteIfBase(ii.flags != base.flags),
                     ndyWriteIfPara(ii.flags != 0), [&] {
-                    ndyWriteThingParam<16>(rw, NdyThingParam::Typeflags, ii.flags);
+                    ndyWriteThingParam<16>(rw, NdyThingParam::TypeFlags, ii.flags);
                 });
 
                 // Param Respawn
@@ -730,7 +730,7 @@ namespace libim::content::asset {
                 ndyWriteThingParamIf(basePartInfo,
                     ndyWriteIfBase(pi.flags != base.flags),
                     ndyWriteIfPara(pi.flags != 0), [&] {
-                    ndyWriteThingParam<16>(rw, NdyThingParam::Typeflags, pi.flags);
+                    ndyWriteThingParam<16>(rw, NdyThingParam::TypeFlags, pi.flags);
                 });
 
                 // Param Material

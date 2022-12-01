@@ -118,6 +118,40 @@ bool hasOptReplace(const CndToolArgs& args)
     return args.hasArg(optReplace) || args.hasArg(optReplaceShort);
 }
 
+fs::path getOptOutputDir(const CndToolArgs& args, std::optional<fs::path> optPath = std::nullopt)
+{
+    if (args.hasArg(optOutputDirShort)){
+        return args.arg(optOutputDirShort);
+    }
+    else if (args.hasArg(optOutputDir)){
+        return args.arg(optOutputDir);
+    }
+    return optPath.value_or(fs::path());
+}
+
+std::vector<fs::path> getCndFilesFromPath(const fs::path path)
+{
+    std::vector<fs::path> cndFiles;
+    cndFiles.reserve(17);
+    if (isFilePath(path)) {
+        cndFiles.push_back(path);
+    }
+    else // Scan folder for CND files
+    {
+        for (const auto& entry : fs::directory_iterator(path))
+        {
+            if (entry.is_regular_file())
+            {
+                const auto& path = entry.path();
+                if (fileExtMatch(path, kExtCnd)) {
+                    cndFiles.push_back(path);
+                }
+            }
+        }
+    }
+    return cndFiles;
+}
+
 void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
 {
     if (cmd == cmdAdd)
@@ -181,7 +215,7 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
     else if (cmd == cmdExtract)
     {
         std::cout << "Extract animation [KEY], material [MAT] and sound [IndyWV] assets from CND level file." << std::endl << std::endl;
-        std::cout << "  Usage: cndtool extract [options] <cnd-file-path>" << std::endl << std::endl;
+        std::cout << "  Usage: cndtool extract [options] <cnd-file-path|cnd-folder>" << std::endl << std::endl;
         printOptionHeader();
         printOption( optExtractAsBmp, optExtractAsBmpShort, "Convert extracted material assets to BMP format."                );
         printOption( optConvertToPng, optConvertToPngShort, "Convert extracted material assets to PNG format."                );
@@ -585,7 +619,7 @@ int convertToNdy(const CndToolArgs& args)
             printHelp(cmdConvert, args.subcmd());
             return 1;
         }
-        fs::path cogDir = args.positionalArgs().at(0);
+        fs::path resourceDir = args.positionalArgs().at(0);
 
         fs::path outDir = getBaseName(cndPath.u8string());
         if (args.hasArg(optOutputDirShort)){
@@ -607,13 +641,13 @@ int convertToNdy(const CndToolArgs& args)
         if (!hasOptVerbose(args)) printProgress(progressTitle, progress++, total);
 
         VirtualFileSystem vfs;
-        vfs.addSysFolder(cogDir);
-        if (!vfs.tryLoadGobContainer(cogDir / "cd1.gob")) {
-            vfs.tryLoadGobContainer(cogDir / "Resource\\cd1.gob");
+        vfs.addSysFolder(resourceDir);
+        if (!vfs.tryLoadGobContainer(resourceDir / "cd1.gob")) {
+            vfs.tryLoadGobContainer(resourceDir / "Resource\\cd1.gob");
         }
 
-        if (!vfs.tryLoadGobContainer(cogDir / "cd2.gob")) {
-            vfs.tryLoadGobContainer(cogDir / "Resource\\cd2.gob");
+        if (!vfs.tryLoadGobContainer(resourceDir / "cd2.gob")) {
+            vfs.tryLoadGobContainer(resourceDir / "Resource\\cd2.gob");
         }
 
         LOG_DEBUG("Opening file stream and reading CND header of file %", cndPath);
@@ -938,27 +972,33 @@ int execCmdExtract(const CndToolArgs& args)
 {
     try
     {
-        const fs::path inputFile = args.cndFile();
-        if (!fileExists(inputFile))
+        fs::path input = args.cndFile();
+        if (input.empty()) {
+            input = !args.subcmd().empty()
+                ? args.subcmd()
+                : !args.positionalArgs().empty()
+                    ? args.positionalArgs().at(0)
+                    : fs::path();
+        }
+
+        if (input.empty() || !fileExists(input) && !dirExists(input))
         {
-            printErrorInvalidCnd(inputFile, cmdExtract);
+            printError("Invalid positional argument for input CND file path or folder path!\n");
+            printHelp(cmdExtract);
             return 1;
         }
 
-        fs::path outDir;
-        if (args.hasArg(optOutputDirShort)){
-            outDir = args.arg(optOutputDirShort);
-        }
-        else if (args.hasArg(optOutputDir)){
-            outDir = args.arg(optOutputDir);
-        }
-        else {
-            outDir = getBaseName(inputFile.u8string());
-        }
-
+        fs::path outDir = getOptOutputDir(args);
         if (!isDirPath(outDir))
         {
             printError("Output path is not directory!\n");
+            return 1;
+        }
+
+        std::vector<fs::path> cndFiles = getCndFilesFromPath(input);
+        if (cndFiles.empty())
+        {
+            printError("No CND file found!\n");
             return 1;
         }
 
@@ -966,17 +1006,27 @@ int execCmdExtract(const CndToolArgs& args)
         opt.verboseOutput      = hasOptVerbose(args);
         opt.key.extract        = !args.hasArg(optNoAnimations);
         opt.mat.extract        = !args.hasArg(optNoMaterials);
+
         opt.mat.convertToBmp   = args.hasArg(optExtractAsBmpShort) || args.hasArg(optExtractAsBmp);
         opt.mat.convertToPng   = args.hasArg(optConvertToPngShort) || args.hasArg(optConvertToPng);
         opt.mat.convertMipMap  = args.hasArg(optExtractLod);
+
         opt.sound.extract      = !args.hasArg(optNoSounds);
         opt.sound.convertToWav = args.hasArg(optConvertToWavShort) || args.hasArg(optConvertToWav);
+
         if (args.hasArg(optMaxTex)) {
             opt.mat.maxTex = args.uintArg(optMaxTex);
         }
 
         /* Extract animations, materials & sounds */
-        extractAssets(inputFile, std::move(outDir), opt);
+        for (const auto& cndFile : cndFiles)
+        {
+            if (cndFiles.size() > 1) std::cout << "\nExtracting assets from: " << cndFile.filename().u8string() << std::endl;
+            auto cndOutDir = outDir / cndFile.stem();
+            makePath(cndOutDir);
+            extractAssets(cndFile, cndOutDir, opt);
+        }
+
         return 0;
     }
     catch (const std::exception& e)

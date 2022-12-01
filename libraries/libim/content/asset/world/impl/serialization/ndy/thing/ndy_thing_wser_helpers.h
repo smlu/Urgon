@@ -40,7 +40,7 @@ namespace libim::content::asset {
     // param: paramPred       - condition for the parm to be written if base template is not present
     // param: paramWriteFun   - Function which writes parameter. Function should have 1 parameter of type TextResourceWriter&
     #define DefNdyWriteThingParamFuncEx(name, basePred, paramPred, paramWriteFun) \
-        void ndyWriteThing##name(TextResourceWriter& rw, const CndThing& t, OptionalRef<const CndThing> baseTemplate) { \
+        static void ndyWriteThing##name(TextResourceWriter& rw, const CndThing& t, OptionalRef<const CndThing> baseTemplate) { \
             ndyWriteThingParamIf(baseTemplate,   \
                 ndyWriteIfBase(basePred),        \
                 ndyWriteIfPara(paramPred), [&](){ paramWriteFun(rw); });}
@@ -49,14 +49,14 @@ namespace libim::content::asset {
     // - base (template) value is available and it's value satisfies basePred
     // - or base value is not present and paramPred is satisfied. Otherwise returns false;
     template<typename BaseT, typename LambdaBasePred, typename LambdaParamPred>
-    bool ndyCanWriteThingParam(OptionalRef<const BaseT> baseVal, LambdaBasePred&& basePred, LambdaParamPred&& paramPred) {
+    inline bool ndyCanWriteThingParam(OptionalRef<const BaseT> baseVal, LambdaBasePred&& basePred, LambdaParamPred&& paramPred) {
        return (baseVal.hasValue() && basePred(baseVal.value())) || (!baseVal && paramPred());
     }
 
     // Function serializes thing param using writeParam function.
     // Param is written only if basePred or paramPred (depending if baseVal is available) satisfy ndyCanWriteThingParam function.
     template<typename BaseT, typename LambdaBasePred, typename LambdaParamPred, typename ParamWriter>
-    void ndyWriteThingParamIf(OptionalRef<const BaseT> baseVal, LambdaBasePred&& basePred, LambdaParamPred&& paramPred, ParamWriter&& writeParam) {
+    inline void ndyWriteThingParamIf(OptionalRef<const BaseT> baseVal, LambdaBasePred&& basePred, LambdaParamPred&& paramPred, ParamWriter&& writeParam) {
        if(ndyCanWriteThingParam(baseVal,
           std::forward<LambdaBasePred>(basePred),
           std::forward<LambdaParamPred>(paramPred))) {
@@ -65,7 +65,7 @@ namespace libim::content::asset {
     }
 
     // Function serializes thing param and it's value to rw stream.
-    void ndyWriteThingParam(TextResourceWriter& rw, NdyThingParam param, std::string_view value)
+    inline void ndyWriteThingParam(TextResourceWriter& rw, NdyThingParam param, std::string_view value)
     {
         rw.write(kNdyThingParamMap.at(param));
         rw.write("=");
@@ -238,7 +238,7 @@ namespace libim::content::asset {
         kThingTypeMap.at(t.type)
     )
 
-    void ndyWriteThingControlInfo(TextResourceWriter& rw, const CndThing& t, OptionalRef<const CndThing> baseTemplate)
+    static void ndyWriteThingControlInfo(TextResourceWriter& rw, const CndThing& t, OptionalRef<const CndThing> baseTemplate)
     {
         using namespace utils;
         std::visit(overloaded {
@@ -267,7 +267,7 @@ namespace libim::content::asset {
         }, t.controlInfo);
     }
 
-    void ndyWriteThingMoveInfo(TextResourceWriter& rw, const CndThing& t, OptionalRef<const CndThing> baseTemplate)
+    static void ndyWriteThingMoveInfo(TextResourceWriter& rw, const CndThing& t, OptionalRef<const CndThing> baseTemplate)
     {
         using namespace libim::utils;
         std::visit(overloaded {
@@ -382,7 +382,7 @@ namespace libim::content::asset {
         t.moveInfo);
     }
 
-    void ndyWriteThingInfo(TextResourceWriter& rw, const CndThing& t, OptionalRef<const CndThing> baseTemplate)
+    static void ndyWriteThingInfo(TextResourceWriter& rw, const CndThing& t, OptionalRef<const CndThing> baseTemplate)
     {
         using namespace libim::utils;
         std::visit(overloaded {
@@ -797,6 +797,75 @@ namespace libim::content::asset {
                 });
             },
         }, t.thingInfo);
+    }
+
+    inline void writeThingNameAndBase(TextResourceWriter& rw, std::string_view name, std::string_view base)
+    {
+        rw.write(name, /*fieldWidth=*/18);
+        rw.write(base.empty() ? kNone : base, /*fieldWidth=*/18);
+    }
+
+    static void writeThingParams(TextResourceWriter& rw, const CndThing& t, const HashMap<CndThing>& templates, bool bTemplateThing = false)
+    {
+        OptionalRef<const CndThing> baseTemplate;
+        if(templates.contains(t.baseName)) {
+            baseTemplate = templates.at(t.baseName);
+        }
+
+        if(bTemplateThing && !t.pyrOrient.isZero()) {
+            ndyWriteThingOrient(rw, t, baseTemplate);
+        }
+
+        ndyWriteThingType(rw, t, baseTemplate);
+        ndyWriteThingCollideType(rw, t, baseTemplate);
+        ndyWriteThingMoveType(rw, t, baseTemplate);
+        ndyWriteThingFlags(rw, t, baseTemplate);
+
+        ndyWriteThingLight(rw, t, baseTemplate);
+        ndyWriteThingTimer(rw, t, baseTemplate);
+        ndyWriteThingPerfLevel(rw, t, baseTemplate);
+
+        ndyWriteThingRdFileName(rw, t, baseTemplate);
+        ndyWriteThingSize(rw, t, baseTemplate);
+        ndyWriteThingMoveSize(rw, t, baseTemplate);
+        ndyWriteThingCollWidth(rw, t, baseTemplate);
+        ndyWriteThingCollHeight(rw, t, baseTemplate);
+
+        ndyWriteThingPuppet(rw, t, baseTemplate);
+        ndyWriteThingSoundClass(rw, t, baseTemplate);
+        ndyWriteThingCreateThing(rw, t, baseTemplate);
+        ndyWriteThingCog(rw, t, baseTemplate);
+
+        ndyWriteThingMoveInfo(rw, t, baseTemplate);
+        ndyWriteThingInfo(rw, t, baseTemplate);
+        ndyWriteThingControlInfo(rw, t, baseTemplate);
+    }
+
+    inline void writeTemplateParams(TextResourceWriter& rw, const CndThing& t, const HashMap<CndThing>& templates)
+    {
+        writeThingParams(rw, t, templates, true);
+    }
+
+    /** 
+     * Writes Thing templates to text stream. 
+     * 
+     * @tparam writeEnd - if true, writes the end of the template section. 
+     *
+     * @param rw - Text stream to write to.
+     * @param templates - Thing templates to write.
+     * @param writeEnd - If true, writes template list header.
+     */
+    template<bool writeEnd = true>
+    void writeTemplateList(TextResourceWriter& rw, const HashMap<CndThing>& templates, bool writeHeader = false)
+    {
+        rw.writeList<writeEnd>(templates, [&](auto& rw, auto idx, const CndThing& t) {
+            if(writeHeader && idx == 0) {
+                rw.writeCommentLine("Name:           Based On:        Params:");
+            }
+
+            writeThingNameAndBase(rw, t.name, t.baseName);
+            writeTemplateParams(rw, t, templates);
+        });
     }
 }
 #endif // LIBIM_NDY_THING_SER_HELPERS_H

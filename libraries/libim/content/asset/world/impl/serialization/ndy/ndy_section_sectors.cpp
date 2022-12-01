@@ -195,7 +195,7 @@ void NDY::writeSection_Sectors(TextResourceWriter& rw, const std::vector<Sector>
         rw.writeKeyValue</*precision=*/8>(kRadius, s.radius);
 
         // Vertex idxs
-        rw.writeList</*writeListSize=*/true, /*lbAfterSize=*/false>(kVertices, s.vertIdxs,
+        rw.writeList</*lbAfterSize=*/false>(kVertices, s.vertIdxs,
         [](auto& rw, auto ridx, auto vidx) {
             rw.writeRowIdx(ridx, 0);
             rw.indent(1);

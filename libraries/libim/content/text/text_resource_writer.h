@@ -156,26 +156,39 @@ namespace libim::content::text {
         TextResourceWriter& writeLabel(std::string_view name, std::string_view text);
         TextResourceWriter& writeLine(std::string_view line);
 
-        template<bool writeListSize = true,
-                 bool lbAfterSize = true,
+        /** 
+         * Write container as list to text stream.
+         * 
+         * @tparam writeListSize - If true, write list size before list items.
+         * @tparam lbAfterSize - If true, write line break after list size.
+         * @tparam writeEnd - writeEnd - If true the "end" keyword is written at the end of the list.
+         * 
+         * @param name - List name.
+         * @param list - Container to write.
+         * @param writeRow - Lambda function to write a single row of the list.
+        */
+        template<bool writeListSize,
+                 bool lbAfterSize,
+                 bool writeEnd,
                  typename Container,
                  typename Lambda,
                  class = utils::requires_container<Container>>
         TextResourceWriter& writeList([[maybe_unused]] std::string_view name, const Container& list, Lambda&& writeRow)
         {
-            /*TODO: Uncomment when static reflection is available and decltype is avaliable for generic lambdas.
+            /*
+            TODO: Uncomment when static reflection is available and decltype is available for generic lambdas.
 
-            using LambdaTriats = typename utils::function_traits<Lambda>;
-            static_assert(LambdaTriats::arity == 3, "constructor func must have 3 arguments");
-            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<0>,
+            using LambdaTraits = typename utils::function_traits<Lambda>;
+            static_assert(LambdaTraits::arity == 3, "constructor func must have 3 arguments");
+            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<0>,
                 TextResourceReader&>, "first arg in writeRow must be of a type TextResourceWriter&"
             );
 
-            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<1>,
+            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<1>,
                 std::size_t>, "second arg in writeRow must be of a type std::size_t"
             );
 
-            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<2>,
+            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<2>,
                 T&>, "third arg in writeRow must be of a type T&"
             );
             */
@@ -187,7 +200,6 @@ namespace libim::content::text {
                     writeEol();
                 }
             }
-
 
             for (auto[i, v] : utils::enumerate(list))
             {
@@ -201,7 +213,7 @@ namespace libim::content::text {
                 }
             }
 
-            if constexpr (!writeListSize)
+            if constexpr (writeEnd && !writeListSize)
             {
                 write("end");
                 writeEol();
@@ -210,11 +222,39 @@ namespace libim::content::text {
             return *this;
         }
 
-        template<typename Container,
+        /** 
+         * Overload function for writing container list with list size.
+         * 
+         * @tparam lbAfterSize - If true the line brake is written after list size is written. Default true.
+         * 
+         * @param name - Name of the list.
+         * @param list - Container to write.
+         * @param writeRow - Lambda function to write a single row of the list.
+         * @return Reference to this object.
+         **/
+        template<bool lbAfterSize = true,
+                 typename Container,
+                 typename Lambda,
+                 class = utils::requires_container<Container>>
+        TextResourceWriter& writeList(std::string_view name, const Container& list, Lambda&& rowWriter) {
+            return writeList</*writeListSize=*/true, lbAfterSize, false>(name, list, std::forward<Lambda>(rowWriter));
+        }
+
+        /** 
+         * Overload method for writing container list without list size.
+         * 
+         * @tparam writeEnd - If true the "end" keyword is written at the end of the list. Default true.
+         * 
+         * @param list - Container to write.
+         * @param writeRow - Lambda function to write a single row of the list.
+         * @return Reference to this object.
+         **/
+        template<bool writeEnd = true,
+                 typename Container,
                  typename Lambda,
                  class = utils::requires_container<Container>>
         TextResourceWriter& writeList(const Container& list, Lambda&& rowWriter) {
-            return writeList<false>("", list, std::forward<Lambda>(rowWriter));
+            return writeList</*writeListSize=*/false, false, writeEnd>("", list, std::forward<Lambda>(rowWriter));
         }
 
         template<std::size_t base = 10,

@@ -11,13 +11,28 @@
 
 namespace libim {
 
-    /** Sequence ordered list which elements are indexed and mapped to the key. */
+    /**
+     * Sequence list which elements are ordered by insertion and mapped to the key.
+     * The elements can be retrieved by the key or by the index.
+     */
     template<typename T, typename KeyT = std::string>
     class HashMap
     {
+        static_assert(std::is_same_v<KeyT, std::string_view> == false,
+            "std::string_view is not supported as a key type. Use std::string instead.");
+
         template<typename, typename>
         class HashMapIterator;
         template<typename, typename> friend class HashMapIterator;
+
+        static constexpr bool isStringKey = std::is_same_v<KeyT, std::string>;
+
+        // Helper types to store std::string in std::unordered_map as std::string_view
+        using MapKey = std::conditional_t<isStringKey,
+            std::string_view, std::reference_wrapper<const KeyT>
+        >;
+        using UnderlyingMapKeyT =
+            std::conditional_t<isStringKey, std::string_view, KeyT>;
 
     public:
         using size_type = std::size_t;
@@ -26,10 +41,11 @@ namespace libim {
         using ContainerElement = std::pair<KeyT, T>;
         using ContainerType = std::list<ContainerElement>;
 
-        using key_type = KeyT;
-        using key_reference = key_type&;
-        using key_const_reference =  const key_type&;
-        using key_rvalue = key_type&&;
+        using key_type = UnderlyingMapKeyT;
+        using key_reference = std::conditional_t<isStringKey, key_type, key_type&>;
+        using key_const_reference  =  const key_reference;
+        using key_rvalue_reference = std::conditional_t<isStringKey, key_type, key_type&&>;
+
         using value_type = T;
         using reference = value_type&;
         using const_reference =  const value_type&;
@@ -50,7 +66,7 @@ namespace libim {
 
         HashMap& operator = (const HashMap& rhs)
         {
-            if(&rhs != this)
+            if (&rhs != this)
             {
                 data_ = rhs.data_;
                 reconstruct_map();
@@ -150,16 +166,17 @@ namespace libim {
         reference operator[](key_const_reference key)
         {
             auto it = map_.find(key);
-            if(it == map_.end()) {
+            if (it == map_.end()) {
                 return *emplaceBack(key).first;
             }
             return it->second->second;
         }
 
-        reference operator[](key_rvalue key)
+        template<typename = std::enable_if_t<!isStringKey>>
+        reference operator[](key_rvalue_reference key)
         {
             auto it = map_.find(key);
-            if(it == map_.end()) {
+            if (it == map_.end()) {
                 return *emplaceBack(std::move(key)).first;
             }
             return it->second->second;
@@ -168,7 +185,7 @@ namespace libim {
         const_reference operator[](key_const_reference key) const
         {
             auto it = map_.find(key);
-            if(it == map_.end()) {
+            if (it == map_.end()) {
                 data_.at(data_.size()); // should throw std::out_of_range
             }
             return it->second;
@@ -177,7 +194,7 @@ namespace libim {
         iterator find(key_const_reference key)
         {
             auto it = map_.find(key);
-            if(it == map_.end()) {
+            if (it == map_.end()) {
                 return end();
             }
             return it->second;
@@ -186,7 +203,7 @@ namespace libim {
         const_iterator find(key_const_reference key) const
         {
             auto it = map_.find(key);
-            if(it == map_.end()) {
+            if (it == map_.end()) {
                 return end();
             }
             return iterator(it->second);
@@ -233,25 +250,26 @@ namespace libim {
         std::pair<iterator, bool> insert(Idx pos, key_type key, const T& value)
         {
             auto mapIt = map_.find(key);
-            if(mapIt != map_.end()) {
+            if (mapIt != map_.end()) {
                 return { mapIt->second, false };
             }
 
-            if( pos > size()) {
+            if ( pos > size()) {
                 pos = isEmpty() ? 0 : size();
             }
 
             auto it = data_.end();
             auto iit = index_.begin() + pos;
-            if( iit != index_.end()) {
-                it = data_.insert(*iit, { std::move(key), value });
-            } else
+            if ( iit != index_.end()) {
+                it = data_.insert(*iit, { moveOrConstructKey(key), value });
+            }
+            else
             {
-                data_.push_back({ std::move(key), value });
+                data_.push_back({ moveOrConstructKey(key), value });
                 it = --data_.end();
             }
 
-            map_[std::cref(it->first)] = it;
+            map_[crefOrKey(it->first)] = it;
             index_.insert(iit, it);
             return { it, true };
         }
@@ -259,25 +277,26 @@ namespace libim {
         std::pair<iterator, bool> insert(Idx pos, key_type key, T&& value)
         {
             auto mapIt = map_.find(key);
-            if(mapIt != map_.end()) {
+            if (mapIt != map_.end()) {
                 return { mapIt->second, false };
             }
 
-            if( pos > size()) {
+            if (pos > size()) {
                 pos = isEmpty() ? 0 : size();
             }
 
-            auto it = data_.end();
+            auto it  = data_.end();
             auto iit = index_.begin() + pos;
-            if( iit != index_.end()) {
-                it = data_.insert(*iit, { std::move(key), std::move(value) });
-            } else
+            if (iit != index_.end()) {
+                it = data_.insert(*iit, { moveOrConstructKey(key), std::move(value) });
+            }
+            else
             {
-                data_.push_back({ std::move(key), std::move(value) });
+                data_.push_back({ moveOrConstructKey(key), std::move(value) });
                 it = --data_.end();
             }
 
-            map_[std::cref(it->first)] = it;
+            map_[crefOrKey(it->first)] = it;
             index_.insert(iit, it);
             return { it, true };
         }
@@ -327,7 +346,7 @@ namespace libim {
         void erase(key_const_reference key)
         {
             auto mapIt = map_.find(key);
-            if(mapIt != map_.end())
+            if (mapIt != map_.end())
             {
                 auto it = mapIt->second;
                 erase_by_idx(get_itr_idx(it));
@@ -374,6 +393,18 @@ namespace libim {
         }
 
     private:
+        static inline auto crefOrKey(key_const_reference key)
+        {
+            if constexpr (isStringKey) return key;
+            else return std::cref(key);
+        }
+
+        static inline auto moveOrConstructKey(key_rvalue_reference key)
+        {
+            if constexpr (isStringKey) return std::string(key);
+            else return std::move(key);
+        }
+
         Idx get_itr_idx(typename ContainerType::const_iterator itr) const
         {
             return std::distance(data_.begin(), itr);
@@ -382,7 +413,7 @@ namespace libim {
         iterator erase_by_idx(Idx idx)
         {
             auto it = end();
-            if(idx < index_.size())
+            if (idx < index_.size())
             {
                 it = index_.at(idx);
                 map_.erase(it.it_->first);
@@ -400,18 +431,19 @@ namespace libim {
             map_.reserve(data_.size());
             for(auto it = data_.begin(); it != data_.end(); it++)
             {
-                map_[std::cref(it->first)] = it;
+                map_[crefOrKey(it->first)] = it;
                 index_.push_back(it);
             }
         }
 
     private:
+        // TODO: When moved to C++20 refactor MapType to directly support std::string_view
         using IndexType = std::deque<typename ContainerType::iterator>;
         using MapType = std::unordered_map<
-            std::reference_wrapper<const KeyT>,
+            MapKey,
             typename ContainerType::iterator,
-            std::hash<KeyT>,
-            std::equal_to<KeyT>
+            std::hash<UnderlyingMapKeyT>,
+            std::equal_to<UnderlyingMapKeyT>
         >;
 
         ContainerType data_;

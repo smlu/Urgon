@@ -1,12 +1,16 @@
 #ifndef LIBIM_RESOURCE_READER_H
 #define LIBIM_RESOURCE_READER_H
-#include <libim/log/log.h>
-#include <libim/math/abstract_vector.h>
+#include "gradientcolor.h"
+
 #include <libim/content/asset/primitives/box.h>
+#include <libim/content/asset/thing/movement/pathinfo.h>
+#include <libim/log/log.h>
+#include <libim/io/binarystream.h>
+#include <libim/math/abstract_vector.h>
 #include <libim/text/tokenizer.h>
+#include <libim/types/flags.h>
 #include <libim/utils/traits.h>
 #include <libim/utils/utils.h>
-#include <libim/types/flags.h>
 
 #include <assert.h>
 #include <cstdint>
@@ -22,13 +26,40 @@ namespace libim::content::text {
     public:
         using Tokenizer::Tokenizer;
 
+        /**
+         * Asserts that the next token is expected label.
+         * Label in stream must be in format: "label:".
+         *
+         * @param label - The expected label.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If label doesn't match.
+        */
         void assertLabel(std::string_view label);
 
+        /**
+         * Asserts that the next token is expected key.
+         * @param key - The expected key.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If key doesn't match.
+        */
         void assertKey(std::string_view key);
 
+        /**
+         * Asserts that the next tokens are expected key and value.
+         * @tparam T - the type of value.
+         *
+         * @param key - The expected key.
+         * @param v   - The expected value.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If either key or value don't match.
+        */
         template<typename T>
         void assertKeyValue(std::string_view key, T v)
         {
+            using namespace std::string_view_literals;
             using DT =  typename std::decay_t<T>;
             if constexpr (utils::isEnum<DT>){
                 return assertKeyValue(key, utils::to_underlying(v));
@@ -45,13 +76,49 @@ namespace libim::content::text {
 
             if(!bValid)
             {
-                using namespace std::string_view_literals;
                 LOG_DEBUG("assertKey: expected value '%', found '%'", v, cachedTkn_.value());
-                throw TokenizerError("invalid value"sv, cachedTkn_.location());
+                throw SyntaxError("invalid value"sv, cachedTkn_.location());
             }
         }
 
+        /**
+         * Asserts that the next line is expected section.
+         * Line in stream must be in format: "SECTION section".
+         *
+         * @param section - The expected section.
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If section doesn't match.
+        */
         void assertSection(std::string_view section);
+
+        /**
+         * Reads std::array from text stream
+         * @tparam T - the type of array elements.
+         * @tparam S - The number of elements in array.
+         * @param parseFunc - function that parses single element of the array.
+         * @return std::array object.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw If parseFunc throws an exception.
+         */
+        template<typename T, size_t S, typename ElemParserF>
+        std::array<T, S> readArray(ElemParserF&& parseFunc)
+        {
+            std::array<T, S> array;
+            for (std::size_t i = 0; i < array.size(); i++) {
+                array[i] = parseFunc(i, *this);
+            }
+            return array;
+        }
+
+        /**
+         * Reads flag number from text stream.
+         * @tparam T - Type of the flag number.
+         * @return Flag number.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If the token is not a flag number.
+         */
 
         template<typename T, typename DT = typename std::decay_t<T>>
         DT readFlags()
@@ -62,6 +129,24 @@ namespace libim::content::text {
             return getFlags<DT>();
         }
 
+        /**
+         * Reads GradientColor object from text stream in format: "(r/g/b/a/r/g/b/a/r/g/b/a/r/g/b/a)"
+         * @return GradientColor object.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If string GradientColor object in stream is not in valid format..
+         */
+        GradientColor readGradientColor();
+
+        /**
+         * Reads a value of the expected key from the stream.
+         *
+         * @tparam T - Type of the value to read.
+         * @param key - Expected key.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If the token is not a number.
+        */
         template<typename T, typename DT = std::decay_t<T>>
         DT readKey(std::string_view key)
         {
@@ -83,14 +168,117 @@ namespace libim::content::text {
                 if constexpr(std::is_arithmetic_v<U>) {
                     return static_cast<DT>(cachedTkn_.getNumber<U>());
                 } else {
-                    return std::move(cachedTkn_).value();
+                    return cachedTkn_.value();
                 }
             }
         }
 
+        /**
+         * Reads the value of the expected key from the stream.
+         *
+         * @param key - Expected key.
+         * @param t   - Token object where the value will be stored.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If the token is not a number.
+        */
         void readKey(std::string_view key, Token& t);
 
+        /**
+         * Reads key-value from stream in format: key|delim|value.
+         * Key-value must be on the same line.
+         *
+         * @param kt     - Read key token is stored here.
+         * @param vt     - Read value token is stored here.
+         * @param delim  - Delimiter between key and value.
+         * @param strict - If true strict parsing mode is enabled causing an exception to be thrown
+         *                 if delimiter is not found or value is either empty string or invalid. By default True.
+         * @return True if key-value pair was read, false otherwise.
+         *         False is returned also in case when end of line or end of stream is reached.
+         *
+         * @throw SyntaxError if strict parsing was enabled and an error has occurred.
+         * @throw StreamError if IO stream error occurs.
+         */
+        bool readKeyValue(Token& kt, Token& vt, std::string_view delim = "=", bool strict = true)
+        {
+            using namespace std::string_view_literals;
+            const bool bReportEol = reportEol();
+            setReportEol(true);
+            AT_SCOPE_EXIT([&] { setReportEol(bReportEol); });
 
+            getNextToken(kt);
+            if (!kt.isValid()) {
+                return false; // end of stream or end of line was reached
+            }
+
+            auto dt = getNextToken();
+            if (dt.value() != delim)
+            {
+                if (strict) throw SyntaxError("Invalid key-value delimiter"sv, dt.location());
+                return false;
+            }
+
+            peekNextToken(vt);
+            if (vt.isNumber()) {
+                skipNextToken(); // advance stream; TODO: Find better way to do this.
+            }
+            else
+            {
+                if (vt.isValid())
+                {
+                    getSpaceDelimitedString(vt, /*throwIfEmpty=*/ false);
+                    if (strict && vt.value().empty()) {
+                        vt.setType(Token::Invalid);
+                    }
+                }
+            }
+
+            if (strict && !vt.isValid()) {
+                throw SyntaxError("Invalid value"sv, dt.location());
+            }
+            return vt.isValid();
+        }
+
+        /**
+         * Reads string line from current stream position to the end of line.
+         * @return String line.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+        */
+        std::string_view readLine();
+
+        /**
+         * Reads a string list of values from the stream.
+         *
+         * 2 Formats:
+         *   1. List with size:
+         *      SomeListName 3
+         *       value1
+         *       value2
+         *       value3
+         *        ...
+         *
+         *   2. List without size:
+         *      value1
+         *      value2
+         *      value3
+         *       ...
+         *      end
+         *
+         * @tparam Container   - Type of the list to store the values in.
+         * @tparam hasRowIdxs  - If true, the serialized text list in stream is expected to have row indices.
+         * @tparam hasListSize - If true, the serialized text list in stream is expected to have a size.
+         *                       If false, the end of list must be marked with keyword "end".
+         * @tparam Lambda      - Type of the list element constructor function: (TextResourceReader&, std::size_t rowIdx, ElementType& element) -> void
+         *
+         * @param expectedName - Expected name of the list. Not required when hasListSize is false.
+         * @param constructor  - Element constructor function.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If text list is not in correct format.
+         *                          i.e. if hasListSize is true and the expected name mismatch or the size of the list is not specified.
+         * @throw Other exceptions that the constructor function may throw.
+         */
         template<typename Container,
                  bool hasRowIdxs = true,
                  bool hasListSize = true,
@@ -101,21 +289,24 @@ namespace libim::content::text {
             static_assert(utils::has_mf_push_back<Container> ||
                           utils::has_no_pos_mf_insert<Container>, "Container doesn't support any valid insertion function!");
 
-            /*TODO: Uncomment when static reflection is available and decltype is avaliable for generic lambdas.
+            static_assert(std::is_default_constructible_v<Container>, "Container must be default constructible!");
 
-            using LambdaTriats = typename utils::function_traits<Lambda>;
-            static_assert(LambdaTriats::arity == 2, "constructor func must have at least 2 arguments");
-            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<0>,
+            /*TODO: Uncomment when static reflection is available and decltype is available for generic lambdas.
+
+            using LambdaTraits = typename utils::function_traits<Lambda>;
+            static_assert(LambdaTraits::arity == 2, "constructor func must have at least 2 arguments");
+            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<0>,
                 TextResourceReader&>, "first arg in constructor must be of a type TextResourceReader&"
             );
             // Note: Constructor can be of arguments: (TextResourceReader&, std::size_t rowIdx, T& type) or
             //                                        (TextResourceReader&, T& type)
             // TODO: check if constructor func has 2 or 3 arguments
-            static_assert(std::is_same_v<typename LambdaTriats::template arg_t<1> or typename LambdaTriats::template arg_t<2>,
+            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<1> or typename LambdaTraits::template arg_t<2>,
                 T&>, "second arg in constructor must be of a type T&"
             );
             */
 
+            using namespace std::string_view_literals;
             auto reserve = [](auto& c, typename Container::size_type r ){
                 if constexpr(utils::has_mf_reserve<Container>) {
                     c.reserve(r);
@@ -145,7 +336,7 @@ namespace libim::content::text {
             {
                 reserve(result, 256);
                 isAtEnd = [&]() {
-                    if (peekNextToken().value() == std::string_view("end"))
+                    if (peekNextToken().value() == "end"sv)
                     {
                         getNextToken();
                         return true;
@@ -154,9 +345,7 @@ namespace libim::content::text {
                 };
             }
 
-
             while(!isAtEnd())
-            //for(std::size_t i = 0; i < len; i++)
             {
                 if constexpr (hasRowIdxs)
                 {
@@ -171,7 +360,7 @@ namespace libim::content::text {
                     }
                 }
 
-                typename Container::value_type item;
+                typename Container::value_type item{};
                 constructor(*this, rowIdx, item);
                 append(result, std::move(item));
                 rowIdx++;
@@ -180,6 +369,22 @@ namespace libim::content::text {
             return result;
         }
 
+
+        /**
+         * Reads a size-less string list of values from the stream.
+         * The end of list must be marked with keyword "end".
+         *
+         * @tparam Container   - Type of the list to store the values in.
+         * @tparam hasRowIdxs  - If true, the serialized text list in stream is expected to have row indices.
+         * @tparam Lambda      - Type of the list element constructor function: (TextResourceReader&, std::size_t rowIdx, ElementType& element) -> void
+         *
+         * @param constructor  - Element constructor function.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If text list is not in correct format.
+         *                          i.e. if hasListSize is true and the expected name mismatch or the size of the list is not specified.
+         * @throw Other exceptions that the constructor function may throw.
+         */
         template<typename Container,
                  bool hasRowIdxs = true,
                  typename Lambda,
@@ -188,46 +393,123 @@ namespace libim::content::text {
             return readList<Container, hasRowIdxs, false>("", std::forward<Lambda>(rowReader));
         }
 
-        template<typename T, std::size_t N, typename DT = typename std::decay_t<T>>
-        std::array<T, N> readNumericArray()
+        /**
+         * Reads numeric std::array from text stream.
+         * @tparam T - Type of array elements.
+         * @tparam S - Size of array.
+         * @return std::array object.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If any of the array elements is not in a number.
+         */
+        template<typename T, std::size_t S, typename DT = typename std::decay_t<T>>
+        std::array<T, S> readNumericArray()
         {
             static_assert(std::is_arithmetic_v<DT>, "T must be an arithmetic type!");
-            std::array<DT, N> result;
-            for (std::size_t i = 0; i < result.size(); i++) {
-                result[i] = getNumber<DT>();
-            }
-            return result;
+            return readArray<DT, S>([](auto, auto& rr) {
+                return rr.getNumber<DT>();
+            });
         }
 
-        template<typename T, typename DT = typename std::decay_t<T>>
-        DT readVector()
+        /**
+         * Reads math vector object from text stream.
+         *
+         * @tparam VecT Type of vector to read.
+         * @param strict - If true, the serialized string vector in the stream must be in the format of "(x/y/z/...)".
+         *                 If false, the string can be in any format, e.g.: "x y z ...", "x,y, z,..." etc...
+         *                 By default false.
+         *
+         * @throw StreamError - If IO error occurs.
+         * @throw SyntaxError - If vector is not in valid format.
+         */
+        template<typename VecT, typename DVecT = typename std::decay_t<VecT>>
+        DVecT readVector(bool strict = false)
         {
             using namespace utils;
-            static_assert(isVector<DT> && std::is_default_constructible_v<DT>,
+            static_assert(isVector<DVecT> && std::is_default_constructible_v<DVecT>,
                 "T must be derivative of type AbstractVector and default constructable!"
             );
 
-            return static_cast<DT &&>(
-                readNumericArray<typename DT::value_type, DT::size()>()
-            );
+            if (strict) assertIdentifier("(");
+            using et = typename DVecT::value_type;
+            auto vec = readArray<et, DVecT::size()>([strict](std::size_t i, TextResourceReader& rr) {
+                if (!strict){ // Since we're not in strict mode, skip any unwanted characters.
+                    while (rr.skipNextTokenIf(TypeMask(Token::Identifier) | Token::String | Token::Punctuator)) {}
+                }
+                else if(i > 0) rr.assertIdentifier("/");
+                return rr.getNumber<et>();
+            });
+            if (strict) assertIdentifier(")");
+            return static_cast<DVecT&&>(std::move(vec));
         }
 
-        template<typename B, typename DB = typename std::decay_t<B>>
-        DB readBox()
+        /**
+         * Reads Box object from text stream in format: "minx miny minz... maxx maxy maxz".
+         * @tparam BoxT - Type of box to read.
+         * @return Box object.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If box is not in correct format.
+         */
+        template<typename BoxT, typename DBoxT = typename std::decay_t<BoxT>>
+        DBoxT readBox()
         {
-            static_assert(asset::isBox<DB>, "B must be of type Box");
+            static_assert(asset::isBox<DBoxT>, "B must be of type Box");
 
-            DB result;
-            result.min = readVector<decltype(result.min)>();
-            result.max = readVector<decltype(result.max)>();
-            return result;
+            DBoxT box;
+            box.min = readVector<decltype(box.min)>();
+            box.max = readVector<decltype(box.max)>();
+            return box;
         }
 
-        std::string readSection();
+        /**
+         * Reads PathFrame object from text stream in format: "(x/y/z:p/y/r)".
+         * @return PathFrame object.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If string PathFrame in stream is not in correct format.
+         */
+        asset::PathFrame readPathFrame();
+
+        /**
+         * Reads list row index from text stream in format: "<index>:".
+         * @return Row index.
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If string row index in stream is not in correct format.
+        */
         std::size_t readRowIdx();
 
-    private:
-        void readSection(Token& t);
+        /**
+         * Reads section line from text stream in format: "SECTION section_name".
+         * @return Const reference to string section name (section_name).
+         *
+         * @throw StreamError - If an error occurs while reading from stream.
+         * @throw SyntaxError - If section line in stream is not in correct format.
+        */
+        std::string_view readSection();
     };
+}
+
+// Definition of helper functions & constructors for other types that can be constructed from a string.
+namespace libim {
+    template<typename T, std::size_t S, typename Tag>
+    AbstractVector<T,S,Tag>::AbstractVector(std::string_view vecstr, bool strict)
+    {
+        using namespace libim::content::text;
+        InputBinaryStream istream(vecstr);
+        TextResourceReader rr(istream);
+        *this = rr.readVector<decltype(*this)>(strict);
+    }
+
+    namespace content::asset {
+        inline PathFrame::PathFrame(std::string_view framestr)
+        {
+            using namespace libim::content::text;
+            InputBinaryStream istream(framestr);
+            TextResourceReader rr(istream);
+            *this = rr.readPathFrame();
+        }
+    }
 }
 #endif // LIBIM_RESOURCE_READER_H

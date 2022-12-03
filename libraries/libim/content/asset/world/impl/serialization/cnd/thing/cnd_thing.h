@@ -34,7 +34,7 @@ namespace libim::content::asset {
     {
         Plot      = 0x0,
         Player    = 0x1,
-        Ai        = 0x2,
+        AI        = 0x2,
         Explosion = 0x6,
         Particle  = 0x7
     };
@@ -54,8 +54,8 @@ namespace libim::content::asset {
         float size;
         float collideWidth;
         float collideHeight;
-        float unknown4;  // probably center x
-        float unknown5;  // probably center y
+        float unkWidth;
+        float unkHeight;
     };
 
     struct CndThingLight final
@@ -69,7 +69,7 @@ namespace libim::content::asset {
     {
         CndResourceName baseName;
         CndResourceName name;
-        Vector3f pos;
+        Vector3f position;
         FRotator pyrOrient;
         int unknown;                        // Possible: padding
         int sectorNum;
@@ -78,15 +78,15 @@ namespace libim::content::asset {
         CndThingMoveType moveType;
         CndThingControlType controlType;
         CndThingLight light;
-        int32_t msLifeLeft;
+        uint32_t msLifeLeft;
         CndRdThingType rdThingType;
         CndResourceName rdThingFileName;    // [*.3do, *.spr, *.par]
         CndResourceName pupFileName;
         CndResourceName sndFileName;
-        CndResourceName createThingName;    // The name of thing template that will be created when this thing is created
+        CndResourceName createThingTemplateName;    // The name of thing template that will be created when this thing is created
         CndResourceName cogScriptFileName;
         CndCollide collide;
-        int perfLevel;  // performance level. Note: If greater then what the game is configured the thing won't be created
+        int performanceLevel;  // performance level. Note: If greater then what the game is configured the thing won't be created
     };
     static_assert(sizeof(CndThingHeader) == 568);
 
@@ -155,15 +155,15 @@ namespace libim::content::asset {
         DamageType damageType;
         float range;
         float force;
-        int32_t msBlastTime;
-        int32_t msBabyTime;
-        int32_t msExpandTime;
-        int32_t msFadeTime;
+        uint32_t msBlastTime;
+        uint32_t msBabyTime;
+        uint32_t msExpandTime;
+        uint32_t msFadeTime;
         float maxLight;
         std::array<CndResourceName, 16> aDebrisTemplateNames;
-        Vector3f posSpriteStart;
-        Vector3f posSpriteEnd;
-        CndResourceName spriteThingName;
+        Vector3f spriteStartPos;
+        Vector3f spriteEndPos;
+        CndResourceName spriteTemplateName;
     };
     static_assert(sizeof(CndExplosionInfo) == 1152);
 
@@ -191,30 +191,30 @@ namespace libim::content::asset {
         int numParticles;
         float pitchRange;
         float yawRange;
-        CndResourceName materialFileName;
+        CndResourceName materialFilename;
     };
     static_assert (sizeof(CndParticleInfo) == 100);
 
 
     // Thing control info
-    struct CndAiControlInfo final // Used if controlType == Ai
+    struct CndAIControlInfo final // Used if controlType == AI
     {
         CndResourceName aiFileName;
         std::vector<Vector3f> pathFrames;
     };
 
-    // This struct is written in the cnd file and represents part of CndAiControlInfo
-    struct CndAiControlInfoHeader final
+    // This struct is written in the cnd file and represents part of CndAIControlInfo
+    struct CndAIControlInfoHeader final
     {
         CndResourceName aiFileName;
         int32_t         numPathFrames;
     };
-    static_assert(sizeof(CndAiControlInfoHeader) == 68);
+    static_assert(sizeof(CndAIControlInfoHeader) == 68);
     static_assert(sizeof(Vector3f) == 12); // ai pathFrame
 
 
     // Thing info's variants
-    using CndThingControlInfo = std::variant<std::monostate, CndAiControlInfo>;
+    using CndThingControlInfo = std::variant<std::monostate, CndAIControlInfo>;
     using CndThingMoveInfo    = std::variant<std::monostate, CndPhysicsInfo, PathInfo>;
     using CndThingInfo        = std::variant<
         std::monostate,
@@ -232,6 +232,10 @@ namespace libim::content::asset {
         CndThingControlInfo controlInfo;
         CndThingMoveInfo    moveInfo;
         CndThingInfo        thingInfo;
+
+        inline void reset() {
+            *this = CndThing{};
+        }
     };
 
 
@@ -248,8 +252,8 @@ namespace libim::content::asset {
         uint32_t sizeItemInfoList;
         uint32_t sizeParticleInfoList;
         uint32_t sizeHintUserValueList;
-        uint32_t sizeAiControlInfoList;
-        uint32_t sizeAiPathFrameList;
+        uint32_t sizeAIControlInfoList;
+        uint32_t sizeAIPathFrameList;
     };
 
     static_assert(sizeof(CndThingParamListSizes) == 44);

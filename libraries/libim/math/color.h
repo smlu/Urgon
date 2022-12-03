@@ -12,20 +12,10 @@ namespace libim {
     template<typename T, std::size_t N, typename ColorTag>
     struct AbstractColor : public AbstractVector<T, N, ColorTag>
     {
-        //using Base_ = AbstractVector<T, N, color_vector_tag>;
-        //using Base_::AbstractVector;
         using AbstractVector<T, N, ColorTag>::AbstractVector;
 
         static_assert(N  == 3 || N == 4);
         static_assert(std::is_floating_point_v<T> || std::is_unsigned_v<T>);
-
-//        constexpr inline Color(float r, float g, float b, float a) noexcept :
-//            Base_{{{ r, g, b, a }}}
-//        {}
-
-//        explicit constexpr inline AbstractColor(std::array<T, N> a) noexcept :
-//            Base_{{ std::move(a) }}
-//        {}
 
         constexpr inline static T max()
         {
@@ -132,6 +122,7 @@ namespace libim {
     struct AbstractLinearColor :
         AbstractColor<float, N, linear_color_vector_tag>
     {
+        using AbstractColor<float, N, linear_color_vector_tag>::AbstractColor;
         constexpr inline LColor clamped() const
         {
             LColor color;
@@ -142,7 +133,6 @@ namespace libim {
         }
 
     private:
-        using AbstractColor<float, N, linear_color_vector_tag>::AbstractColor;
         friend LColor;
     };
 
@@ -150,13 +140,17 @@ namespace libim {
      * Represents linear, 32-bit/component floating point RGBA color.
      * @note: When converting color from non-linear gamma space use helper function makeLinearColor(color, sRGB=true).
      */
-    struct LinearColor : AbstractLinearColor<LinearColor, 4> {};
+    struct LinearColor : AbstractLinearColor<LinearColor, 4> {
+        using AbstractLinearColor<LinearColor, 4>::AbstractLinearColor;
+    };
 
     /**
      * Represents linear, 32-bit/component floating point RGB color.
      * @note: When converting color from non-linear gamma space use helper function makeLinearColorRgb(color, sRGB=true).
      */
-    struct LinearColorRgb : AbstractLinearColor<LinearColorRgb, 3> {};
+    struct LinearColorRgb : AbstractLinearColor<LinearColorRgb, 3> {
+        using AbstractLinearColor<LinearColorRgb, 3>::AbstractLinearColor;
+    };
 
 
     /**
@@ -166,7 +160,7 @@ namespace libim {
      */
     constexpr inline Color makeColor(const ColorRgb& rgb, uint8_t alpha = Color::max())
     {
-        return {{{ rgb.red(), rgb.green(), rgb.blue(), alpha }}};
+        return Color{{{ rgb.red(), rgb.green(), rgb.blue(), alpha }}};
     }
 
     /**
@@ -255,12 +249,12 @@ namespace libim {
      */
     constexpr inline LinearColor makeLinearColor(const LinearColorRgb& rgb, float alpha = LinearColor::max())
     {
-        return LinearColor{{{{
+        return LinearColor{{
             LinearColor::clamp(rgb.red()),
             LinearColor::clamp(rgb.green()),
             LinearColor::clamp(rgb.blue()),
             LinearColor::clamp(alpha)
-        }}}};
+        }};
     }
 
     /**
@@ -274,12 +268,12 @@ namespace libim {
      */
     constexpr inline LinearColor makeLinearColor(float red, float green, float blue, float alpha)
     {
-        return LinearColor{{{{
+        return LinearColor{{
             LinearColor::clamp(red),
             LinearColor::clamp(green),
             LinearColor::clamp(blue),
             LinearColor::clamp(alpha)
-        }}}};
+        }};
     }
 
     /**
@@ -302,11 +296,11 @@ namespace libim {
      */
     constexpr inline LinearColorRgb makeLinearColorRgb(const LinearColor& rgba)
     {
-        return LinearColorRgb{{{{
+        return LinearColorRgb{{
             LinearColorRgb::clamp(rgba.red()),
             LinearColorRgb::clamp(rgba.green()),
             LinearColorRgb::clamp(rgba.blue())
-        }}}};
+        }};
     }
 
     /**
@@ -319,11 +313,11 @@ namespace libim {
      */
     constexpr inline LinearColorRgb makeLinearColorRgb(float red, float green, float blue)
     {
-        return LinearColorRgb{{{{
+        return LinearColorRgb{{
             LinearColorRgb::clamp(red),
             LinearColorRgb::clamp(green),
             LinearColorRgb::clamp(blue)
-        }}}};
+        }};
     }
 }
 

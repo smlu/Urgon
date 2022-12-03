@@ -8,13 +8,10 @@ using namespace libim::content::asset;
 using namespace libim::content::text;
 using namespace libim::utils;
 
-
-
 static constexpr auto kWorldVertices      = "World vertices"sv;
 static constexpr auto kWorldTexVerts      = "World texture vertices"sv;
 static constexpr auto kWorldAdjoints      = "World adjoins"sv;
 static constexpr auto kWorldSurfaces      = "World surfaces"sv;
-
 
 Georesource NDY::parseSection_Georesource(TextResourceReader& rr)
 {
@@ -90,11 +87,11 @@ Georesource NDY::parseSection_Georesource(TextResourceReader& rr)
 
 void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& geores)
 {
-    AT_SCOPE_EXIT([&rw, ich = rw.indentCh()](){
-        rw.setIndentCh(ich);
+    AT_SCOPE_EXIT([&rw, ich = rw.indentChar()](){
+        rw.setIndentChar(ich);
     });
 
-    rw.setIndentCh(' ');
+    rw.setIndentChar(' ');
     rw.writeLine("#### Geometry Resources Info ####"sv);
     rw.writeSection(kSectionGeoresource, /*overline=*/ false);
 
@@ -102,7 +99,7 @@ void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& ge
     rw.writeList(kWorldVertices, geores.verts, [](auto& rw, auto idx, auto& v){
         if (idx == 0)
         {
-            rw.setIndentCh('\t');
+            rw.setIndentChar('\t');
             rw.writeCommentLine("num:	vertex:"sv);
         }
 
@@ -113,28 +110,28 @@ void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& ge
     rw.writeEol();
     rw.writeEol();
 
-    rw.setIndentCh(' ');
+    rw.setIndentChar(' ');
     rw.writeCommentLine("-- Texture Verts Subsection ---"sv);
     rw.writeList(kWorldTexVerts, geores.texVerts, [](auto& rw, auto idx, auto& v){
         if (idx == 0)
         {
-            rw.setIndentCh('\t');
+            rw.setIndentChar('\t');
             rw.writeCommentLine("num:	u:	v:"sv);
         }
 
         rw.writeRowIdx(idx, 0);
-        rw.writeVector(v, /*indent=*/ 1);
+        rw.writeVector(v, /*width=*/ 1);
     });
 
     rw.writeEol();
     rw.writeEol();
 
-    rw.setIndentCh(' ');
+    rw.setIndentChar(' ');
     rw.writeCommentLine("------ Adjoins Subsection -----"sv);
     rw.writeList(kWorldAdjoints, geores.adjoints, [](auto& rw, auto idx, const SurfaceAdjoin& a) {
         if (idx == 0)
         {
-            rw.setIndentCh('\t');
+            rw.setIndentChar('\t');
             rw.writeCommentLine("num:	flags:	mirror:	dist:"sv);
         }
 
@@ -151,13 +148,13 @@ void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& ge
     });
 
     rw.writeEol();
-    rw.setIndentCh(' ');
+    rw.setIndentChar(' ');
 
     rw.writeCommentLine("----- Surfaces Subsection -----"sv);
     rw.writeList(kWorldSurfaces, geores.surfaces, [](auto& rw, auto idx, const Surface& s){
         if(idx == 0)
         {
-            rw.setIndentCh('\t');
+            rw.setIndentChar('\t');
             rw.writeCommentLine("num:	mat:	surfflags:	faceflags:	geo:	light:	tex:	adjoin:	extralight:	nverts:	vertices:			intensities:"sv);
         }
 
@@ -185,7 +182,7 @@ void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& ge
         rw.writeNumber(fromOptionalIdx(s.adjoinIdx));
         rw.indent(1);
 
-        rw.writeVector(s.extraLight, /*indent=*/1);
+        rw.writeVector(s.extraLight, /*width=*/1);
         rw.indent(2);
 
         // Surface verts, tex verts and verts color
@@ -200,12 +197,12 @@ void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& ge
         }
 
         for(const auto& i : s.vecIntensities) {
-            rw.writeVector(makeLinearColorRgb(i), /*indent=*/1); // Note: The engine takes alpha from field alpha of member var extraLight
+            rw.writeVector(makeLinearColorRgb(i), /*width=*/1); // Note: The engine takes alpha from field alpha of member var extraLight
         }
     });
 
     rw.writeEol();
-    rw.setIndentCh('\t');
+    rw.setIndentChar('\t');
 
     rw.writeCommentLine("--- Surface normals ---"sv);
     for(auto[idx, s] : enumerate(geores.surfaces))

@@ -1,9 +1,9 @@
-#ifndef DIAGNOSTIC_LOCATION_H
-#define DIAGNOSTIC_LOCATION_H
+#ifndef LIBIM_PARSELOCATION_H
+#define LIBIM_PARSELOCATION_H
 #include <string_view>
 
 namespace libim::text {
-    struct diagnostic_location
+    struct ParseLocation
     {
         std::string_view filename;
         std::size_t first_line;
@@ -13,4 +13,4 @@ namespace libim::text {
     };
 }
 
-#endif // DIAGNOSTIC_LOCATION_H
+#endif // LIBIM_PARSE_LOCATION_H

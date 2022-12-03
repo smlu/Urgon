@@ -29,7 +29,7 @@ namespace libim::content::asset {
         Deactivated = 21,
         Shutdown    = 22,
         Respawn     = 23,
-        AiEvent     = 24,
+        AIEvent     = 24,
         Callback    = 25,
         Taken       = 26,
         User0       = 27,

@@ -1,5 +1,5 @@
-#ifndef BINARYSTREAM_IMPL
-#define BINARYSTREAM_IMPL
+#ifndef LIBIM_BINARYSTREAM_IMPL
+#define LIBIM_BINARYSTREAM_IMPL
 #include <functional>
 #include <iterator>
 #include <type_traits>
@@ -118,7 +118,7 @@ namespace libim
         end_(last),
         pos_(first)
     {
-        static_assert(!std::is_const_v<T> || (std::is_same_v<Iterator, typename T::const_iterator>), "Inerator type must be of a 'const iterator' type");
+        static_assert(!std::is_const_v<T> || (std::is_same_v<Iterator, typename T::const_iterator>), "Iterator type must be of a 'const iterator' type");
     }
 
     template<typename T, typename Iterator>
@@ -236,4 +236,4 @@ namespace libim
         std::advance(pos_, nPos);
     }
 }
-#endif // BINARYSTREAM_IMPL
+#endif // LIBIM_BINARYSTREAM_IMPL

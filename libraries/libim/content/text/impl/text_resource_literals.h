@@ -1,12 +1,12 @@
 #ifndef LIBIM_RESOURCE_LITERALS_H
 #define LIBIM_RESOURCE_LITERALS_H
-#include "../../../text/impl/schars.h"
+#include <libim/text/impl/schars.h>
 #include <string_view>
 
 namespace libim::content::text {
     using namespace std::string_view_literals;
 
-    static constexpr auto kResLabelPunc     = ":"sv;
+    static constexpr auto kResLabelDelim     = ":"sv;
     static constexpr auto kResSectionHeader  = "###############"sv;
     static constexpr auto kResName_Entries   = "ENTRIES"sv;
     static constexpr auto kResName_Flags     = "FLAGS"sv;

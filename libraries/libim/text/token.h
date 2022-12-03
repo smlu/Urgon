@@ -4,8 +4,8 @@
 #include <sstream>
 #include <type_traits>
 
-#include "diagnostic_location.h"
-#include "tokenizer_error.h"
+#include "parselocation.h"
+#include "syntax_error.h"
 #include "../utils/utils.h"
 
 namespace libim::text {
@@ -32,7 +32,7 @@ namespace libim::text {
             m_value(std::move(value))
         {}
 
-        Token(Type type, std::string value, diagnostic_location loc) :
+        Token(Type type, std::string value, ParseLocation loc) :
             m_type(type),
             m_value(std::move(value)),
             m_loc(std::move(loc))
@@ -62,17 +62,17 @@ namespace libim::text {
                    m_type == FloatNumber;
         }
 
-        void setLocation(diagnostic_location loc)
+        void setLocation(ParseLocation loc)
         {
             m_loc = std::move(loc);
         }
 
-        const diagnostic_location& location() const
+        const ParseLocation& location() const
         {
             return m_loc;
         }
 
-        diagnostic_location& location()
+        ParseLocation& location()
         {
             return m_loc;
         }
@@ -136,7 +136,7 @@ namespace libim::text {
             if(!isNumber() || ss.fail())
             {
                 using namespace std::string_view_literals;
-                throw TokenizerError("invalid numeric conversion from string"sv, m_loc);
+                throw SyntaxError("Invalid numeric conversion from string"sv, m_loc);
             }
 
             return result;
@@ -157,8 +157,7 @@ namespace libim::text {
     private:
         Type m_type = Invalid;
         std::string m_value;
-        diagnostic_location m_loc;
+        ParseLocation m_loc;
     };
-
 }
 #endif // LIBIM_TEXT_TOKEN_H

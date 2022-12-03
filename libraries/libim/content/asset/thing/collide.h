@@ -17,8 +17,8 @@ namespace libim::content::asset {
         double size;
         double collideWidth;
         double collideHeight;
-        double unknown4;
-        double unknown5;
+        double unkWidth;
+        double unkHeight;
     };
 }
 #endif // LIBIM_COLLIDE_H

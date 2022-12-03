@@ -82,7 +82,7 @@ void writeKeyframes(TextResourceWriter& rw, const Animation& anim)
 
               const auto placementIndent = rw.tell() - rowBegin;
 
-              rw.writeVector(frame.pos, vecIndent);
+              rw.writeVector(frame.position, vecIndent);
               rw.writeVector(frame.rot, vecIndent);
 
               rw.writeEol().indent(placementIndent);

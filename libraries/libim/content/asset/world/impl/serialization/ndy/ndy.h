@@ -15,7 +15,6 @@
 #include <libim/types/hashmap.h>
 #include <libim/types/sharedref.h>
 
-
 #include <string>
 #include <utility>
 #include <vector>
@@ -29,7 +28,7 @@ namespace libim::content::asset {
         static constexpr auto kSectionMaterials   = std::string_view{ "MATERIALS"   };
         static constexpr auto kSectionGeoresource = std::string_view{ "GEORESOURCE" };
         static constexpr auto kSectionSectors     = std::string_view{ "SECTORS"     };
-        static constexpr auto kSectionAiClass     = std::string_view{ "AICLASS"     };
+        static constexpr auto kSectionAIClass     = std::string_view{ "AICLASS"     };
         static constexpr auto kSectionModels      = std::string_view{ "MODELS"      };
         static constexpr auto kSectionSprites     = std::string_view{ "SPRITES"     };
         static constexpr auto kSectionKeyframes   = std::string_view{ "KEYFRAMES"   };
@@ -45,56 +44,59 @@ namespace libim::content::asset {
         static bool parseSection_Copyright(text::TextResourceReader& rr); // Retuns true if copyright notice is valid
         static void writeSection_Copyright(text::TextResourceWriter& rw);
 
-        static CndHeader parseSection_Header(text::TextResourceReader& rr);
-        static void      writeSection_Header(text::TextResourceWriter& rw, const CndHeader& header );
+        [[nodiscard]] static CndHeader parseSection_Header(text::TextResourceReader& rr);
+        static void writeSection_Header(text::TextResourceWriter& rw, const CndHeader& header );
 
-        static std::pair<std::size_t, std::vector<std::string>>
+        [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Sounds(text::TextResourceReader& rr); // Returns pair of max no. of world sounds and the list of wav file names
         static void writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxWorldSounds, const HashMap<audio::Sound>& track);
 
-        static std::pair<std::size_t, std::vector<std::string>>
+        [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Materials(text::TextResourceReader& rr); // Returns pair of max no. of world materials and the list of mat file names
         static void writeSection_Materials(text::TextResourceWriter& rw, const HashMap<Material>& materials);
 
-        static Georesource parseSection_Georesource(text::TextResourceReader& rr);
+        [[nodiscard]] static Georesource parseSection_Georesource(text::TextResourceReader& rr);
         static void writeSection_Georesource(text::TextResourceWriter& rw, const Georesource& geores);
 
-        static std::vector<Sector> parseSection_Sectors(text::TextResourceReader& rr);
+        [[nodiscard]] static std::vector<Sector> parseSection_Sectors(text::TextResourceReader& rr);
         static void writeSection_Sectors(text::TextResourceWriter& rw, const std::vector<Sector>& sectors);
 
-        static std::pair<std::size_t, std::vector<std::string>>
-                    parseSection_AiClass(text::TextResourceReader& rr); // Returns pair of max no. of world ai classes and the list of ai file names
-        static void writeSection_AiClass(text::TextResourceWriter& rw, std::size_t maxWorldAiClasses, const std::vector<std::string>& aiclasses);
+        [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
+                    parseSection_AIClass(text::TextResourceReader& rr); // Returns pair of max no. of world ai classes and the list of ai file names
+        static void writeSection_AIClass(text::TextResourceWriter& rw, std::size_t maxWorldAIClasses, const std::vector<std::string>& aiclasses);
 
-        static std::pair<std::size_t, std::vector<std::string>>
+        [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Models(text::TextResourceReader& rr); // Returns pair of max no. of world models and the list of 3do file names
         static void writeSection_Models(text::TextResourceWriter& rw, std::size_t maxWorldModels, const std::vector<std::string>& models);
 
-        static std::pair<std::size_t, std::vector<std::string>>
+        [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Sprites(text::TextResourceReader& rr); // Returns pair of max no. of world sprites and the list of spr file names
         static void writeSection_Sprites(text::TextResourceWriter& rw, std::size_t maxWorldSprites, const std::vector<std::string>& sprites);
 
-        static std::pair<std::size_t, std::vector<std::string>>
+        [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Keyframes(text::TextResourceReader& rr); // Returns pair of max no. of world keyframes and the list of key file names
         static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxWorldKeyframes, const HashMap<Animation>& keyframes);
 
-        static std::pair<std::size_t, std::vector<std::string>>
+        [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_AnimClass(text::TextResourceReader& rr); // Returns pair of max no. of world puppets and the list of pup file names
         static void writeSection_AnimClass(text::TextResourceWriter& rw, std::size_t maxWorldPuppets, const std::vector<std::string>& puppets);
 
-        static std::pair<std::size_t, std::vector<std::string>>
+        [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_SoundClass(text::TextResourceReader& rr); // Returns pair of max no. of world sound classes and the list of snd file names
         static void writeSection_SoundClass(text::TextResourceWriter& rw, std::size_t maxWorldSndClasses, const std::vector<std::string>& sndclasses);
 
-        static std::pair<std::size_t, std::vector<std::string>>
+        [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_CogScripts(text::TextResourceReader& rr); // Returns pair of max no. of world cog scripts and the list of cog file names
         static void writeSection_CogScripts(text::TextResourceWriter& rw, std::size_t maxWorldCogScripts, const std::vector<std::string>& scripts);
 
-        static std::pair<std::size_t, std::vector<SharedRef<Cog>>>
+        [[nodiscard]] static std::pair<std::size_t, std::vector<SharedRef<Cog>>>
                     parseSection_Cogs(text::TextResourceReader& rr, const HashMap<SharedRef<CogScript>>& scripts); // Returns pair of max no. of world cogs and list of world cogs
         static void writeSection_Cogs(text::TextResourceWriter& rw, std::size_t maxWorldCogs, const std::vector<SharedRef<Cog>>& cogs);
 
+        [[nodiscard]] static std::vector<CndThing> parseSection_Templates(text::TextResourceReader& rr);
         static void writeSection_Templates(text::TextResourceWriter& rw, const HashMap<CndThing>& templates);
+
+        [[nodiscard]] static std::vector<CndThing> parseSection_Things(text::TextResourceReader& r);
         static void writeSection_Things(text::TextResourceWriter& rw, const std::vector<CndThing>& things, const HashMap<CndThing>& templates);
 
         // Note: Section PVS is optional and it doesn't need to be written but performance will be degraded.
@@ -126,11 +128,11 @@ namespace libim::content::asset {
                 rw.writeCommentLine(listHeader);
             }
 
-            AT_SCOPE_EXIT([&rw, ich = rw.indentCh()](){
-                rw.setIndentCh(ich);
+            AT_SCOPE_EXIT([&rw, ich = rw.indentChar()](){
+                rw.setIndentChar(ich);
             });
 
-            rw.setIndentCh('\t');
+            rw.setIndentChar('\t');
 
             rw.writeList(c, [&](auto& rw, [[maybe_unused]]auto idx, auto& v){
                 if constexpr (hasRowIdx)
@@ -152,7 +154,7 @@ namespace libim::content::asset {
         {
             std::size_t maxResources = rr.readKey<std::size_t>(listName);
             auto resources = rr.readList<std::vector<std::string>, hasRowIdxs>(
-            [](auto& rr, auto /*rowIdx*/, auto& r){
+            [](auto& rr, auto /*rowIdx*/, auto& r) {
                 r = rr.getDelimitedString([](char c){ return c == '\r' || c == '\n'; });
             });
 

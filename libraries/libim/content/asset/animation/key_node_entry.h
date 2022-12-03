@@ -23,7 +23,7 @@ namespace libim::content::asset {
         float frame;
         Flags<Flag> flags;
 
-        Vector3f pos;
+        Vector3f position;
         FRotator rot;
 
         Vector3f dpos;
@@ -33,11 +33,11 @@ namespace libim::content::asset {
     inline constexpr bool operator == (const KeyNodeEntry& kf1, const KeyNodeEntry& kf2)
     {
         return libim::cmpf(kf1.frame, kf2.frame) &&
-               kf1.flags == kf2.flags &&
-               kf1.pos   == kf2.pos   &&
-               kf1.dpos  == kf2.dpos  &&
-               kf1.rot   == kf2.rot   &&
-               kf1.drot  == kf2.drot;
+               kf1.flags    == kf2.flags         &&
+               kf1.position == kf2.position      &&
+               kf1.dpos     == kf2.dpos          &&
+               kf1.rot      == kf2.rot           &&
+               kf1.drot     == kf2.drot;
     }
 }
 #endif // LIBIM_KEY_NODE_ENTRY_H

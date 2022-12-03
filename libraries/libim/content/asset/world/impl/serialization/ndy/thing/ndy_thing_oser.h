@@ -1,5 +1,5 @@
-#ifndef LIBIM_NDY_THING_SER_HELPERS_H
-#define LIBIM_NDY_THING_SER_HELPERS_H
+#ifndef LIBIM_NDY_THING_OSER_H
+#define LIBIM_NDY_THING_OSER_H
 #include "ndy_thing_ser_common.h"
 #include "../ndy.h"
 #include "../../world_ser_common.h"
@@ -26,13 +26,6 @@ namespace libim::content::asset {
     #define DefNdyWriteThingParamFunc(name, basePred, paramPred, paramType, paramWriteValue) \
         DefNdyWriteThingParamFuncEx(name, basePred, paramPred, [&](TextResourceWriter& rw) { \
             ndyWriteThingParam(rw, paramType, paramWriteValue); })
-
-    /*void ndyWriteThing##name(TextResourceWriter& rw, const CndThing& t, OptionalRef<const CndThing> baseTemplate) { \
-            NdyWriteThingParamIf(baseTemplate,   \
-                ndyWriteIfBase(basePred),        \
-                ndyWriteIfPara(paramPred), [&] { \
-                ndyWriteThingParam(rw, paramType, paramWriteValue); \
-            });}*/
 
     // Macro defines new ndy serialization function to write thing parameter.
     // param: name            - name of function
@@ -73,6 +66,32 @@ namespace libim::content::asset {
         rw.indent(1);
     }
 
+     // Function serializes thing vector param to rw stream.
+    template<typename T, std::size_t S, typename Tag>
+    inline void ndyWriteThingParam(TextResourceWriter& rw, NdyThingParam param, const AbstractVector<T,S,Tag>& vec)
+    {
+        rw.write(kNdyThingParamMap.at(param));
+        rw.write("=");
+        rw.writeVector</*strict=*/true>(vec);
+        rw.indent(1);
+    }
+
+    inline void ndyWriteThingParam(TextResourceWriter& rw, NdyThingParam param, const PathFrame& frame)
+    {
+        rw.write(kNdyThingParamMap.at(param));
+        rw.write("=");
+        rw.writePathFrame(frame);
+        rw.indent(1);
+    }
+
+    inline void ndyWriteThingParam(TextResourceWriter& rw, NdyThingParam param, const GradientColor& color)
+    {
+        rw.write(kNdyThingParamMap.at(param));
+        rw.write("=");
+        rw.writeGradientColor(color);
+        rw.indent(1);
+    }
+
     // Overload for numbers and enums
     template<std::size_t base = 10, typename T,
         typename std::enable_if_t<utils::isEnum<T> || std::is_arithmetic_v<T>>* = nullptr>
@@ -97,7 +116,6 @@ namespace libim::content::asset {
         using namespace utils;
         return to_string<16>(to_underlying(f));
     }
-
 
     //-----------------------------------------------------------------//
     // Helper functions for serializing thing params and their values. //
@@ -139,22 +157,22 @@ namespace libim::content::asset {
     )
 
     DefNdyWriteThingParamFunc(CreateThing,
-        t.createThingName != base.createThingName && !t.createThingName.isEmpty(),
-        !t.createThingName.isEmpty(),
+        t.createThingTemplateName != base.createThingTemplateName && !t.createThingTemplateName.isEmpty(),
+        !t.createThingTemplateName.isEmpty(),
         NdyThingParam::CreateThing,
-        t.createThingName
+        t.createThingTemplateName
     )
 
     DefNdyWriteThingParamFuncEx(Light,
         t.light.color != base.light.color,
         t.light.color.isZero() == false,
         [&](TextResourceWriter&) {
-            // Writes: light=(r/g/b/a) if alpha is not 0.0 else light=(r/g/b)
-            std::string light = t.light.color.toString();
-            if (t.light.color.alpha() == 0.0f) {
-                light = makeLinearColorRgb(t.light.emitColor).toString();
+            if (t.light.color.alpha() != 0.0f) {
+                ndyWriteThingParam(rw, NdyThingParam::Light, t.light.emitColor);
             }
-            ndyWriteThingParam(rw, NdyThingParam::Light, light);
+            else {
+                ndyWriteThingParam(rw, NdyThingParam::Light, makeLinearColorRgb(t.light.emitColor));
+            }
         }
     )
 
@@ -176,14 +194,14 @@ namespace libim::content::asset {
         t.pyrOrient != base.pyrOrient,
         !t.pyrOrient.isZero(),
         NdyThingParam::Orient,
-        t.pyrOrient.toString()
+        t.pyrOrient
     )
 
     DefNdyWriteThingParamFunc(PerfLevel,
-        t.perfLevel != base.perfLevel,
-        t.perfLevel != 0,
+        t.performanceLevel != base.performanceLevel,
+        t.performanceLevel != 0,
         NdyThingParam::PerformanceLevel,
-        t.perfLevel
+        t.performanceLevel
     )
 
     DefNdyWriteThingParamFunc(Puppet,
@@ -243,24 +261,24 @@ namespace libim::content::asset {
         using namespace utils;
         std::visit(overloaded {
             [](std::monostate ){},
-            [&](const CndAiControlInfo& aiInfo)
+            [&](const CndAIControlInfo& aiInfo)
             {
-                OptionalRef<const CndAiControlInfo> baseAiInfo;
-                if(baseTemplate && std::holds_alternative<CndAiControlInfo>(baseTemplate->controlInfo)) {
-                   baseAiInfo = std::get<CndAiControlInfo>(baseTemplate->controlInfo);
+                OptionalRef<const CndAIControlInfo> baseAIInfo;
+                if(baseTemplate && std::holds_alternative<CndAIControlInfo>(baseTemplate->controlInfo)) {
+                   baseAIInfo = std::get<CndAIControlInfo>(baseTemplate->controlInfo);
                 }
 
-                ndyWriteThingParamIf(baseAiInfo,
+                ndyWriteThingParamIf(baseAIInfo,
                    ndyWriteIfBase(aiInfo.aiFileName != base.aiFileName),
                    ndyWriteIfPara(!aiInfo.aiFileName.isEmpty()), [&] {
-                   ndyWriteThingParam(rw, NdyThingParam::AiClass, aiInfo.aiFileName);
+                   ndyWriteThingParam(rw, NdyThingParam::AIClass, aiInfo.aiFileName);
                 });
 
                 // Writes: numframes=x frame=(f/f/f) frame=(f/f/f) ...
                 if(!aiInfo.pathFrames.empty()) {
                     ndyWriteThingParam(rw, NdyThingParam::NumFrames, aiInfo.pathFrames.size());
                     for( const auto& p : aiInfo.pathFrames) {
-                        ndyWriteThingParam(rw, NdyThingParam::Frame, p.toString());
+                        ndyWriteThingParam(rw, NdyThingParam::Frame, p);
                     }
                 }
            }
@@ -283,7 +301,7 @@ namespace libim::content::asset {
                 if(!pi.pathFrames.empty()) {
                     ndyWriteThingParam(rw, NdyThingParam::NumFrames, pi.pathFrames.size());
                     for( const auto& p : pi.pathFrames) {
-                        ndyWriteThingParam(rw, NdyThingParam::Frame, p.toString());
+                        ndyWriteThingParam(rw, NdyThingParam::Frame, p);
                     }
                 }
             },
@@ -347,7 +365,7 @@ namespace libim::content::asset {
                 ndyWriteThingParamIf(physInfo,
                     ndyWriteIfBase(pi.velocity != base.velocity),
                     ndyWriteIfPara(!pi.velocity.isZero()), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::Vel, pi.velocity.toString());
+                    ndyWriteThingParam(rw, NdyThingParam::Vel, pi.velocity);
                 });
 
                 // Param MaxVel
@@ -361,7 +379,7 @@ namespace libim::content::asset {
                 ndyWriteThingParamIf(physInfo,
                     ndyWriteIfBase(pi.angularVelocity != base.angularVelocity),
                     ndyWriteIfPara(!pi.angularVelocity.isZero()), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::AngularVel, pi.angularVelocity.toString());
+                    ndyWriteThingParam(rw, NdyThingParam::AngularVel, pi.angularVelocity);
                 });
 
                 // Param OrientSpeed
@@ -451,7 +469,7 @@ namespace libim::content::asset {
                    ndyWriteThingParam(rw, NdyThingParam::JumpSpeed, ai.jumpSpeed);
                });
 
-               // Param TypeFlags
+               // Param lags
                ndyWriteThingParamIf(baseActorInfo,
                    ndyWriteIfBase(ai.flags != base.flags),
                    ndyWriteIfPara(ai.flags != 0), [&] {
@@ -462,7 +480,7 @@ namespace libim::content::asset {
                ndyWriteThingParamIf(baseActorInfo,
                    ndyWriteIfBase(ai.eyeOffset != base.eyeOffset),
                    ndyWriteIfPara(!ai.eyeOffset.isZero()), [&] {
-                   ndyWriteThingParam(rw, NdyThingParam::EyeOffset, ai.eyeOffset.toString());
+                   ndyWriteThingParam(rw, NdyThingParam::EyeOffset, ai.eyeOffset);
                });
 
                // Param MinHeadPitch
@@ -483,21 +501,21 @@ namespace libim::content::asset {
                ndyWriteThingParamIf(baseActorInfo,
                    ndyWriteIfBase(ai.fireOffset != base.fireOffset),
                    ndyWriteIfPara(!ai.fireOffset.isZero()), [&] {
-                   ndyWriteThingParam(rw, NdyThingParam::FireOffset, ai.fireOffset.toString());
+                   ndyWriteThingParam(rw, NdyThingParam::FireOffset, ai.fireOffset);
                });
 
                // Param LightOffset
                ndyWriteThingParamIf(baseActorInfo,
                    ndyWriteIfBase(ai.lightOffset != base.lightOffset),
                    ndyWriteIfPara(!ai.lightOffset.isZero()), [&] {
-                   ndyWriteThingParam(rw, NdyThingParam::LightOffset, ai.lightOffset.toString());
+                   ndyWriteThingParam(rw, NdyThingParam::LightOffset, ai.lightOffset);
                });
 
                // Param LightIntensity
                ndyWriteThingParamIf(baseActorInfo,
                    ndyWriteIfBase(ai.lightIntensity != base.lightIntensity),
                    ndyWriteIfPara(!ai.lightIntensity.isZero()), [&] {
-                   ndyWriteThingParam(rw, NdyThingParam::LightIntensity, makeLinearColorRgb(ai.lightIntensity).toString());
+                   ndyWriteThingParam(rw, NdyThingParam::LightIntensity, makeLinearColorRgb(ai.lightIntensity));
                });
 
                // Param Explode
@@ -512,7 +530,7 @@ namespace libim::content::asset {
                    ndyWriteIfBase(ai.voiceColor != base.voiceColor),
                    ndyWriteIfPara(ai.voiceColor.isValid() && ai.voiceColor.isZero() == false), [&] {
                        if (ai.voiceColor.isValid()) {
-                           ndyWriteThingParam(rw, NdyThingParam::VoiceColor, ai.voiceColor.toString());
+                           ndyWriteThingParam(rw, NdyThingParam::VoiceColor, ai.voiceColor);
                        }
                });
             },
@@ -666,23 +684,23 @@ namespace libim::content::asset {
 
                 // Param SpriteThing
                 ndyWriteThingParamIf(baseExpInfo,
-                   ndyWriteIfBase(ei.spriteThingName != base.spriteThingName && !ei.spriteThingName.isEmpty()),
-                   ndyWriteIfPara(!ei.spriteThingName.isEmpty()), [&] {
-                   ndyWriteThingParam(rw, NdyThingParam::SpriteThing, ei.spriteThingName);
+                   ndyWriteIfBase(ei.spriteTemplateName != base.spriteTemplateName && !ei.spriteTemplateName.isEmpty()),
+                   ndyWriteIfPara(!ei.spriteTemplateName.isEmpty()), [&] {
+                   ndyWriteThingParam(rw, NdyThingParam::SpriteThing, ei.spriteTemplateName);
                 });
 
                 // Param SpriteStart
                 ndyWriteThingParamIf(baseExpInfo,
-                    ndyWriteIfBase(ei.posSpriteStart != base.posSpriteStart),
-                    ndyWriteIfPara(!ei.posSpriteStart.isZero()), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::SpriteStart, ei.posSpriteStart.toString());
+                    ndyWriteIfBase(ei.spriteStartPos != base.spriteStartPos),
+                    ndyWriteIfPara(!ei.spriteStartPos.isZero()), [&] {
+                    ndyWriteThingParam(rw, NdyThingParam::SpriteStart, ei.spriteStartPos);
                 });
 
                 // Param SpriteEnd
                 ndyWriteThingParamIf(baseExpInfo,
-                    ndyWriteIfBase(ei.posSpriteEnd != base.posSpriteEnd),
-                    ndyWriteIfPara(!ei.posSpriteEnd.isZero()), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::SpriteEnd, ei.posSpriteEnd.toString());
+                    ndyWriteIfBase(ei.spriteEndPos != base.spriteEndPos),
+                    ndyWriteIfPara(!ei.spriteEndPos.isZero()), [&] {
+                    ndyWriteThingParam(rw, NdyThingParam::SpriteEnd, ei.spriteEndPos);
                 });
             },
             // ItemInfo
@@ -735,9 +753,9 @@ namespace libim::content::asset {
 
                 // Param Material
                 ndyWriteThingParamIf(basePartInfo,
-                    ndyWriteIfBase(pi.materialFileName != base.materialFileName && !pi.materialFileName.isEmpty()),
-                    ndyWriteIfPara(!pi.materialFileName.isEmpty()), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::Material, pi.materialFileName);
+                    ndyWriteIfBase(pi.materialFilename != base.materialFilename && !pi.materialFilename.isEmpty()),
+                    ndyWriteIfPara(!pi.materialFilename.isEmpty()), [&] {
+                    ndyWriteThingParam(rw, NdyThingParam::Material, pi.materialFilename);
                 });
 
                 // Param Range
@@ -846,10 +864,10 @@ namespace libim::content::asset {
         writeThingParams(rw, t, templates, true);
     }
 
-    /** 
-     * Writes Thing templates to text stream. 
-     * 
-     * @tparam writeEnd - if true, writes the end of the template section. 
+    /**
+     * Writes Thing templates to text stream.
+     *
+     * @tparam writeEnd - if true, writes the end of the template section.
      *
      * @param rw - Text stream to write to.
      * @param templates - Thing templates to write.
@@ -868,4 +886,4 @@ namespace libim::content::asset {
         });
     }
 }
-#endif // LIBIM_NDY_THING_SER_HELPERS_H
+#endif // LIBIM_NDY_THING_OSER_H

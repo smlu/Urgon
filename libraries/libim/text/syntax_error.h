@@ -1,17 +1,17 @@
-#ifndef TOKENIZER_ERROR_H
-#define TOKENIZER_ERROR_H
+#ifndef LIBIM_SYNTAX_ERROR_H
+#define LIBIM_SYNTAX_ERROR_H
 #include <exception>
 #include <string_view>
 
-#include "diagnostic_location.h"
+#include "parselocation.h"
 
 namespace libim::text {
-    class TokenizerError : public std::exception
+    class SyntaxError : public std::exception
     {
     public:
-        TokenizerError(std::string_view what, const diagnostic_location& location) :
+        SyntaxError(std::string_view what, const ParseLocation& location) :
             m_what(what),
-            m_loc(location) // Fixme: diagnostic_location contains std::string_view
+            m_loc(location) // Fixme: ParseLocation contains std::string_view
                             // which can be invalidated at any point of stack unwinding.
         {}
 
@@ -20,14 +20,14 @@ namespace libim::text {
             return m_what.data();
         }
 
-        const diagnostic_location& location() const
+        const ParseLocation& location() const
         {
             return m_loc;
         }
 
     private:
         std::string_view m_what;
-        diagnostic_location m_loc;
+        ParseLocation m_loc;
     };
 }
-#endif // TOKENIZER_ERROR_H
+#endif // LIBIM_SYNTAX_ERROR_H

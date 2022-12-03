@@ -1,5 +1,5 @@
-#ifndef COGVTABLE_H
-#define COGVTABLE_H
+#ifndef LIBIM_COGVTABLE_H
+#define LIBIM_COGVTABLE_H
 #include <cstdint>
 #include <map>
 #include <stdexcept>
@@ -65,4 +65,4 @@ namespace libim::content::asset {
         }
     };
 }
-#endif // COGVTABLE_H
+#endif // LIBIM_COGVTABLE_H

@@ -656,7 +656,7 @@ namespace libim {
         std::string res(lenHint, '0');
         const auto nRead = this->read(reinterpret_cast<byte_t*>(&res[0]), lenHint * sizeof(std::string::value_type));
         if(nRead != lenHint){
-            throw StreamError("Could not read std::string from stream");
+            throw StreamError("Could not read string from stream");
         }
 
         auto nPos = res.find('\0');

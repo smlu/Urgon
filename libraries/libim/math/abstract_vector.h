@@ -7,13 +7,14 @@
 
 #include "math.h"
 #include "fmath.h"
+
 #include <libim/utils/utils.h>
 #include <libim/types/safe_cast.h>
 
 
 namespace libim {
     struct math_vector_tag {};
-    
+
     template<typename Tag>
     constexpr bool isMathVectorTag = std::is_base_of_v<math_vector_tag, Tag>;
 
@@ -31,6 +32,17 @@ namespace libim {
         using base_type::array;
         constexpr AbstractVector() : base_type{ 0 } {}
         constexpr AbstractVector(base_type a) : base_type(std::move(a)) {}
+
+        /**
+         * Construct a new vector object from string.
+         *
+         * @param vecstr - String representation of vector. The vector components in string should be deliminated with non-float numeric delims e.g. "(x/y/z/...)" , "x y z ...", "x,y, z,..." etc..
+         * @param strict - If true, the string must be in the format of "(x/y/z/...)". If false, the string can be in any format.
+         *                 By default false.
+         *
+         * @throw std::ios_base::failure if string is not in valid format,
+         */
+        AbstractVector(std::string_view vecstr, bool strict = false); // Definition in text_resource_reader.h
 
         constexpr void set(std::size_t idx, T v)
         {
@@ -56,59 +68,11 @@ namespace libim {
             return true;
         }
 
-        std::string toString() const
-        {
-            std::string ss;
-            ss.reserve(
-                S * 10  + /* S * max float num char len */
-                (S - 1) + /* S - 1 fwd. slashes */
-                2         /* 2 parentheses */
-            );
-
-            ss.push_back('(');
-            for(auto e : *this)
-            {
-                ss.append(utils::to_string<10, 6>(e));
-                ss.push_back('/');
-            }
-            ss.back() = ')';
-            return ss;
-        }
-
-        static AbstractVector fromString(std::string_view str)
-        {
-            std::istringstream istream;
-            istream.exceptions(std::ios::failbit);
-            istream.rdbuf()->pubsetbuf(
-                const_cast<char*>(str.data()),
-                safe_cast<std::streamsize>(str.size())
-            );
-
-            char ch;
-            istream >> ch;
-            if( ch != '(' ) {
-                throw std::ios_base::failure("Found invalid char while converting string to AbstractVector, expected char '('");
-            }
-
-            AbstractVector res;
-            for(auto[ idx, e ] : utils::enumerate(res))
-            {
-                istream >> e;
-                istream >> ch;
-
-                if( idx >= (res.size() - 1) )
-                {
-                    if( ch != ')' ) {
-                        throw std::ios_base::failure("Found invalid char while converting string to AbstractVector, expected char ')'");
-                    }
-                }
-                else if( ch != '/' ) {
-                    throw std::ios_base::failure("Found invalid char while converting string to AbstractVector, expected char '/'");
-                }
-            }
-
-            return res;
-        }
+        /**
+         * Serializes vector to string in format: "(x/y/z/...)"
+         * @return Serialized vector.
+         */
+        std::string toString() const; // Definition in text_resource_writer.h
 
         template<typename TTag = Tag, typename = requireMathVectorTag<TTag>>
         constexpr inline auto& operator += (const AbstractVector& rhs)

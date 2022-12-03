@@ -79,7 +79,7 @@ std::vector<Sector> NDY::parseSection_Sectors(TextResourceReader& rr)
         if (keytkn.value() != kBoundBox)
         {
             LOG_DEBUG("NDY::ParseSection_Sectors: expected key '%', found '%'", kBoundBox, keytkn.value());
-            throw TokenizerError("invalid value"sv, keytkn.location());
+            throw SyntaxError("invalid value"sv, keytkn.location());
         }
         s.boundBox = rr.readBox<decltype(s.boundBox)>();
 
@@ -110,8 +110,8 @@ std::vector<Sector> NDY::parseSection_Sectors(TextResourceReader& rr)
         // Center & radius
         if(keytkn.value() != kCenter)
         {
-            LOG_DEBUG("NDY::ParseSection_Sectors: expected key '%', found '%'", kCenter, keytkn.value());
-            throw TokenizerError("invalid value"sv, keytkn.location());
+            LOG_DEBUG("NDY::ParseSection_Sectors: expected '%', found '%'", kCenter, keytkn.value());
+            throw SyntaxError("Invalid sector property value for center"sv, keytkn.location());
         }
 
         s.center = rr.readVector<decltype(s.center)>();
@@ -135,11 +135,11 @@ void NDY::writeSection_Sectors(TextResourceWriter& rw, const std::vector<Sector>
     rw.writeSection(kSectionSectors, /*overline=*/ false);
     rw.writeEol();
 
-    AT_SCOPE_EXIT([&rw, ich = rw.indentCh()](){
-        rw.setIndentCh(ich);
+    AT_SCOPE_EXIT([&rw, ich = rw.indentChar()](){
+        rw.setIndentChar(ich);
     });
 
-    rw.setIndentCh(kValDelim);
+    rw.setIndentChar(kValDelim);
     rw.writeList(kWorldSectors, sectors, [](TextResourceWriter& rw, auto idx, const Sector& s) {
         rw.writeEol();
 

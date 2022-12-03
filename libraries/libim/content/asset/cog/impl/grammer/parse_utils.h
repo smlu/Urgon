@@ -69,7 +69,7 @@ namespace libim::content::asset::impl {
                 return std::holds_alternative<int32_t>(value) ||
                         std::holds_alternative<float>(value)  ||
                         (sval && is_numeric_raw_value(*sval));
-            case CogSymbol::Ai:
+            case CogSymbol::AI:
                 return sval && utils::iends_with(*sval, ".ai"sv);
             case CogSymbol::Cog:
                 return sval && is_int_raw_value(*sval);

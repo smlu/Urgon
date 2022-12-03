@@ -156,5 +156,4 @@ namespace libim::content::asset {
     template <typename T>
     constexpr bool isBox = detail::isBox<T>::value;
 }
-
 #endif // LIBIM_BOX_H

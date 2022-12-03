@@ -7,7 +7,7 @@ namespace libim::content::asset {
     {
         uint32_t hSnd;          // sound handle
         uint32_t bankIdx;
-        uint32_t dirNameOffset;
+        uint32_t filePathOffset;
         uint32_t fileNameOffset;
         uint32_t dataOffset;
         uint32_t pLipSyncData;  // unused in serialization

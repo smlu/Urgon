@@ -2,17 +2,17 @@
 #define LIBIM_NDY_THING_SER_COMMON_H
 #include "../../cnd/thing/cnd_thing.h"
 #include <libim/content/asset/thing/thing.h>
-#include <map>
+#include <libim/types/string_map.h>
+
 #include <string_view>
 #include <type_traits>
-
 
 namespace libim::content::asset {
     using namespace std::string_view_literals;
 
     static constexpr auto kNone = "none"sv;
 
-    static const std::map<std::string_view, Thing::Type> kThingNameMap {
+    static const StringMap<const std::string_view, Thing::Type> kThingTypeNameMap {
         { "free"sv      , Thing::Free      },
         { "camera"sv    , Thing::Camera    },
         { "actor"sv     , Thing::Actor     },
@@ -55,7 +55,7 @@ namespace libim::content::asset {
         { CndThingMoveType::Path    , "path"sv    },
     };
 
-    static const std::map<std::string_view, CndThingMoveType> kCndThingMoveNameMap {
+    static const StringMap<const std::string_view, CndThingMoveType> kCndThingMoveNameMap {
         { kNone       , CndThingMoveType::None    },
         { "physics"sv , CndThingMoveType::Physics },
         { "path"sv    , CndThingMoveType::Path    },
@@ -97,7 +97,7 @@ namespace libim::content::asset {
         MinDamage        = 31,
         DamageClass      = 32,  // DamageType
         Explode          = 33,
-        Frame            = 34, // ai path pos frame or thing movement path pos&orient frame
+        Frame            = 34, // ai path position frame or thing movement path position&orient frame
         NumFrames        = 35, // ai or thing path movement
         Puppet           = 36,
         BlastTime        = 37,
@@ -108,7 +108,7 @@ namespace libim::content::asset {
         FlashRGB         = 42, // not used by engine
         ExpandTime       = 43,
         FadeTime         = 44,
-        AiClass          = 45,
+        AIClass          = 45,
         Cog              = 46,
         Respawn          = 47,
         Material         = 48,
@@ -163,7 +163,7 @@ namespace libim::content::asset {
         { NdyThingParam::MaxRotVel        , "maxrotvel"sv      },
         { NdyThingParam::MaxVel           , "maxvel"sv         },
         { NdyThingParam::Vel              , "vel"sv            },
-        { NdyThingParam::AngularVel           , "angvel"sv         },
+        { NdyThingParam::AngularVel       , "angvel"sv         },
         { NdyThingParam::TypeFlags        , "typeflags"sv      },
         { NdyThingParam::Health           , "health"sv         },
         { NdyThingParam::MaxThrust        , "maxthrust"sv      },
@@ -187,7 +187,7 @@ namespace libim::content::asset {
         { NdyThingParam::FlashRGB         , "flashrgb"sv       },
         { NdyThingParam::ExpandTime       , "expandtime"sv     },
         { NdyThingParam::FadeTime         , "fadetime"sv       },
-        { NdyThingParam::AiClass          , "aiclass"sv        },
+        { NdyThingParam::AIClass          , "aiclass"sv        },
         { NdyThingParam::Cog              , "cog"sv            },
         { NdyThingParam::Respawn          , "respawn"sv        },
         { NdyThingParam::Material         , "material"sv       },
@@ -221,7 +221,7 @@ namespace libim::content::asset {
         { NdyThingParam::PerformanceLevel , "perflevel"sv      }
     };
 
-    static const std::map<std::string_view, NdyThingParam> kNdyThingParamNameMap {
+    static const StringMap<const std::string_view, NdyThingParam> kNdyThingParamNameMap {
         { "type"sv           , NdyThingParam::Type             },
         { "collide"sv        , NdyThingParam::Collide          },
         { "move"sv           , NdyThingParam::Move             },
@@ -266,7 +266,7 @@ namespace libim::content::asset {
         { "flashrgb"sv       , NdyThingParam::FlashRGB         },
         { "expandtime"sv     , NdyThingParam::ExpandTime       },
         { "fadetime"sv       , NdyThingParam::FadeTime         },
-        { "aiclass"sv        , NdyThingParam::AiClass          },
+        { "aiclass"sv        , NdyThingParam::AIClass          },
         { "cog"sv            , NdyThingParam::Cog              },
         { "respawn"sv        , NdyThingParam::Respawn          },
         { "material"sv       , NdyThingParam::Material         },

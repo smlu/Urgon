@@ -37,7 +37,6 @@ static constexpr auto kWorldScripts      = "World scripts"sv;
 static constexpr auto kPvsSize           = "PVS size:"sv;
 
 
-
 bool NDY::parseSection_Copyright(TextResourceReader& rr)
 {
     const std::size_t nLines    = kFileCopyright.size() / kCopyrightLineWidth;
@@ -115,7 +114,7 @@ void NDY::writeSection_Header(TextResourceWriter& rw, const CndHeader& header)
     rw.writeNumber(header.fog.enabled);
 
     rw.indent(2);
-    rw.writeVector(header.fog.color, /*indent=*/1);
+    rw.writeVector(header.fog.color, /*width=*/1);
 
     rw.indent(3);
     rw.writeNumber<10,8>(header.fog.startDepth);
@@ -128,7 +127,6 @@ void NDY::writeSection_Header(TextResourceWriter& rw, const CndHeader& header)
     rw.writeEol();
     rw.writeEol();
 }
-
 
 std::pair<std::size_t, std::vector<std::string>>
 NDY::parseSection_Sounds(TextResourceReader& rr)
@@ -147,7 +145,6 @@ void NDY::writeSection_Sounds(TextResourceWriter& rw, std::size_t maxWorldSounds
         [](const auto& v) { return v.name(); }
     );
 }
-
 
 std::pair<std::size_t, std::vector<std::string>>
 NDY::parseSection_Materials(TextResourceReader& rr)
@@ -168,18 +165,18 @@ void NDY::writeSection_Materials(TextResourceWriter& rw, const HashMap<Material>
 }
 
 std::pair<std::size_t, std::vector<std::string>>
-NDY::parseSection_AiClass(TextResourceReader& rr)
+NDY::parseSection_AIClass(TextResourceReader& rr)
 {
     return parseResourceSection<true>(rr, kWorldAIClasses);
 }
 
-void NDY::writeSection_AiClass(TextResourceWriter& rw, std::size_t maxWorldAiClasses, const std::vector<std::string>& aiclasses)
+void NDY::writeSection_AIClass(TextResourceWriter& rw, std::size_t maxWorldAIClasses, const std::vector<std::string>& aiclasses)
 {
     writeResourceSection<true>(rw,
         "######### AI Classes ###########"sv,
-        kSectionAiClass,
+        kSectionAIClass,
         kWorldAIClasses,
-        maxWorldAiClasses,
+        maxWorldAIClasses,
         aiclasses,
         [](const auto& v) { return v; }
     );

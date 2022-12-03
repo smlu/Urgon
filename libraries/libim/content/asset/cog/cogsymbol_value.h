@@ -31,7 +31,7 @@ namespace libim::content::asset {
         SharedRef<Material>,
         SharedRef<Surface>,
         SharedRef<Sector>,
-        /* utils::SharedRef<Ai>,*/
+        /* utils::SharedRef<AI>,*/
         SharedRef<Cog>
         /*utils::SharedRef<Template>,
         utils::SharedRef<Thing>, */

@@ -16,7 +16,7 @@ namespace libim::content::asset {
             Floor                    = 0x1,        // Surface is ground floor. Could be face collision if Collision is set.
             CogLinked                = 0x2,        // Surface is linked to cog script.
             Collision                = 0x4,        // Surface has collision.
-            AiCannotWalkOnFloor      = 0x8,        // Ai won't walk on this surface
+            AICannotWalkOnSurface    = 0x8,        // AI won't walk on this surface
             DoubleSurfaceScale       = 0x10,       // When set, it affects SlideWall() cog function.
                                                    //   By default the animating surface matrix is resized to 320x320, this flag resizes it to 640x640
 
@@ -71,7 +71,7 @@ namespace libim::content::asset {
         Id id;
         Flags<SurfaceFlag> surflags;
         std::optional<std::size_t> adjoinIdx;
-        std::vector<LinearColor> vecIntensities;  // Verticies color. The size should be the same as `verts`. 
+        std::vector<LinearColor> vecIntensities;  // Verticies color. The size should be the same as `verts`.
                                                   // The color of each vertex is applied over surface's texture and
                                                   // can give surface an additional ambient color e.g. underwater blue color.
     };

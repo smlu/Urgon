@@ -12,21 +12,23 @@ static constexpr auto kWorldCogs = "World cogs"sv;
 std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextResourceReader& rr, const HashMap<SharedRef<CogScript>>& scripts)
 {
     std::size_t maxCogs = rr.readKey<std::size_t>(kWorldCogs);
+
     auto resources = rr.readList<std::vector<SharedRef<Cog>>>(
     [&scripts](TextResourceReader& rr, auto rowIdx, SharedRef<Cog>& c) {
         AT_SCOPE_EXIT([&rr, reol = rr.reportEol()](){
             rr.setReportEol(reol);
         });
 
+        /* Get script */
         auto scrname = rr.getSpaceDelimitedString();
-
         auto sit = scripts.find(scrname);
         if(sit == scripts.end())
         {
             LOG_ERROR("CND::ParseSection_Cogs(): Can't find cog script '%'", scrname);
-            throw StreamError("Can't make Cog, CogScript not found");
+            throw StreamError("Can't make COG, CogScript not found");
         }
 
+        /* Parse COG symbol values */
         c->id     = rowIdx;
         c->script = *sit;
         c->flags  = c->script->flags;
@@ -60,7 +62,6 @@ std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextR
     return { maxCogs, std::move(resources) };
 }
 
-
 void NDY::writeSection_Cogs(TextResourceWriter& rw, std::size_t maxWorldCogs, const std::vector<SharedRef<Cog>>& cogs)
 {
     std::vector<std::string> scogs;
@@ -76,7 +77,7 @@ void NDY::writeSection_Cogs(TextResourceWriter& rw, std::size_t maxWorldCogs, co
                 continue;
             }
 
-            cogvalue_visitor([&](const std::string_view& s) {
+            cogvalue_visitor([&](const std::string_view s) {
                 if(s.empty()) return;
 
                 const char delim = cogvals.empty() ? '\t' : ' ';

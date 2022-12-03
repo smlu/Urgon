@@ -16,6 +16,7 @@
 #include <libim/content/asset/cog/cogscript.h>
 #include <libim/content/asset/material/material.h>
 #include <libim/content/asset/world/georesource.h>
+#include <libim/content/asset/world/world.h>
 #include <libim/content/audio/impl/sbtrack.h>
 #include <libim/io/stream.h>
 #include <libim/math/color.h>
@@ -28,7 +29,8 @@ namespace libim::content::asset {
     {
         StaticWorld          = 0x1, // jones3dstatic.cnd
         WorldInitialized     = 0x2,
-        UpdateFogRenderState = 0x4
+        UpdateFogRenderState = 0x4,
+        Unknown8             = 0x8,
     };
 
     struct CndHeader final
@@ -44,12 +46,7 @@ namespace libim::content::asset {
         Vector2f horizonSkyOffset; // x,y
         Vector2f ceilingSkyOffset; // x,y
         std::array<float, 4> lodDistances; // list of distances to change level of detail
-        struct {
-            int32_t enabled;
-            LinearColor color;
-            float startDepth;
-            float endDepth;
-        } fog;
+        World::Fog fog;
 
         uint32_t numSounds;
 
@@ -79,9 +76,9 @@ namespace libim::content::asset {
         uint32_t numSectors;
         uint32_t aSectors;            // 32-bit pointer
 
-        uint32_t numAiClasses;
-        uint32_t sizeAiClasses;
-        uint32_t aAiClasses;          // 32-bit pointer
+        uint32_t numAIClasses;
+        uint32_t sizeAIClasses;
+        uint32_t aAIClasses;          // 32-bit pointer
 
         uint32_t numModels;
         uint32_t sizeModels;
@@ -140,76 +137,76 @@ namespace libim::content::asset {
         */
         static void parseSection_Sounds(const InputStream& istream, audio::impl::SbTrack& track, uint32_t& nextHandle);
 
-        static std::size_t getOffset_Materials(const InputStream& istream);
-        static HashMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.
-        static HashMap<Material> readMaterials(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_Materials(const InputStream& istream);
+        [[nodiscard]] static HashMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.
+        [[nodiscard]] static HashMap<Material> readMaterials(const InputStream& istream);
         static void writeSection_Materials(OutputStream& ostream, const HashMap<Material>& materials);
 
-        static std::size_t getOffset_Georesource(const InputStream& istream, const CndHeader& header);
-        static Georesource parseSection_Georesource(const InputStream& istream, const CndHeader& cndHeader);
-        static Georesource readGeoresource(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_Georesource(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static Georesource parseSection_Georesource(const InputStream& istream, const CndHeader& cndHeader);
+        [[nodiscard]] static Georesource readGeoresource(const InputStream& istream);
         static void writeSection_Georesource(OutputStream& ostream, const Georesource& geores);
 
-        static std::size_t getOffset_Sectors(const InputStream& istream, const CndHeader& header);
-        static std::vector<Sector> parseSection_Sectors(const InputStream& istream, const CndHeader& header);
-        static std::vector<Sector> readSectors(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_Sectors(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<Sector> parseSection_Sectors(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<Sector> readSectors(const InputStream& istream);
         static void writeSection_Sectors(OutputStream& ostream, const std::vector<Sector>& sectors);
 
-        static std::size_t getOffset_AiClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> parseSection_AiClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> readAiClass(const InputStream& istream);
-        static void writeSection_AiClass(OutputStream& ostream, const std::vector<std::string>& aiclasses);
+        [[nodiscard]] static std::size_t getOffset_AIClass(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> parseSection_AIClass(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> readAIClass(const InputStream& istream);
+        static void writeSection_AIClass(OutputStream& ostream, const std::vector<std::string>& aiclasses);
 
-        static std::size_t getOffset_Models(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> parseSection_Models(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> readModels(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_Models(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> parseSection_Models(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> readModels(const InputStream& istream);
         static void writeSection_Models(OutputStream& ostream, const std::vector<std::string>& models);
 
-        static std::size_t getOffset_Sprites(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> parseSection_Sprites(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> readSprites(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_Sprites(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> parseSection_Sprites(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> readSprites(const InputStream& istream);
         static void WriteSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites);
 
-        static std::size_t getOffset_Keyframes(const InputStream& istream, const CndHeader& header);
-        static HashMap<Animation> parseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
-        static HashMap<Animation> readKeyframes(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_Keyframes(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static HashMap<Animation> parseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
+        [[nodiscard]] static HashMap<Animation> readKeyframes(const InputStream& istream);
         static void writeSection_Keyframes(OutputStream& ostream, const HashMap<Animation>& animations);
 
-        static std::size_t getOffset_AnimClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> parseSection_AnimClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> readAnimClass(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_AnimClass(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> parseSection_AnimClass(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> readAnimClass(const InputStream& istream);
         static void writeSection_AnimClass(OutputStream& ostream, const std::vector<std::string>& animclasses);
 
-        static std::size_t getOffset_SoundClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> parseSection_SoundClass(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> readSoundClass(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_SoundClass(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> parseSection_SoundClass(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> readSoundClass(const InputStream& istream);
         static void writeSection_SoundClass(OutputStream& ostream, const std::vector<std::string>& sndclasses);
 
-        static std::size_t getOffset_CogScripts(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> parseSection_CogScripts(const InputStream& istream, const CndHeader& header);
-        static std::vector<std::string> readCogScripts(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_CogScripts(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> parseSection_CogScripts(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> readCogScripts(const InputStream& istream);
         static void writeSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts);
 
-        static std::size_t getOffset_Cogs(const InputStream& istream, const CndHeader& header);
-        static std::vector<SharedRef<Cog>> parseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts);
-        static std::vector<SharedRef<Cog>> readCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts);
+        [[nodiscard]] static std::size_t getOffset_Cogs(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<SharedRef<Cog>> parseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts);
+        [[nodiscard]] static std::vector<SharedRef<Cog>> readCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts);
         static void writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs);
 
-        static std::size_t getOffset_Templates(const InputStream& istream, const CndHeader& header);
-        static HashMap<CndThing> parseSection_Templates(const InputStream& istream, const CndHeader& header);
-        static HashMap<CndThing> readTemplates(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_Templates(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static HashMap<CndThing> parseSection_Templates(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static HashMap<CndThing> readTemplates(const InputStream& istream);
         static void writeSection_Templates(OutputStream& ostream, const HashMap<CndThing>& templates);
 
-        static std::size_t getOffset_Things(const InputStream& istream, const CndHeader& header);
-        static std::vector<CndThing> parseSection_Things(const InputStream& istream, const CndHeader& header);
-        static std::vector<CndThing> readThings(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_Things(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<CndThing> parseSection_Things(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<CndThing> readThings(const InputStream& istream);
         static void writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things);
 
         // Note: Section PVS is optional and it doesn't need to be written but performance will be degraded.
         //       Also if this section is not written, the sectors in sector section should have pvsIdx member set to -1
-        static std::size_t getOffset_PVS(const InputStream& istream, const CndHeader& header);
-        static ByteArray parseSection_PVS(const InputStream& istream);
-        static ByteArray readPVS(const InputStream& istream);
+        [[nodiscard]] static std::size_t getOffset_PVS(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static ByteArray parseSection_PVS(const InputStream& istream);
+        [[nodiscard]] static ByteArray readPVS(const InputStream& istream);
         static void writeSection_PVS(OutputStream& ostream, const ByteArray& pvs);
     };
 }

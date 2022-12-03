@@ -1,6 +1,7 @@
-#ifndef LIMIM_PATHINFO_H
-#define LIMIM_PATHINFO_H
+#ifndef LIBIM_PATHINFO_H
+#define LIBIM_PATHINFO_H
 #include <vector>
+#include <string_view>
 
 #include <libim/math/vector3.h>
 #include <libim/math/rotator.h>
@@ -9,18 +10,25 @@ namespace libim::content::asset {
 
     struct PathFrame final
     {
-        Vector3f pos;
+        Vector3f position;
         FRotator orient;
-        std::string toString() const
-        {
-            auto poser = pos.toString();
-            *(--poser.end()) = ':';
-            return poser + orient.toString().substr(1);
-        }
+
+        PathFrame() = default;
+        PathFrame(Vector3f pos, FRotator rot)
+            : position(std::move(pos))
+            , orient(std::move(rot))
+        {}
+        PathFrame(std::string_view strpath); // defined in text_resource_reader.h
+
+        PathFrame(const PathFrame&) = default;
+        PathFrame(PathFrame&&) = default;
+        PathFrame& operator=(const PathFrame&) = default;
+        PathFrame& operator=(PathFrame&&) = default;
     };
 
-    struct PathInfo final {
+    struct PathInfo final
+    {
         std::vector<PathFrame> pathFrames;
     };
 }
-#endif // LIMIM_PATHINFO_H
+#endif // LIBIM_PATHINFO_H

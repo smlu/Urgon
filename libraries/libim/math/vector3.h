@@ -65,7 +65,7 @@ namespace libim {
     };
 
     // Calculate vertex normal over face normals of adjacent faces that contains the vertex.
-    // Vertex normal is calculated by averiging face normals (unweighted averaging).
+    // Vertex normal is calculated by averaging face normals (unweighted averaging).
     template<typename V3T, typename = std::enable_if_t<std::is_base_of_v<Vector3<typename V3T::value_type>, V3T>>>
     static V3T unweightedVertexNormal(const std::vector<V3T>& faceNormals)
     {

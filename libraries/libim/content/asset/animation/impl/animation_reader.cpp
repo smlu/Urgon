@@ -50,8 +50,8 @@ void parseKeyframes(TextResourceReader& rr, Animation& anim)
             entry.frame = rr.getNumber<decltype(entry.frame)>();
             entry.flags = rr.readFlags<decltype(entry.flags)>();
 
-            entry.pos   = rr.readVector<Vector3f>();
-            entry.rot   = rr.readVector<FRotator>();
+            entry.position = rr.readVector<Vector3f>();
+            entry.rot      = rr.readVector<FRotator>();
 
             entry.dpos  = rr.readVector<Vector3f>();
             entry.drot  = rr.readVector<FRotator>();
@@ -76,7 +76,7 @@ Animation libim::content::asset::keyLoad(text::TextResourceReader& rr)
     else if(section != kResName_KfNodes)
     {
         LOG_DEBUG("Animation::load: section expected '%', found '%'", kResName_KfNodes, section);
-        throw TokenizerError("expected section: KEYFRAME NODES"sv, rr.currentToken().location());
+        throw SyntaxError("Expected section: KEYFRAME NODES"sv, rr.currentToken().location());
     }
 
     parseKeyframes(rr, anim);

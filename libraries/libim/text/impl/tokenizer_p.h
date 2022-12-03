@@ -3,10 +3,10 @@
 #include "schars.h"
 #include "../token.h"
 #include "../tokenizer.h"
-#include "../tokenizer_error.h"
-#include "../diagnostic_location.h"
-#include "../../io/stream.h"
+#include "../syntax_error.h"
+#include "../parselocation.h"
 
+#include <libim/io/stream.h>
 #include <libim/math/math.h>
 
 #include <array>
@@ -208,7 +208,7 @@ namespace libim::text {
             });
 
             if(out.value().size() != len){
-                throw TokenizerError("unexpected end of file in sized string"sv, out.location());
+                throw SyntaxError("Unexpected end of file in sized string"sv, out.location());
             }
         }
 
@@ -339,13 +339,13 @@ namespace libim::text {
                 {
                     out.location().last_line = line_;
                     out.location().last_col  = column_;
-                    throw TokenizerError("unexpected end of file in string literal"sv, out.location());
+                    throw SyntaxError("Unexpected end of file in string literal"sv, out.location());
                 }
                 else if(current_ch_ == ChEol)
                 {
                     out.location().last_line = line_;
                     out.location().last_col  = column_;
-                    throw TokenizerError("unexpected new line in string literal"sv, out.location());
+                    throw SyntaxError("Unexpected new line in string literal"sv, out.location());
                 }
                 else if(current_ch_ == ChDblQuote)
                 {

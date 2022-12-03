@@ -218,7 +218,7 @@ namespace libim::content::asset {
     }
 
     /**
-     * Returns bit count per color component from left shift pos mask
+     * Returns bit count per color component from left shift position mask
      * @param mask - color mask
      *
      * @note reference implementation taken from stb lib:

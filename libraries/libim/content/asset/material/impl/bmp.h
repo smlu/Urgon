@@ -246,13 +246,13 @@ namespace libim::content::asset {
                 cf.blueBPP  = bbpc;
                 cf.alphaBPP = abpc;
 
-                // left shift pos per each RGBA color component
+                // left shift position per each RGBA color component
                 cf.redShl   = rls;
                 cf.greenShl = gls;
                 cf.blueShl  = bls;
                 cf.alphaShl = als;
 
-                // right shift pos per each RGBA color component to convert decoded components to 8-bit values
+                // right shift position per each RGBA color component to convert decoded components to 8-bit values
                 cf.redShr   = 8 - rbpc;
                 cf.greenShr = 8 - gbpc;
                 cf.blueShr  = 8 - bbpc;

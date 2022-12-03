@@ -81,7 +81,7 @@ CndHeader CND::readHeader(const InputStream& istream)
     return cndHeader;
 }
 
-std::size_t CND::getOffset_AiClass(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_AIClass(const InputStream& istream, const CndHeader& header)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
@@ -96,34 +96,34 @@ std::size_t CND::getOffset_AiClass(const InputStream& istream, const CndHeader& 
     return istream.tell() + vecBuffSize * sizeof(uint32_t);
 }
 
-std::vector<std::string> CND::parseSection_AiClass(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_AIClass(const InputStream& istream, const CndHeader& header)
 {
     try {
-        return readResourceList(istream, header.numAiClasses);
+        return readResourceList(istream, header.numAIClasses);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
-        throw CNDError("parseSection_AiClass",
+        throw CNDError("parseSection_AIClass",
             "An exception was encountered while parsing section 'AIClass': "s + e.what()
         );
     }
 }
 
-std::vector<std::string> CND::readAiClass(const InputStream& istream)
+std::vector<std::string> CND::readAIClass(const InputStream& istream)
 {
     auto header = readHeader(istream);
-    istream.seek(getOffset_AiClass(istream, header));
-    return parseSection_AiClass(istream, header);
+    istream.seek(getOffset_AIClass(istream, header));
+    return parseSection_AIClass(istream, header);
 }
 
-void CND::writeSection_AiClass(OutputStream& ostream, const std::vector<std::string>& aiclasses)
+void CND::writeSection_AIClass(OutputStream& ostream, const std::vector<std::string>& aiclasses)
 {
     try {
         writeResourceList(ostream, aiclasses);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
-        throw CNDError("writeSection_AiClass",
+        throw CNDError("writeSection_AIClass",
             "An exception was encountered while writing section 'AIClass': "s + e.what()
         );
     }
@@ -131,7 +131,7 @@ void CND::writeSection_AiClass(OutputStream& ostream, const std::vector<std::str
 
 std::size_t CND::getOffset_Models(const InputStream& istream, const CndHeader& header)
 {
-    return getOffset_AiClass(istream, header) + header.numAiClasses * sizeof(CndResourceName);
+    return getOffset_AIClass(istream, header) + header.numAIClasses * sizeof(CndResourceName);
 }
 
 std::vector<std::string> CND::parseSection_Models(const InputStream& istream, const CndHeader& header)
@@ -471,8 +471,8 @@ std::size_t CND::getOffset_PVS(const InputStream& istream, const CndHeader& head
         sizeof(CndItemInfo)            * sizes.sizeItemInfoList       +
         sizeof(CndHintUserVal)         * sizes.sizeHintUserValueList  +
         sizeof(CndParticleInfo)        * sizes.sizeParticleInfoList   +
-        sizeof(CndAiControlInfoHeader) * sizes.sizeAiControlInfoList  +
-        sizeof(Vector3f)               * sizes.sizeAiPathFrameList
+        sizeof(CndAIControlInfoHeader) * sizes.sizeAIControlInfoList  +
+        sizeof(Vector3f)               * sizes.sizeAIPathFrameList
     );
 
     return istream.tell();

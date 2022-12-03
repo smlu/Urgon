@@ -118,7 +118,7 @@ namespace cndtool {
 
             OutputFileStream objs(objOutPath, /*truncate=*/true);
             TextResourceWriter rw(objs);
-            rw.setIndentCh('\t');
+            rw.setIndentChar('\t');
             rw.writeCommentLine("% v% OBJ file: %", kProgramName, kVersion, objOutPath.filename().u8string());
             rw.writeCommentLine(kProgramUrl);
             rw.writeEol();
@@ -130,14 +130,14 @@ namespace cndtool {
             for (const auto& v : geores.verts)
             {
                 rw.write("v");
-                rw.writeVector(getObjCoords(v), /*indent=*/ 1);
+                rw.writeVector(getObjCoords(v), /*width=*/ 1);
                 rw.writeEol();
             }
 
             for (const auto& uv : geores.texVerts)
             {
                 rw.write("vt");
-                rw.writeVector(Vector2f(uv.x(), -uv.y()), /*indent=*/ 1); // UV.y is flipped as Mat texture is stored top-to-bottom
+                rw.writeVector(Vector2f(uv.x(), -uv.y()), /*width=*/ 1); // UV.y is flipped as Mat texture is stored top-to-bottom
                 rw.writeEol();
             }
 
@@ -219,7 +219,7 @@ namespace cndtool {
             {
                 auto vn = unweightedVertexNormal(fn);
                 rw.write("vn");
-                rw.writeVector(getObjCoords(vn), /*indent=*/ 1);
+                rw.writeVector(getObjCoords(vn), /*width=*/ 1);
                 rw.writeEol();
                 i++;
             }
@@ -235,7 +235,7 @@ namespace cndtool {
 
             OutputFileStream mtls(mtlOutPath);
             TextResourceWriter rw(mtls);
-            rw.setIndentCh(' ');
+            rw.setIndentChar(' ');
             rw.writeCommentLine("% v% MTL file: %", kProgramName, kVersion, mtlOutPath.filename().u8string());
             rw.writeCommentLine(kProgramUrl);
             rw.writeCommentLine("Material Count: %", usedMats.size() + 1); // +1 = transparent img

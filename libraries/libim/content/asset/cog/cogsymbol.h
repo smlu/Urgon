@@ -1,5 +1,5 @@
-#ifndef LOG_COGSYMBOL_H
-#define LOG_COGSYMBOL_H
+#ifndef LIBIM_COGSYMBOL_H
+#define LIBIM_COGSYMBOL_H
 #include <map>
 #include <string>
 #include <variant>
@@ -27,7 +27,7 @@ namespace libim::content::asset {
             Material  = 10,
             Vector    = 11,
             Model     = 12,
-            Ai        = 13,
+            AI        = 13,
             Message   = 14
         };
 
@@ -61,4 +61,4 @@ namespace libim::content::asset {
         }
     };
 }
-#endif // LOG_COGSYMBOL_H
+#endif // LIBIM_COGSYMBOL_H

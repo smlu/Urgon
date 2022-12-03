@@ -71,9 +71,9 @@ void parseThingList(const InputStream& istream, std::size_t numThings, Lambda&& 
     auto hintUserVals   = istream.read<std::vector<CndHintUserVal>>(sizes.sizeHintUserValueList); // idx for partInfos and Hint list size are switched
     auto partInfos      = istream.read<std::vector<CndParticleInfo>>(sizes.sizeParticleInfoList);
 
-    // Ai Thing Control infos
-    auto aiControlInfos = istream.read<std::vector<CndAiControlInfoHeader>>(sizes.sizeAiControlInfoList);
-    auto aiPathFrames   = istream.read<std::vector<Vector3f>>(sizes.sizeAiPathFrameList);
+    // AI Thing Control infos
+    auto aiControlInfos = istream.read<std::vector<CndAIControlInfoHeader>>(sizes.sizeAIControlInfoList);
+    auto aiPathFrames   = istream.read<std::vector<Vector3f>>(sizes.sizeAIPathFrameList);
 
     auto pit    = physicsInfos.cbegin();
     auto npfit  = numPathFrames.cbegin();
@@ -147,9 +147,9 @@ void parseThingList(const InputStream& istream, std::size_t numThings, Lambda&& 
                 break;
         }
 
-        if(t.controlType == CndThingControlType::Ai)
+        if(t.controlType == CndThingControlType::AI)
         {
-            CndAiControlInfo ai;
+            CndAIControlInfo ai;
             ai.aiFileName = aicit->aiFileName;
             if(aicit->numPathFrames > 0) {
                 aipfit = utils::copy(aipfit, aicit->numPathFrames, ai.pathFrames);
@@ -170,8 +170,8 @@ void parseThingList(const InputStream& istream, std::size_t numThings, Lambda&& 
     world_ser_assert(eit == explosionInfos.end()  , "Not all parsed ExplosionInfos were used");
     world_ser_assert(iit == itemInfos.end()       , "Not all parsed ItemInfos were used");
     world_ser_assert(pait == partInfos.end()      , "Not all parsed ParticleInfos were used");
-    world_ser_assert(aicit == aiControlInfos.end(), "Not all parsed AiControlInfos were used");
-    world_ser_assert(aipfit == aiPathFrames.end() , "Not all parsed AiPathFrames were used");
+    world_ser_assert(aicit == aiControlInfos.end(), "Not all parsed AIControlInfos were used");
+    world_ser_assert(aipfit == aiPathFrames.end() , "Not all parsed AIPathFrames were used");
 }
 
 template<typename Container>
@@ -189,7 +189,7 @@ void writeThingList(OutputStream& ostream, const Container& c)
     auto itemInfos      = std::vector<CndItemInfo>();
     auto hintUserVals   = std::vector<CndHintUserVal>();
     auto particleInfos  = std::vector<CndParticleInfo>();
-    auto aiControlInfos = std::vector<CndAiControlInfoHeader>();
+    auto aiControlInfos = std::vector<CndAIControlInfoHeader>();
     auto aiPathFrames   = std::vector<Vector3f>();
     auto reserve = [](auto& c) {
         if(c.capacity() == 0) {
@@ -282,11 +282,11 @@ void writeThingList(OutputStream& ostream, const Container& c)
                 break;
         }
 
-        if(t.controlType == CndThingControlType::Ai)
+        if(t.controlType == CndThingControlType::AI)
         {
-            auto& ai = std::get<CndAiControlInfo>(t.controlInfo); // Should throw an exception if object is missing
+            auto& ai = std::get<CndAIControlInfo>(t.controlInfo); // Should throw an exception if object is missing
 
-            CndAiControlInfoHeader h;
+            CndAIControlInfoHeader h;
             h.aiFileName = ai.aiFileName;
             h.numPathFrames = safe_cast<decltype(h.numPathFrames)>(
                 ai.pathFrames.size()
@@ -314,8 +314,8 @@ void writeThingList(OutputStream& ostream, const Container& c)
     sizes.sizeItemInfoList      = safe_cast<uint32_t>(itemInfos.size());
     sizes.sizeHintUserValueList = safe_cast<uint32_t>(hintUserVals.size());
     sizes.sizeParticleInfoList  = safe_cast<uint32_t>(particleInfos.size());
-    sizes.sizeAiControlInfoList = safe_cast<uint32_t>(aiControlInfos.size());
-    sizes.sizeAiPathFrameList   = safe_cast<uint32_t>(aiPathFrames.size());
+    sizes.sizeAIControlInfoList = safe_cast<uint32_t>(aiControlInfos.size());
+    sizes.sizeAIPathFrameList   = safe_cast<uint32_t>(aiPathFrames.size());
 
     // Write lists to stream
     ostream << headers;
@@ -414,8 +414,8 @@ std::size_t CND::getOffset_Things(const InputStream& istream, const CndHeader& h
         sizeof(CndItemInfo)            * sizes.sizeItemInfoList       +
         sizeof(CndHintUserVal)         * sizes.sizeHintUserValueList  +
         sizeof(CndParticleInfo)        * sizes.sizeParticleInfoList   +
-        sizeof(CndAiControlInfoHeader) * sizes.sizeAiControlInfoList  +
-        sizeof(Vector3f)               * sizes.sizeAiPathFrameList
+        sizeof(CndAIControlInfoHeader) * sizes.sizeAIControlInfoList  +
+        sizeof(Vector3f)               * sizes.sizeAIPathFrameList
     );
 
     return istream.tell();

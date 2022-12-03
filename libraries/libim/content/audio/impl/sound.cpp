@@ -9,8 +9,8 @@ using namespace libim;
 using namespace libim::content;
 using namespace libim::content::audio;
 
-Sound::Sound(std::weak_ptr<ByteArray> wptrBankData, std::size_t dirNameOffset, std::size_t nameOffset, std::size_t dataOffset, std::size_t dataSize) :
-    dirNameOffset_(dirNameOffset),
+Sound::Sound(std::weak_ptr<ByteArray> wptrBankData, std::size_t filePathOffset, std::size_t nameOffset, std::size_t dataOffset, std::size_t dataSize) :
+    filePathOffset_(filePathOffset),
     nameOffset_(nameOffset),
     dataOffset_(dataOffset),
     dataSize_(dataSize),
@@ -43,8 +43,8 @@ std::shared_ptr<ByteArray> Sound::lockOrThrow() const
 bool Sound::isValid(const ByteArray& data) const
 {
     return dataOffset_ + dataSize_  < data.size() &&
-        dirNameOffset_ < data.size()              &&
-        dirNameOffset_ <= nameOffset_             &&
+        filePathOffset_ < data.size()             &&
+        filePathOffset_ <= nameOffset_            &&
         nameOffset_    < data.size()              &&
         sampleRate_    > 0                        &&
         bitsPerSample_ > 0                        &&

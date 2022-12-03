@@ -24,11 +24,11 @@ namespace libim::content::asset {
             Unknown_20000           = 0x20000,  // inf_turnerhunt.cog
             Unknown_40000           = 0x40000,
             RicochetOffSurface      = 0x80000,  // Rebounds/bounces off of surface. Usually should hit COG thing which will produce bounce off sound fx.
-            TriggerAiEvent          = 0x200000, // Triggers AI event for hit AI actor. e.g. if AI actor is sleeping it will be woken up & COG msg 0x1000 - EVENT_TARGETED will be sent to actor's cog script.
+            TriggerAIEvent          = 0x200000, // Triggers AI event for hit AI actor. e.g. if AI actor is sleeping it will be woken up & COG msg 0x1000 - EVENT_TARGETED will be sent to actor's cog script.
             ExplodeOnWorldFloorHit  = 0x400000,
             MophiaBomb              = 0x800000  // Marduk weapon when he's in mophia form.
                                                 // When player holding mirror and projectile with this flag is set, it is reflected of the mirror by creating new projectile from `+mardukhit` template.
-                                                // Also hiting player without holding mirror plays 'aet_mr_hit_indy.wav'.
+                                                // Also hitting player without holding mirror plays 'aet_mr_hit_indy.wav'.
                                                 // i.e. `+mardukhit` template has this flag set
         };
     };

@@ -1,4 +1,6 @@
-#include "ndy_thing_wser_helpers.h"
+#include "ndy_thing_iser.h"
+#include "ndy_thing_oser.h"
+
 #include "../ndy.h"
 #include "../../world_ser_common.h"
 #include <libim/types/optref.h>
@@ -50,19 +52,19 @@ void NDY::writeSection_Things(TextResourceWriter& rw, const std::vector<CndThing
         rw.indent(1);
         writeThingNameAndBase(rw, t.name, t.baseName);
 
-        AT_SCOPE_EXIT([&rw, ich = rw.indentCh()](){
-            rw.setIndentCh(ich);
+        AT_SCOPE_EXIT([&rw, ich = rw.indentChar()](){
+            rw.setIndentChar(ich);
         });
-        rw.setIndentCh('\t');
+        rw.setIndentChar('\t');
 
-        rw.writeVector(t.pos, /*indent=*/1);
-        rw.writeVector(t.pyrOrient, /*indent=*/1);
+        rw.writeVector(t.position, /*width=*/1);
+        rw.writeVector(t.pyrOrient, /*width=*/1);
         rw.indent(1);
 
         rw.writeNumber(t.sectorNum);
         rw.indent(1);
 
-        rw.setIndentCh(' ');
+        rw.setIndentChar(' ');
         writeThingParams(rw, t, templates);
     });
 

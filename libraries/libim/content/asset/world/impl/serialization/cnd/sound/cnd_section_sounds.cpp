@@ -35,10 +35,10 @@ void CND::parseSection_Sounds(const InputStream& istream, SbTrack& track, uint32
         track.sounds.reserve(nSounds);
         for(const auto& h : vecHeaders)
         {
-            world_ser_assert(h.dirNameOffset + kCndMaxNameLen <= track.ptrData->size(),
+            world_ser_assert(h.filePathOffset + kCndMaxNameLen <= track.ptrData->size(),
                 "Sound dir name offset out of bounds"
             );
-            world_ser_assert(h.dirNameOffset + kCndMaxNameLen <= track.ptrData->size(),
+            world_ser_assert(h.filePathOffset + kCndMaxNameLen <= track.ptrData->size(),
                 "Sound file name offset out of bounds"
             );
             world_ser_assert(h.dataOffset + h.dataSize <= track.ptrData->size(),
@@ -47,7 +47,7 @@ void CND::parseSection_Sounds(const InputStream& istream, SbTrack& track, uint32
 
             Sound s (
                 track.ptrData,
-                h.dirNameOffset,
+                h.filePathOffset,
                 h.fileNameOffset,
                 h.dataOffset,
                 h.dataSize

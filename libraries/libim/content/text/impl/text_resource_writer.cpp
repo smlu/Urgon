@@ -22,19 +22,6 @@ TextResourceWriter& TextResourceWriter::indent(std::size_t width)
     return indent(width, indch_);
 }
 
-TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx, std::size_t indent)
-{
-    const auto strIdx = utils::to_string(idx);
-    if(indent > 0)
-    {
-        auto[min, max] = minmax(indent, strIdx.size());
-        this->indent(max - min);
-    }
-
-    ostream_ << strIdx << kResLabelPunc;
-    return *this;
-}
-
 TextResourceWriter& TextResourceWriter::write(std::string_view text)
 {
     ostream_ << text;
@@ -57,6 +44,17 @@ TextResourceWriter& TextResourceWriter::writeEol()
     return *this;
 }
 
+TextResourceWriter& TextResourceWriter::writeGradientColor(const GradientColor& color)
+{
+    write("(");
+    writeNumericArray</*precision=*/6>(color.top, /*width=*/0, /*separator=*/ '/');          write("/");
+    writeNumericArray</*precision=*/6>(color.middle, /*width=*/0, /*separator=*/ '/');       write("/");
+    writeNumericArray</*precision=*/6>(color.bottomLeft, /*width=*/0, /*separator=*/ '/');   write("/");
+    writeNumericArray</*precision=*/6>(color.bottomRight, /*width=*/0, /*separator=*/ '/');
+    write(")");
+    return *this;
+}
+
 TextResourceWriter& TextResourceWriter::writeKeyValue(std::string_view key, std::string_view value, std::size_t indent)
 {
     write(key);
@@ -67,7 +65,7 @@ TextResourceWriter& TextResourceWriter::writeKeyValue(std::string_view key, std:
 
 TextResourceWriter& TextResourceWriter::writeLabel(std::string_view name, std::string_view text)
 {
-    ostream_ << name << kResLabelPunc << indch_ << text;
+    ostream_ << name << kResLabelDelim << indch_ << text;
     return writeEol();
 }
 
@@ -75,6 +73,29 @@ TextResourceWriter& TextResourceWriter::writeLine(std::string_view line)
 {
     ostream_ << line;
     return writeEol();
+}
+
+TextResourceWriter& TextResourceWriter::writePathFrame(const asset::PathFrame& frame)
+{
+    write("(");
+    writeNumericArray</*precision=*/6>(frame.position, /*width=*/0, /*separator=*/ '/');
+    write(":");
+    writeNumericArray</*precision=*/6>(frame.orient, /*width=*/0, /*separator=*/ '/');
+    write(")");
+    return *this;
+}
+
+TextResourceWriter& TextResourceWriter::writeRowIdx(std::size_t idx, std::size_t indent)
+{
+    const auto strIdx = utils::to_string(idx);
+    if(indent > 0)
+    {
+        auto[min, max] = minmax(indent, strIdx.size());
+        this->indent(max - min);
+    }
+
+    ostream_ << strIdx << kResLabelDelim;
+    return *this;
 }
 
 TextResourceWriter& TextResourceWriter::writeSection(std::string_view section, bool overline)
@@ -85,12 +106,12 @@ TextResourceWriter& TextResourceWriter::writeSection(std::string_view section, b
     return writeLabel(kResName_Section, section);
 }
 
-char TextResourceWriter::chComment() const
+char TextResourceWriter::commentChar() const
 {
     return ChComment;
 }
 
-char TextResourceWriter::chSpace() const
+char TextResourceWriter::spaceChar() const
 {
     return ChSpace;
 }

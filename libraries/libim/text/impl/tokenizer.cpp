@@ -1,7 +1,8 @@
-#include "../tokenizer.h"
 #include "tokenizer_p.h"
-#include "../../log/log.h"
-#include "../../utils/utils.h"
+#include "../tokenizer.h"
+
+#include <libim/log/log.h>
+#include <libim/utils/utils.h>
 #include <string_view>
 
 using namespace libim;
@@ -54,7 +55,7 @@ std::string Tokenizer::getIdentifier()
 {
     getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::Identifier) {
-        throw TokenizerError("expected identifier"sv, cachedTkn_.location());
+        throw SyntaxError("Expected identifier"sv, cachedTkn_.location());
     }
 
     return std::move(cachedTkn_).value();
@@ -64,7 +65,7 @@ std::string Tokenizer::getStringLiteral()
 {
     getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::String) {
-        throw TokenizerError("expected string literal"sv, cachedTkn_.location());
+        throw SyntaxError("Expected string literal"sv, cachedTkn_.location());
     }
     return std::move(cachedTkn_).value();
 }
@@ -79,7 +80,7 @@ void Tokenizer::getSpaceDelimitedString(Token& out, bool throwIfEmpty)
 {
     getDelimitedString(out, [](char c) { return isspace(c); });
     if(throwIfEmpty && out.isEmpty()) {
-        throw TokenizerError("expected string fragment"sv, out.location());
+        throw SyntaxError("Expected string fragment"sv, out.location());
     }
 }
 
@@ -111,7 +112,7 @@ void Tokenizer::assertIdentifier(std::string_view id)
     if(cachedTkn_.type() != Token::Identifier || !utils::iequal(cachedTkn_.value(), id))
     {
         LOG_DEBUG("assertIdentifier: expected '%', found '%'", id, cachedTkn_.value());
-        throw TokenizerError("expected identifier"sv, cachedTkn_.location());
+        throw SyntaxError("expected identifier"sv, cachedTkn_.location());
     }
 }
 
@@ -121,7 +122,7 @@ void Tokenizer::assertPunctuator(std::string_view punc)
     if(cachedTkn_.type() != Token::Punctuator || cachedTkn_.value() != punc)
     {
         LOG_DEBUG("assertPunctuator: expected '%', found '%'", punc, cachedTkn_.value());
-        throw TokenizerError("expected punctuator"sv, cachedTkn_.location());
+        throw SyntaxError("Expected punctuator"sv, cachedTkn_.location());
     }
 }
 
@@ -129,7 +130,7 @@ void Tokenizer::assertEndOfFile()
 {
     getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::EndOfFile) {
-        throw TokenizerError("expected end of file"sv, cachedTkn_.location());
+        throw SyntaxError("Expected end of file"sv, cachedTkn_.location());
     }
 }
 

@@ -12,7 +12,7 @@ namespace libim::content::audio {
     {
     public:
         Sound() = default;
-        Sound(std::weak_ptr<ByteArray> wptrBankData, std::size_t dirNameOffset, std::size_t nameOffset, std::size_t dataOffset, std::size_t dataSize);
+        Sound(std::weak_ptr<ByteArray> wptrBankData, std::size_t filePathOffset, std::size_t nameOffset, std::size_t dataOffset, std::size_t dataSize);
         Sound(Sound&&) noexcept = default;
         Sound& operator =(Sound&&) noexcept = default;
         Sound(const Sound&) = default;
@@ -90,7 +90,7 @@ namespace libim::content::audio {
     private:
         uint32_t handle_  = 0;
         uint32_t idx_ = 0;
-        std::size_t dirNameOffset_;
+        std::size_t filePathOffset_;
         std::size_t nameOffset_;
         std::size_t dataOffset_;
         std::size_t dataSize_;

@@ -219,7 +219,7 @@ namespace libim {
 
     inline bool dirExists(const std::filesystem::path& dirPath)
     {
-        if(dirPath.empty() || isFilePath(dirPath)) {
+        if(isFilePath(dirPath)) {
             return false;
         }
         else if(!isNativePath(dirPath.string())) {

@@ -75,6 +75,15 @@ namespace libim::utils {
         }
     } // detail
 
+    /** std::string_view implementation of std::streambuf. */
+    struct StringViewStreamBuf : public std::streambuf
+    {
+        StringViewStreamBuf(const std::string_view strv)
+        {
+            char* pd(const_cast<char*>(strv.data()));
+            setg(pd, pd, pd + strv.size());
+        }
+    };
 
     // Helper type for the visitor
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -104,11 +113,9 @@ namespace libim::utils {
     #define AT_SCOPE_EXIT(...) \
         const auto ANOVAR(sexit_) = libim::utils::at_scope_exit(__VA_ARGS__)
 
-
-
     /**
      * Returns wrapped iterable object which iterator is pair of iterator's
-     * index number and iterator of iterable object. Wrapping object has 4 mehods:
+     * index number and iterator of iterable object. Wrapping object has 4 methods:
      * begin, end and their const variation.
      * Example:
      *     std::vector<char> chars{ 'a', 'b', 'c' };
@@ -164,9 +171,8 @@ namespace libim::utils {
         );
     }
 
-
     /**
-     * Copies n elements begining at source iterator to destination container.
+     * Copies n elements beginning at source iterator to destination container.
      *
      * @param srcIt Source iterator.
      * @param count Number of elements to copy.
@@ -182,7 +188,6 @@ namespace libim::utils {
         std::copy(srcIt, srcEnd, std::back_inserter(dest));
         return srcEnd;
     }
-
 
     /** Case insensitive comparison of two strings */
     [[nodiscard]] inline bool iequal(const std::string& s1, const std::string& s2)
@@ -229,7 +234,6 @@ namespace libim::utils {
         return i > 0 ? static_cast<std::size_t>(std::log10(i)) + 1 : 1;
     }
 
-
     template<std::size_t base = 10, std::size_t precision = 0, typename T>
     [[nodiscard]] static std::string to_string(T n)
     {
@@ -267,7 +271,6 @@ namespace libim::utils {
         return ss.str();
     }
 
-
     template<std::size_t N>
     inline bool strcpy(char (&dest)[N], const std::string_view src)
     {
@@ -280,7 +283,6 @@ namespace libim::utils {
         return detail::strcpy(dest.data(), N, src);
     }
 
-
     template<std::size_t N>
     [[nodiscard]] inline std::string trim(const char (&str)[N])
     {
@@ -292,7 +294,6 @@ namespace libim::utils {
     {
         return detail::trim(str.data(), N);
     }
-
 
     /**
      * Transforms string to all lower case characters.
@@ -397,6 +398,48 @@ namespace libim::utils {
     {
         ssprintf(ss, format.data(), std::forward<Args>(args)...);
     }
+
+    /**
+     * Converts a string to a number.
+     *
+     * @tparam T The type of the number to convert to.
+     *
+     * @param strnum - The string to convert to number.
+     * @param num    - The number to store the result in.
+     * @param base   - The base to use for the conversion i.e.: std::dec, std::hex, std::oct.
+     * @result True if the conversion was successful, false otherwise.
+     */
+    template<typename T, typename BaseF = std::ios_base&(*)(std::ios_base&)>
+    bool to_number(const std::string_view strnum, T& num, const BaseF& base = std::dec)
+    {
+        static_assert(std::is_arithmetic_v<T>, "T is not a arithmetic type");
+        StringViewStreamBuf osrb(strnum);
+        std::istream is(&osrb);
+        is >> base >> num;
+        return !is.fail();
+    }
+
+    /**
+     * Converts a string to a number.
+     *
+     * @tparam T The type of the number to convert to.
+     *
+     * @param strnum - The string to convert to number.
+     * @param base   - The base to use for the conversion i.e.: std::dec, std::hex, std::oct.
+     * @return The number if the conversion was successful.
+     * @throw std::ios_base::failure if the conversion was not successful.
+     */
+    template<typename T, typename DT = std::decay_t<T>, typename BaseF = std::ios_base&(*)(std::ios_base&)>
+    DT to_number(const std::string_view strnum, BaseF base = std::dec)
+    {
+        DT num;
+        if(!to_number(strnum, num, base))
+        {
+            using namespace std::string_view_literals;
+            throw std::ios_base::failure("invalid numeric conversion from string"sv);
+        }
+        return num;
+     }
 }
 
 #endif // LIBIM_UTILS_H

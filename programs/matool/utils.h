@@ -35,7 +35,7 @@ namespace matool {
             return "__cel_" + std::to_string(idx);
         }
 
-        inline std::string_view removeSuffix(const std::string_view& name, const std::regex& regex)
+        inline std::string_view removeSuffix(const std::string_view name, const std::regex& regex)
         {
             std::match_results<std::string_view::const_iterator> match;
             if (std::regex_search(name.begin(), name.end(), match, regex)) {
@@ -45,15 +45,15 @@ namespace matool {
         }
     }
 
-    [[nodiscard]] inline std::string_view removeSeqSuffix(const std::string_view& name) {
+    [[nodiscard]] inline std::string_view removeSeqSuffix(const std::string_view name) {
         return detail::removeSuffix(name, detail::kSeqSufRegex);
     }
 
-    [[nodiscard]] inline std::string_view removeLodSeqSuffix(const std::string_view& name) {
+    [[nodiscard]] inline std::string_view removeLodSeqSuffix(const std::string_view name) {
         return detail::removeSuffix(name, detail::kLodSeqSufRegex);
     }
 
-    [[nodiscard]] inline bool hasLodSeqSuf(const std::string_view& name) {
+    [[nodiscard]] inline bool hasLodSeqSuf(const std::string_view name) {
         return std::regex_search(name.begin(), name.end(), detail::kLodSeqSufRegex);
     }
 

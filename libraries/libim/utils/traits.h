@@ -2,10 +2,10 @@
 #define LIBIM_TRAITS_H
 #include <libim/types/flags.h>
 #include <libim/types/typemask.h>
-#include <libim/math/abstract_vector.h>
 
 #include <array>
 #include <type_traits>
+#include <vector>
 
 namespace libim::utils {
 
@@ -56,6 +56,12 @@ namespace libim::utils {
 
         template<typename T, std::size_t N>
         struct is_std_array<std::array<T, N>> : std::true_type {};
+
+        template<typename>
+        struct is_std_vector: std::false_type {};
+
+        template<typename T, typename A>
+        struct is_std_vector<std::vector<T, A>> : std::true_type {};
 
         template<typename>
         struct is_numeric_std_array : std::false_type {};
@@ -123,6 +129,10 @@ namespace libim::utils {
     // Is T numeric std::array<T, N> type
     template<typename T>
     constexpr bool isNumericStdArray = detail::is_numeric_std_array<T>::value;
+
+    // Is T of type std::vector<T,A>
+    template<typename T>
+    constexpr bool isStdVector = detail::is_std_vector<T>::value;
 
     // Is T of type Flags
     template<typename T>

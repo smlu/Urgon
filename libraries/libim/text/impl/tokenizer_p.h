@@ -85,9 +85,9 @@ namespace libim::text {
                 if (nRead > length) nRead = length;
                 std::copy(buffer_.begin() + pos_, buffer_.begin() + pos_+ nRead, data);
 
-                pos_ += nRead;
-                length -= nRead;
-                data += nRead;
+                pos_      += nRead;
+                length    -= nRead;
+                data      += nRead;
                 totalRead += nRead;
             }
 
@@ -113,7 +113,6 @@ namespace libim::text {
         mutable std::size_t end_ = 0;
         std::array<byte_t, N> buffer_;
     };
-
 
 
     inline bool is_crlf(char c1, char c2)
@@ -226,8 +225,13 @@ namespace libim::text {
             skipWhitespace();
 
             out.clear();
+            out.location().filename   = istream_.name();
             out.location().first_line = line_;
             out.location().first_col  = column_;
+            AT_SCOPE_EXIT([&](){
+                out.location().last_line = line_;
+                out.location().last_col  = column_;
+            });
 
             while(!isDelim(current_ch_) && !istream_.atEnd())
             {
@@ -236,8 +240,6 @@ namespace libim::text {
             }
 
             out.setType(Token::String);
-            out.location().last_line = line_;
-            out.location().last_col  = column_;
         }
 
         void readNumericLiteralHexPart(Token& out)
@@ -286,10 +288,10 @@ namespace libim::text {
             out.setType(Token::Integer);
             readNumericLiteralIntegerPart(out);
 
-            if(current_ch_ == ChDecimalSep && std::isdigit(next_ch_))
+            if(current_ch_ == ChDecimalSep && (std::isdigit(next_ch_) || next_ch_ == '#')) // checking for '#' fixes problems with '.#QNAN0'
             {
                 if(out.isEmpty() || !std::isdigit(out.value().back())) {
-                    // Poorly formatted floating point number. Prepend 0.
+                    // Poorly formatted floating point number, prepend 0.
                     out.append('0');
                 }
 
@@ -378,7 +380,7 @@ namespace libim::text {
                         {
                             out.location().last_line = line_;
                             out.location().last_col  = column_;
-                            throw TokenizerError("unknown escape sequence"sv, out.location());
+                            throw SyntaxError("Unknown escape sequence"sv, out.location());
                         }
                     }
                 }
@@ -396,14 +398,15 @@ namespace libim::text {
             const auto nch = next_ch_;
             const auto lin = line_;
             const auto col = column_;
+            AT_SCOPE_EXIT([&] {
+                istream_.seek(pos);
+                current_ch_ = cch;
+                next_ch_    = nch;
+                line_       = lin;
+                column_     = col;
+            });
 
             readToken(out);
-
-            istream_.seek(pos);
-            current_ch_ = cch;
-            next_ch_    = nch;
-            line_       = lin;
-            column_     = col;
         }
 
         void readToken(Token& out)
@@ -412,8 +415,13 @@ namespace libim::text {
             skipWhitespace();
 
             out.clear();
+            out.location().filename   = istream_.name();
             out.location().first_line = line_;
             out.location().first_col  = column_;
+            AT_SCOPE_EXIT([&](){
+                out.location().last_line = line_;
+                out.location().last_col  = column_;
+            });
 
             if(current_ch_ == ChEof) { // Stream has reached end of file.
                 out.setType(Token::EndOfFile);
@@ -433,10 +441,10 @@ namespace libim::text {
             }
             else if(std::ispunct(current_ch_))
             {
-                if(current_ch_ == ChMinus && (next_ch_ == ChDecimalSep || std::isdigit(next_ch_))) {
+                if(current_ch_ == ChDecimalSep && std::isdigit(next_ch_)) {
                     readNumericLiteral(out);
                 }
-                else if(current_ch_ == ChDecimalSep && std::isdigit(next_ch_)) {
+                else if(current_ch_ == ChMinus && (next_ch_ == ChDecimalSep || std::isdigit(next_ch_))) {
                     readNumericLiteral(out);
                 }
                 else
@@ -446,9 +454,6 @@ namespace libim::text {
                     advance();
                 }
             }
-
-            out.location().last_line = line_;
-            out.location().last_col  = column_;
         }
 
         inline void setReportEol(bool report)
@@ -470,6 +475,10 @@ namespace libim::text {
 
         inline bool skipWhitespaceStep()
         {
+            if (istream_.atEnd()) {
+                return false;
+            }
+
             if(current_ch_ == ChEof) {
                 return false;
             }

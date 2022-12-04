@@ -27,6 +27,12 @@ namespace libim::text {
         };
 
         Token() = default;
+        Token(const Token&) = default;
+        Token(Token&&) noexcept = default;
+        Token& operator=(const Token&) = default;
+        Token& operator=(Token&&) noexcept = default;
+        ~Token() = default;
+
         Token(Type type, std::string value) :
             m_type(type),
             m_value(std::move(value))
@@ -47,6 +53,7 @@ namespace libim::text {
         {
             m_type = Invalid;
             m_value.clear();
+            m_loc = ParseLocation{};
         }
 
         bool isEmpty() const
@@ -116,31 +123,37 @@ namespace libim::text {
         template<typename T, typename DT = std::decay_t<T>>
         DT getNumber() const
         {
-            static_assert(std::is_arithmetic_v<DT>, "T is not a arithmetic type");
-
-            DT result = DT(0);
-            std::stringstream ss(m_value);
+            auto base = std::dec;
             switch(m_type)
             {
                 case OctInteger: {
-                    ss >> std::oct;
+                    base = std::oct;
                 } break;
                 case HexInteger: {
-                    ss >> std::hex;
+                    base = std::hex;
                 } break;
                 default:
                     break;
             }
 
-            ss >> result;
-            if(!isNumber() || ss.fail())
+            DT num;
+            if (!isNumber() || !utils::to_number(m_value, num, base))
             {
                 using namespace std::string_view_literals;
                 throw SyntaxError("Invalid numeric conversion from string"sv, m_loc);
             }
 
-            return result;
-         }
+            return num;
+        }
+
+        template <typename T, typename DT = std::decay_t<T>>
+        DT getFlags() const
+        {
+            static_assert(utils::isEnum<DT>,
+                "T must be either enum, Flags or TypeMask type"
+            );
+            return DT(getNumber<utils::underlying_type_t<DT>>());
+        }
 
         void toLowercase()
         {
@@ -152,6 +165,14 @@ namespace libim::text {
             Token cpy = *this;
             cpy.toLowercase();
             return cpy;
+        }
+
+        /**
+         * Returns true if token is not invalid, not end of file or not end of line.
+         */
+        bool isValid() const
+        {
+            return m_type != Invalid && m_type != EndOfFile && m_type != EndOfLine;
         }
 
     private:

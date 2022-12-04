@@ -41,7 +41,7 @@ std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextR
                 continue;
             }
 
-            std::string sval = rr.getSpaceDelimitedString(/*throwIfEmpty=*/false);
+            std::string sval{ rr.getSpaceDelimitedString(/*throwIfEmpty=*/false) };
             if(sval.empty())
             {
                 if(!s.hasDefaultValue())

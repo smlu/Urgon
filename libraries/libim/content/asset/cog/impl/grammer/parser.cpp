@@ -216,7 +216,7 @@ CogSymbolValue parseAssignment(Tokenizer& tok, CogSymbol::Type type)
     }
 
     // Get string value
-    auto value = tok.getSpaceDelimitedString(/*throwIfEmpty=*/false);
+    std::string value(tok.getSpaceDelimitedString(/*throwIfEmpty=*/false));
     to_lower(value);
 
     if(value.empty()) {

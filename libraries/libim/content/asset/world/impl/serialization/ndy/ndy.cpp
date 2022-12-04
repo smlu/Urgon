@@ -41,7 +41,7 @@ bool NDY::parseSection_Copyright(TextResourceReader& rr)
 {
     const std::size_t nLines    = kFileCopyright.size() / kCopyrightLineWidth;
     const std::size_t nReadLen  = kFileCopyright.size() + nLines;
-    std::string       copyright = rr.getString(nReadLen);
+    std::string copyright(rr.getString(nReadLen));
 
     copyright.erase(std::remove(copyright.begin(), copyright.end(), '\n'), copyright.end());
     return copyright == kFileCopyright;

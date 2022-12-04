@@ -18,91 +18,114 @@ Tokenizer::Tokenizer(const InputStream& s)
 Tokenizer::~Tokenizer()
 {}
 
+ParseLocation Tokenizer::currentLocation()
+{
+    return ParseLocation{
+        tp_->istream().name(),
+        tp_->currentLine(),
+        tp_->currentColumn(),
+        tp_->currentLine(),
+        tp_->currentColumn()
+    };
+}
+
 const Token& Tokenizer::currentToken() const
 {
     return cachedTkn_;
 }
 
+bool Tokenizer::getNextToken(Token& out, bool lowercased, bool cache)
+{
+    tp_->readToken(out);
+    if (lowercased) out.toLowercase();
+    if (cache) cachedTkn_ = out;
+    return out.isValid();
+}
+
 const Token& Tokenizer::getNextToken(bool lowercased)
 {
-    getNextToken(cachedTkn_);
-    if(lowercased){
-        cachedTkn_.toLowercase();
-    }
+    getNextToken(cachedTkn_, lowercased);
     return cachedTkn_;
 }
 
-void Tokenizer::getNextToken(Token& out)
+bool Tokenizer::getNextToken(Token& out, bool lowercased)
 {
-    tp_->readToken(out);
+    return getNextToken(out, lowercased, true);
 }
 
-const Token& Tokenizer::peekNextToken(bool lowercased)
+Token Tokenizer::peekNextToken(bool lowercased)
 {
-    peekNextToken(peekedTkn_);
-    if(lowercased){
-        peekedTkn_.toLowercase();
-    }
-    return peekedTkn_;
+    Token t;
+    peekNextToken(t, lowercased);
+    return t;
 }
 
-void Tokenizer::peekNextToken(Token& out)
+bool Tokenizer::peekNextToken(Token& out, bool lowercased)
 {
     tp_->peekNextToken(out);
+    if (lowercased){
+        out.toLowercase();
+    }
+    return out.isValid();
 }
 
-std::string Tokenizer::getIdentifier()
+std::string_view Tokenizer::getIdentifier()
 {
     getNextToken(cachedTkn_);
-    if(cachedTkn_.type() != Token::Identifier) {
+    if (cachedTkn_.type() != Token::Identifier) {
         throw SyntaxError("Expected identifier"sv, cachedTkn_.location());
     }
 
-    return std::move(cachedTkn_).value();
+    return cachedTkn_.value();
 }
 
-std::string Tokenizer::getStringLiteral()
+std::string_view Tokenizer::getStringLiteral()
 {
     getNextToken(cachedTkn_);
-    if(cachedTkn_.type() != Token::String) {
+    if (cachedTkn_.type() != Token::String) {
         throw SyntaxError("Expected string literal"sv, cachedTkn_.location());
     }
-    return std::move(cachedTkn_).value();
+    return cachedTkn_.value();
 }
 
-const std::string& Tokenizer::getSpaceDelimitedString(bool throwIfEmpty)
+bool Tokenizer::getSpaceDelimitedString(Token& out, bool throwIfEmpty)
+{
+    getDelimitedString(out, [](char c) { return isspace(c); });
+    if (throwIfEmpty && out.isEmpty()) {
+        throw SyntaxError("Expected string fragment"sv, out.location());
+    }
+    return out.type() == Token::String;
+}
+
+std::string_view Tokenizer::getSpaceDelimitedString(bool throwIfEmpty)
 {
     getSpaceDelimitedString(cachedTkn_, throwIfEmpty);
     return cachedTkn_.value();
 }
 
-void Tokenizer::getSpaceDelimitedString(Token& out, bool throwIfEmpty)
+bool Tokenizer::getDelimitedString(Token& out, const std::function<bool(char)>& isDelim)
 {
-    getDelimitedString(out, [](char c) { return isspace(c); });
-    if(throwIfEmpty && out.isEmpty()) {
-        throw SyntaxError("Expected string fragment"sv, out.location());
-    }
+    tp_->readDelimitedString(out, isDelim);
+    cachedTkn_ = out;
+    return out.type() == Token::String;
 }
 
-const std::string& Tokenizer::getDelimitedString(const std::function<bool(char)>& isDelim)
+std::string_view Tokenizer::getDelimitedString(const std::function<bool(char)>& isDelim)
 {
     getDelimitedString(cachedTkn_, isDelim);
     return cachedTkn_.value();
 }
 
-void Tokenizer::getDelimitedString(Token& out, const std::function<bool(char)>& isDelim)
-{
-    tp_->readDelimitedString(out, isDelim);
-}
-
-void Tokenizer::getString(Token& out, std::size_t len)
+bool Tokenizer::getString(Token& out, std::size_t len)
 {
     tp_->readString(out, len);
+    cachedTkn_ = out;
+    return out.type() == Token::String;
 }
 
-const std::string& Tokenizer::getString(std::size_t len)
+std::string_view Tokenizer::getString(std::size_t len)
 {
-    tp_->readString(cachedTkn_, len);
+    getString(cachedTkn_, len);
     return cachedTkn_.value();
 }
 
@@ -129,7 +152,7 @@ void Tokenizer::assertPunctuator(std::string_view punc)
 void Tokenizer::assertEndOfFile()
 {
     getNextToken(cachedTkn_);
-    if(cachedTkn_.type() != Token::EndOfFile) {
+    if (cachedTkn_.type() != Token::EndOfFile) {
         throw SyntaxError("Expected end of file"sv, cachedTkn_.location());
     }
 }
@@ -137,7 +160,7 @@ void Tokenizer::assertEndOfFile()
 void Tokenizer::skipNextToken()
 {
     Token t;
-    getNextToken(t);
+    getNextToken(t, /*lowercased=*/false, /*cache=*/false);
 }
 
 bool Tokenizer::skipNextTokenIf(TypeMask<Token::Type> mask)
@@ -146,7 +169,7 @@ bool Tokenizer::skipNextTokenIf(TypeMask<Token::Type> mask)
     using namespace utils;
     if (peekNextToken(t); TypeMask(t.type()) & mask)
     {
-        getNextToken(t);
+        skipNextToken();
         return true;
     }
     return false;
@@ -158,7 +181,7 @@ bool Tokenizer::skipNextTokenIfNot(TypeMask<Token::Type> mask)
     using namespace utils;
     if (peekNextToken(t); !(TypeMask(t.type()) & mask))
     {
-        getNextToken(t);
+        skipNextToken();
         return true;
     }
     return false;

@@ -94,8 +94,8 @@ std::vector<Sector> NDY::parseSection_Sectors(TextResourceReader& rr)
         // Optional sound
         if (keytkn.value() == kSound)
         {
-            auto sound  = rr.getSpaceDelimitedString();
-            auto volume = rr.getNumber<decltype(std::declval<Sector::AmbientSound>().volume)>();
+            std::string sound{ rr.getSpaceDelimitedString() };
+            auto volume    = rr.getNumber<decltype(std::declval<Sector::AmbientSound>().volume)>();
             s.ambientSound = { std::move(sound), volume };
             readNextKey();
         }

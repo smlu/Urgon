@@ -3,7 +3,7 @@
 #include "sound.h"
 #include <libim/common.h>
 #include <libim/io/stream.h>
-#include <libim/types/hashmap.h>
+#include <libim/types/indexmap.h>
 
 #include <cstdint>
 #include <memory>
@@ -21,7 +21,7 @@ namespace libim::content::audio
 
         std::size_t count() const; // !< Returns number of tracks
 
-        const HashMap<Sound>& getTrack(std::size_t trackIdx) const;
+        const IndexMap<Sound>& getTrack(std::size_t trackIdx) const;
 
         /** Imports sounbank data to track at index Idx */
         bool importTrack(std::size_t trackIdx, const InputStream& istream);

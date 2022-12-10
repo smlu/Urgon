@@ -349,11 +349,11 @@ std::size_t CND::getOffset_Templates(const InputStream& istream, const CndHeader
            aSizes.at(1) * sizeof(CndResourceName);
 }
 
-HashMap<CndThing> CND::parseSection_Templates(const InputStream& istream, const CndHeader& header)
+IndexMap<CndThing> CND::parseSection_Templates(const InputStream& istream, const CndHeader& header)
 {
     try
     {
-        HashMap<CndThing> templates;
+        IndexMap<CndThing> templates;
         templates.reserve(header.numThingTemplates);
         parseThingList(istream, header.numThingTemplates, [&](CndThing&& t){
             world_ser_assert(templates.pushBack(t.name, std::move(t)).second,
@@ -370,14 +370,14 @@ HashMap<CndThing> CND::parseSection_Templates(const InputStream& istream, const 
     }
 }
 
-HashMap<CndThing> CND::readTemplates(const InputStream& istream)
+IndexMap<CndThing> CND::readTemplates(const InputStream& istream)
 {
     auto header = readHeader(istream);
     istream.seek(getOffset_Templates(istream, header));
     return parseSection_Templates(istream, header);
 }
 
-void CND::writeSection_Templates(OutputStream& ostream, const HashMap<CndThing>& templates)
+void CND::writeSection_Templates(OutputStream& ostream, const IndexMap<CndThing>& templates)
 {
     try {
         writeThingList(ostream, templates);

@@ -6,7 +6,7 @@
 
 #include <libim/io/stream.h>
 #include <libim/types/flags.h>
-#include <libim/types/hashmap.h>
+#include <libim/types/indexmap.h>
 #include <string>
 
 namespace libim::content::asset {
@@ -28,7 +28,7 @@ namespace libim::content::asset {
         };
 
         Flags<Flag> flags;
-        HashMap<CogSymbol> symbols;
+        IndexMap<CogSymbol> symbols;
 
         using Asset::Asset;
         CogScript(const InputStream& istream, bool parseSymDescription = false);

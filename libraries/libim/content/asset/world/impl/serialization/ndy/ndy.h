@@ -12,7 +12,7 @@
 #include <libim/content/text/text_resource_reader.h>
 #include <libim/content/text/text_resource_writer.h>
 #include <libim/io/stream.h>
-#include <libim/types/hashmap.h>
+#include <libim/types/indexmap.h>
 #include <libim/types/sharedref.h>
 
 #include <string>
@@ -49,11 +49,11 @@ namespace libim::content::asset {
 
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Sounds(text::TextResourceReader& rr); // Returns pair of max no. of world sounds and the list of wav file names
-        static void writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxWorldSounds, const HashMap<audio::Sound>& track);
+        static void writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxWorldSounds, const IndexMap<audio::Sound>& track);
 
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Materials(text::TextResourceReader& rr); // Returns pair of max no. of world materials and the list of mat file names
-        static void writeSection_Materials(text::TextResourceWriter& rw, const HashMap<Material>& materials);
+        static void writeSection_Materials(text::TextResourceWriter& rw, const IndexMap<Material>& materials);
 
         [[nodiscard]] static Georesource parseSection_Georesource(text::TextResourceReader& rr);
         static void writeSection_Georesource(text::TextResourceWriter& rw, const Georesource& geores);
@@ -75,7 +75,7 @@ namespace libim::content::asset {
 
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Keyframes(text::TextResourceReader& rr); // Returns pair of max no. of world keyframes and the list of key file names
-        static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxWorldKeyframes, const HashMap<Animation>& keyframes);
+        static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxWorldKeyframes, const IndexMap<Animation>& keyframes);
 
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_AnimClass(text::TextResourceReader& rr); // Returns pair of max no. of world puppets and the list of pup file names
@@ -90,14 +90,14 @@ namespace libim::content::asset {
         static void writeSection_CogScripts(text::TextResourceWriter& rw, std::size_t maxWorldCogScripts, const std::vector<std::string>& scripts);
 
         [[nodiscard]] static std::pair<std::size_t, std::vector<SharedRef<Cog>>>
-                    parseSection_Cogs(text::TextResourceReader& rr, const HashMap<SharedRef<CogScript>>& scripts); // Returns pair of max no. of world cogs and list of world cogs
+                    parseSection_Cogs(text::TextResourceReader& rr, const IndexMap<SharedRef<CogScript>>& scripts); // Returns pair of max no. of world cogs and list of world cogs
         static void writeSection_Cogs(text::TextResourceWriter& rw, std::size_t maxWorldCogs, const std::vector<SharedRef<Cog>>& cogs);
 
         [[nodiscard]] static std::vector<CndThing> parseSection_Templates(text::TextResourceReader& rr);
-        static void writeSection_Templates(text::TextResourceWriter& rw, const HashMap<CndThing>& templates);
+        static void writeSection_Templates(text::TextResourceWriter& rw, const IndexMap<CndThing>& templates);
 
         [[nodiscard]] static std::vector<CndThing> parseSection_Things(text::TextResourceReader& r);
-        static void writeSection_Things(text::TextResourceWriter& rw, const std::vector<CndThing>& things, const HashMap<CndThing>& templates);
+        static void writeSection_Things(text::TextResourceWriter& rw, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates);
 
         // Note: Section PVS is optional and it doesn't need to be written but performance will be degraded.
         static void writeSection_PVS(text::TextResourceWriter& rw, const ByteArray& pvs, const std::vector<Sector>& sectors);

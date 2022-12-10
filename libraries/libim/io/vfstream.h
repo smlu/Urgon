@@ -3,7 +3,7 @@
 #include <string_view>
 
 #include "stream.h"
-#include <libim/types/hashmap.h>
+#include <libim/types/indexmap.h>
 #include <libim/utils/utils.h>
 
 namespace libim {
@@ -90,7 +90,7 @@ namespace libim {
     class VfContainer
     {
     public:
-        using MapType = HashMap<SharedRef<VirtualFile>>;
+        using MapType = IndexMap<SharedRef<VirtualFile>>;
         using ConstIterator = typename MapType::ContainerType::const_iterator;
 
         ConstIterator begin() const

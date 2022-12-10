@@ -45,7 +45,7 @@ std::size_t SoundBank::count() const
     return ptrImpl_->vecTracks.size();
 }
 
-const HashMap<Sound>& SoundBank::getTrack(std::size_t trackIdx) const
+const IndexMap<Sound>& SoundBank::getTrack(std::size_t trackIdx) const
 {
     if(trackIdx >= ptrImpl_->vecTracks.size()) {
         throw SoundBankError("trackIdx out of range!");

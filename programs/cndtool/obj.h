@@ -97,7 +97,7 @@ namespace cndtool {
         // Load materials from jones3dstatic.cnd
         fs::path scndPath = inCndPath;
         scndPath.replace_filename(kJones3dStatic);
-        HashMap<Material> smats;
+        IndexMap<Material> smats;
         if (fileExists(scndPath))
         {
             LOG_DEBUG("Loading materials from %", kJones3dStatic);
@@ -108,7 +108,7 @@ namespace cndtool {
             LOG_WARNING("File % was not found. Some surfaces might have incomplete texture information.", kJones3dStatic);
         }
 
-        HashMap<const Material*> usedMats;
+        IndexMap<const Material*> usedMats;
         const auto mtlPath = kMtlFolder / fs::path(inCndPath).filename().replace_extension(".mtl");
 
         // Write obj

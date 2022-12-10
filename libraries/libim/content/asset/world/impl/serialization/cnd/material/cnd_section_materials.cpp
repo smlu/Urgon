@@ -33,9 +33,9 @@ std::size_t CND::getOffset_Materials(const InputStream& istream)
            sizeNextFileIdField;
 }
 
-HashMap<Material> CND::parseSection_Materials(const InputStream& istream, const CndHeader& header)
+IndexMap<Material> CND::parseSection_Materials(const InputStream& istream, const CndHeader& header)
 {
-    HashMap<Material> materials;
+    IndexMap<Material> materials;
     try
     {
         /* Return if no materials are present in file*/
@@ -115,14 +115,14 @@ HashMap<Material> CND::parseSection_Materials(const InputStream& istream, const 
     }
 }
 
-HashMap<Material> CND::readMaterials(const InputStream& istream)
+IndexMap<Material> CND::readMaterials(const InputStream& istream)
 {
     auto cndHeader = readHeader(istream);
     istream.seek(getOffset_Materials(istream));
     return parseSection_Materials(istream, cndHeader);
 }
 
-void CND::writeSection_Materials(OutputStream& ostream, const HashMap<Material>& materials)
+void CND::writeSection_Materials(OutputStream& ostream, const IndexMap<Material>& materials)
 {
     try
     {

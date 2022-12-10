@@ -426,7 +426,7 @@ int execCmdAdd(std::string_view scmd, const CndToolArgs& args)
     return 1;
 }
 
-void writeAnimations(const HashMap<Animation> animations, const fs::path& outDir, const std::string& cndName, const ExtractOptions& opt)
+void writeAnimations(const IndexMap<Animation>& animations, const fs::path& outDir, const std::string& cndName, const ExtractOptions& opt)
 {
     if (animations.isEmpty()) return;
 
@@ -460,7 +460,7 @@ void writeAnimations(const HashMap<Animation> animations, const fs::path& outDir
     if (!opt.verboseOutput) std::cout << "\rExtracting animations... " << kSuccess << std::endl;
 }
 
-void writeMaterials(const HashMap<Material>& materials, const fs::path& outDir, const ExtractOptions& opt)
+void writeMaterials(const IndexMap<Material>& materials, const fs::path& outDir, const ExtractOptions& opt)
 {
     if (materials.isEmpty()) return;
 
@@ -518,7 +518,7 @@ void writeMaterials(const HashMap<Material>& materials, const fs::path& outDir, 
     if (!opt.verboseOutput) std::cout << "\rExtracting materials... " << kSuccess << std::endl;
 }
 
-void writeSounds(const HashMap<Sound>& sounds, const fs::path& outDir, const ExtractOptions& opt)
+void writeSounds(const IndexMap<Sound>& sounds, const fs::path& outDir, const ExtractOptions& opt)
 {
     if (sounds.isEmpty()) return;
     if (!opt.verboseOutput) printProgress("Extracting sounds... ", 0, 1);
@@ -558,9 +558,9 @@ void writeSounds(const HashMap<Sound>& sounds, const fs::path& outDir, const Ext
     if (!opt.verboseOutput) std::cout << "\rExtracting sounds... " << kSuccess << std::endl;
 }
 
-[[nodiscard]] HashMap<SharedRef<CogScript>> loadCogScripts(const VirtualFileSystem& vfs, const std::vector<std::string>& scripts, bool bFixCogScripts)
+[[nodiscard]] IndexMap<SharedRef<CogScript>> loadCogScripts(const VirtualFileSystem& vfs, const std::vector<std::string>& scripts, bool bFixCogScripts)
 {
-    HashMap<SharedRef<CogScript>> stable;
+    IndexMap<SharedRef<CogScript>> stable;
     stable.reserve(scripts.size());
 
     for(const auto& sname : scripts)

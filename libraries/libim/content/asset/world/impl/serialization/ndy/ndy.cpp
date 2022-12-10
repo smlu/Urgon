@@ -134,7 +134,7 @@ NDY::parseSection_Sounds(TextResourceReader& rr)
     return parseResourceSection<false>(rr, kWorldSounds);
 }
 
-void NDY::writeSection_Sounds(TextResourceWriter& rw, std::size_t maxWorldSounds, const HashMap<Sound>& track)
+void NDY::writeSection_Sounds(TextResourceWriter& rw, std::size_t maxWorldSounds, const IndexMap<Sound>& track)
 {
     writeResourceSection<false>(rw,
         "#### Sound information  #####"sv,
@@ -152,7 +152,7 @@ NDY::parseSection_Materials(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldMaterials);
 }
 
-void NDY::writeSection_Materials(TextResourceWriter& rw, const HashMap<Material>& materials)
+void NDY::writeSection_Materials(TextResourceWriter& rw, const IndexMap<Material>& materials)
 {
     writeResourceSection<true>(rw,
         "##### Material information #####"sv,
@@ -224,7 +224,7 @@ NDY::parseSection_Keyframes(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldKeyframes);
 }
 
-void NDY::writeSection_Keyframes(TextResourceWriter &rw, std::size_t maxWorldKeyframes, const HashMap<Animation>& keyframes)
+void NDY::writeSection_Keyframes(TextResourceWriter &rw, std::size_t maxWorldKeyframes, const IndexMap<Animation>& keyframes)
 {
     writeResourceSection<true>(rw,
         "##### Keyframe information #####"sv,

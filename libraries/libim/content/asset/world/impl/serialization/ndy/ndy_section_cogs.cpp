@@ -9,7 +9,7 @@ using namespace std::string_view_literals;
 
 static constexpr auto kWorldCogs = "World cogs"sv;
 
-std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextResourceReader& rr, const HashMap<SharedRef<CogScript>>& scripts)
+std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextResourceReader& rr, const IndexMap<SharedRef<CogScript>>& scripts)
 {
     std::size_t maxCogs = rr.readKey<std::size_t>(kWorldCogs);
 

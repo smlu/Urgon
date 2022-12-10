@@ -1,5 +1,5 @@
-#ifndef LIBIM_HASHMAP_H
-#define LIBIM_HASHMAP_H
+#ifndef LIBIM_INDEXMAP_H
+#define LIBIM_INDEXMAP_H
 #include <cstdint>
 #include <deque>
 #include <functional>
@@ -12,18 +12,18 @@
 namespace libim {
 
     /**
-     * Sequence list which elements are ordered by insertion and mapped to the key.
-     * The elements can be retrieved by the key or by the index.
+     * Hash table which elements are ordered by insertion and mapped to the key.
+     * Each element can be retrieved by the key or by the index.
      */
     template<typename T, typename KeyT = std::string>
-    class HashMap
+    class IndexMap
     {
         static_assert(std::is_same_v<KeyT, std::string_view> == false,
             "std::string_view is not supported as a key type. Use std::string instead.");
 
         template<typename, typename>
-        class HashMapIterator;
-        template<typename, typename> friend class HashMapIterator;
+        class IndexMapIterator;
+        template<typename, typename> friend class IndexMapIterator;
 
         static constexpr bool isStringKey = std::is_same_v<KeyT, std::string>;
 
@@ -50,26 +50,26 @@ namespace libim {
         using reference = value_type&;
         using const_reference =  const value_type&;
 
-        using iterator = HashMapIterator<T, typename ContainerType::iterator>;
-        using const_iterator = HashMapIterator<T, typename ContainerType::const_iterator>;
+        using iterator = IndexMapIterator<T, typename ContainerType::iterator>;
+        using const_iterator = IndexMapIterator<T, typename ContainerType::const_iterator>;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        HashMap() = default;
-        HashMap(HashMap&&) = default;
-        HashMap& operator = (HashMap&&) noexcept = default;
+        IndexMap() = default;
+        IndexMap(IndexMap&&) = default;
+        IndexMap& operator = (IndexMap&&) noexcept = default;
 
-        HashMap(const HashMap& rhs) : data_(rhs.data_)
+        IndexMap(const IndexMap& rhs) : data_(rhs.data_)
         {
-            reconstruct_map();
+            reconstruct();
         }
 
-        HashMap& operator = (const HashMap& rhs)
+        IndexMap& operator = (const IndexMap& rhs)
         {
             if (&rhs != this)
             {
                 data_ = rhs.data_;
-                reconstruct_map();
+                reconstruct();
             }
             return *this;
         }
@@ -237,13 +237,13 @@ namespace libim {
 
         std::pair<iterator, bool> insert(const_iterator pos, key_type key, const T& value)
         {
-            auto iidx = get_itr_idx(pos);
+            auto iidx = getItrIdx(pos);
             return insert(iidx, std::move(key), value);
         }
 
         std::pair<iterator, bool> insert(const_iterator pos, key_type key, T&& value)
         {
-            auto iidx = get_itr_idx(pos);
+            auto iidx = getItrIdx(pos);
             return insert(iidx, std::move(key), std::move(value));
         }
 
@@ -335,12 +335,12 @@ namespace libim {
 
         iterator erase(const_iterator pos)
         {
-            return erase_by_idx(get_itr_idx(pos));
+            return eraseByIdx(getItrIdx(pos));
         }
 
         void erase(Idx pos)
         {
-            erase_by_idx(pos);
+            eraseByIdx(pos);
         }
 
         void erase(key_const_reference key)
@@ -349,7 +349,7 @@ namespace libim {
             if (mapIt != map_.end())
             {
                 auto it = mapIt->second;
-                erase_by_idx(get_itr_idx(it));
+                eraseByIdx(getItrIdx(it));
             }
         }
 
@@ -385,7 +385,7 @@ namespace libim {
             map_.reserve(n);
         }
 
-        void swap(HashMap& other) noexcept
+        void swap(IndexMap& other) noexcept
         {
             data_.swap(other.data_);
             index_.swap(other.index_);
@@ -405,12 +405,12 @@ namespace libim {
             else return std::move(key);
         }
 
-        Idx get_itr_idx(typename ContainerType::const_iterator itr) const
+        Idx getItrIdx(typename ContainerType::const_iterator itr) const
         {
             return std::distance(data_.begin(), itr);
         }
 
-        iterator erase_by_idx(Idx idx)
+        iterator eraseByIdx(Idx idx)
         {
             auto it = end();
             if (idx < index_.size())
@@ -424,7 +424,7 @@ namespace libim {
             return it;
         }
 
-        void reconstruct_map()
+        void reconstruct()
         {
             map_.clear();
             index_.clear();
@@ -454,7 +454,7 @@ namespace libim {
 
     template<typename T,typename KeyT>
     template <typename ValueT, typename ContainerIterator>
-    class HashMap<T, KeyT>::HashMapIterator
+    class IndexMap<T, KeyT>::IndexMapIterator
     {
         using IterTriats = std::iterator_traits<ContainerIterator>;
         ContainerIterator it_;
@@ -464,8 +464,8 @@ namespace libim {
             return it_;
         }
 
-        friend class HashMap<T, KeyT>;
-        HashMapIterator(ContainerIterator it) : it_(it) {}
+        friend class IndexMap<T, KeyT>;
+        IndexMapIterator(ContainerIterator it) : it_(it) {}
 
     public:
         using iterator_category = typename IterTriats::iterator_category;
@@ -475,7 +475,7 @@ namespace libim {
         using reference = std::conditional_t<std::is_const_v<typename IterTriats::reference>, const value_type, value_type>&;
 
         template<typename U, typename W>
-        HashMapIterator(HashMapIterator<U, W> other) : it_(other.it_)
+        IndexMapIterator(IndexMapIterator<U, W> other) : it_(other.it_)
         {}
 
         reference operator* () const
@@ -493,79 +493,79 @@ namespace libim {
             return it_.operator[](n)->second;
         }
 
-        inline HashMapIterator operator+ (difference_type n) const
+        inline IndexMapIterator operator+ (difference_type n) const
         {
-            return HashMapIterator(it_ + n);
+            return IndexMapIterator(it_ + n);
         }
 
-        HashMapIterator& operator++ ()
+        IndexMapIterator& operator++ ()
         {
             ++it_;
             return *this;
         }
 
-        HashMapIterator operator++ (int)
+        IndexMapIterator operator++ (int)
         {
-            return HashMapIterator(it_++);
+            return IndexMapIterator(it_++);
         }
 
-        HashMapIterator& operator+= (difference_type n)
+        IndexMapIterator& operator+= (difference_type n)
         {
             it_ += n;
             return *this;
         }
 
-        HashMapIterator operator- (difference_type n) const
+        IndexMapIterator operator- (difference_type n) const
         {
-            return HashMapIterator(it_ - n);
+            return IndexMapIterator(it_ - n);
         }
 
-        HashMapIterator& operator-- ()
+        IndexMapIterator& operator-- ()
         {
             --it_;
             return *this;
         }
 
-        HashMapIterator operator-- (int)
+        IndexMapIterator operator-- (int)
         {
-            return HashMapIterator(it_--);
+            return IndexMapIterator(it_--);
         }
 
-        HashMapIterator& operator-= (difference_type n)
+        IndexMapIterator& operator-= (difference_type n)
         {
             it_ -= n;
             return *this;
         }
 
-        bool operator == (const HashMapIterator& rhs) const
+        bool operator == (const IndexMapIterator& rhs) const
         {
             return it_ == rhs.it_;
         }
 
-        bool operator != (const HashMapIterator& rhs) const
+        bool operator != (const IndexMapIterator& rhs) const
         {
             return it_ != rhs.it_;
         }
 
-        bool operator < (const HashMapIterator& rhs) const
+        bool operator < (const IndexMapIterator& rhs) const
         {
             return it_ < rhs.it_;
         }
 
-        bool operator > (const HashMapIterator& rhs) const
+        bool operator > (const IndexMapIterator& rhs) const
         {
             return it_ > rhs.it_;
         }
 
-        bool operator <= (const HashMapIterator& rhs) const
+        bool operator <= (const IndexMapIterator& rhs) const
         {
             return it_ <= rhs.it_;
         }
 
-        bool operator >= (const HashMapIterator& rhs) const
+        bool operator >= (const IndexMapIterator& rhs) const
         {
             return it_ >= rhs.it_;
         }
     };
 }
-#endif // LIBIM_HASHMAP_H
+#endif // LIBIM_INDEXMAP_H

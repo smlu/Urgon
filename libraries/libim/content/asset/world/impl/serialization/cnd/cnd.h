@@ -22,7 +22,7 @@
 #include <libim/math/color.h>
 #include <libim/math/vector2.h>
 #include <libim/math/vector4.h>
-#include <libim/types/hashmap.h>
+#include <libim/types/indexmap.h>
 
 namespace libim::content::asset {
     enum class CndWorldFlag : uint32_t
@@ -138,9 +138,9 @@ namespace libim::content::asset {
         static void parseSection_Sounds(const InputStream& istream, audio::impl::SbTrack& track, uint32_t& nextHandle);
 
         [[nodiscard]] static std::size_t getOffset_Materials(const InputStream& istream);
-        [[nodiscard]] static HashMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.
-        [[nodiscard]] static HashMap<Material> readMaterials(const InputStream& istream);
-        static void writeSection_Materials(OutputStream& ostream, const HashMap<Material>& materials);
+        [[nodiscard]] static IndexMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.
+        [[nodiscard]] static IndexMap<Material> readMaterials(const InputStream& istream);
+        static void writeSection_Materials(OutputStream& ostream, const IndexMap<Material>& materials);
 
         [[nodiscard]] static std::size_t getOffset_Georesource(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static Georesource parseSection_Georesource(const InputStream& istream, const CndHeader& cndHeader);
@@ -168,9 +168,9 @@ namespace libim::content::asset {
         static void WriteSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites);
 
         [[nodiscard]] static std::size_t getOffset_Keyframes(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static HashMap<Animation> parseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
-        [[nodiscard]] static HashMap<Animation> readKeyframes(const InputStream& istream);
-        static void writeSection_Keyframes(OutputStream& ostream, const HashMap<Animation>& animations);
+        [[nodiscard]] static IndexMap<Animation> parseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
+        [[nodiscard]] static IndexMap<Animation> readKeyframes(const InputStream& istream);
+        static void writeSection_Keyframes(OutputStream& ostream, const IndexMap<Animation>& animations);
 
         [[nodiscard]] static std::size_t getOffset_AnimClass(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static std::vector<std::string> parseSection_AnimClass(const InputStream& istream, const CndHeader& header);
@@ -188,14 +188,14 @@ namespace libim::content::asset {
         static void writeSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts);
 
         [[nodiscard]] static std::size_t getOffset_Cogs(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<SharedRef<Cog>> parseSection_Cogs(const InputStream& istream, const CndHeader& header, const HashMap<SharedRef<CogScript>>& scripts);
-        [[nodiscard]] static std::vector<SharedRef<Cog>> readCogs(const InputStream& istream, const HashMap<SharedRef<CogScript>>& scripts);
+        [[nodiscard]] static std::vector<SharedRef<Cog>> parseSection_Cogs(const InputStream& istream, const CndHeader& header, const IndexMap<SharedRef<CogScript>>& scripts);
+        [[nodiscard]] static std::vector<SharedRef<Cog>> readCogs(const InputStream& istream, const IndexMap<SharedRef<CogScript>>& scripts);
         static void writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs);
 
         [[nodiscard]] static std::size_t getOffset_Templates(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static HashMap<CndThing> parseSection_Templates(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static HashMap<CndThing> readTemplates(const InputStream& istream);
-        static void writeSection_Templates(OutputStream& ostream, const HashMap<CndThing>& templates);
+        [[nodiscard]] static IndexMap<CndThing> parseSection_Templates(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static IndexMap<CndThing> readTemplates(const InputStream& istream);
+        static void writeSection_Templates(OutputStream& ostream, const IndexMap<CndThing>& templates);
 
         [[nodiscard]] static std::size_t getOffset_Things(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static std::vector<CndThing> parseSection_Things(const InputStream& istream, const CndHeader& header);

@@ -18,7 +18,7 @@ using namespace std::string_view_literals;
 static constexpr auto kWorldTemplates = "World templates"sv;
 static constexpr auto kWorldThings    = "World things"sv;
 
-void NDY::writeSection_Templates(TextResourceWriter& rw, const HashMap<CndThing>& templates)
+void NDY::writeSection_Templates(TextResourceWriter& rw, const IndexMap<CndThing>& templates)
 {
     rw.writeLine("##### Templates information ####"sv);
     rw.writeSection(kSectionTemplates, /*overline=*/ false);
@@ -34,7 +34,7 @@ void NDY::writeSection_Templates(TextResourceWriter& rw, const HashMap<CndThing>
     rw.writeEol();
 }
 
-void NDY::writeSection_Things(TextResourceWriter& rw, const std::vector<CndThing>& things, const HashMap<CndThing>& templates)
+void NDY::writeSection_Things(TextResourceWriter& rw, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates)
 {
     rw.writeLine("##### Things information ####"sv);
     rw.writeSection(kSectionThings, /*overline=*/ false);

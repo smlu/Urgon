@@ -8,14 +8,14 @@
 #include <libim/content/asset/world/impl/serialization/cnd/animation/cnd_key_structs.h>
 #include <libim/content/asset/world/impl/serialization/cnd/material/cnd_mat_header.h>
 #include <libim/io/stream.h>
-#include <libim/types/hashmap.h>
+#include <libim/types/indexmap.h>
 
 using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::utils;
 
 namespace cndtool {
-    bool patchCndMaterials(const std::filesystem::path& cndFile, const HashMap<Material>& materials)
+    bool patchCndMaterials(const std::filesystem::path& cndFile, const IndexMap<Material>& materials)
     {
         const std::filesystem::path patchedCndFile = cndFile.u8string() + ".patched";
         try
@@ -68,7 +68,7 @@ namespace cndtool {
         }
     }
 
-    bool patchCndAnimations(const std::filesystem::path& cndFile, const HashMap<Animation>& animations)
+    bool patchCndAnimations(const std::filesystem::path& cndFile, const IndexMap<Animation>& animations)
     {
         const std::filesystem::path patchedCndFile = cndFile.u8string() + ".patched";
         try

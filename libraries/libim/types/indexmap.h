@@ -6,16 +6,56 @@
 #include <iterator>
 #include <list>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_map>
 
+#include <libim/platform.h>
+#include <libim/types/string_map.h>
+#include <libim/utils/traits.h>
+
 namespace libim {
+
+    /** A case-insensitive string hash function. */
+    struct StringCaseInsensitiveHash
+    {
+        size_t operator()(std::string_view val) const
+        {
+            // FNV-1a hash function
+            // TODO: Use faster hash function for smaller strings with better avalanche effect.
+            //       Check MurmurHash3, CityHash....
+            #if defined(LIBIM_PLATFORM_64BIT)
+                static constexpr size_t fnvOffsetBasis = 14695981039346656037ULL;
+                static constexpr size_t fnvPrime       = 1099511628211ULL;
+            #else
+                static constexpr size_t fnvOffsetBasis = 2166136261U;
+                static constexpr size_t fnvPrime       = 16777619U;
+            #endif
+
+            std::size_t hash = fnvOffsetBasis;
+            for (auto c : val)
+            {
+                hash ^= static_cast<std::size_t>(std::tolower(c));
+                hash *= fnvPrime;
+            }
+            return hash;
+        }
+    };
 
     /**
      * Hash table which elements are ordered by insertion and mapped to the key.
      * Each element can be retrieved by the key or by the index.
+     *
+     * @tparam T        - The value type.
+     * @tparam KeyT     - The key type. By default std::string.
+     * @tparam Hash     - The hash function type. By default, StringCaseInsensitiveHash is used if KeyT is std::string, else std::hash<KeyT>.
+     * @tparam KeyEqual - The key equality function type. By default, StringCaseInsensitiveEqual is used if KeyT is std::string, else std::equal_to<KeyT>.
      */
-    template<typename T, typename KeyT = std::string>
+    template<typename T,
+        typename KeyT = std::string,
+        typename Hash = std::conditional_t<utils::isStdString<KeyT>, StringCaseInsensitiveHash, std::hash<KeyT>>,
+        typename KeyEqual = std::conditional_t<utils::isStdString<KeyT>, StringCaseInsensitiveEqual, std::equal_to<KeyT>>
+    >
     class IndexMap
     {
         static_assert(std::is_same_v<KeyT, std::string_view> == false,
@@ -25,7 +65,7 @@ namespace libim {
         class IndexMapIterator;
         template<typename, typename> friend class IndexMapIterator;
 
-        static constexpr bool isStringKey = std::is_same_v<KeyT, std::string>;
+        static constexpr bool isStringKey = utils::isStdString<KeyT>;
 
         // Helper types to store std::string in std::unordered_map as std::string_view
         using MapKey = std::conditional_t<isStringKey,
@@ -43,7 +83,7 @@ namespace libim {
 
         using key_type = UnderlyingMapKeyT;
         using key_reference = std::conditional_t<isStringKey, key_type, key_type&>;
-        using key_const_reference  =  const key_reference;
+        using key_const_reference  = const key_reference;
         using key_rvalue_reference = std::conditional_t<isStringKey, key_type, key_type&&>;
 
         using value_type = T;
@@ -442,8 +482,8 @@ namespace libim {
         using MapType = std::unordered_map<
             MapKey,
             typename ContainerType::iterator,
-            std::hash<UnderlyingMapKeyT>,
-            std::equal_to<UnderlyingMapKeyT>
+            Hash,
+            KeyEqual
         >;
 
         ContainerType data_;
@@ -452,9 +492,9 @@ namespace libim {
     };
 
 
-    template<typename T,typename KeyT>
+    template<typename T,typename KeyT, typename Hash, typename KeyEqual>
     template <typename ValueT, typename ContainerIterator>
-    class IndexMap<T, KeyT>::IndexMapIterator
+    class IndexMap<T, KeyT, Hash, KeyEqual>::IndexMapIterator
     {
         using IterTriats = std::iterator_traits<ContainerIterator>;
         ContainerIterator it_;

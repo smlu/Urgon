@@ -6,10 +6,10 @@ namespace libim::text {
     struct ParseLocation
     {
         std::string_view filename;
-        std::size_t first_line;
-        std::size_t first_col;
-        std::size_t last_line;
-        std::size_t last_col;
+        std::size_t firstLine;
+        std::size_t firstColumn;
+        std::size_t lastLine;
+        std::size_t lastColumn;
     };
 }
 

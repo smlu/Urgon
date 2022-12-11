@@ -226,11 +226,11 @@ namespace libim::text {
 
             out.clear();
             out.location().filename   = istream_.name();
-            out.location().first_line = line_;
-            out.location().first_col  = column_;
+            out.location().firstLine = line_;
+            out.location().firstColumn  = column_;
             AT_SCOPE_EXIT([&](){
-                out.location().last_line = line_;
-                out.location().last_col  = column_;
+                out.location().lastLine = line_;
+                out.location().lastColumn  = column_;
             });
 
             while(!isDelim(current_ch_) && !istream_.atEnd())
@@ -339,14 +339,14 @@ namespace libim::text {
                 advance();
                 if(current_ch_ == ChEof)
                 {
-                    out.location().last_line = line_;
-                    out.location().last_col  = column_;
+                    out.location().lastLine = line_;
+                    out.location().lastColumn  = column_;
                     throw SyntaxError("Unexpected end of file in string literal"sv, out.location());
                 }
                 else if(current_ch_ == ChEol)
                 {
-                    out.location().last_line = line_;
-                    out.location().last_col  = column_;
+                    out.location().lastLine = line_;
+                    out.location().lastColumn  = column_;
                     throw SyntaxError("Unexpected new line in string literal"sv, out.location());
                 }
                 else if(current_ch_ == ChDblQuote)
@@ -378,8 +378,8 @@ namespace libim::text {
 
                         default:
                         {
-                            out.location().last_line = line_;
-                            out.location().last_col  = column_;
+                            out.location().lastLine = line_;
+                            out.location().lastColumn  = column_;
                             throw SyntaxError("Unknown escape sequence"sv, out.location());
                         }
                     }
@@ -416,11 +416,11 @@ namespace libim::text {
 
             out.clear();
             out.location().filename   = istream_.name();
-            out.location().first_line = line_;
-            out.location().first_col  = column_;
+            out.location().firstLine = line_;
+            out.location().firstColumn  = column_;
             AT_SCOPE_EXIT([&](){
-                out.location().last_line = line_;
-                out.location().last_col  = column_;
+                out.location().lastLine = line_;
+                out.location().lastColumn  = column_;
             });
 
             if(current_ch_ == ChEof) { // Stream has reached end of file.

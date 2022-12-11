@@ -48,7 +48,7 @@ std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextR
                 {
                     const auto& loc = rr.currentToken().location();
                     LOG_WARNING("NDY::ParseSection_Cogs(): Reached end of line while parsing file:'%', script:'%', symbol:'%' [LOC %:%]",
-                        loc.filename, scrname, s.name, loc.last_line, loc.first_col);
+                        loc.filename, scrname, s.name, loc.lastLine, loc.firstColumn);
                 }
 
                break;

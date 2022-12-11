@@ -1,21 +1,21 @@
-#include "../filestream.h"
-#include "../binarystream.h"
 #include "iobuffer.h"
 
 #include <libim/common.h>
+#include <libim/io/filestream.h>
+#include <libim/io/binarystream.h>
+#include <libim/platform.h>
 #include <libim/types/safe_cast.h>
 
 #include <algorithm>
-
 #include <filesystem>
 #include <iterator>
 
-#ifdef OS_WINDOWS
+#ifdef LIBIM_OS_WINDOWS
 #include <windows.h>
 #include <locale>
 #include <codecvt>
 #include <string>
-# ifdef _WIN64
+# ifdef LIBIM_PLATFORM_64BIT
   typedef int64_t ssize_t;
 # else
   typedef int32_t ssize_t;
@@ -41,25 +41,26 @@ constexpr std::size_t kBufferSize = 4096;
 std::string getLastErrorAsString()
 {
     std::string message;
-#ifdef OS_WINDOWS
-    //Get the error message, if any.
-    DWORD errorMessageID = ::GetLastError();
-    if(errorMessageID == 0)
-        return std::string(); //No error message has been recorded
 
-    LPSTR messageBuffer = nullptr;
-    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                 nullptr, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPSTR>(&messageBuffer), 0, nullptr);
+    if constexpr (platformOS == PlatformOS::Windows)
+    {
+        //Get the error message, if any.
+        DWORD errorMessageID = ::GetLastError();
+        if(errorMessageID == 0)
+            return std::string(); //No error message has been recorded
 
-    message = std::string(messageBuffer, size);
+        LPSTR messageBuffer = nullptr;
+        size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                     nullptr, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPSTR>(&messageBuffer), 0, nullptr);
 
-    //Free the buffer.
-    LocalFree(messageBuffer);
+        message = std::string(messageBuffer, size);
 
-#else
-    message = strerror(errno);
-#endif
-
+        //Free the buffer.
+        LocalFree(messageBuffer);
+    }
+    else {
+        message = strerror(errno);
+    }
     return message;
 }
 
@@ -73,16 +74,16 @@ struct FileStream::FileStreamImpl
         {
             switch (mode)
             {
-            #ifdef OS_WINDOWS
-            case Read:      return GENERIC_READ;
-            case Write:     return static_cast<DWORD>(GENERIC_WRITE);
-            case ReadWrite: return static_cast<DWORD>(GENERIC_WRITE | GENERIC_READ);
+            #ifdef LIBIM_OS_WINDOWS
+                case Read:      return GENERIC_READ;
+                case Write:     return static_cast<DWORD>(GENERIC_WRITE);
+                case ReadWrite: return static_cast<DWORD>(GENERIC_WRITE | GENERIC_READ);
             default:
                 return static_cast<DWORD>(-1);
             #else
-            case Read:      return O_RDONLY;
-            case Write:     return O_WRONLY | O_CREAT;
-            case ReadWrite: return O_RDWR   | O_CREAT;
+                case Read:      return O_RDONLY;
+                case Write:     return O_WRONLY | O_CREAT;
+                case ReadWrite: return O_RDWR   | O_CREAT;
             default:
                 return -1;
             #endif
@@ -93,7 +94,7 @@ struct FileStream::FileStreamImpl
             throw FileStreamError("Unknown file open mode!");
         }
 
-    #ifdef OS_WINDOWS
+    #ifdef LIBIM_OS_WINDOWS
         /* Open file
            Since obuffer is used the write operations could be also done without buffering.
            To do this add flags FILE_FLAG_NO_BUFFERING and FILE_FLAG_WRITE_THROUGH
@@ -134,16 +135,15 @@ struct FileStream::FileStreamImpl
 
         /* Get file size */
         LARGE_INTEGER lSize {{0, 0}};
-        if(!GetFileSizeEx(hFile, &lSize)) {
+        if (!GetFileSizeEx(hFile, &lSize)) {
             throw FileStreamError("Error getting the file size: " + getLastErrorAsString());
         }
 
-        #ifdef _WIN64
+        #ifdef LIBIM_PLATFORM_64BIT
             fileSize = lSize.QuadPart;
         #else
             fileSize = lSize.LowPart;
         #endif
-
     #else // Unix
         /* Open file */
         if (mode != Read && truncate) {
@@ -168,7 +168,7 @@ struct FileStream::FileStreamImpl
     std::size_t read(byte_t* data, std::size_t length)
     {
         ssize_t nRead = 0;
-    #ifdef OS_WINDOWS
+    #ifdef LIBIM_OS_WINDOWS
         if(!ReadFile(hFile, reinterpret_cast<LPVOID>(data), safe_cast<DWORD>(length), reinterpret_cast<LPDWORD>(&nRead), nullptr)) {
     #else
         nRead = ::read(fd, data, length);
@@ -181,7 +181,6 @@ struct FileStream::FileStreamImpl
         return static_cast<std::size_t>(nRead);
     }
 
-
     std::size_t flush(bool sync)
     {
         ssize_t nWritten = 0;
@@ -189,7 +188,7 @@ struct FileStream::FileStreamImpl
         {
             if(obuffer_.hasData())
             {
-            #ifdef OS_WINDOWS
+            #ifdef LIBIM_OS_WINDOWS
                 if (!WriteFile(
                         hFile,
                         reinterpret_cast<LPCVOID>(obuffer_.data()),
@@ -209,7 +208,7 @@ struct FileStream::FileStreamImpl
 
             if(sync)
             {
-            #ifdef OS_WINDOWS
+            #ifdef LIBIM_OS_WINDOWS
                 if(!FlushFileBuffers(hFile)) {
             #else // Unix
                 if (fsync(fd) != 0) {
@@ -239,11 +238,11 @@ struct FileStream::FileStreamImpl
             nTotalWritten += nWritten;
             data += nWritten;
 
-#ifdef MAX_WRITE_FILE_SIZE
+        #ifdef MAX_WRITE_FILE_SIZE
             if( currentOffset + nTotalWritten >= MAX_WRITE_FILE_SIZE) {
                 throw FileStreamError("Wrote to max file size limit");
             }
-#endif
+        #endif
         }
         while(nTotalWritten < length);
 
@@ -258,7 +257,8 @@ struct FileStream::FileStreamImpl
     void seek(std::size_t offset) const
     {
         const_cast<FileStreamImpl*>(this)->flush(/*sync=*/true);
-    #ifdef OS_WINDOWS
+
+    #ifdef LIBIM_OS_WINDOWS
         LARGE_INTEGER li;
         li.QuadPart = offset;
         li.LowPart  = SetFilePointer(hFile, li.LowPart, &li.HighPart, FILE_BEGIN);
@@ -285,7 +285,7 @@ struct FileStream::FileStreamImpl
         catch(...){}
 
         // Close file handle
-    #ifdef OS_WINDOWS
+    #ifdef LIBIM_OS_WINDOWS
         if(hFile != INVALID_HANDLE_VALUE)
         {
             CloseHandle(hFile); // can throw under a debugger
@@ -305,7 +305,6 @@ struct FileStream::FileStreamImpl
         close();
     }
 
-
     Mode mode;
     std::string filePath;
     mutable std::size_t fileSize = 0;
@@ -314,7 +313,7 @@ struct FileStream::FileStreamImpl
 private:
     IOBuffer<kBufferSize> obuffer_;
 
-#ifdef OS_WINDOWS
+#ifdef LIBIM_OS_WINDOWS
     HANDLE hFile = INVALID_HANDLE_VALUE;
 #else
     int fd = 0;

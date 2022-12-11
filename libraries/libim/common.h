@@ -14,20 +14,9 @@
 #include <type_traits>
 #include <utility>
 
-#include "types/optref.h"
-#include "utils/utils.h"
-
-#if defined(WIN32) || defined(_WIN32)
-#  define OS_WINDOWS 1
-#  ifndef NOMINMAX
-#    define NOMINMAX
-#  endif
-#  include <windows.h>
-#endif
-
-#if !defined(OS_WINDOWS) || defined(__MINGW32__)
-#  include <sys/stat.h>
-#endif
+#include "platform.h"
+#include <libim/types/optref.h>
+#include <libim/utils/utils.h>
 
 #ifdef PACKED
 #  undef PACKED
@@ -94,7 +83,7 @@ namespace libim {
 
     inline constexpr char pathSeparator()
     {
-    #ifdef OS_WINDOWS
+    #ifdef LIBIM_OS_WINDOWS
         return '\\';
     #else
         return '/';
@@ -103,7 +92,7 @@ namespace libim {
 
     inline constexpr char noneNativePathSeparator()
     {
-    #ifdef OS_WINDOWS
+    #ifdef LIBIM_OS_WINDOWS
         return '/';
     #else
         return '\\';

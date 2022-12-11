@@ -11,7 +11,7 @@
 #include "../texture.h"
 #include "../texture_view.h"
 
-#include <libim/common.h>
+#include <libim/platform.h>
 #include <libim/log/log.h>
 #include <libim/io/filestream.h>
 
@@ -19,7 +19,7 @@ namespace libim::content::asset {
 
     constexpr uint16_t BMP_TYPE = 0x4D42;
 
-#ifdef OS_WINDOWS
+#ifdef LIBIM_OS_WINDOWS
     using BiCompression = uint32_t;
     using LcsType = uint32_t;
 #else

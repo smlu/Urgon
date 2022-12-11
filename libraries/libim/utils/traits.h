@@ -122,35 +122,41 @@ namespace libim::utils {
     template<typename C>
     constexpr bool has_mf_reserve = detail::has_reserve<C>::value;
 
-    // Is T of type std::array<T,N>
+     // is T of type enum or Flags or TypeMask
     template<typename T>
-    constexpr bool isStdArray = detail::is_std_array<T>::value;
+    constexpr bool isEnum = std::is_enum_v<T> || isFlags<T> || isTypeMask<T>;
 
     // Is T numeric std::array<T, N> type
     template<typename T>
     constexpr bool isNumericStdArray = detail::is_numeric_std_array<T>::value;
 
-    // Is T of type std::vector<T,A>
-    template<typename T>
-    constexpr bool isStdVector = detail::is_std_vector<T>::value;
-
     // Is T of type Flags
     template<typename T>
     constexpr bool isFlags = detail::is_flags<T>::value;
+
+    // Is T std::shared_ptr type
+    template<typename T>
+    constexpr bool isSharedPtr = detail::is_shared_ptr<T>::value;
+
+    // Is T of type std::array<T,N>
+    template<typename T>
+    constexpr bool isStdArray = detail::is_std_array<T>::value;
+
+    // Is T of type std::string
+    template<typename T>
+    constexpr bool isStdString = std::is_same_v<T, std::string>;
+
+    // Is T of type std::vector<T,A>
+    template<typename T>
+    constexpr bool isStdVector = detail::is_std_vector<T>::value;
 
     // Is T of type TypeMask
     template<typename T>
     constexpr bool isTypeMask = detail::is_typemask<T>::value;
 
-    // is T of type enum or Flags or TypeMask
-    template<typename T>
-    constexpr bool isEnum = std::is_enum_v<T> || isFlags<T> || isTypeMask<T>;
-
-    /* Utility type triats */
+    /* Utility type traits */
     template<typename T>
     constexpr std::size_t arraySize = detail::array_size<T>::size;
 
-    template<typename T>
-    constexpr bool isSharedPtr = detail::is_shared_ptr<T>::value;
 }
 #endif // LIBIM_TRAITS_H

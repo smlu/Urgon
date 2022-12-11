@@ -269,10 +269,12 @@ namespace libim::content::text {
          * @tparam hasRowIdxs  - If true, the serialized text list in stream is expected to have row indices.
          * @tparam hasListSize - If true, the serialized text list in stream is expected to have a size.
          *                       If false, the end of list must be marked with keyword "end".
-         * @tparam Lambda      - Type of the list element constructor function: (TextResourceReader&, std::size_t rowIdx, ElementType& element) -> void
+         * @tparam ReadRowFunc - Function type which parses list line and constructs list element: (TextResourceReader&, std::size_t rowIdx, ElementType& element) -> void
+         * @tparam InsertFunc  - Function which inserts parsed element into container: (Container&, std::size_t rowIdx, ElementType&& element) -> void
          *
          * @param expectedName - Expected name of the list. Not required when hasListSize is false.
-         * @param constructor  - Element constructor function.
+         * @param readRow      - Function which parses each list row to construct each list element.
+         * @param insert       - Function which inserts parsed element into container. Default is DefaultListInserter<Container>.
          *
          * @throw StreamError - If an error occurs while reading from stream.
          * @throw SyntaxError - If text list is not in correct format.
@@ -280,31 +282,27 @@ namespace libim::content::text {
          * @throw Other exceptions that the constructor function may throw.
          */
         template<typename Container,
-                 bool hasRowIdxs = true,
+                 bool hasRowIdxs  = true,
                  bool hasListSize = true,
-                 typename Lambda,
+                 typename ReadRowFunc,
+                 typename InsertFunc = decltype(DefaultListInserter<Container>),
                  typename = utils::requires_container<Container>>
-        Container readList(std::string_view expectedName, Lambda&& constructor)
+        Container readList(std::string_view expectedName, ReadRowFunc&& readRow, InsertFunc&& insert  = DefaultListInserter<Container>)
         {
-            static_assert(utils::has_mf_push_back<Container> ||
-                          utils::has_no_pos_mf_insert<Container>, "Container doesn't support any valid insertion function!");
+            // static_assert(utils::has_mf_push_back<Container> ||
+            //               utils::has_no_pos_mf_insert<Container>, "Container doesn't support any valid insertion function!");
 
             static_assert(std::is_default_constructible_v<Container>, "Container must be default constructible!");
 
-            /*TODO: Uncomment when static reflection is available and decltype is available for generic lambdas.
+            constexpr bool parseWithNoContainer = std::is_invocable_v<ReadRowFunc, TextResourceReader&, std::size_t, typename Container::value_type&>;
+            constexpr bool parseWithContainer   = std::is_invocable_v<ReadRowFunc, TextResourceReader&, const Container&, std::size_t, typename Container::value_type&>;
+            static_assert( parseWithNoContainer || parseWithContainer,
+                "readRow function must be invocable with arguments: (TextResourceReader&, std::size_t rowIdx, ElementType& element)"
+            );
 
-            using LambdaTraits = typename utils::function_traits<Lambda>;
-            static_assert(LambdaTraits::arity == 2, "constructor func must have at least 2 arguments");
-            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<0>,
-                TextResourceReader&>, "first arg in constructor must be of a type TextResourceReader&"
+            static_assert(std::is_invocable_v<InsertFunc, Container&, typename Container::value_type&&>,
+                "insert function must be invocable with arguments: (Container&, ElementType)"
             );
-            // Note: Constructor can be of arguments: (TextResourceReader&, std::size_t rowIdx, T& type) or
-            //                                        (TextResourceReader&, T& type)
-            // TODO: check if constructor func has 2 or 3 arguments
-            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<1> or typename LambdaTraits::template arg_t<2>,
-                T&>, "second arg in constructor must be of a type T&"
-            );
-            */
 
             using namespace std::string_view_literals;
             auto reserve = [](auto& c, typename Container::size_type r ){
@@ -313,28 +311,28 @@ namespace libim::content::text {
                 }
             };
 
-            auto append = [](auto& c, auto&& v){
-                if constexpr(utils::has_mf_push_back<Container>) {
-                    c.push_back(std::move(v));
-                }
-                else {
-                    c.insert(std::move(v));
-                }
-            };
+            // auto append = [](auto& c, auto&& v){
+            //     if constexpr(utils::has_mf_push_back<Container>) {
+            //         c.push_back(std::move(v));
+            //     }
+            //     else {
+            //         insert(c, std::move(v));
+            //     }
+            // };
 
-            Container result;
+            Container container;
             [[maybe_unused]] std::size_t rowIdx = 0;
             std::function<bool()> isAtEnd;
 
             if constexpr(hasListSize)
             {
                 auto len = readKey<std::size_t>(expectedName);
-                reserve(result, len);
+                reserve(container, len);
                 isAtEnd = [&, len]() { return rowIdx >= len; };
             }
             else
             {
-                reserve(result, 256);
+                reserve(container, 256);
                 isAtEnd = [&]() {
                     if (peekNextToken().value() == "end"sv)
                     {
@@ -355,20 +353,25 @@ namespace libim::content::text {
 
                 if constexpr(!hasListSize && utils::has_mf_capacity<Container>)
                 {
-                    if (result.capacity() < 10) {
-                        reserve(result, 256);
+                    if (container.capacity() < 10) {
+                        reserve(container, 256);
                     }
                 }
 
-                typename Container::value_type item{};
-                constructor(*this, rowIdx, item);
-                append(result, std::move(item));
+                typename Container::value_type element{};
+                if constexpr(parseWithNoContainer) {
+                    readRow(*this, rowIdx, element);
+                }
+                else {
+                    readRow(*this, container, rowIdx, element);
+                }
+
+                insert(container, std::move(element));
                 rowIdx++;
             }
 
-            return result;
+            return container;
         }
-
 
         /**
          * Reads a size-less string list of values from the stream.
@@ -376,9 +379,11 @@ namespace libim::content::text {
          *
          * @tparam Container   - Type of the list to store the values in.
          * @tparam hasRowIdxs  - If true, the serialized text list in stream is expected to have row indices.
-         * @tparam Lambda      - Type of the list element constructor function: (TextResourceReader&, std::size_t rowIdx, ElementType& element) -> void
+         * @tparam ReadRowFunc - Function type which parses list line and constructs list element: (TextResourceReader&, std::size_t rowIdx, ElementType& element) -> void
+         * @tparam InsertFunc  - Function which inserts parsed element into container: (Container&, std::size_t rowIdx, ElementType&& element) -> void
          *
-         * @param constructor  - Element constructor function.
+         * @param readRow      - Function which parses each list row to construct each list element.
+         * @param insert       - Function which inserts parsed element into container. Default is DefaultListInserter<Container>.
          *
          * @throw StreamError - If an error occurs while reading from stream.
          * @throw SyntaxError - If text list is not in correct format.
@@ -387,10 +392,13 @@ namespace libim::content::text {
          */
         template<typename Container,
                  bool hasRowIdxs = true,
-                 typename Lambda,
+                 typename ReadRowFunc,
+                 typename InsertFunc = decltype(DefaultListInserter<Container>),
                  class = utils::requires_container<Container>>
-        Container readList(Lambda&& rowReader) {
-            return readList<Container, hasRowIdxs, false>("", std::forward<Lambda>(rowReader));
+        Container readList(ReadRowFunc&& readRow, InsertFunc&& insert = DefaultListInserter<Container>) {
+            return readList<Container, hasRowIdxs, /*hasListSize*/false>(
+                "", std::forward<ReadRowFunc>(readRow), std::forward<InsertFunc>(insert)
+            );
         }
 
         /**
@@ -488,6 +496,18 @@ namespace libim::content::text {
          * @throw SyntaxError - If section line in stream is not in correct format.
         */
         std::string_view readSection();
+
+    private:
+        template <typename Container>
+        static void DefaultListInserter(Container& c, typename Container::value_type&& v)
+        {
+            if constexpr(utils::has_mf_push_back<Container>) {
+                c.push_back(std::move(v));
+            }
+            else {
+                insert(c, std::move(v));
+            }
+        }
     };
 }
 

@@ -430,16 +430,16 @@ namespace libim::content::text {
                 "T must be derivative of type AbstractVector and default constructable!"
             );
 
-            if (strict) assertIdentifier("(");
+            if (strict) assertPunctuator("(");
             using et = typename DVecT::value_type;
             auto vec = readArray<et, DVecT::size()>([strict](std::size_t i, TextResourceReader& rr) {
                 if (!strict){ // Since we're not in strict mode, skip any unwanted characters.
                     while (rr.skipNextTokenIf(TypeMask(Token::Identifier) | Token::String | Token::Punctuator)) {}
                 }
-                else if(i > 0) rr.assertIdentifier("/");
+                else if(i > 0) rr.assertPunctuator("/");
                 return rr.getNumber<et>();
             });
-            if (strict) assertIdentifier(")");
+            if (strict) assertPunctuator(")");
             return static_cast<DVecT&&>(std::move(vec));
         }
 

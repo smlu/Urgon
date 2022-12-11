@@ -19,7 +19,7 @@ void readStrictVec(TextResourceReader& rr, VecT& vec)
  {
     using vet = typename VecT::value_type;
     auto a = rr.readArray<vet, VecT::size()>([](std::size_t i, TextResourceReader& rr) {
-        if ( i > 0) rr.assertIdentifier("/");
+        if ( i > 0) rr.assertPunctuator("/");
         return rr.getNumber<vet>();
     });
     vec = static_cast<VecT&&>(std::move(a));
@@ -28,34 +28,36 @@ void readStrictVec(TextResourceReader& rr, VecT& vec)
 GradientColor TextResourceReader::readGradientColor()
 {
     GradientColor color;
-    assertIdentifier("(");
+    assertPunctuator("(");
     readStrictVec(*this, color.top);
+    assertPunctuator("/");
     readStrictVec(*this, color.middle);
+    assertPunctuator("/");
     readStrictVec(*this, color.bottomLeft);
+    assertPunctuator("/");
     readStrictVec(*this, color.bottomRight);
-    assertIdentifier(")");
+    assertPunctuator(")");
     return color;
 }
 
 PathFrame TextResourceReader::readPathFrame()
 {
     PathFrame frame;
-    assertIdentifier("(");
+    assertPunctuator("(");
     readStrictVec(*this, frame.position);
-    assertIdentifier(":");
+    assertPunctuator(":");
     readStrictVec(*this, frame.orient);
-    assertIdentifier(")");
+    assertPunctuator(")");
     return frame;
 }
-
 
 void TextResourceReader::assertKey(std::string_view key)
 {
     getString(cachedTkn_, key.size());
     if(!utils::iequal(key, cachedTkn_.value()))
     {
-        LOG_DEBUG("assertKey: expected key '%', found '%'", key, cachedTkn_.value());
-        throw SyntaxError("invalid key"sv, cachedTkn_.location());
+        LOG_DEBUG("assertKey: Expected key '%', found '%'", key, cachedTkn_.value());
+        throw SyntaxError("Invalid key"sv, cachedTkn_.location());
     }
 }
 
@@ -87,8 +89,8 @@ void TextResourceReader::assertSection(std::string_view section)
     const auto sectionName = readSection();
     if(!utils::iequal(sectionName, section))
     {
-        LOG_DEBUG("expected '%', found '%'", section, cachedTkn_.value());
-        throw SyntaxError("invalid section"sv, cachedTkn_.location());
+        LOG_DEBUG("Expected '%', found '%'", section, cachedTkn_.value());
+        throw SyntaxError("Invalid section"sv, cachedTkn_.location());
     }
 }
 

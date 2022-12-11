@@ -120,6 +120,25 @@ namespace libim::text {
             return m_type;
         }
 
+        std::string_view stringType() const
+        {
+            using namespace std::string_view_literals;
+            switch(m_type)
+            {
+                case Invalid:     return "Invalid"sv;
+                case EndOfFile:   return "EndOfFile"sv;
+                case EndOfLine:   return "EndOfLine"sv;
+                case Identifier:  return "Identifier"sv;
+                case String:      return "String"sv;
+                case Punctuator:  return "Punctuator"sv;
+                case Integer:     return "Integer"sv;
+                case HexInteger:  return "HexInteger"sv;
+                case OctInteger:  return "OctInteger"sv;
+                case FloatNumber: return "FloatNumber"sv;
+                default:          return "Unknown"sv;
+            }
+        }
+
         template<typename T, typename DT = std::decay_t<T>>
         DT getNumber() const
         {

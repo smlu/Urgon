@@ -290,6 +290,26 @@ void NDY::writeSection_CogScripts(TextResourceWriter &rw, std::size_t maxWorldCo
     );
 }
 
+ByteArray NDY::parseSection_PVS(TextResourceReader& rr, std::vector<Sector>& sectors)
+{
+    const std::size_t sizePVS = rr.readKey<std::size_t>(kPvsSize);
+    std::size_t numFrames = sizePVS / 64;
+    if (sizePVS % 64 != 0) {
+        numFrames++;
+    }
+
+    ByteArray pvs(numFrames * 64);
+    auto intSizePVS = numFrames * 16;
+    for (std::size_t i = 0; i < intSizePVS && (i * sizeof(uint32_t)) < sizePVS ; i++) {
+        *reinterpret_cast<uint32_t*>(&pvs[i]) = rr.getNumber<uint32_t>();
+    }
+
+    // read PVS indices
+    for (auto& sector : sectors) {
+        sector.pvsIdx = rr.getNumber<decltype(sector.pvsIdx)>();;
+    }
+    return pvs;
+}
 
 void NDY::writeSection_PVS(TextResourceWriter& rw, const ByteArray& pvs, const std::vector<Sector>& sectors)
 {

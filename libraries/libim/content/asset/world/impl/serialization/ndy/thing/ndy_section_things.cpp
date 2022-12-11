@@ -18,6 +18,23 @@ using namespace std::string_view_literals;
 static constexpr auto kWorldTemplates = "World templates"sv;
 static constexpr auto kWorldThings    = "World things"sv;
 
+IndexMap<CndThing> NDY::parseSection_Templates(text::TextResourceReader& rr)
+{
+    const std::size_t sizeTemplates = rr.readKey<std::size_t>(kWorldTemplates);
+    auto templates = rr.readList<IndexMap<CndThing>, /*hasRowIdxs=*/false>(
+    [](TextResourceReader& rr, const auto& templates, auto rowIdx, CndThing& t) {
+        t = ndyParseTemplate(rr, templates);
+    },
+    [](auto& map, auto&& t) {
+        map.emplaceBack(t.name, std::move(t));
+    });
+
+    if (templates.size() != sizeTemplates) {
+        LOG_WARNING("NDY::ParseSection_Templates(): Expected % templates, but found %", sizeTemplates, templates.size());
+    }
+    return templates;
+}
+
 void NDY::writeSection_Templates(TextResourceWriter& rw, const IndexMap<CndThing>& templates)
 {
     rw.writeLine("##### Templates information ####"sv);
@@ -32,6 +49,27 @@ void NDY::writeSection_Templates(TextResourceWriter& rw, const IndexMap<CndThing
     rw.writeLine("################################"sv);
     rw.writeEol();
     rw.writeEol();
+}
+
+std::vector<CndThing> NDY::parseSection_Things(text::TextResourceReader& rr, const IndexMap<CndThing>& templates)
+{
+    const std::size_t sizeThings = rr.readKey<std::size_t>(kWorldThings);
+    auto things = rr.readList<std::vector<CndThing>, /*hasRowIdxs*/false>( // Note, row idx are read by ndyParseThing
+        [&templates](TextResourceReader& rr, auto rowIdx, CndThing& t) {
+            t = ndyParseThing(rr, templates);
+    });
+
+    if (sizeThings < things.size()) {
+        LOG_WARNING("NDY::parseSection_Things(): Expected thing array size % is smaller than actual size %", sizeThings, things.size());
+    }
+
+    if (sizeThings > things.size()) {
+        // Resize buffer with free Things to match size
+        things.resize(sizeThings);
+    }
+
+    // resize array to match size
+    return things;
 }
 
 void NDY::writeSection_Things(TextResourceWriter& rw, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates)

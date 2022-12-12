@@ -5,6 +5,7 @@
 #include <string>
 
 #include <libim/content/asset/cog/cogscript.h>
+#include <libim/types/string_map.h>
 #include <libim/utils/utils.h>
 
 namespace imfixes {
@@ -32,22 +33,20 @@ namespace imfixes {
             if(iequal(cs.name(), "shs_btladder.cog"))
             {
                 auto it = cs.symbols.find("in_rotrate");
-                if(it != cs.symbols.end() && it->type == CogSymbol::Int) {
+                if (it != cs.symbols.end() && it->type == CogSymbol::Int) {
                     it->isLocal = false;
                 }
             }
         }
 
-        static const std::map<std::string, std::function<void(CogScript&)>> kCogScriptFixes = {
+        static const libim::StringMap<std::string_view, std::function<void(CogScript&)>> kCogScriptFixes = {
             { "shs_btladder.cog", shs_btladder_fix },
         };
 
-        decltype(kCogScriptFixes)::const_iterator get_cog_script_fix(std::string sname)
+        decltype(kCogScriptFixes)::const_iterator get_cog_script_fix(std::string_view sname)
         {
-            to_lower(sname);
             return kCogScriptFixes.find(sname);
         }
-
     }
 
     bool isMalformedCogScript(const libim::content::asset::CogScript& s)
@@ -60,10 +59,9 @@ namespace imfixes {
     {
         using namespace  detail;
         auto it = get_cog_script_fix(s.name());
-        if( it != kCogScriptFixes.end() ) {
+        if (it != kCogScriptFixes.end()) {
             it->second(s);
         }
     }
 }
-
 #endif // IM_COGSCRIPT_FIXES_H

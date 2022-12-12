@@ -49,10 +49,12 @@ namespace libim::content::asset {
 
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Sounds(text::TextResourceReader& rr); // Returns pair of max no. of world sounds and the list of wav file names
+        static void writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxWorldSounds, const std::vector<std::string>& sounds);
         static void writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxWorldSounds, const IndexMap<audio::Sound>& track);
 
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Materials(text::TextResourceReader& rr); // Returns pair of max no. of world materials and the list of mat file names
+        static void writeSection_Materials(text::TextResourceWriter& rw, const std::vector<std::string>& materials);
         static void writeSection_Materials(text::TextResourceWriter& rw, const IndexMap<Material>& materials);
 
         [[nodiscard]] static Georesource parseSection_Georesource(text::TextResourceReader& rr);
@@ -75,6 +77,7 @@ namespace libim::content::asset {
 
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Keyframes(text::TextResourceReader& rr); // Returns pair of max no. of world keyframes and the list of key file names
+        static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxWorldKeyframes, const std::vector<std::string>& keyframes);
         static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxWorldKeyframes, const IndexMap<Animation>& keyframes);
 
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>

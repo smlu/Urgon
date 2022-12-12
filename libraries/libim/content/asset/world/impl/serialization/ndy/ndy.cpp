@@ -10,9 +10,10 @@ using namespace libim::content::text;
 using namespace libim::utils;
 
 
-static constexpr std::size_t kFileVersion          = 3;
-static constexpr float       kDefaultHorizonPixels = 768.f;
-static constexpr std::size_t kCopyrightLineWidth   = 32;
+static constexpr std::size_t kFileVersion                   = 3;
+static constexpr float       kDefaultHorizonPixels          = 768.f;
+static constexpr std::size_t kCopyrightLineWidth            = 32;
+static constexpr std::size_t kMaterialArrayExtraBufferSize  = 64; // The game engine allows additional 64 materials to be loaded later (through cog script).
 
 static constexpr auto kCeilingSkyOffset = "Ceiling Sky Offset"sv;
 static constexpr auto kCeilingSkyZ      = "Ceiling Sky Z"sv;
@@ -134,6 +135,18 @@ NDY::parseSection_Sounds(TextResourceReader& rr)
     return parseResourceSection<false>(rr, kWorldSounds);
 }
 
+void NDY::writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxWorldSounds, const std::vector<std::string>& sounds)
+{
+    writeResourceSection<false>(rw,
+        "#### Sound information  #####"sv,
+        kSectionSounds,
+        kWorldSounds,
+        maxWorldSounds,
+        sounds,
+        [](const auto& v) { return v; }
+    );
+}
+
 void NDY::writeSection_Sounds(TextResourceWriter& rw, std::size_t maxWorldSounds, const IndexMap<Sound>& track)
 {
     writeResourceSection<false>(rw,
@@ -152,13 +165,25 @@ NDY::parseSection_Materials(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldMaterials);
 }
 
+void NDY::writeSection_Materials(text::TextResourceWriter& rw, const std::vector<std::string>& materials)
+{
+    writeResourceSection<true>(rw,
+        "##### Material information #####"sv,
+        kSectionMaterials,
+        kWorldMaterials,
+        materials.size() + kMaterialArrayExtraBufferSize,
+        materials,
+        [](const auto& v) { return v; }
+    );
+}
+
 void NDY::writeSection_Materials(TextResourceWriter& rw, const IndexMap<Material>& materials)
 {
     writeResourceSection<true>(rw,
         "##### Material information #####"sv,
         kSectionMaterials,
         kWorldMaterials,
-        materials.size() + 64, // game engine allows max 64 additional materials to be loaded later (through cog script).
+        materials.size() + kMaterialArrayExtraBufferSize,
         materials,
         [](const auto& v) { return v.name(); }
     );
@@ -222,6 +247,18 @@ std::pair<std::size_t, std::vector<std::string>>
 NDY::parseSection_Keyframes(TextResourceReader& rr)
 {
     return parseResourceSection<true>(rr, kWorldKeyframes);
+}
+
+void NDY::writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxWorldKeyframes, const std::vector<std::string>& keyframes)
+{
+    writeResourceSection<true>(rw,
+        "##### Keyframe information #####"sv,
+        kSectionKeyframes,
+        kWorldKeyframes,
+        maxWorldKeyframes,
+        keyframes,
+        [](const auto& v) { return v; }
+    );
 }
 
 void NDY::writeSection_Keyframes(TextResourceWriter &rw, std::size_t maxWorldKeyframes, const IndexMap<Animation>& keyframes)

@@ -358,6 +358,7 @@ std::vector<SharedRef<Cog>> CND::parseSection_Cogs(const InputStream& istream, c
             }
 
             Cog c;
+            c.setName(sname);
             c.id     = std::size(cogs);
             c.script = *it;
             c.flags  = c.script->flags;

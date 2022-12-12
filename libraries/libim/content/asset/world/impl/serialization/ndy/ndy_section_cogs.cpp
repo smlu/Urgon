@@ -20,15 +20,16 @@ std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextR
         });
 
         /* Get script */
-        auto scrname = rr.getSpaceDelimitedString();
-        auto sit = scripts.find(scrname);
+        auto scriptName = rr.getSpaceDelimitedString();
+        auto sit = scripts.find(scriptName);
         if(sit == scripts.end())
         {
-            LOG_ERROR("CND::ParseSection_Cogs(): Can't find cog script '%'", scrname);
+            LOG_ERROR("CND::ParseSection_Cogs(): Can't find cog script '%'", scriptName);
             throw StreamError("Can't make COG, CogScript not found");
         }
 
         /* Parse COG symbol values */
+        c->setName(std::string(scriptName));
         c->id     = rowIdx;
         c->script = *sit;
         c->flags  = c->script->flags;
@@ -48,7 +49,7 @@ std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextR
                 {
                     const auto& loc = rr.currentToken().location();
                     LOG_WARNING("NDY::ParseSection_Cogs(): Reached end of line while parsing file:'%', script:'%', symbol:'%' [LOC %:%]",
-                        loc.filename, scrname, s.name, loc.lastLine, loc.firstColumn);
+                        loc.filename, scriptName, s.name, loc.lastLine, loc.firstColumn);
                 }
 
                break;
@@ -69,7 +70,7 @@ void NDY::writeSection_Cogs(TextResourceWriter& rw, std::size_t maxWorldCogs, co
     for(const auto& c : cogs)
     {
         std::string cogvals;
-        cogvals.reserve(c->script->name().size() + c->script->symbols.size() * 64);
+        cogvals.reserve(c->name().size() + c->script->symbols.size() * 64);
         for(const auto& s : c->script->symbols)
         {
             if(s.isLocal ||
@@ -87,7 +88,7 @@ void NDY::writeSection_Cogs(TextResourceWriter& rw, std::size_t maxWorldCogs, co
             }, s.vtable.at(c->vtid));
         }
 
-        scogs.push_back(c->script->name() + cogvals);
+        scogs.push_back(c->name() + cogvals);
     }
 
     writeResourceSection<true>(rw,

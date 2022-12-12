@@ -294,13 +294,13 @@ namespace libim {
                 return { mapIt->second, false };
             }
 
-            if ( pos > size()) {
+            if (pos > size()) {
                 pos = isEmpty() ? 0 : size();
             }
 
             auto it = data_.end();
             auto iit = index_.begin() + pos;
-            if ( iit != index_.end()) {
+            if (iit != index_.end()) {
                 it = data_.insert(*iit, { moveOrConstructKey(key), value });
             }
             else
@@ -496,7 +496,7 @@ namespace libim {
     template <typename ValueT, typename ContainerIterator>
     class IndexMap<T, KeyT, Hash, KeyEqual>::IndexMapIterator
     {
-        using IterTriats = std::iterator_traits<ContainerIterator>;
+        using IterTraits = std::iterator_traits<ContainerIterator>;
         ContainerIterator it_;
 
         operator ContainerIterator() const
@@ -508,11 +508,11 @@ namespace libim {
         IndexMapIterator(ContainerIterator it) : it_(it) {}
 
     public:
-        using iterator_category = typename IterTriats::iterator_category;
+        using iterator_category = typename IterTraits::iterator_category;
         using value_type = ValueT;
-        using difference_type = typename IterTriats::difference_type;
-        using pointer = std::conditional_t<std::is_const_v<typename IterTriats::pointer>, const value_type*, value_type*>;
-        using reference = std::conditional_t<std::is_const_v<typename IterTriats::reference>, const value_type, value_type>&;
+        using difference_type = typename IterTraits::difference_type;
+        using pointer = std::conditional_t<std::is_const_v<typename IterTraits::pointer>, const value_type*, value_type*>;
+        using reference = std::conditional_t<std::is_const_v<typename IterTraits::reference>, const value_type, value_type>&;
 
         template<typename U, typename W>
         IndexMapIterator(IndexMapIterator<U, W> other) : it_(other.it_)

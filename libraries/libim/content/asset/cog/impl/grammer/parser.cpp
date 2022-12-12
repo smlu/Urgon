@@ -480,9 +480,11 @@ void parseSectionSymbols(Tokenizer& tok, CogScript& script, bool parse_descripti
     tok.getNextToken();
 }
 
-void libim::content::asset::impl::parseCogScript(Tokenizer& tok, CogScript& script, bool parseSymDescription)
+CogScript libim::content::asset::impl::parseCogScript(Tokenizer& tok, bool parseSymDescription)
 {
+    CogScript script;
     script.setName(tok.istream().name());
     parseSectionFlags(tok, script);
     parseSectionSymbols(tok, script, parseSymDescription);
+    return script;
 }

@@ -574,10 +574,7 @@ void writeSounds(const IndexMap<Sound>& sounds, const fs::path& outDir, const Ex
 
         stable.emplaceBack(
             sname,
-            CogScript(
-                *optfs.value(),
-                /*load description*/true
-            )
+            loadCogScript(optfs->get(), /*load description*/true)
         );
 
         if(bFixCogScripts) {

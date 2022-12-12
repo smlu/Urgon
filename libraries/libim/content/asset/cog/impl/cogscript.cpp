@@ -4,13 +4,13 @@
 #include "grammer/parser.h"
 
 using namespace libim;
-using namespace libim::content::asset;
 using namespace libim::content::asset::impl;
 using namespace libim::text;
 
+namespace asset = libim::content::asset;
 
-CogScript::CogScript(const InputStream& istream, bool parseSymDescription)
+asset::CogScript asset::loadCogScript(const InputStream& istream, bool parseSymDescription)
 {
     Tokenizer tok(istream);
-    parseCogScript(tok, *this, parseSymDescription);
+    return parseCogScript(tok, parseSymDescription);
 }

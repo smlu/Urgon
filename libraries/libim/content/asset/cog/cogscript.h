@@ -12,6 +12,8 @@
 namespace libim::content::asset {
     struct CogScript : public Asset
     {
+        using Asset::Asset;
+
         enum Flag
         {
             None      = 0x00,
@@ -30,9 +32,6 @@ namespace libim::content::asset {
         Flags<Flag> flags;
         IndexMap<CogSymbol> symbols;
 
-        using Asset::Asset;
-        CogScript(const InputStream& istream, bool parseSymDescription = false);
-
         CogVTable::Id getNextVTableId() const
         {
             auto uvtid = utils::to_underlying(vtid_);
@@ -43,5 +42,16 @@ namespace libim::content::asset {
     private:
         mutable CogVTable::Id vtid_ = CogVTable::defaultId;
     };
+
+    /**
+     * Loads COG script from the given input stream.
+     * @param istream             - Input stream to load script from.
+     * @param parseSymDescription - If true, the symbol descriptions will be parsed.
+     * @return Loaded COG script.
+     *
+     * @throw StreamError - On encountering stream IO errors.
+     * @throw SyntaxError - If the script contains syntax errors.
+    */
+    CogScript loadCogScript(const InputStream& istream, bool parseSymDescription = false);
 }
 #endif // LIBIM_COGSCRIPT_H

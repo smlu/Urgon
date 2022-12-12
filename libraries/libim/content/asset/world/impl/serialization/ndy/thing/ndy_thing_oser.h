@@ -512,10 +512,11 @@ namespace libim::content::asset {
                });
 
                // Param LightIntensity
+               auto lightIntensity = makeLinearColorRgb(ai.lightIntensity);
                ndyWriteThingParamIf(baseActorInfo,
-                   ndyWriteIfBase(ai.lightIntensity != base.lightIntensity),
-                   ndyWriteIfPara(!ai.lightIntensity.isZero()), [&] {
-                   ndyWriteThingParam(rw, NdyThingParam::LightIntensity, makeLinearColorRgb(ai.lightIntensity));
+                   ndyWriteIfBase(lightIntensity != makeLinearColorRgb(base.lightIntensity)),
+                   ndyWriteIfPara(!lightIntensity.isZero()), [&] {
+                   ndyWriteThingParam(rw, NdyThingParam::LightIntensity, lightIntensity);
                });
 
                // Param Explode

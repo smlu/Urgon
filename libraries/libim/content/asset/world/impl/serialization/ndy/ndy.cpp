@@ -300,9 +300,10 @@ ByteArray NDY::parseSection_PVS(TextResourceReader& rr, std::vector<Sector>& sec
 
     ByteArray pvs(numFrames * 64);
     auto intSizePVS = numFrames * 16;
-    for (std::size_t i = 0; i < intSizePVS && (i * sizeof(uint32_t)) < sizePVS ; i++) {
-        *reinterpret_cast<uint32_t*>(&pvs[i]) = rr.getNumber<uint32_t>();
+    for (std::size_t i = 0, j = 0; i < intSizePVS && j < sizePVS ; i++ , j += 4) {
+        *reinterpret_cast<uint32_t*>(&pvs[j]) = rr.getNumber<uint32_t>();
     }
+    pvs.resize(sizePVS); // Trim excess bytes
 
     // read PVS indices
     for (auto& sector : sectors) {

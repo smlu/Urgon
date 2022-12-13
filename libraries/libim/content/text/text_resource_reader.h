@@ -186,7 +186,7 @@ namespace libim::content::text {
 
         /**
          * Reads key-value from stream in format: key|delim|value.
-         * Key-value must be on the same line.
+         * Key-value must be on the same line. Both tokens are read as strings.
          *
          * @param kt     - Read key token is stored here.
          * @param vt     - Read value token is stored here.
@@ -214,27 +214,17 @@ namespace libim::content::text {
             auto dt = getNextToken();
             if (dt.value() != delim)
             {
-                if (strict) throw SyntaxError("Invalid key-value delimiter"sv, dt.location());
+                if (strict) throw SyntaxError("Invalid delimiter while reading key-value"sv, dt.location());
                 return false;
             }
 
-            peekNextToken(vt);
-            if (vt.isNumber()) {
-                skipNextToken(); // advance stream; TODO: Find better way to do this.
-            }
-            else
-            {
-                if (vt.isValid())
-                {
-                    getSpaceDelimitedString(vt, /*throwIfEmpty=*/ false);
-                    if (strict && vt.value().empty()) {
-                        vt.setType(Token::Invalid);
-                    }
-                }
+            getSpaceDelimitedString(vt, /*throwIfEmpty=*/ false);
+            if (strict && vt.value().empty()) {
+                vt.setType(Token::Invalid);
             }
 
             if (strict && !vt.isValid()) {
-                throw SyntaxError("Invalid value"sv, dt.location());
+                throw SyntaxError("Invalid value while reading key-value"sv, dt.location());
             }
             return vt.isValid();
         }

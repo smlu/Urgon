@@ -31,8 +31,12 @@ namespace libim::content::asset {
         try{
             color = LinearColor(val.value(), /*strict=*/true);
         }
-        catch (...) {
-            try{
+        catch (...)
+        {
+            try
+            {
+                auto& loc = val.location();
+                LOG_DEBUG("%:%:%: The light param of thing '%' is not in RGBA format, trying to parse it as RGB.", loc.filename, loc.firstLine, loc.firstColumn, thing.name);
                 color = makeLinearColor(LinearColorRgb(val.value(), /*strict=*/true), 0.0f);
             }
             catch (...) {
@@ -46,7 +50,7 @@ namespace libim::content::asset {
         thing.flags |= Thing::Flag::EmitsLight;
     }
 
-    bool ndyParseThingParam(NdyThingParam param, const Token& value, CndThing& thing)
+    bool ndyParseThingParam(NdyThingParam param, Token& value, CndThing& thing)
     {
         switch ( param )
         {
@@ -77,6 +81,7 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::Collide:
+                value.setType(Token::HexInteger); // force hex token
                 thing.collide.type = value.getFlags<decltype(thing.collide.type)>();
                 return true;
 
@@ -88,6 +93,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::Size:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto size = value.getNumber<decltype(thing.collide.size)>();
                 if (size < 0) {
                     throw SyntaxError("Bad size value"sv, value.location());
@@ -98,11 +104,13 @@ namespace libim::content::asset {
             }
 
             case NdyThingParam::ThingFlags:
+                value.setType(Token::HexInteger); // force hex token
                 thing.flags = value.getFlags<decltype(thing.flags)>();
                 return true;
 
             case NdyThingParam::Timer:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto secLifeLeft = value.getNumber<float>();
                 if (secLifeLeft < 0) {
                     throw SyntaxError("Bad timer value"sv, value.location());
@@ -172,6 +180,7 @@ namespace libim::content::asset {
             case NdyThingParam::MoveSize:
                 if (thing.type != Thing::Actor && thing.type != Thing::Player)
                 {
+                    value.setType(Token::FloatNumber); // force float token
                     auto movesize = value.getNumber<decltype(thing.collide.movesize)>();
                     if (movesize < 0.0) {
                         throw SyntaxError("Bad movesize value"sv, value.location());
@@ -190,6 +199,8 @@ namespace libim::content::asset {
 
             case NdyThingParam::UserVal:
             {
+                static_assert(std::is_same_v<CndHintUserVal, float>);
+                value.setType(Token::FloatNumber); // force float token
                 auto userval = value.getNumber<CndHintUserVal>();
                 if (userval < 0.0) {
                     throw SyntaxError("Bad user value"sv, value.location());
@@ -200,6 +211,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::CollHeight:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto height = value.getNumber<decltype(thing.collide.collideHeight)>();
                 if (height < 0.0) {
                     throw SyntaxError("Bad collheight value"sv, value.location());
@@ -211,6 +223,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::CollWidth:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto width = value.getNumber<decltype(thing.collide.collideWidth)>();
                 if (width < 0.0) {
                     throw SyntaxError("Bad collwidth value"sv, value.location());
@@ -221,6 +234,7 @@ namespace libim::content::asset {
             }
 
             case NdyThingParam::PerformanceLevel:
+                value.setType(Token::Integer); // force integer token
                 thing.performanceLevel = value.getNumber<decltype(thing.performanceLevel)>();
                 return true;
 
@@ -231,7 +245,7 @@ namespace libim::content::asset {
         return false; // param not parsed
     }
 
-    bool ndyParseActorParam(NdyThingParam param, const Token& value, CndThing& thing)
+    bool ndyParseActorParam(NdyThingParam param, Token& value, CndThing& thing)
     {
         // Init actorInfo in case it's not already
         if (!std::holds_alternative<CndActorInfo>(thing.thingInfo)) {
@@ -243,11 +257,13 @@ namespace libim::content::asset {
         switch (param)
         {
             case NdyThingParam::TypeFlags:
+                value.setType(Token::HexInteger); // force hex integer token
                 actorInfo.flags = value.getFlags<decltype(actorInfo.flags)>();
                 return true;
 
             case NdyThingParam::Health:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto health = value.getNumber<decltype(actorInfo.health)>();
                 if (health < 0.0) {
                     throw SyntaxError("Bad actor health value"sv, value.location());
@@ -262,6 +278,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::MaxThrust:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto maxThrust = value.getNumber<decltype(actorInfo.maxThrust)>();
                 if (maxThrust < 0.0) {
                     throw SyntaxError("Bad actor maxthrust value"sv, value.location());
@@ -272,6 +289,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::MaxRotThrust:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto maxRotThrust = value.getNumber<decltype(actorInfo.maxRotThrust)>();
                 if (maxRotThrust < 0.0) {
                     throw SyntaxError("Bad actor maxrotthrust value"sv, value.location());
@@ -282,6 +300,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::MaxHeadVel:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto maxHeadVelocity = value.getNumber<decltype(actorInfo.maxHeadVelocity)>();
                 if (maxHeadVelocity < 0.0) {
                     throw SyntaxError("Bad actor maxheadvel value"sv, value.location());
@@ -292,6 +311,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::MaxHeadYaw:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto maxHeadYaw = value.getNumber<decltype(actorInfo.maxHeadYaw)>();
                 if (maxHeadYaw < 0.0) {
                     throw SyntaxError("Bad actor maxheadyaw value"sv, value.location());
@@ -302,6 +322,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::JumpSpeed:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto jumpSpeed = value.getNumber<decltype(actorInfo.jumpSpeed)>();
                 if (jumpSpeed < 0.0) {
                     throw SyntaxError("Bad actor jumpspeed value"sv, value.location());
@@ -320,6 +341,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::MaxHealth:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto maxHealth = value.getNumber<decltype(actorInfo.maxHealth)>();
                 if (maxHealth < 0.0) {
                     throw SyntaxError("Bad actor maxhealth value"sv, value.location());
@@ -333,11 +355,13 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::MinHeadPitch:
-                actorInfo.minHeadPitch  = value.getNumber<decltype(actorInfo.minHeadPitch)>();
+                value.setType(Token::FloatNumber); // force float token
+                actorInfo.minHeadPitch = value.getNumber<decltype(actorInfo.minHeadPitch)>();
                 return true;
 
             case NdyThingParam::MaxHeadPitch:
-                actorInfo.maxHeadPitch  = value.getNumber<decltype(actorInfo.maxHeadPitch)>();
+                value.setType(Token::FloatNumber); // force float token
+                actorInfo.maxHeadPitch = value.getNumber<decltype(actorInfo.maxHeadPitch)>();
                 return true;
 
             case NdyThingParam::FireOffset:
@@ -365,7 +389,7 @@ namespace libim::content::asset {
         return false; // param not parsed
     }
 
-    bool ndyParseWeaponParam(NdyThingParam param, const Token& value, CndThing& thing)
+    bool ndyParseWeaponParam(NdyThingParam param, Token& value, CndThing& thing)
     {
         // Init weaponInfo in case it's not already
         if (!std::holds_alternative<CndWeaponInfo>(thing.thingInfo)) {
@@ -377,18 +401,22 @@ namespace libim::content::asset {
         switch (param)
         {
             case NdyThingParam::TypeFlags:
+                value.setType(Token::HexInteger); // force hex token
                 weaponInfo.flags = value.getFlags<decltype(weaponInfo.flags)>();
                 return true;
 
             case NdyThingParam::Damage:
+                value.setType(Token::FloatNumber); // force float token
                 weaponInfo.damage = value.getNumber<decltype(weaponInfo.damage)>();
                 return true;
 
             case NdyThingParam::MinDamage:
+                value.setType(Token::FloatNumber); // force float token
                 weaponInfo.minDamage = value.getNumber<decltype(weaponInfo.minDamage)>();
                 return true;
 
             case NdyThingParam::DamageClass:
+                value.setType(Token::HexInteger); // force hex token
                 weaponInfo.damageType = value.getFlags<decltype(weaponInfo.damageType)>();
                 return true;
 
@@ -397,21 +425,24 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::Force:
+                value.setType(Token::FloatNumber); // force float token
                 weaponInfo.force = value.getNumber<decltype(weaponInfo.force)>();
                 return true;
 
             case NdyThingParam::Range:
+                value.setType(Token::FloatNumber); // force float token
                 weaponInfo.range = value.getNumber<decltype(weaponInfo.range)>();
                 return true;
 
             case NdyThingParam::Rate:
+                value.setType(Token::FloatNumber); // force float token
                 weaponInfo.rate = value.getNumber<decltype(weaponInfo.rate)>();
                 return true;
         }
         return false; // param not parsed
     }
 
-    bool ndyParseItemParam(NdyThingParam param, const Token& value, CndThing& thing)
+    bool ndyParseItemParam(NdyThingParam param, Token& value, CndThing& thing)
     {
         // Init itemInfo in case it's not already
         if (!std::holds_alternative<CndItemInfo>(thing.thingInfo)) {
@@ -423,17 +454,19 @@ namespace libim::content::asset {
         switch (param)
         {
             case NdyThingParam::TypeFlags:
+                value.setType(Token::HexInteger); // force hex token
                 itemInfo.flags = value.getFlags<decltype(itemInfo.flags)>();
                 return true;
 
             case NdyThingParam::Respawn:
+                value.setType(Token::FloatNumber); // force float token
                 itemInfo.secRespawnInterval = value.getNumber<decltype(itemInfo.secRespawnInterval)>();
                 return true;
         }
         return false; // param not parsed
     }
 
-    bool ndyParseExplosionParam(NdyThingParam param, const Token& value, CndThing& thing)
+    bool ndyParseExplosionParam(NdyThingParam param, Token& value, CndThing& thing)
     {
         // Init explosionInfo in case it's not already
         if (!std::holds_alternative<CndExplosionInfo>(thing.thingInfo)) {
@@ -445,40 +478,48 @@ namespace libim::content::asset {
         switch (param)
         {
             case NdyThingParam::TypeFlags:
+                value.setType(Token::HexInteger); // force hex token
                 explosionInfo.flags = value.getFlags<decltype(explosionInfo.flags)>();
                 return true;
 
             case NdyThingParam::Damage:
+                value.setType(Token::FloatNumber); // force float token
                 explosionInfo.damage = value.getNumber<decltype(explosionInfo.damage)>();
                 return true;
 
             case NdyThingParam::DamageClass:
+                value.setType(Token::HexInteger); // force hex token
                 explosionInfo.damageType = value.getFlags<decltype(explosionInfo.damageType)>();
                 return true;
 
             case NdyThingParam::BlastTime:
                 using BlastTimeT = decltype(explosionInfo.msBlastTime);
+                value.setType(Token::FloatNumber); // force float token
                 explosionInfo.msBlastTime = static_cast<BlastTimeT>(value.getNumber<float>() * 1000.0f);
                 explosionInfo.flags |= ExplosionThing::HasBlastPhase;
                 return true;
 
             case NdyThingParam::BabyTime:
                 using BabyTimeT = decltype(explosionInfo.msBabyTime);
+                value.setType(Token::FloatNumber); // force float token
                 explosionInfo.msBabyTime = static_cast<BabyTimeT>(value.getNumber<float>() * 1000.0f);
                 explosionInfo.flags |= ExplosionThing::HasChildExplosion;
                 return true;
 
             case NdyThingParam::Force:
+                value.setType(Token::FloatNumber); // force float token
                 explosionInfo.force = value.getNumber<decltype(explosionInfo.force)>();
                 explosionInfo.flags |= ExplosionThing::HasBlastPhase;
                 return true;
 
             case NdyThingParam::MaxLight:
+                value.setType(Token::FloatNumber); // force float token
                 explosionInfo.maxLight = value.getNumber<decltype(explosionInfo.maxLight)>();
                 explosionInfo.flags |= ExplosionThing::VariableLight;
                 return true;
 
             case NdyThingParam::Range:
+                value.setType(Token::FloatNumber); // force float token
                 explosionInfo.range = value.getNumber<decltype(explosionInfo.range)>();
                 explosionInfo.flags |= ExplosionThing::HasBlastPhase;
                 return true;
@@ -489,12 +530,14 @@ namespace libim::content::asset {
 
             case NdyThingParam::ExpandTime:
                 using ExpandTimeT = decltype(explosionInfo.msExpandTime);
+                value.setType(Token::FloatNumber); // force float token
                 explosionInfo.msExpandTime = static_cast<ExpandTimeT>(value.getNumber<float>() * 1000.0f);
                 explosionInfo.flags |= ExplosionThing::ExpandTimeSet;
                 return true;
 
             case NdyThingParam::FadeTime:
                 using FadeTimeT = decltype(explosionInfo.msFadeTime);
+                value.setType(Token::FloatNumber); // force float token
                 explosionInfo.msFadeTime = static_cast<FadeTimeT>(value.getNumber<float>() * 1000.0f);
                 explosionInfo.flags |= ExplosionThing::FadeTimeSet;
                 return true;
@@ -528,7 +571,7 @@ namespace libim::content::asset {
         return false; // param not parsed
     }
 
-    bool ndyParseParticleParam(NdyThingParam param, const Token& value, CndThing& thing)
+    bool ndyParseParticleParam(NdyThingParam param, Token& value, CndThing& thing)
     {
         // Init particleInfo in case it's not already
         if (!std::holds_alternative<CndParticleInfo>(thing.thingInfo)) {
@@ -540,10 +583,12 @@ namespace libim::content::asset {
         switch (param)
         {
             case NdyThingParam::TypeFlags:
+                value.setType(Token::HexInteger); // force hex token
                 particleInfo.flags = value.getFlags<decltype(particleInfo.flags)>();
                 return true;
 
             case NdyThingParam::MaxThrust:
+                value.setType(Token::FloatNumber); // force float token
                 particleInfo.growthSpeed = value.getNumber<decltype(particleInfo.growthSpeed)>();
                 if (particleInfo.growthSpeed < 0.0f) {
                     throw SyntaxError("Bad particle maxthrust value"sv, value.location());
@@ -551,6 +596,7 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::Range:
+                value.setType(Token::FloatNumber); // force float token
                 particleInfo.maxRadius = value.getNumber<decltype(particleInfo.maxRadius)>();
                 if (particleInfo.maxRadius < 0.0f) {
                     throw SyntaxError("Bad particle range value"sv, value.location());
@@ -562,6 +608,7 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::Rate:
+                value.setType(Token::FloatNumber); // force float token
                 particleInfo.timeoutRate = value.getNumber<decltype(particleInfo.timeoutRate)>();
                 if (particleInfo.timeoutRate < 0.0f) {
                     throw SyntaxError("Bad particle rate value"sv, value.location());
@@ -569,6 +616,7 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::Count:
+                value.setType(Token::Integer); // force integer token
                 particleInfo.numParticles = value.getNumber<decltype(particleInfo.numParticles)>();
                 if (particleInfo.numParticles > 256) {
                     throw SyntaxError("Bad particle count value"sv, value.location());
@@ -576,6 +624,7 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::ElementSize:
+                value.setType(Token::FloatNumber); // force float token
                 particleInfo.size = value.getNumber<decltype(particleInfo.size)>();
                 if (particleInfo.size < 0.0f) {
                     throw SyntaxError("Bad particle elementsize value"sv, value.location());
@@ -583,6 +632,7 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::MinSize:
+                value.setType(Token::FloatNumber); // force float token
                 particleInfo.minRadius = value.getNumber<decltype(particleInfo.minRadius)>();
                 if (particleInfo.minRadius < 0.0f) {
                     throw SyntaxError("Bad particle minsize value"sv, value.location());
@@ -590,6 +640,7 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::PitchRange:
+                value.setType(Token::FloatNumber); // force float token
                 particleInfo.pitchRange = value.getNumber<decltype(particleInfo.pitchRange)>();
                 if (particleInfo.pitchRange < 0.0f) {
                     throw SyntaxError("Bad particle pitchrange value"sv, value.location());
@@ -597,6 +648,7 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::YawRange:
+                value.setType(Token::FloatNumber); // force float token
                 particleInfo.yawRange = value.getNumber<decltype(particleInfo.yawRange)>();
                 if (particleInfo.yawRange < 0.0f) {
                     throw SyntaxError("Bad particle yawrange value"sv, value.location());
@@ -607,7 +659,7 @@ namespace libim::content::asset {
         return false; // param not parsed
     }
 
-    bool ndyParsePhysicsParam(NdyThingParam param, const Token& value, CndThing& thing)
+    bool ndyParsePhysicsParam(NdyThingParam param, Token& value, CndThing& thing)
     {
         // Init physicsInfo in case it's not already
         if (!std::holds_alternative<CndPhysicsInfo>(thing.moveInfo)) {
@@ -620,6 +672,7 @@ namespace libim::content::asset {
         {
             case NdyThingParam::SurfDrag:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto surfDrag = value.getNumber<decltype(physicsInfo.surfaceDrag)>();
                 if (surfDrag < 0.0f) {
                     throw SyntaxError("Bad physics surfdrag value"sv, value.location());
@@ -630,6 +683,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::AirDrag:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto airDrag = value.getNumber<decltype(physicsInfo.airDrag)>();
                 if (airDrag < 0.0f) {
                     throw SyntaxError("Bad physics airdrag value"sv, value.location());
@@ -640,6 +694,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::StaticDrag:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto staticDrag = value.getNumber<decltype(physicsInfo.staticDrag)>();
                 if (staticDrag < 0.0f) {
                     throw SyntaxError("Bad physics staticdrag value"sv, value.location());
@@ -650,6 +705,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::Mass:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto mass = value.getNumber<decltype(physicsInfo.mass)>();
                 if (mass < 0.0f) {
                     throw SyntaxError("Bad physics mass value"sv, value.location());
@@ -660,6 +716,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::Height:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto height = value.getNumber<decltype(physicsInfo.height)>();
                 if (height < 0.0f) {
                     throw SyntaxError("Bad physics height value"sv, value.location());
@@ -669,11 +726,13 @@ namespace libim::content::asset {
             }
 
             case NdyThingParam::PhysicsFlags:
+                value.setType(Token::HexInteger); // force hex token
                 physicsInfo.flags = value.getFlags<decltype(physicsInfo.flags)>();
                 return true;
 
             case NdyThingParam::MaxRotVel:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto maxRotVel = value.getNumber<decltype(physicsInfo.maxRotationVelocity)>();
                 if (maxRotVel < 0.0f) {
                     throw SyntaxError("Bad physics maxrotvel value"sv, value.location());
@@ -684,6 +743,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::MaxVel:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto maxVel = value.getNumber<decltype(physicsInfo.maxVelocity)>();
                 if (maxVel < 0.0f) {
                     throw SyntaxError("Bad physics maxvel value"sv, value.location());
@@ -702,6 +762,7 @@ namespace libim::content::asset {
 
             case NdyThingParam::OrientSpeed:
             {
+                value.setType(Token::FloatNumber); // force float token
                 auto orientSpeed = value.getNumber<decltype(physicsInfo.orientSpeed)>();
                 if (orientSpeed < 0.0f) {
                     throw SyntaxError("Bad physics orientspeed value"sv, value.location());
@@ -710,6 +771,7 @@ namespace libim::content::asset {
                 return true;
             }
             case NdyThingParam::Buoyancy:
+                value.setType(Token::FloatNumber); // force float token
                 physicsInfo.buoyancy = value.getNumber<decltype(physicsInfo.buoyancy)>();
                 return true;
 
@@ -718,7 +780,7 @@ namespace libim::content::asset {
         return false; // param not parsed
     }
 
-    bool ndyParsePathParam(NdyThingParam param, const Token& value, CndThing& thing)
+    bool ndyParsePathParam(NdyThingParam param, Token& value, CndThing& thing)
     {
         // Init pathInfo in case it's not already
         if (!std::holds_alternative<PathInfo>(thing.moveInfo)) {
@@ -733,6 +795,7 @@ namespace libim::content::asset {
                 if (pathInfo.pathFrames.size() > 0) {
                     throw SyntaxError("Multiple numframes arguments found."sv, value.location());
                 }
+                value.setType(Token::Integer); // force integer token
                 pathInfo.pathFrames.reserve(value.getNumber<int>());
                 return true;
 
@@ -749,7 +812,7 @@ namespace libim::content::asset {
         return false; // param not parsed
     }
 
-    bool ndyParseAIParam(NdyThingParam param, const Token& value, CndThing& thing)
+    bool ndyParseAIParam(NdyThingParam param, Token& value, CndThing& thing)
     {
         // Init aiInfo in case it's not already
         if (!std::holds_alternative<CndAIControlInfo>(thing.controlInfo)) {
@@ -764,6 +827,7 @@ namespace libim::content::asset {
                 if (aiInfo.pathFrames.size() > 0) {
                     throw SyntaxError("Multiple AI numframes arguments found."sv, value.location());
                 }
+                value.setType(Token::Integer); // force integer token
                 aiInfo.pathFrames.reserve(value.getNumber<int>());
                 return true;
 

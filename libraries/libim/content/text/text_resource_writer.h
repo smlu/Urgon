@@ -288,8 +288,10 @@ namespace libim::content::text {
          * Write container as list to text stream.
          *
          * @tparam writeListSize - If true, write list size before list items.
-         * @tparam lbAfterSize - If true, write line break after list size.
-         * @tparam writeEnd - writeEnd - If true the "end" keyword is written at the end of the list.
+         * @tparam lbAfterSize   - If true, write line break after list size.
+         * @tparam writeEnd      - writeEnd - If true the "end" keyword is written at the end of the list.
+         * @tparam Container     - Container type.
+         * @tparam RowWriteFunc  - The type of function to write a single row of the list.
          *
          * @param name - List name.
          * @param list - Container to write.
@@ -299,27 +301,13 @@ namespace libim::content::text {
                  bool lbAfterSize,
                  bool writeEnd,
                  typename Container,
-                 typename Lambda,
+                 typename RowWriteFunc,
                  class = utils::requires_container<Container>>
-        TextResourceWriter& writeList([[maybe_unused]] std::string_view name, const Container& list, Lambda&& writeRow)
+        TextResourceWriter& writeList([[maybe_unused]] std::string_view name, const Container& list, RowWriteFunc&& writeRow)
         {
-            /*
-            TODO: Uncomment when static reflection is available and decltype is available for generic lambdas.
-
-            using LambdaTraits = typename utils::function_traits<Lambda>;
-            static_assert(LambdaTraits::arity == 3, "constructor func must have 3 arguments");
-            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<0>,
-                TextResourceReader&>, "first arg in writeRow must be of a type TextResourceWriter&"
+            static_assert(std::is_invocable_v<RowWriteFunc, TextResourceWriter&, std::size_t, const typename Container::value_type&>,
+                "writeRow function must be invocable with arguments: (TextResourceWriter&, std::size_t rowIdx, const ElementType& element)"
             );
-
-            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<1>,
-                std::size_t>, "second arg in writeRow must be of a type std::size_t"
-            );
-
-            static_assert(std::is_same_v<typename LambdaTraits::template arg_t<2>,
-                T&>, "third arg in writeRow must be of a type T&"
-            );
-            */
 
             if constexpr (writeListSize)
             {
@@ -336,6 +324,7 @@ namespace libim::content::text {
                                        //       The return type can only be bool or void.
                                        //       Based on te return type write EOL, e.g:
                                        //       if void always write EOL, if bool write EOL only when true is returned.
+
                 if(tell() > pos) { // write eol if pos has changed.
                     writeEol();
                 }

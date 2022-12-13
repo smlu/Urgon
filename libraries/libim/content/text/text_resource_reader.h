@@ -279,9 +279,6 @@ namespace libim::content::text {
                  typename = utils::requires_container<Container>>
         Container readList(std::string_view expectedName, ReadRowFunc&& readRow, InsertFunc&& insert  = DefaultListInserter<Container>)
         {
-            // static_assert(utils::has_mf_push_back<Container> ||
-            //               utils::has_no_pos_mf_insert<Container>, "Container doesn't support any valid insertion function!");
-
             static_assert(std::is_default_constructible_v<Container>, "Container must be default constructible!");
 
             constexpr bool parseWithNoContainer = std::is_invocable_v<ReadRowFunc, TextResourceReader&, std::size_t, typename Container::value_type&>;
@@ -301,15 +298,6 @@ namespace libim::content::text {
                 }
             };
 
-            // auto append = [](auto& c, auto&& v){
-            //     if constexpr(utils::has_mf_push_back<Container>) {
-            //         c.push_back(std::move(v));
-            //     }
-            //     else {
-            //         insert(c, std::move(v));
-            //     }
-            // };
-
             Container container;
             [[maybe_unused]] std::size_t rowIdx = 0;
             std::function<bool()> isAtEnd;
@@ -324,12 +312,14 @@ namespace libim::content::text {
             {
                 reserve(container, 256);
                 isAtEnd = [&]() {
-                    if (peekNextToken().value() == "end"sv)
-                    {
-                        getNextToken();
+                    // Checks if the next token is "end", invalid or end of stream.
+                    Token tkn;
+                    if ((!peekNextToken(tkn) && tkn.type() != Token::EndOfLine)
+                        || utils::iequal(tkn.value(), "end"sv)) {
+                        skipNextToken(); // consume "end"
                         return true;
                     }
-                    return false;
+                    return false; // we're not at the end of list
                 };
             }
 

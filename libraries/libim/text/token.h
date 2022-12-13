@@ -6,7 +6,9 @@
 
 #include "parselocation.h"
 #include "syntax_error.h"
-#include "../utils/utils.h"
+
+#include <libim/utils/utils.h>
+#include <libim/utils/traits.h>
 
 namespace libim::text {
     class Token final
@@ -139,9 +141,19 @@ namespace libim::text {
             }
         }
 
+        /*
+        * Tries to parse the token value as a number.
+        * If token is not of a numeric type, it will try to guess the base and parse the number.
+        *
+        * @tparam T The type of the number to parse.
+        *
+        * @param number - The output number to store the parsed value.
+        * @return True if number was parsed, otherwise false.
+        */
         template<typename T, typename DT = std::decay_t<T>>
-        DT getNumber() const
+        bool tryParseNumber(T& number) const
         {
+            static_assert(std::is_arithmetic_v<DT>, "T is not a arithmetic type");
             auto base = std::dec;
             switch(m_type)
             {
@@ -152,26 +164,88 @@ namespace libim::text {
                     base = std::hex;
                 } break;
                 default:
+                    if (!isNumber() && !m_value.empty())
+                    {
+                        // Try to guess the base
+                        if (m_value.size() > 3 && std::isdigit(m_value[0])
+                            && std::tolower(m_value[1]) == 'x' && std::isxdigit(m_value[2]))
+                        {
+                            base = std::hex;
+                        }
+                    }
                     break;
             }
-
-            DT num;
-            if (!isNumber() || !utils::to_number(m_value, num, base))
-            {
-                using namespace std::string_view_literals;
-                throw SyntaxError("Invalid numeric conversion from string"sv, m_loc);
-            }
-
-            return num;
+            return utils::to_number(m_value, number, base);
         }
 
+        /**
+         * Parses the token value as a number.
+         * Requires the token to be of a numeric type.
+         *
+         * @tparam T The type of the number to parse.
+         *
+         * @return The parsed number.
+         * @throws SyntaxError if the token is not a number or if the number cannot be parsed.
+        */
+        template<typename T, typename DT = std::decay_t<T>>
+        DT getNumber() const
+        {
+            T num;
+            if (isNumber() && tryParseNumber<T>(num))
+            {
+                return num;
+            }
+
+            using namespace std::string_view_literals;
+            throw SyntaxError("Failed to convert token to number"sv, m_loc);
+        }
+
+        /**
+         * Tries to parse the token value as a flags aka enum type.
+         * If token is not of a numeric type, it will try to guess the base and parse the number.
+         *
+         * @tparam T The type of the flags to parse.
+         *
+         * @param flags - The output flags to store the parsed value.
+         * @return True if flags was parsed, otherwise false.
+        */
+        template <typename T, typename DT = std::decay_t<T>>
+        bool tryParseFlags(T& flags) const
+        {
+            static_assert(utils::isEnum<DT>,
+                "T must be either enum, Flags or TypeMask type"
+            );
+
+            utils::underlying_type_t<DT> num;
+            if (tryParseNumber(num))
+            {
+                flags = DT(num);
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Parses the token value as a flags aka enum type.
+         * Requires the token to be of a numeric type.
+         *
+         * @tparam T The type of the flags to parse.
+         *
+         * @return The parsed flags.
+         * @throws SyntaxError if the token is not a number or if the number cannot be parsed.
+        */
         template <typename T, typename DT = std::decay_t<T>>
         DT getFlags() const
         {
             static_assert(utils::isEnum<DT>,
                 "T must be either enum, Flags or TypeMask type"
             );
-            return DT(getNumber<utils::underlying_type_t<DT>>());
+
+            DT flags;
+            if (tryParseFlags<DT>(flags)) {
+                return flags;
+            }
+            throw SyntaxError("Failed to convert token to flags", m_loc);
         }
 
         void toLowercase()

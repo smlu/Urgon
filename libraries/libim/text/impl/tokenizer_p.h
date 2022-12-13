@@ -14,8 +14,8 @@
 #include <functional>
 #include <string_view>
 
-
 using namespace std::string_view_literals;
+
 namespace libim::text {
 
     // TODO BufferedRead should be used by InputFileStream insted of TokenizerPrivate
@@ -30,7 +30,7 @@ namespace libim::text {
 
         virtual void seek(std::size_t position) const override
         {
-            if((istream_.tell() < position) || position < (istream_.tell() - end_))
+            if ((istream_.tell() < position) || position < (istream_.tell() - end_))
             {
                 istream_.seek(position);
                 refillBuffer();
@@ -72,16 +72,18 @@ namespace libim::text {
         virtual std::size_t readsome(byte_t* data, std::size_t length) const override
         {
             std::size_t  totalRead = 0;
-            while(length)
+            while (length)
             {
                 std::size_t nRead = end_ - pos_;
-                if(nRead == 0)
+                if (nRead == 0)
                 {
                     refillBuffer();
                     nRead = end_ - pos_;
-                    if(nRead == 0)
+                    if(nRead == 0) {
                         return totalRead;
+                    }
                 }
+
                 if (nRead > length) nRead = length;
                 std::copy(buffer_.begin() + pos_, buffer_.begin() + pos_+ nRead, data);
 
@@ -99,12 +101,12 @@ namespace libim::text {
         void refillBuffer() const
         {
             std::size_t nRead = buffer_.size();
-            if(istream_.size() - istream_.tell() < nRead) {
+            if ((istream_.size() - istream_.tell()) < nRead) {
                 nRead = istream_.size() - istream_.tell();
             }
             nRead = istream_.read(const_cast<byte_t*>(buffer_.data()), nRead);
-            pos_ = 0;
-            end_ = nRead;
+            pos_  = 0;
+            end_  = nRead;
         }
 
     private:
@@ -144,7 +146,7 @@ namespace libim::text {
 
         inline char readNextChar()
         {
-            while(!istream_.atEnd()) {
+            while (!istream_.atEnd()) {
                 return istream_.read<char>();
             }
             return ChEof;
@@ -159,14 +161,14 @@ namespace libim::text {
         void advance()
         {
              column_++;
-             if(current_ch_ == ChEol)
+             if (current_ch_ == ChEol)
              {
                  line_++;
                  column_ = 1;
              }
 
              current_ch_ = next_ch_;
-             next_ch_ = readNextChar();
+             next_ch_    = readNextChar();
         }
 
         inline char peek() const
@@ -206,7 +208,7 @@ namespace libim::text {
                 return (len--) == 0;
             });
 
-            if(out.value().size() != len){
+            if (out.value().size() != len){
                 throw SyntaxError("Unexpected end of file in sized string"sv, out.location());
             }
         }
@@ -225,12 +227,12 @@ namespace libim::text {
             skipWhitespace();
 
             out.clear();
-            out.location().filename   = istream_.name();
-            out.location().firstLine = line_;
-            out.location().firstColumn  = column_;
+            out.location().filename    = istream_.name();
+            out.location().firstLine   = line_;
+            out.location().firstColumn = column_;
             AT_SCOPE_EXIT([&](){
-                out.location().lastLine = line_;
-                out.location().lastColumn  = column_;
+                out.location().lastLine   = line_;
+                out.location().lastColumn = column_;
             });
 
             while(!isDelim(current_ch_) && !istream_.atEnd())
@@ -265,14 +267,15 @@ namespace libim::text {
         void readNumericLiteral(Token& out)
         {
             out.reserve(64);
+
             // Check for sign
-            if(current_ch_ == ChMinus || current_ch_ == ChPlus)
+            if (current_ch_ == ChMinus || current_ch_ == ChPlus)
             {
                 out.append(current_ch_);
                 advance();
             }
 
-            if(current_ch_ == '0' && (next_ch_ == 'x' || next_ch_ == 'X'))
+            if (current_ch_ == '0' && (next_ch_ == 'x' || next_ch_ == 'X'))
             {
                 out.setType(Token::HexInteger);
                 out.append(current_ch_);
@@ -288,7 +291,7 @@ namespace libim::text {
             out.setType(Token::Integer);
             readNumericLiteralIntegerPart(out);
 
-            if(current_ch_ == ChDecimalSep && (std::isdigit(next_ch_) || next_ch_ == '#')) // checking for '#' fixes problems with '.#QNAN0'
+            if (current_ch_ == ChDecimalSep && (std::isdigit(next_ch_) || next_ch_ == '#')) // checking for '#' fixes problems with '.#QNAN0'
             {
                 if(out.isEmpty() || !std::isdigit(out.value().back())) {
                     // Poorly formatted floating point number, prepend 0.
@@ -302,12 +305,12 @@ namespace libim::text {
                 out.setType(Token::FloatNumber);
             }
 
-            if(current_ch_ == 'e' || current_ch_ == 'E')
+            if (current_ch_ == 'e' || current_ch_ == 'E')
             {
                 out.append(current_ch_);
                 advance();
 
-                if(current_ch_ == ChMinus || current_ch_ == ChPlus)
+                if (current_ch_ == ChMinus || current_ch_ == ChPlus)
                 {
                     out.append(current_ch_);
                     advance();
@@ -321,13 +324,13 @@ namespace libim::text {
         void readIdentifier(Token& out)
         {
             out.reserve(64);
-            if(isIdentifierLead(current_ch_))
+            if (isIdentifierLead(current_ch_))
             {
                 out.setType(Token::Identifier);
                 do {
                     out.append(current_ch_);
                     advance();
-                } while(isIdentifierChar(current_ch_) || current_ch_ == ChMinus);
+                } while (isIdentifierChar(current_ch_) || current_ch_ == ChMinus);
             }
         }
 
@@ -337,19 +340,19 @@ namespace libim::text {
             while(true)
             {
                 advance();
-                if(current_ch_ == ChEof)
+                if (current_ch_ == ChEof)
                 {
                     out.location().lastLine = line_;
                     out.location().lastColumn  = column_;
                     throw SyntaxError("Unexpected end of file in string literal"sv, out.location());
                 }
-                else if(current_ch_ == ChEol)
+                else if (current_ch_ == ChEol)
                 {
                     out.location().lastLine = line_;
                     out.location().lastColumn  = column_;
                     throw SyntaxError("Unexpected new line in string literal"sv, out.location());
                 }
-                else if(current_ch_ == ChDblQuote)
+                else if (current_ch_ == ChDblQuote)
                 {
                     out.setType(Token::String);
                     advance();
@@ -415,36 +418,37 @@ namespace libim::text {
             skipWhitespace();
 
             out.clear();
-            out.location().filename   = istream_.name();
-            out.location().firstLine = line_;
-            out.location().firstColumn  = column_;
+            out.location().filename    = istream_.name();
+            out.location().firstLine   = line_;
+            out.location().firstColumn = column_;
             AT_SCOPE_EXIT([&](){
-                out.location().lastLine = line_;
-                out.location().lastColumn  = column_;
+                out.location().lastLine   = line_;
+                out.location().lastColumn = column_;
             });
 
-            if(current_ch_ == ChEof) { // Stream has reached end of file.
+            if (current_ch_ == ChEof) { // Stream has reached end of file.
                 out.setType(Token::EndOfFile);
             }
-            else if(current_ch_ == ChEol) {
+            else if (current_ch_ == ChEol || current_ch_ == ChCr)
+            {
                 out.setType(Token::EndOfLine);
                 advance();
             }
-            else if(current_ch_ == ChDblQuote) {
+            else if (current_ch_ == ChDblQuote) {
                 readStringLiteral(out);
             }
-            else if(isIdentifierLead(current_ch_)) {
+            else if (isIdentifierLead(current_ch_)) {
                 readIdentifier(out);
             }
-            else if(std::isdigit(current_ch_)) {
+            else if (std::isdigit(current_ch_)) {
                 readNumericLiteral(out);
             }
-            else if(std::ispunct(current_ch_))
+            else if (std::ispunct(current_ch_))
             {
-                if(current_ch_ == ChDecimalSep && std::isdigit(next_ch_)) {
+                if (current_ch_ == ChDecimalSep && std::isdigit(next_ch_)) {
                     readNumericLiteral(out);
                 }
-                else if(current_ch_ == ChMinus && (next_ch_ == ChDecimalSep || std::isdigit(next_ch_))) {
+                else if (current_ch_ == ChMinus && (next_ch_ == ChDecimalSep || std::isdigit(next_ch_))) {
                     readNumericLiteral(out);
                 }
                 else

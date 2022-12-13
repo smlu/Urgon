@@ -1,6 +1,7 @@
 #ifndef LIBIM_ABSTRACT_VECTOR_H
 #define LIBIM_ABSTRACT_VECTOR_H
 #include <array>
+#include <functional>
 #include <sstream>
 #include <string>
 #include <type_traits>
@@ -240,7 +241,7 @@ namespace libim {
     {
         MVT rv;
         using F = typename MVT::value_type;
-        std::transform(v.begin(), v.end(), rv.begin(), std::negate<F>());
+        std::transform(v.cbegin(), v.cend(), rv.begin(), std::negate<F>());
         return rv;
     }
 }

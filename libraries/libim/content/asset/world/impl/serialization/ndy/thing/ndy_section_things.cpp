@@ -18,7 +18,7 @@ using namespace std::string_view_literals;
 static constexpr auto kWorldTemplates = "World templates"sv;
 static constexpr auto kWorldThings    = "World things"sv;
 
-IndexMap<CndThing> NDY::parseSection_TemplateList(text::TextResourceReader& rr)
+IndexMap<CndThing> NDY::parseTemplateList(text::TextResourceReader& rr)
 {
     return rr.readList<IndexMap<CndThing>, /*hasRowIdxs=*/false>(
         [](TextResourceReader& rr, const auto& templates, auto rowIdx, CndThing& t) {
@@ -32,7 +32,7 @@ IndexMap<CndThing> NDY::parseSection_TemplateList(text::TextResourceReader& rr)
 IndexMap<CndThing> NDY::parseSection_Templates(text::TextResourceReader& rr)
 {
     const std::size_t sizeTemplates = rr.readKey<std::size_t>(kWorldTemplates);
-    auto templates = parseSection_TemplateList(rr);
+    auto templates = parseTemplateList(rr);
     if (templates.size() != sizeTemplates) {
         LOG_WARNING("NDY::ParseSection_Templates(): Expected % templates, but found %", sizeTemplates, templates.size());
     }

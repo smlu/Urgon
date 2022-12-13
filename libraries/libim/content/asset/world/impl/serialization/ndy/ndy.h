@@ -96,8 +96,8 @@ namespace libim::content::asset {
                     parseSection_Cogs(text::TextResourceReader& rr, const IndexMap<SharedRef<CogScript>>& scripts); // Returns pair of max no. of world cogs and list of world cogs
         static void writeSection_Cogs(text::TextResourceWriter& rw, std::size_t maxWorldCogs, const std::vector<SharedRef<Cog>>& cogs);
 
+        [[nodiscard]] static IndexMap<CndThing> parseTemplateList(text::TextResourceReader& rr);
         [[nodiscard]] static IndexMap<CndThing> parseSection_Templates(text::TextResourceReader& rr);
-        [[nodiscard]] static IndexMap<CndThing> parseSection_TemplateList(text::TextResourceReader& rr);
         static void writeSection_Templates(text::TextResourceWriter& rw, const IndexMap<CndThing>& templates);
 
         [[nodiscard]] static std::vector<CndThing> parseSection_Things(text::TextResourceReader& r, const IndexMap<CndThing>& templates);

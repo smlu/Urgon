@@ -104,7 +104,7 @@ namespace libim::content::asset {
         static void writeSection_Things(text::TextResourceWriter& rw, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates);
 
         // Note: Section PVS is optional and it doesn't need to be written.
-        [[nodiscard]] static ByteArray NDY::parseSection_PVS(TextResourceReader& rr, std::vector<Sector>& sectors);
+        [[nodiscard]] static ByteArray parseSection_PVS(TextResourceReader& rr, std::vector<Sector>& sectors);
         static void writeSection_PVS(text::TextResourceWriter& rw, const ByteArray& pvs, const std::vector<Sector>& sectors);
 
     private:

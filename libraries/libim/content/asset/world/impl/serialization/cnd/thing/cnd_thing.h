@@ -72,7 +72,7 @@ namespace libim::content::asset {
         Vector3f position;
         FRotator pyrOrient;
         int32_t unknown;                        // Possible: padding
-        int sectorNum;
+        int32_t sectorNum = -1;
         Thing::Type type;
         Flags<Thing::Flag> flags;
         CndThingMoveType moveType;

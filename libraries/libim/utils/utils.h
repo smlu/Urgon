@@ -49,20 +49,21 @@ namespace libim::utils {
                     break;
                 }
             }
-
             return std::string(str, end);
         }
 
+        // Note, in case of strncpy_s d_size must be for 1 greater
+        // than src.size() to include null termination
         inline bool strcpy(char* dest, std::size_t d_size, const std::string_view src)
         {
-            if(d_size < src.size()) {
-                return false;
-            }
-
+            std::size_t count = src.size() + 1;
+            count = std::min(d_size, count);
         #if defined(__STDC_LIB_EXT1__) || defined(_MSC_VER)
-            return strncpy_s(dest, d_size, src.data(), src.size()) == 0;
+            return strncpy_s(dest, d_size, src.data(), count) == 0;
         #else
-            return std::strncpy(dest, src.data(), d_size) != nullptr;
+            const bool success = std::strncpy(dest, src.data(), count - 1) != nullptr;
+            dest[count - 1] = 0;
+            return success;
         #endif
         }
 
@@ -172,7 +173,7 @@ namespace libim::utils {
     }
 
     /**
-     * Copies n elements beginning at source iterator to destination container.
+     * Copies n elements from source iterator to the back of destination container.
      *
      * @param srcIt Source iterator.
      * @param count Number of elements to copy.
@@ -274,13 +275,13 @@ namespace libim::utils {
     template<std::size_t N>
     inline bool strcpy(char (&dest)[N], const std::string_view src)
     {
-        return detail::strcpy(dest, N, src);
+        return detail::strcpy(dest, std::min(N, src.size() + 1), src); // +1 for null terminator
     }
 
     template<std::size_t N>
     inline bool strcpy(std::array<char, N>& dest, const std::string_view src)
     {
-        return detail::strcpy(dest.data(), N, src);
+        return detail::strcpy(dest.data(), std::min(N, src.size() + 1), src); // +1 for null terminator
     }
 
     template<std::size_t N>
@@ -373,11 +374,29 @@ namespace libim::utils {
         return result;
     }
 
+    /**
+     * Writes string to string stream.
+     * @tparam StringStream - type of string stream to write to.
+     * @param ss - string stream to write to.
+     * @param format - format string.
+     */
     template<typename StringStream>
-    inline void ssprintf(StringStream& ss, const char* format) {
+    inline void ssprintf(StringStream& ss, const char* format)
+    {
         ss << format;
     }
 
+    /**
+     * Formats string and writes it to string stream.
+     *
+     * @tparam StringStream - type of string stream to write to.
+     * @tparam First        - type of first argument.
+     * @tparam Rest         - types of other arguments.
+     *
+     * @param ss    - string stream to write to.
+     * @param format - format string.
+     * @param first  - first argument.
+     */
     template<typename StringStream, typename First, typename... Rest>
     static void ssprintf(StringStream& ss, const char* format, First first, Rest&&... rest) // recursive variadic function
     {
@@ -393,10 +412,38 @@ namespace libim::utils {
         }
     }
 
+    /**
+     * Formats string and writes it to string stream.
+     *
+     * @tparam StringStream - type of string stream to write to.
+     * @tparam Args         - types of arguments.
+     *
+     * @param ss     - string stream to write to.
+     * @param format - format string.
+     * @param args   - arguments.
+     */
     template<typename StringStream, typename... Args>
     inline void ssprintf(StringStream& ss, std::string_view format, Args&&... args) // recursive variadic function
     {
         ssprintf(ss, format.data(), std::forward<Args>(args)...);
+    }
+
+    /**
+     * Formats string and returns std::basic_string.
+     *
+     * @tparam CharT - type of string character. By default it is char.
+     * @tparam Args  - types of arguments.
+     *
+     * @param format - format string.
+     * @param args   - arguments.
+     * @return std::basic_string<CharT> - formatted string.
+     */
+    template<typename CharT = char, typename... Args>
+    inline std::basic_string<CharT> format(std::string_view format, Args&&... args)
+    {
+        std::ostringstream oss;
+        ssprintf(oss, format, std::forward<Args>(args)...);
+        return oss.str();
     }
 
     /**

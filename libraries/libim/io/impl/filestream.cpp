@@ -5,6 +5,7 @@
 #include <libim/io/binarystream.h>
 #include <libim/platform.h>
 #include <libim/types/safe_cast.h>
+#include <libim/utils/utils.h>
 
 #include <algorithm>
 #include <filesystem>
@@ -125,18 +126,24 @@ struct FileStream::FileStreamImpl
         #endif
 
         if (hFile == INVALID_HANDLE_VALUE) {
-            throw FileStreamError(getLastErrorAsString());
+            throw FileStreamError(
+                utils::format("Failed to open file %: %",  filePath, getLastErrorAsString())
+            );
         }
 
         /* Truncate file if writable */
         if ((flags & GENERIC_WRITE) && truncate && !SetEndOfFile(hFile)) {
-            throw FileStreamError(getLastErrorAsString());
+            throw FileStreamError(
+                utils::format("Failed to to truncate the file %: %",  filePath, getLastErrorAsString())
+            );
         }
 
         /* Get file size */
         LARGE_INTEGER lSize {{0, 0}};
         if (!GetFileSizeEx(hFile, &lSize)) {
-            throw FileStreamError("Error getting the file size: " + getLastErrorAsString());
+            throw FileStreamError(
+                utils::format("Failed to get the size of file %: %",  filePath, getLastErrorAsString())
+            );
         }
 
         #ifdef LIBIM_PLATFORM_64BIT
@@ -152,13 +159,17 @@ struct FileStream::FileStreamImpl
 
         fd = open(filePath.c_str(), flags, (mode_t)0600);
         if (fd == -1) {
-            throw FileStreamError(strerror(errno));
+            throw FileStreamError(
+                utils::format("Failed to open file %: %",  filePath, strerror(errno))
+            );
         }
 
         /* Get file size */
         struct stat fileInfo {};
         if (fstat(fd, &fileInfo) == -1) {
-            throw FileStreamError(std::string("Error getting the file size: ") + strerror(errno));
+            throw FileStreamError(
+                utils::format("Failed to get the size of file %: %",  filePath, strerror(errno))
+            );
         }
 
         fileSize = fileInfo.st_size;

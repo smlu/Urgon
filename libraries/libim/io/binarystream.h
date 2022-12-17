@@ -12,6 +12,7 @@ namespace libim {
     {
     public:
         BinaryStream(T& data);
+        BinaryStream(T& data, std::size_t size);
         BinaryStream(T& data, Iterator first, Iterator last);
         virtual ~BinaryStream() override;
 
@@ -39,53 +40,58 @@ namespace libim {
         mutable Iterator pos_;
     };
 
-
-
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4250)
 #endif
 
-    template<typename T>
-    class InputBinaryStream final : public InputStream, public BinaryStream<const T, typename T::const_iterator>
+    template<typename T, typename ConstIterator = decltype(std::cbegin(std::declval<T>()))>
+    class InputBinaryStream final : public InputStream, public BinaryStream<const T, ConstIterator>
     {
     public:
         InputBinaryStream(const T& data) :
-            BinaryStream<const T, typename T::const_iterator>(data)
+            BinaryStream<const T, ConstIterator>(data)
         {}
 
-        InputBinaryStream(const T& data, typename T::const_iterator first, typename T::const_iterator last) :
-            BinaryStream<const T, typename T::const_iterator>(data, first, last)
+        InputBinaryStream(const T& data, std::size_t size) :
+            BinaryStream<const T, ConstIterator>(data, size)
+        {}
+
+        InputBinaryStream(const T& data, ConstIterator first, ConstIterator last) :
+            BinaryStream<const T, ConstIterator>(data, first, last)
         {}
 
     private:
-        using BinaryStream<const T, typename T::const_iterator>::write;
+        using BinaryStream<const T, ConstIterator>::write;
     };
 
-    template<typename T>
-    class OutputBinaryStream final : public OutputStream, public BinaryStream<T, typename T::iterator>
+    template<typename T, typename Iterator = T::iterator>
+    class OutputBinaryStream final : public OutputStream, public BinaryStream<T, Iterator>
     {
     public:
-        OutputBinaryStream(T& data) :
-            BinaryStream<T>(data)
+        OutputBinaryStream(T& data) : BinaryStream<T, Iterator>(data)
         {
             static_assert(!std::is_const_v<T>, "T must not be const-qualified type");
         }
 
-        OutputBinaryStream(T& data, typename T::iterator first, typename T::iterator last) :
-            BinaryStream<T, typename T::iterator>(data, first, last)
+        OutputBinaryStream(T& data, std::size_t size) : BinaryStream<T, Iterator>(data, size)
+        {
+            static_assert(!std::is_const_v<T>, "T must not be const-qualified type");
+        }
+
+        OutputBinaryStream(T& data, Iterator first, Iterator last) :
+            BinaryStream<T, Iterator>(data, first, last)
         {
             static_assert(!std::is_const_v<T>, "T must not be const-qualified type");
         }
 
     private:
-        using BinaryStream<T, typename T::iterator>::read;
+        using BinaryStream<T, Iterator>::read;
     };
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
 }
 
 #include "impl/binarystream.impl"

@@ -1,5 +1,7 @@
 #ifndef LIBIM_BINARYSTREAM_IMPL
 #define LIBIM_BINARYSTREAM_IMPL
+#include <libim/utils/traits.h>
+
 #include <functional>
 #include <iterator>
 #include <type_traits>
@@ -7,28 +9,6 @@
 namespace libim
 {
     namespace detail {
-        template<class>
-        struct sfinae_true : std::true_type{};
-
-        template<class T>
-        static auto has_capacity_impl()
-          -> sfinae_true<decltype(std::declval<T>().capacity())>;
-        template<class>
-        static auto has_capacity_impl() -> std::false_type;
-
-        template<class T>
-        struct has_capacity : decltype(detail::has_capacity_impl<T>()){};
-
-
-        template<class T>
-        static auto has_reserve_impl(int s)
-          -> sfinae_true<decltype(std::declval<T>().reserve(s))>;
-        template<class>
-        static auto has_reserve_impl(long) -> std::false_type;
-
-        template<class T>
-        struct has_reserve : decltype(detail::has_reserve_impl<T>(0)){};
-
         template<class Container>
         struct WriteIterator : public std::back_insert_iterator<Container>
         {
@@ -112,13 +92,19 @@ namespace libim
     {}
 
     template<typename T, typename Iterator>
+    BinaryStream<T, Iterator>::BinaryStream(T& data, std::size_t size) :
+        BinaryStream(data,  std::begin(data),  std::begin(data) + size)
+    {}
+
+    template<typename T, typename Iterator>
     BinaryStream<T, Iterator>::BinaryStream(T& data, Iterator first, Iterator last) :
         data_(data),
         begin_(first),
         end_(last),
         pos_(first)
     {
-        static_assert(!std::is_const_v<T> || (std::is_same_v<Iterator, typename T::const_iterator>), "Iterator type must be of a 'const iterator' type");
+        static_assert(!std::is_const_v<T> || (std::is_same_v<Iterator, decltype(std::cbegin(std::declval<T>()))>),
+            "Iterator type must be of a 'const iterator' type");
     }
 
     template<typename T, typename Iterator>
@@ -141,7 +127,7 @@ namespace libim
     template<typename T, typename Iterator>
     std::size_t BinaryStream<T, Iterator>::capacity() const
     {
-        if constexpr(detail::has_capacity<T>::value) {
+        if constexpr(utils::has_mf_capacity<T>) {
             return data_.capacity();
         }
         else {
@@ -152,8 +138,8 @@ namespace libim
     template<typename T, typename Iterator>
     void BinaryStream<T, Iterator>::reserve(std::size_t size)
     {
-        if constexpr(detail::has_reserve<T>::value) {
-            resize(size, std::mem_fn(&T::reserve));
+        if constexpr(utils::has_mf_reserve<T>) {
+            resize(size, [](T& c, std::size_t s) { c.reserve(s); });
         }
         else if (data_.size() < size){
             resize(size, std::mem_fn(&T::resize));

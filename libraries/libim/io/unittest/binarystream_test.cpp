@@ -112,9 +112,9 @@ void libim::unit_test::run_binarystream_tests()
     {
         auto beginOffset = sizeof(tvBTrue) + sizeof(tvUInt64);
         auto endOffset   = sizeof(tvInt32) + sizeof(tvInt64);
-        auto itBegin = bytes.begin() + beginOffset;
-        auto itEnd   = bytes.end()   - endOffset;
-        auto ibsSize = bytes.size()  - (beginOffset + endOffset);
+        auto itBegin = bytes.cbegin() + beginOffset;
+        auto itEnd   = bytes.cend()   - endOffset;
+        auto ibsSize = bytes.size()   - (beginOffset + endOffset);
 
         InputBinaryStream ibs(bytes, itBegin, itEnd);
         assert(ibs.size() == ibsSize);

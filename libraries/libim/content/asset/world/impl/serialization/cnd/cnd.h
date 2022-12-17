@@ -37,8 +37,8 @@ namespace libim::content::asset {
     struct CndHeader final
     {
         uint32_t fileSize;
-        FixedString<1216> copyright;
-        CndResourceName   filePath;
+        FixedString<1216, /*nullTermination=*/false> copyright;
+        CndResourceName filePath;
         Flags<CndWorldState> state; // World stored in cnd file usually has state set to 0x0C. The static world has also flag 0x1 (Static) set and combined with other state results in value 0x0D.
         uint32_t version;
         float    worldGravity;

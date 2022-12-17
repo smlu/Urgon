@@ -13,6 +13,7 @@ using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::utils;
 using namespace std::string_literals;
+using namespace std::string_view_literals;
 
 
 // TODO:
@@ -46,9 +47,53 @@ using namespace std::string_literals;
 //    vs.getNext();
 
 
+[[nodiscard]] inline const CndThing* getBaseTemplate(std::string_view name, const IndexMap<CndThing>& templates)
+{
+    if (name.empty() || iequal(name, "none"sv)) {
+        return nullptr;
+    }
+    auto it = templates.find(name);
+    world_ser_assert(it != templates.end(),
+        utils::format("Failed to find base template '%'", std::string_view{ name })
+    );
+    return &(*it);
+}
+
+template<typename VariantMemberT, typename T, typename VariantT, typename ExtractorT>
+inline bool getVariantValue(T& value, const VariantT& var, ExtractorT&& extractor)
+{
+    if (const auto* pvm = std::get_if<VariantMemberT>(&var)) {
+        value = extractor(*pvm);
+        return true;
+    }
+    return false;
+}
+
+template<typename VariantMemberT, typename VariantT, typename SetterT>
+inline bool setVariantValue(VariantT& var, SetterT&& setter)
+{
+    if (auto* pvm = std::get_if<VariantMemberT>(&var)) {
+        setter(*pvm);
+        return true;
+    }
+    return false;
+}
+
+template<typename ThingInfoType, typename SetterT>
+void thingAndBaseInfo(CndThing& thing, const CndThing* base, SetterT&& setter)
+{
+    if (base) {
+        if (const auto* pbi = std::get_if<ThingInfoType>(&base->thingInfo)) {
+            if (auto* pti = std::get_if<ThingInfoType>(&thing.thingInfo)) {
+                setter(*pti, *pbi);
+            }
+        }
+    }
+}
+
 
 template<typename Lambda>
-void parseThingList(const InputStream& istream, std::size_t numThings, Lambda&& insertThing)
+void parseThingList(const InputStream& istream, std::size_t numThings, const IndexMap<CndThing>& templates, Lambda&& insertThing)
 {
     static_assert(sizeof(PathFrame) == 24);
 
@@ -90,17 +135,58 @@ void parseThingList(const InputStream& istream, std::size_t numThings, Lambda&& 
     for (const auto& h : headers)
     {
         CndThing t;
-        memcpy(&t, &h, sizeof(CndThingHeader));
+
+        const auto* pBaseTemplate = getBaseTemplate(h.baseName, templates);
+        if (pBaseTemplate) {
+            t = *pBaseTemplate;
+        }
+
+        // Copy header data
+        t.baseName         = h.baseName;
+        t.name             = h.name;
+        t.position         = h.position;
+        t.pyrOrient        = h.pyrOrient;
+        t.unknown          = h.unknown;
+        t.sectorNum        = h.sectorNum;
+        t.type             = h.type;
+        t.flags            = h.flags;
+        t.moveType         = h.moveType;
+        t.controlType      = h.controlType;
+        t.msecLifeLeft     = h.msecLifeLeft;
+        t.performanceLevel = h.performanceLevel;
+        t.sndFilename      = h.sndFilename;
+        t.rdThingType      = h.rdThingType;
+        t.createThingTemplateName = h.createThingTemplateName;
+
+        if (t.flags & Thing::Flag::Seen) {
+            t.flags -= Thing::Flag::Seen;
+        }
+
+        memcpy(&t.light, &h.light, sizeof(CndThingLight));
+        memcpy(&t.collide, &h.collide, sizeof(CndCollide));
+
+        // Copy resource data if present
+        if (!h.rdThingFilename.isEmpty()) {
+            t.rdThingFilename = h.rdThingFilename;
+        }
+
+        if (!h.pupFilename.isEmpty()) {
+            t.pupFilename = h.pupFilename;
+        }
+
+        if (!h.cogScriptFilename.isEmpty()) {
+            t.cogScriptFilename = h.cogScriptFilename;
+        }
 
         // Copy thing movement info
-        if(t.moveType == CndThingMoveType::Physics)
+        if (t.moveType == CndThingMoveType::Physics)
         {
             t.moveInfo = std::move(*pit);
             ++pit;
         }
-        else if(t.moveType == CndThingMoveType::Path)
+        else if (t.moveType == CndThingMoveType::Path)
         {
-            if(*npfit > 0)
+            if (*npfit > 0)
             {
                 PathInfo p;
                 pfit = utils::copy(pfit, *npfit, p.pathFrames);
@@ -115,46 +201,91 @@ void parseThingList(const InputStream& istream, std::size_t numThings, Lambda&& 
             case Thing::Actor:
             case Thing::Player:
             {
+                // Copy actor info
                 t.thingInfo = std::move(*ait);
                 ++ait;
+
+                // Reset empty resource data
+                thingAndBaseInfo<CndActorInfo>(t, pBaseTemplate, [](auto& info, const auto& baseInfo) {
+                    if (info.weaponTemplateName.isEmpty()) {
+                        info.weaponTemplateName = baseInfo.weaponTemplateName;
+                    }
+                    if (info.explodeTemplateName.isEmpty()) {
+                        info.explodeTemplateName = baseInfo.explodeTemplateName;
+                    }
+                });
             } break;
             case Thing::Weapon:
             {
+                // Copy weapon info
                 t.thingInfo = std::move(*wit);
                 ++wit;
+
+                // Reset empty resource data
+                thingAndBaseInfo<CndWeaponInfo>(t, pBaseTemplate, [](auto& info, const auto& baseInfo) {
+                    if (info.explosionTemplateName.isEmpty()) {
+                        info.explosionTemplateName = baseInfo.explosionTemplateName;
+                    }
+                });
             } break;
             case Thing::Explosion:
             {
+                // Copy explosion info
                 t.thingInfo = std::move(*eit);
                 ++eit;
+
+                // Reset empty resource data
+                thingAndBaseInfo<CndExplosionInfo>(t, pBaseTemplate, [](auto& info, const auto& baseInfo) {
+                    if (info.spriteTemplateName.isEmpty()) {
+                        info.spriteTemplateName = baseInfo.spriteTemplateName;
+                    }
+                });
             } break;
             case Thing::Item:
             {
+                // Copy item info
                 t.thingInfo = std::move(*iit);
                 ++iit;
             } break;
             case Thing::Hint:
             {
+                // Copy hint info
                 t.thingInfo = std::move(*huvit);
                 ++huvit;
             } break;
             case Thing::Particle:
             {
+                // Copy particle info
                 t.thingInfo = std::move(*pait);
                 ++pait;
+
+                // Reset empty resource data
+                thingAndBaseInfo<CndParticleInfo>(t, pBaseTemplate, [](auto& info, const auto& baseInfo) {
+                    if (info.materialFilename.isEmpty()) {
+                        info.materialFilename = baseInfo.materialFilename;
+                    }
+                });
             } break;
             default:
                 break;
         }
 
-        if(t.controlType == CndThingControlType::AI)
+        if (t.controlType == CndThingControlType::AI)
         {
-            CndAIControlInfo ai;
-            ai.aiFileName = aicit->aiFileName;
-            if(aicit->numPathFrames > 0) {
+            if (!std::holds_alternative<CndAIControlInfo>(t.controlInfo)) {
+                t.controlInfo = CndAIControlInfo{};
+            }
+
+            CndAIControlInfo& ai = std::get<CndAIControlInfo>(t.controlInfo);
+            if (!aicit->aiFileName.isEmpty()) {
+                ai.aiFileName = aicit->aiFileName;
+            }
+
+            if (aicit->numPathFrames > 0) {
                 aipfit = utils::copy(aipfit, aicit->numPathFrames, ai.pathFrames);
             }
-            t.controlInfo = std::move(ai);
+
+            // Advance to next AIControlInfo
             std::advance(aicit, 1);
         }
 
@@ -175,7 +306,7 @@ void parseThingList(const InputStream& istream, std::size_t numThings, Lambda&& 
 }
 
 template<typename Container>
-void writeThingList(OutputStream& ostream, const Container& c)
+void writeThingList(OutputStream& ostream, const Container& c, const IndexMap<CndThing>& templates)
 {
     std::vector<CndThingHeader> headers(std::size(c));
     auto hit = headers.begin();
@@ -201,27 +332,63 @@ void writeThingList(OutputStream& ostream, const Container& c)
     for (const CndThing& t : c)
     {
         memcpy(&(*hit), &t, sizeof(CndThingHeader));
+        // Make sure free thing has no sector
+        if (hit->type == Thing::Free) {
+            hit->sectorNum = -1;
+        }
+        if (hit->flags & Thing::Flag::Seen) {
+            hit->flags -= Thing::Flag::Seen;
+        }
+
+        const CndThing* pTemplate = getBaseTemplate(hit->baseName, templates);
+
+        // Remove polyline rdname
+        if (hit->rdThingType == CndRdThingType::RdPolyline) {
+            hit->rdThingFilename = CndResourceName{}; // Empty string
+        }
+
+        // Remove 3DO model, sprite or particle filename
+        // if it's the same as the template
+        if (hit->rdThingType == CndRdThingType::RdModel ||
+            hit->rdThingType == CndRdThingType::RdSprite ||
+            hit->rdThingType == CndRdThingType::RdParticle) {
+            if (pTemplate && pTemplate->rdThingFilename == hit->rdThingFilename) {
+                hit->rdThingFilename = CndResourceName{}; // Empty string
+            }
+        }
+
+        // Remove puppet filename if it's the same as the template
+        if (pTemplate && pTemplate->pupFilename == hit->pupFilename) {
+            hit->pupFilename = CndResourceName{}; // Empty string
+        }
+
+        // Remove COG filename if it's the same as the template
+        if (pTemplate && pTemplate->cogScriptFilename == hit->cogScriptFilename) {
+            hit->cogScriptFilename = CndResourceName{}; // Empty string
+        }
+
+        // Advance header iterator
         std::advance(hit, 1);
 
         // Copy thing movement info
-        if(t.moveType == CndThingMoveType::Physics)
+        if (t.moveType == CndThingMoveType::Physics)
         {
             reserve(physicsInfos);
             physicsInfos.push_back(
                 std::get<CndPhysicsInfo>(t.moveInfo) // Should throw an exception if object is missing
             );
         }
-        else if(t.moveType == CndThingMoveType::Path)
+        else if (t.moveType == CndThingMoveType::Path)
         {
             int32_t numFrames = 0;
-            if(auto pi = std::get_if<PathInfo>(&t.moveInfo))
+            if (auto pi = std::get_if<PathInfo>(&t.moveInfo))
             {
                 const auto&frames = pi->pathFrames;
                 numFrames = safe_cast<decltype(numPathFrames)::value_type>(
                     frames.size()
                 );
 
-                if(!frames.empty())
+                if (!frames.empty())
                 {
                     reserve(pathFrames);
                     utils::copy(frames.begin(), frames.size(), pathFrames);
@@ -249,6 +416,17 @@ void writeThingList(OutputStream& ostream, const Container& c)
                 weaponInfos.push_back(
                     std::get<CndWeaponInfo>(t.thingInfo) // Should throw an exception if object is missing
                 );
+
+                // Remove explosion template name if it's the same as the base template
+                if (pTemplate)
+                {
+                    if (const auto* pBWi = std::get_if<CndWeaponInfo>(&pTemplate->thingInfo)) {
+                        auto& wi = weaponInfos.back();
+                        if (pBWi->explosionTemplateName == wi.explosionTemplateName) {
+                            wi.explosionTemplateName = CndResourceName{}; // Empty string
+                        }
+                    }
+                }
             } break;
             case Thing::Explosion:
             {
@@ -282,24 +460,28 @@ void writeThingList(OutputStream& ostream, const Container& c)
                 break;
         }
 
-        if(t.controlType == CndThingControlType::AI)
+        if (t.controlType == CndThingControlType::AI)
         {
-            auto& ai = std::get<CndAIControlInfo>(t.controlInfo); // Should throw an exception if object is missing
+            const auto& ai = std::get<CndAIControlInfo>(t.controlInfo); // Should throw an exception if object is missing
 
-            CndAIControlInfoHeader h;
-            h.aiFileName = ai.aiFileName;
+            CndAIControlInfoHeader h{};
+            if (!ai.aiFileName.isEmpty()) {
+                h.aiFileName = ai.aiFileName;
+            }
+
             h.numPathFrames = safe_cast<decltype(h.numPathFrames)>(
                 ai.pathFrames.size()
             );
 
-            reserve(aiControlInfos);
-            aiControlInfos.push_back(std::move(h));
-
-            if(!ai.pathFrames.empty())
+            if (!ai.pathFrames.empty())
             {
+
                 reserve(aiPathFrames);
                 utils::copy(ai.pathFrames.begin(), ai.pathFrames.size(), aiPathFrames);
             }
+
+            reserve(aiControlInfos);
+            aiControlInfos.push_back(std::move(h));
         }
     }
 
@@ -355,7 +537,7 @@ IndexMap<CndThing> CND::parseSection_Templates(const InputStream& istream, const
     {
         IndexMap<CndThing> templates;
         templates.reserve(header.numThingTemplates);
-        parseThingList(istream, header.numThingTemplates, [&](CndThing&& t){
+        parseThingList(istream, header.numThingTemplates, templates, [&](CndThing&& t){
             world_ser_assert(templates.pushBack(t.name, std::move(t)).second,
                 "Found duplicated template '" + t.name.toStdString() + "'"
             );
@@ -380,12 +562,12 @@ IndexMap<CndThing> CND::readTemplates(const InputStream& istream)
 void CND::writeSection_Templates(OutputStream& ostream, const IndexMap<CndThing>& templates)
 {
     try {
-        writeThingList(ostream, templates);
+        writeThingList(ostream, templates, templates);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
         throw CNDError("writeSection_Templates",
-            "An exception was encountered while writing section 'Templates': "s + e.what()
+            format("An exception was encountered while writing section 'Templates': %", e.what())
         );
     }
 }
@@ -421,13 +603,13 @@ std::size_t CND::getOffset_Things(const InputStream& istream, const CndHeader& h
     return istream.tell();
 }
 
-std::vector<CndThing> CND::parseSection_Things(const InputStream& istream, const CndHeader& header)
+std::vector<CndThing> CND::parseSection_Things(const InputStream& istream, const CndHeader& header, const IndexMap<CndThing>& templates)
 {
     try
     {
         std::vector<CndThing> things;
         things.reserve(header.numThings);
-        parseThingList(istream, header.numThings, [&](CndThing&& t) {
+        parseThingList(istream, header.numThings, templates, [&](CndThing&& t) {
             things.push_back(std::move(t));
         });
         return things;
@@ -435,22 +617,22 @@ std::vector<CndThing> CND::parseSection_Things(const InputStream& istream, const
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
         throw CNDError("parseSection_Things",
-            "An exception was encountered while parsing section 'Things': "s + e.what()
+            format("An exception was encountered while writing section 'Things': %", e.what())
         );
     }
 }
 
-std::vector<CndThing> CND::readThings(const InputStream& istream)
+std::vector<CndThing> CND::readThings(const InputStream& istream, const IndexMap<CndThing>& templates)
 {
     auto header = readHeader(istream);
     istream.seek(getOffset_Things(istream, header));
-    return parseSection_Things(istream, header);
+    return parseSection_Things(istream, header, templates);
 }
 
-void CND::writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things)
+void CND::writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates)
 {
     try {
-        writeThingList(ostream, things);
+        writeThingList(ostream, things, templates);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {

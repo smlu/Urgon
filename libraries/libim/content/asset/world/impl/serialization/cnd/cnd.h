@@ -199,9 +199,9 @@ namespace libim::content::asset {
         static void writeSection_Templates(OutputStream& ostream, const IndexMap<CndThing>& templates);
 
         [[nodiscard]] static std::size_t getOffset_Things(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<CndThing> parseSection_Things(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<CndThing> readThings(const InputStream& istream);
-        static void writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things);
+        [[nodiscard]] static std::vector<CndThing> parseSection_Things(const InputStream& istream, const CndHeader& header, const IndexMap<CndThing>& templates);
+        [[nodiscard]] static std::vector<CndThing> readThings(const InputStream& istream, const IndexMap<CndThing>& templates);
+        static void writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates);
 
         // Note: Section PVS is optional and it doesn't need to be written but performance will be degraded.
         //       Also if this section is not written, the sectors in sector section should have pvsIdx member set to -1

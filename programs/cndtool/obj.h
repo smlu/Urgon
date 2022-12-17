@@ -90,7 +90,7 @@ namespace cndtool {
         InputFileStream icnds(inCndPath);
         auto mats   = CND::readMaterials(icnds);
         auto geores = CND::readGeoresource(icnds);
-        if (geores.verts.empty()) {
+        if (geores.vertices.empty()) {
             throw std::runtime_error("CND file has no geometry resources");
         }
 
@@ -127,14 +127,14 @@ namespace cndtool {
             rw.writeLine("o " + mtlPath.filename().stem().string());
 
             // Write vertices
-            for (const auto& v : geores.verts)
+            for (const auto& v : geores.vertices)
             {
                 rw.write("v");
                 rw.writeVector(getObjCoords(v), /*width=*/ 1);
                 rw.writeEol();
             }
 
-            for (const auto& uv : geores.texVerts)
+            for (const auto& uv : geores.texVertices)
             {
                 rw.write("vt");
                 rw.writeVector(Vector2f(uv.x(), -uv.y()), /*width=*/ 1); // UV.y is flipped as Mat texture is stored top-to-bottom
@@ -142,7 +142,7 @@ namespace cndtool {
             }
 
             // Write surfaces & vertex normals to buffers
-            std::vector<std::vector<Vector3f>> fnormals(geores.verts.size()); // face normals that share the same vertex
+            std::vector<std::vector<Vector3f>> fnormals(geores.vertices.size()); // face normals that share the same vertex
             std::vector<byte_t> fbuffer;
             fbuffer.reserve(geores.surfaces.size() * kFaceLineMaxChars);
 
@@ -195,7 +195,7 @@ namespace cndtool {
 
                 // Write face vertex and UV incices
                 brw.write("f\t");
-                for (const auto& v : s.verts)
+                for (const auto& v : s.vertices)
                 {
                     brw.writeNumber(v.vertIdx + 1); // Note: idx in obj starts at 1
                     brw.write("/");

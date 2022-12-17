@@ -50,7 +50,7 @@ namespace libim::content::asset {
         std::size_t matCelIdx = 0; // material texture to use (material mipmap idx)
         LinearColor extraLight;    // face additional light color
         Vector3f normal;
-        std::vector<VertexIdx> verts;
+        std::vector<VertexIdx> vertices;
     };
 
 
@@ -71,7 +71,7 @@ namespace libim::content::asset {
                lhs.matCelIdx  == rhs.matCelIdx  &&
                lhs.extraLight == rhs.extraLight &&
                lhs.normal     == rhs.normal     &&
-               lhs.verts      == rhs.verts;
+               lhs.vertices   == rhs.vertices;
     }
 
     inline bool operator != (const Face& lhs, const Face& rhs) {

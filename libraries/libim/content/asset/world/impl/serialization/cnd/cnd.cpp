@@ -19,7 +19,7 @@ using namespace libim::content::asset;
 using namespace libim::utils;
 using namespace std::string_literals;
 
-static constexpr uint32_t kFileVersion = 3;
+static constexpr uint32_t kCndFileVersion = 3;
 
 
 std::vector<std::string> readResourceList(const InputStream& istream, std::size_t size)
@@ -45,9 +45,9 @@ void writeResourceList(OutputStream& ostream, const List<T, Args...>& list, Lamb
     std::transform(list.begin(), list.end(), std::back_insert_iterator(wlist),
     [&](const T& e)
     {
-        CndResourceName aName;
-        if(!utils::strcpy(aName, nameExtractor(e))) {
-            throw std::runtime_error("Too long resource name to write to CND stream");
+        CndResourceName aName {};
+        if (!utils::strcpy(aName, nameExtractor(e))) {
+            throw CNDError("writeResourceList", "Too long resource name to write to CND stream");
         }
         return aName;
     });
@@ -61,20 +61,18 @@ void writeResourceList(OutputStream& ostream, const List<std::string, Args...>& 
      writeResourceList(ostream, list, [](const std::string& e){ return e; });
 }
 
-
-
 CndHeader CND::readHeader(const InputStream& istream)
 {
     istream.seekBegin();
     CndHeader cndHeader = istream.read<CndHeader>();
 
     /* Verify file copyright notice  */
-    if (!std::equal(cndHeader.copyright.begin(), cndHeader.copyright.end(), kFileCopyright.begin())) {
+    if (!std::equal(cndHeader.copyright.begin(), cndHeader.copyright.end(), kWorldFileCopyright.begin())) {
         throw CNDError("readHeader", "Error bad CND file copyright");
     }
 
     /* Verify file version */
-    if (cndHeader.version != kFileVersion) {
+    if (cndHeader.version != kCndFileVersion) {
         throw CNDError("readHeader", "Error wrong CND file version: " + std::to_string(cndHeader.version));
     }
 
@@ -192,7 +190,7 @@ std::vector<std::string> CND::readSprites(const InputStream& istream)
     return parseSection_Sprites(istream, header);
 }
 
-void CND::WriteSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites)
+void CND::writeSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites)
 {
     try {
         writeResourceList(ostream, sprites);

@@ -5,7 +5,6 @@
 using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::content::audio;
-using namespace libim::content::audio::impl;
 using namespace libim::content::text;
 using namespace libim::utils;
 
@@ -40,12 +39,12 @@ static constexpr auto kPvsSize           = "PVS size:"sv;
 
 bool NDY::parseSection_Copyright(TextResourceReader& rr)
 {
-    const std::size_t nLines    = kFileCopyright.size() / kCopyrightLineWidth;
-    const std::size_t nReadLen  = kFileCopyright.size() + nLines;
+    const std::size_t nLines    = kWorldFileCopyright.size() / kCopyrightLineWidth;
+    const std::size_t nReadLen  = kWorldFileCopyright.size() + nLines;
     std::string copyright(rr.getString(nReadLen));
 
     copyright.erase(std::remove(copyright.begin(), copyright.end(), '\n'), copyright.end());
-    return copyright == kFileCopyright;
+    return copyright == kWorldFileCopyright;
 }
 
 void NDY::writeSection_Copyright(TextResourceWriter& rw)
@@ -53,8 +52,8 @@ void NDY::writeSection_Copyright(TextResourceWriter& rw)
     rw.writeLine("#### Copyright information #####"sv);
     rw.writeSection(kSectionCopyright, /*overline=*/ false);
 
-    for(std::size_t i = 0; i < kFileCopyright.size(); i += kCopyrightLineWidth) {
-        rw.writeLine(kFileCopyright.substr(i, kCopyrightLineWidth));
+    for(std::size_t i = 0; i < kWorldFileCopyright.size(); i += kCopyrightLineWidth) {
+        rw.writeLine(kWorldFileCopyright.substr(i, kCopyrightLineWidth));
     }
 
     rw.writeLine("################################"sv);
@@ -135,25 +134,25 @@ NDY::parseSection_Sounds(TextResourceReader& rr)
     return parseResourceSection<false>(rr, kWorldSounds);
 }
 
-void NDY::writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxWorldSounds, const std::vector<std::string>& sounds)
+void NDY::writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxSounds, const std::vector<std::string>& sounds)
 {
     writeResourceSection<false>(rw,
         "#### Sound information  #####"sv,
         kSectionSounds,
         kWorldSounds,
-        maxWorldSounds,
+        maxSounds,
         sounds,
         [](const auto& v) { return v; }
     );
 }
 
-void NDY::writeSection_Sounds(TextResourceWriter& rw, std::size_t maxWorldSounds, const IndexMap<Sound>& track)
+void NDY::writeSection_Sounds(TextResourceWriter& rw, std::size_t maxSounds, const IndexMap<Sound>& track)
 {
     writeResourceSection<false>(rw,
         "#### Sound information  #####"sv,
         kSectionSounds,
         kWorldSounds,
-        maxWorldSounds,
+        maxSounds,
         track,
         [](const auto& v) { return v.name(); }
     );
@@ -195,13 +194,13 @@ NDY::parseSection_AIClass(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldAIClasses);
 }
 
-void NDY::writeSection_AIClass(TextResourceWriter& rw, std::size_t maxWorldAIClasses, const std::vector<std::string>& aiclasses)
+void NDY::writeSection_AIClass(TextResourceWriter& rw, std::size_t maxAIClasses, const std::vector<std::string>& aiclasses)
 {
     writeResourceSection<true>(rw,
         "######### AI Classes ###########"sv,
         kSectionAIClass,
         kWorldAIClasses,
-        maxWorldAIClasses,
+        maxAIClasses,
         aiclasses,
         [](const auto& v) { return v; }
     );
@@ -213,13 +212,13 @@ NDY::parseSection_Models(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldModels);
 }
 
-void NDY::writeSection_Models(TextResourceWriter& rw, std::size_t maxWorldModels, const std::vector<std::string>& models)
+void NDY::writeSection_Models(TextResourceWriter& rw, std::size_t maxModels, const std::vector<std::string>& models)
 {
     writeResourceSection<true>(rw,
         "###### Models information ######"sv,
         kSectionModels,
         kWorldModels,
-        maxWorldModels,
+        maxModels,
         models,
         [](const auto& v) { return v; }
     );
@@ -231,13 +230,13 @@ NDY::parseSection_Sprites(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldSprites);
 }
 
-void NDY::writeSection_Sprites(TextResourceWriter &rw,  std::size_t maxWorldSprites, const std::vector<std::string>& sprites)
+void NDY::writeSection_Sprites(TextResourceWriter &rw,  std::size_t maxSprites, const std::vector<std::string>& sprites)
 {
     writeResourceSection<true>(rw,
         "###### Sprite information ######"sv,
         kSectionSprites,
         kWorldSprites,
-        maxWorldSprites,
+        maxSprites,
         sprites,
         [](const auto& v) { return v; }
     );
@@ -249,25 +248,25 @@ NDY::parseSection_Keyframes(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldKeyframes);
 }
 
-void NDY::writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxWorldKeyframes, const std::vector<std::string>& keyframes)
+void NDY::writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxKeyframes, const std::vector<std::string>& keyframes)
 {
     writeResourceSection<true>(rw,
         "##### Keyframe information #####"sv,
         kSectionKeyframes,
         kWorldKeyframes,
-        maxWorldKeyframes,
+        maxKeyframes,
         keyframes,
         [](const auto& v) { return v; }
     );
 }
 
-void NDY::writeSection_Keyframes(TextResourceWriter &rw, std::size_t maxWorldKeyframes, const IndexMap<Animation>& keyframes)
+void NDY::writeSection_Keyframes(TextResourceWriter &rw, std::size_t maxKeyframes, const IndexMap<Animation>& keyframes)
 {
     writeResourceSection<true>(rw,
         "##### Keyframe information #####"sv,
         kSectionKeyframes,
         kWorldKeyframes,
-        maxWorldKeyframes,
+        maxKeyframes,
         keyframes,
         [](const auto& v) { return v.name(); }
     );
@@ -279,13 +278,13 @@ NDY::parseSection_AnimClass(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldPuppets);
 }
 
-void NDY::writeSection_AnimClass(TextResourceWriter &rw, std::size_t maxWorldPuppets, const std::vector<std::string>& puppets)
+void NDY::writeSection_AnimClass(TextResourceWriter &rw, std::size_t maxAnimClasses, const std::vector<std::string>& puppets)
 {
     writeResourceSection<true>(rw,
         "###### Animation Classes #######"sv,
         kSectionAnimClass,
         kWorldPuppets,
-        maxWorldPuppets,
+        maxAnimClasses,
         puppets,
         [](const auto& v) { return v; }
     );
@@ -297,13 +296,13 @@ NDY::parseSection_SoundClass(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldSoundClasses);
 }
 
-void NDY::writeSection_SoundClass(TextResourceWriter &rw, std::size_t maxWorldSndClasses, const std::vector<std::string>& sndclasses)
+void NDY::writeSection_SoundClass(TextResourceWriter &rw, std::size_t maxSoundClasses, const std::vector<std::string>& sndclasses)
 {
     writeResourceSection<true>(rw,
         "######### Sound Classes ########"sv,
         kSectionSoundClass,
         kWorldSoundClasses,
-        maxWorldSndClasses,
+        maxSoundClasses,
         sndclasses,
         [](const auto& v) { return v; }
     );
@@ -315,13 +314,13 @@ NDY::parseSection_CogScripts(TextResourceReader& rr)
     return parseResourceSection<true>(rr, kWorldScripts);
 }
 
-void NDY::writeSection_CogScripts(TextResourceWriter &rw, std::size_t maxWorldCogScripts, const std::vector<std::string>& scripts)
+void NDY::writeSection_CogScripts(TextResourceWriter &rw, std::size_t maxCogScripts, const std::vector<std::string>& scripts)
 {
     writeResourceSection<true>(rw,
         "########## COG scripts #########"sv,
         kSectionCogScripts,
         kWorldScripts,
-        maxWorldCogScripts,
+        maxCogScripts,
         scripts,
         [](const auto& v) { return v; }
     );

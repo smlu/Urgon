@@ -115,7 +115,7 @@ namespace libim::content::asset {
                 if (secLifeLeft < 0) {
                     throw SyntaxError("Bad timer value"sv, value.location());
                 }
-                thing.msLifeLeft = static_cast<decltype(thing.msLifeLeft)>(secLifeLeft * 1000.0f);
+                thing.msecLifeLeft = static_cast<decltype(thing.msecLifeLeft)>(secLifeLeft * 1000.0f);
                 return true;
             }
 
@@ -124,12 +124,12 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::SoundClass:
-                thing.sndFileName = CndResourceName(value.value());
+                thing.sndFilename = CndResourceName(value.value());
                 return true;
 
             case NdyThingParam::Model3d:
                 thing.rdThingType     = CndRdThingType::RdModel;
-                thing.rdThingFileName = CndResourceName(value.value());
+                thing.rdThingFilename = CndResourceName(value.value());
 
                 if (thing.collide.unkWidth == 0.0 )
                 {
@@ -147,11 +147,11 @@ namespace libim::content::asset {
 
             case NdyThingParam::Sprite:
                 thing.rdThingType     = CndRdThingType::RdSprite;
-                thing.rdThingFileName = CndResourceName(value.value());
+                thing.rdThingFilename = CndResourceName(value.value());
                 return true;
 
             case NdyThingParam::Puppet:
-                thing.pupFileName = CndResourceName(value.value());
+                thing.pupFilename = CndResourceName(value.value());
                 return true;
 
             case NdyThingParam::AIClass:
@@ -169,12 +169,12 @@ namespace libim::content::asset {
 
             case NdyThingParam::Cog:
                 thing.flags |= Thing::Flag::CogLinked;
-                thing.cogScriptFileName = CndResourceName(value.value());
+                thing.cogScriptFilename = CndResourceName(value.value());
                 return true;
 
             case NdyThingParam::Particle:
                 thing.rdThingType     = CndRdThingType::RdParticle;
-                thing.rdThingFileName = CndResourceName(value.value());
+                thing.rdThingFilename = CndResourceName(value.value());
                 return true;
 
             case NdyThingParam::MoveSize:
@@ -493,16 +493,16 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::BlastTime:
-                using BlastTimeT = decltype(explosionInfo.msBlastTime);
+                using BlastTimeT = decltype(explosionInfo.msecBlastTime);
                 value.setType(Token::FloatNumber); // force float token
-                explosionInfo.msBlastTime = static_cast<BlastTimeT>(value.getNumber<float>() * 1000.0f);
+                explosionInfo.msecBlastTime = static_cast<BlastTimeT>(value.getNumber<float>() * 1000.0f);
                 explosionInfo.flags |= ExplosionThing::HasBlastPhase;
                 return true;
 
             case NdyThingParam::BabyTime:
-                using BabyTimeT = decltype(explosionInfo.msBabyTime);
+                using BabyTimeT = decltype(explosionInfo.msecBabyTime);
                 value.setType(Token::FloatNumber); // force float token
-                explosionInfo.msBabyTime = static_cast<BabyTimeT>(value.getNumber<float>() * 1000.0f);
+                explosionInfo.msecBabyTime = static_cast<BabyTimeT>(value.getNumber<float>() * 1000.0f);
                 explosionInfo.flags |= ExplosionThing::HasChildExplosion;
                 return true;
 
@@ -529,16 +529,16 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::ExpandTime:
-                using ExpandTimeT = decltype(explosionInfo.msExpandTime);
+                using ExpandTimeT = decltype(explosionInfo.msecExpandTime);
                 value.setType(Token::FloatNumber); // force float token
-                explosionInfo.msExpandTime = static_cast<ExpandTimeT>(value.getNumber<float>() * 1000.0f);
+                explosionInfo.msecExpandTime = static_cast<ExpandTimeT>(value.getNumber<float>() * 1000.0f);
                 explosionInfo.flags |= ExplosionThing::ExpandTimeSet;
                 return true;
 
             case NdyThingParam::FadeTime:
-                using FadeTimeT = decltype(explosionInfo.msFadeTime);
+                using FadeTimeT = decltype(explosionInfo.msecFadeTime);
                 value.setType(Token::FloatNumber); // force float token
-                explosionInfo.msFadeTime = static_cast<FadeTimeT>(value.getNumber<float>() * 1000.0f);
+                explosionInfo.msecFadeTime = static_cast<FadeTimeT>(value.getNumber<float>() * 1000.0f);
                 explosionInfo.flags |= ExplosionThing::FadeTimeSet;
                 return true;
 

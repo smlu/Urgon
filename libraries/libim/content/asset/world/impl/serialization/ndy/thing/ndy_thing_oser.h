@@ -129,10 +129,10 @@ namespace libim::content::asset {
     )
 
     DefNdyWriteThingParamFunc(Cog,
-        t.cogScriptFileName != base.cogScriptFileName && !t.cogScriptFileName.isEmpty(),
-        !t.cogScriptFileName.isEmpty(),
+        t.cogScriptFilename != base.cogScriptFilename && !t.cogScriptFilename.isEmpty(),
+        !t.cogScriptFilename.isEmpty(),
         NdyThingParam::Cog,
-        t.cogScriptFileName
+        t.cogScriptFilename
     )
 
     DefNdyWriteThingParamFunc(CollideType,
@@ -205,25 +205,25 @@ namespace libim::content::asset {
     )
 
     DefNdyWriteThingParamFunc(Puppet,
-        t.pupFileName != base.pupFileName && !t.pupFileName.isEmpty(),
-        !t.pupFileName.isEmpty(),
+        t.pupFilename != base.pupFilename && !t.pupFilename.isEmpty(),
+        !t.pupFilename.isEmpty(),
         NdyThingParam::Puppet,
-        t.pupFileName
+        t.pupFilename
     )
 
     DefNdyWriteThingParamFuncEx(RdFileName,
-        t.rdThingFileName != base.rdThingFileName && !t.rdThingFileName.isEmpty(),
-        !t.rdThingFileName.isEmpty(),
+        t.rdThingFilename != base.rdThingFilename && !t.rdThingFilename.isEmpty(),
+        !t.rdThingFilename.isEmpty(),
         [&](TextResourceWriter&) {
             // Writes render file name e.g. model3d=*.3do or sprite=*.spr or particle=*.par
             if(t.rdThingType == CndRdThingType::RdModel) {
-                ndyWriteThingParam(rw, NdyThingParam::Model3d, t.rdThingFileName);
+                ndyWriteThingParam(rw, NdyThingParam::Model3d, t.rdThingFilename);
             }
             else if(t.rdThingType == CndRdThingType::RdSprite) {
-                ndyWriteThingParam(rw, NdyThingParam::Sprite, t.rdThingFileName);
+                ndyWriteThingParam(rw, NdyThingParam::Sprite, t.rdThingFilename);
             }
             else if(t.rdThingType == CndRdThingType::RdParticle) {
-                ndyWriteThingParam(rw, NdyThingParam::Particle, t.rdThingFileName);
+                ndyWriteThingParam(rw, NdyThingParam::Particle, t.rdThingFilename);
             }
         }
     )
@@ -236,17 +236,17 @@ namespace libim::content::asset {
     )
 
     DefNdyWriteThingParamFunc(SoundClass,
-        t.sndFileName != base.sndFileName && !t.sndFileName.isEmpty(),
-        !t.sndFileName.isEmpty(),
+        t.sndFilename != base.sndFilename && !t.sndFilename.isEmpty(),
+        !t.sndFilename.isEmpty(),
         NdyThingParam::SoundClass,
-        t.sndFileName
+        t.sndFilename
     )
 
     DefNdyWriteThingParamFunc(Timer,
-        t.msLifeLeft != base.msLifeLeft,
-        t.msLifeLeft != 0,
+        t.msecLifeLeft != base.msecLifeLeft,
+        t.msecLifeLeft != 0,
         NdyThingParam::Timer,
-        t.msLifeLeft * 0.001 // in sec
+        t.msecLifeLeft * 0.001 // in sec
     )
 
     DefNdyWriteThingParamFunc(Type,
@@ -628,30 +628,30 @@ namespace libim::content::asset {
 
                 // Param ExpandTime
                 ndyWriteThingParamIf(baseExpInfo,
-                    ndyWriteIfBase(ei.msExpandTime != base.msExpandTime),
-                    ndyWriteIfPara(ei.msExpandTime != 0), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::ExpandTime, ei.msExpandTime * 0.001); // in sec
+                    ndyWriteIfBase(ei.msecExpandTime != base.msecExpandTime),
+                    ndyWriteIfPara(ei.msecExpandTime != 0), [&] {
+                    ndyWriteThingParam(rw, NdyThingParam::ExpandTime, ei.msecExpandTime * 0.001); // in sec
                 });
 
                 // Param FadeTime
                 ndyWriteThingParamIf(baseExpInfo,
-                    ndyWriteIfBase(ei.msFadeTime != base.msFadeTime),
-                    ndyWriteIfPara(ei.msFadeTime != 0), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::FadeTime, ei.msFadeTime * 0.001); // in sec
+                    ndyWriteIfBase(ei.msecFadeTime != base.msecFadeTime),
+                    ndyWriteIfPara(ei.msecFadeTime != 0), [&] {
+                    ndyWriteThingParam(rw, NdyThingParam::FadeTime, ei.msecFadeTime * 0.001); // in sec
                 });
 
                 // Param BlastTime
                 ndyWriteThingParamIf(baseExpInfo,
-                    ndyWriteIfBase(ei.msBlastTime != base.msBlastTime),
-                    ndyWriteIfPara(ei.msBlastTime != 0), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::BlastTime, ei.msBlastTime * 0.001); // in sec
+                    ndyWriteIfBase(ei.msecBlastTime != base.msecBlastTime),
+                    ndyWriteIfPara(ei.msecBlastTime != 0), [&] {
+                    ndyWriteThingParam(rw, NdyThingParam::BlastTime, ei.msecBlastTime * 0.001); // in sec
                 });
 
                 // Param BabyTime
                 ndyWriteThingParamIf(baseExpInfo,
-                    ndyWriteIfBase(ei.msBabyTime != base.msBabyTime),
-                    ndyWriteIfPara(ei.msBabyTime != 0), [&] {
-                    ndyWriteThingParam(rw, NdyThingParam::BabyTime, ei.msBabyTime * 0.001); // in sec
+                    ndyWriteIfBase(ei.msecBabyTime != base.msecBabyTime),
+                    ndyWriteIfPara(ei.msecBabyTime != 0), [&] {
+                    ndyWriteThingParam(rw, NdyThingParam::BabyTime, ei.msecBabyTime * 0.001); // in sec
                 });
 
                 // Param Force
@@ -885,6 +885,12 @@ namespace libim::content::asset {
             writeThingNameAndBase(rw, t.name, t.baseName);
             writeTemplateParams(rw, t, templates);
         });
+    }
+
+    template<bool writeEnd = true>
+    void writeTemplateList(TextResourceWriter&& rw, const IndexMap<CndThing>& templates, bool writeHeader = false)
+    {
+        writeTemplateList<writeEnd>(rw, templates, writeHeader);
     }
 }
 #endif // LIBIM_NDY_THING_OSER_H

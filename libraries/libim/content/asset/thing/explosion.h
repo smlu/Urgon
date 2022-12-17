@@ -14,9 +14,9 @@ namespace libim::content::asset {
         {
             None                          = 0x00,
             AnimatedSprite                = 0x01,   // If set, sprite material is animated (spriteThing or sprite)
-            HasBlastPhase                 = 0x02,   // If set, msBlastTime field is used
+            HasBlastPhase                 = 0x02,   // If set, msecBlastTime field is used
             DamageInBlastRadius           = 0x04,   // If set, range field and damage field are used
-            HasChildExplosion             = 0x08,   // If set, the msBabyTime field is used
+            HasChildExplosion             = 0x08,   // If set, the msecBabyTime field is used
             VariableLight                 = 0x10,   // If set, the maxLight field is used (could be 0)
             RandomSpriteThingOrientation  = 0x20,   // If set, spriteThing is randomly orientated
             NoDamageToShooter             = 0x40,

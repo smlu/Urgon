@@ -147,16 +147,7 @@ namespace libim::content::text {
                 std::ostringstream ss;
                 ss << commentChar() << spaceChar();
                 utils::ssprintf(ss, comment, std::forward<Args&&>(args)...);
-
-                // TODO: This is hack to get pointer to the underlying buffer and avoid copying.
-                //       When C++20 is supported use ss.view() to get std::sting_view from ss;
-                using ostrbuf = std::basic_stringbuf<std::ostringstream::char_type,
-                    std::ostringstream::traits_type, std::ostringstream::allocator_type>;
-                struct ssb : public ostrbuf{
-                    char* pbase() const { return ostrbuf::pbase(); }
-                };
-                const auto s = ss.tellp();
-                ostream_ << std::string_view(reinterpret_cast<const ssb*>(ss.rdbuf())->pbase(), s);
+                ostream_ << ss.view();
                 writeEol();
             }
             return *this;

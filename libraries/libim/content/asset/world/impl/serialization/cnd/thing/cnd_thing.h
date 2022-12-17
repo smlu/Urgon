@@ -71,20 +71,20 @@ namespace libim::content::asset {
         CndResourceName name;
         Vector3f position;
         FRotator pyrOrient;
-        int unknown;                        // Possible: padding
+        int32_t unknown;                        // Possible: padding
         int sectorNum;
         Thing::Type type;
         Flags<Thing::Flag> flags;
         CndThingMoveType moveType;
         CndThingControlType controlType;
         CndThingLight light;
-        uint32_t msLifeLeft;
+        uint32_t msecLifeLeft;
         CndRdThingType rdThingType;
-        CndResourceName rdThingFileName;    // [*.3do, *.spr, *.par]
-        CndResourceName pupFileName;
-        CndResourceName sndFileName;
+        CndResourceName rdThingFilename;    // [*.3do, *.spr, *.par]
+        CndResourceName pupFilename;
+        CndResourceName sndFilename;
         CndResourceName createThingTemplateName;    // The name of thing template that will be created when this thing is created
-        CndResourceName cogScriptFileName;
+        CndResourceName cogScriptFilename;
         CndCollide collide;
         int performanceLevel;  // performance level. Note: If greater then what the game is configured the thing won't be created
     };
@@ -155,10 +155,10 @@ namespace libim::content::asset {
         DamageType damageType;
         float range;
         float force;
-        uint32_t msBlastTime;
-        uint32_t msBabyTime;
-        uint32_t msExpandTime;
-        uint32_t msFadeTime;
+        uint32_t msecBlastTime;
+        uint32_t msecBabyTime;
+        uint32_t msecExpandTime;
+        uint32_t msecFadeTime;
         float maxLight;
         std::array<CndResourceName, 16> aDebrisTemplateNames;
         Vector3f spriteStartPos;

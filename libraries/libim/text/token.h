@@ -185,7 +185,7 @@ namespace libim::text {
          * @tparam T The type of the number to parse.
          *
          * @return The parsed number.
-         * @throws SyntaxError if the token is not a number or if the number cannot be parsed.
+         * @throw SyntaxError if the token is not a number or if the number cannot be parsed.
         */
         template<typename T, typename DT = std::decay_t<T>>
         DT getNumber() const

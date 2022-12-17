@@ -160,26 +160,28 @@ namespace libim::content::asset {
      * Loads Material from MAT file format.
      * @param istream - input rvalue stream to read Material from
      * @return Material
-     * @throw StreamError   - if invalid MAT file in the istream
+     * @throw StreamError   - if invalid MAT file in the istream.
      *        MaterialError - if textures stored in MAT file are invalid i.e. either not the same size or don't have the same mip level.
      */
     Material matLoad(InputStream&& istream);
 
     /**
      * Writes Material as MAT file format to output stream.
-     * @param mat - Material to write to ostream
+     * @param mat      - Material to write to ostream
      * @param ostream - output stream reference to write Material to
-     * @return true if writting took place, otherwise false
-     * @throw StreamError if error has occur while writting Material to stream.
+     * @return true if writing took place, otherwise false
+     *
+     * @throw StreamError if an error occurs while writing Material to stream.
      */
     bool matWrite(const Material& mat, OutputStream&& ostream);
 
     /**
      * Writes Material as MAT file format to output stream.
-     * @param mat - Material to write to ostream
+     * @param mat     - Material to write to ostream
      * @param ostream - output rvalue stream reference to write Material to
-     * @return true if writting took place, otherwise false
-     * @throw StreamError if error has occur while writting Material to stream.
+     * @return true if writing took place, otherwise false
+     *
+     * @throw StreamError if an error occurs while writing Material to stream.
      */
     bool matWrite(const Material& mat, OutputStream& ostream);
 }

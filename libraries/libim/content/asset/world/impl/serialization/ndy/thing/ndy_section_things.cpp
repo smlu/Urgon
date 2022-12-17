@@ -29,23 +29,29 @@ IndexMap<CndThing> NDY::parseTemplateList(text::TextResourceReader& rr)
     });
 }
 
-IndexMap<CndThing> NDY::parseSection_Templates(text::TextResourceReader& rr)
+IndexMap<CndThing> NDY::parseTemplateList(text::TextResourceReader&& rr)
+{
+    return parseTemplateList(rr);
+}
+
+std::pair<std::size_t, IndexMap<CndThing>>
+NDY::parseSection_Templates(text::TextResourceReader& rr)
 {
     const std::size_t sizeTemplates = rr.readKey<std::size_t>(kWorldTemplates);
     auto templates = parseTemplateList(rr);
-    if (templates.size() != sizeTemplates) {
-        LOG_WARNING("NDY::ParseSection_Templates(): Expected % templates, but found %", sizeTemplates, templates.size());
+    if (templates.size() > sizeTemplates) {
+        LOG_WARNING("NDY::ParseSection_Templates(): Expected at max % templates, but found %", sizeTemplates, templates.size());
     }
-    return templates;
+    return { sizeTemplates, templates };
 }
 
-void NDY::writeSection_Templates(TextResourceWriter& rw, const IndexMap<CndThing>& templates)
+void NDY::writeSection_Templates(TextResourceWriter& rw, std::size_t maxTemplates, const IndexMap<CndThing>& templates)
 {
     rw.writeLine("##### Templates information ####"sv);
     rw.writeSection(kSectionTemplates, /*overline=*/ false);
     rw.writeEol();
 
-    rw.writeKeyValue(kWorldTemplates, templates.size());
+    rw.writeKeyValue(kWorldTemplates, maxTemplates);
     rw.writeEol();
 
     writeTemplateList(rw, templates, /*writeHeader=*/true);
@@ -64,7 +70,7 @@ std::vector<CndThing> NDY::parseSection_Things(text::TextResourceReader& rr, con
     });
 
     if (sizeThings < things.size()) {
-        LOG_WARNING("NDY::parseSection_Things(): Expected thing array size % is smaller than actual size %", sizeThings, things.size());
+        LOG_WARNING("NDY::parseSection_Things(): Expected at max % things but found %", sizeThings, things.size());
     }
 
     if (sizeThings > things.size()) {

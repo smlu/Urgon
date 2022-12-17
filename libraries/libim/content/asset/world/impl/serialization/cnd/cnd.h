@@ -25,12 +25,13 @@
 #include <libim/types/indexmap.h>
 
 namespace libim::content::asset {
-    enum class CndWorldFlag : uint32_t
+    /** Represents internal world state*/
+    enum class CndWorldState : uint32_t
     {
-        StaticWorld          = 0x1, // jones3dstatic.cnd
-        WorldInitialized     = 0x2,
-        UpdateFogRenderState = 0x4,
-        Unknown8             = 0x8,
+        Static      = 0x1, // Resource container. e.g. jones3dstatic.cnd
+        Initialized = 0x2, // world is initialized
+        UpdateFog   = 0x4, // Update fog render state.
+        InitHUD     = 0x8, // Initialize HUD.
     };
 
     struct CndHeader final
@@ -38,7 +39,7 @@ namespace libim::content::asset {
         uint32_t fileSize;
         FixedString<1216> copyright;
         CndResourceName   filePath;
-        CndWorldFlag flags; // World stored in cnd file usually has flags set to 0x0C. The static world has also flag 0x1 (StaticWorld) set and combined with other flags results in value 0x0D.
+        Flags<CndWorldState> state; // World stored in cnd file usually has state set to 0x0C. The static world has also flag 0x1 (Static) set and combined with other state results in value 0x0D.
         uint32_t version;
         float    worldGravity;
         float    ceilingSky_Z;
@@ -56,13 +57,13 @@ namespace libim::content::asset {
         uint32_t apMatArray;          // 32-bit pointer to pointer
 
         uint32_t numVertices;
-        uint32_t aVerticies;          // 32-bit pointer Vector3f*
+        uint32_t aVertices;          // 32-bit pointer Vector3f*
 
         uint32_t unknown28;
         uint32_t unknown29;
 
         uint32_t numTexVertices;
-        uint32_t aTexVerticies;       // 32-bit pointer Vector2f*
+        uint32_t aTexVertices;       // 32-bit pointer Vector2f*
 
         uint32_t unknown32;
         uint32_t unknown33;
@@ -113,11 +114,11 @@ namespace libim::content::asset {
         uint32_t aThingTemplates;     // 32-bit pointer
 
         uint32_t numThings;
-        uint32_t sizeThings;
+        uint32_t lastThingIdx;
         uint32_t aThings;             // 32-bit pointer
 
-        uint32_t pvsSize;
-        uint32_t aPvs;                // 32-bit pointer (struct of 16 * int)
+        uint32_t sizePVS;
+        uint32_t aPVS;                // 32-bit pointer (struct of 16 * int)
     };
 
     static_assert(sizeof(CndHeader) == 1568);
@@ -165,7 +166,7 @@ namespace libim::content::asset {
         [[nodiscard]] static std::size_t getOffset_Sprites(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static std::vector<std::string> parseSection_Sprites(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static std::vector<std::string> readSprites(const InputStream& istream);
-        static void WriteSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites);
+        static void writeSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites);
 
         [[nodiscard]] static std::size_t getOffset_Keyframes(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static IndexMap<Animation> parseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.

@@ -39,14 +39,14 @@ Georesource CND::parseSection_Georesource(const InputStream& istream, const CndH
     try
     {
         Georesource geores;
-        geores.verts    = istream.read<std::vector<Vector3f>>(cndHeader.numVertices);
-        geores.texVerts = istream.read<std::vector<Vector2f>>(cndHeader.numTexVertices);
-        auto adjoints   = istream.read<std::vector<CndSurfaceAdjoin>>(cndHeader.numAdjoins);
+        geores.vertices    = istream.read<std::vector<Vector3f>>(cndHeader.numVertices);
+        geores.texVertices = istream.read<std::vector<Vector2f>>(cndHeader.numTexVertices);
+        auto adjoins       = istream.read<std::vector<CndSurfaceAdjoin>>(cndHeader.numAdjoins);
 
-        geores.adjoints.reserve(adjoints.size());
-        for (const auto& a : adjoints)
+        geores.adjoins.reserve(adjoins.size());
+        for (const auto& a : adjoins)
         {
-            geores.adjoints.push_back({
+            geores.adjoins.push_back({
                 a.flags,
                 makeOptionalIdx(a.mirror),
                 std::nullopt,
@@ -115,9 +115,9 @@ Georesource CND::parseSection_Georesource(const InputStream& istream, const CndH
             s.extraLight = h.extraLight;
             s.normal     = h.normal;
 
-            s.verts.resize(h.numVerts);
+            s.vertices.resize(h.numVerts);
             s.vecIntensities.reserve(h.numVerts);
-            for (auto& v : s.verts)
+            for (auto& v : s.vertices)
             {
                 v.vertIdx = safe_cast<decltype(v.vertIdx)>(itVerts->vertIdx);
                 v.uvIdx   = makeOptionalIdx(itVerts->uvIdx);
@@ -151,13 +151,13 @@ void CND::writeSection_Georesource(OutputStream& ostream, const Georesource& geo
     try
     {
         // Write verteices and tex vertices
-        ostream.write(geores.verts);
-        ostream.write(geores.texVerts);
+        ostream.write(geores.vertices);
+        ostream.write(geores.texVertices);
 
         // Write adjoins
         std::vector<CndSurfaceAdjoin> cadjons;
-        cadjons.reserve(geores.adjoints.size());
-        for(const auto& a : geores.adjoints)
+        cadjons.reserve(geores.adjoins.size());
+        for(const auto& a : geores.adjoins)
         {
             cadjons.push_back({
                 a.flags,
@@ -183,12 +183,12 @@ void CND::writeSection_Georesource(OutputStream& ostream, const Georesource& geo
             h.lightMode   = s.lightMode;
             h.adjoinIdx   = fromOptionalIdx(s.adjoinIdx);
             h.extraLight  = s.extraLight;
-            h.numVerts    = s.verts.size();
+            h.numVerts    = s.vertices.size();
             h.normal      = s.normal;
             surfheaders.push_back(std::move(h));
 
-            vecSurfVerts.reserve(s.verts.size());
-            for(auto[idx, v] : cenumerate(s.verts))
+            vecSurfVerts.reserve(s.vertices.size());
+            for(auto[idx, v] : cenumerate(s.vertices))
             {
                 vecSurfVerts.push_back({
                     safe_cast<decltype(CndSurfaceVerts::vertIdx)>(v.vertIdx),

@@ -63,7 +63,7 @@ std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextR
     return { maxCogs, std::move(resources) };
 }
 
-void NDY::writeSection_Cogs(TextResourceWriter& rw, std::size_t maxWorldCogs, const std::vector<SharedRef<Cog>>& cogs)
+void NDY::writeSection_Cogs(TextResourceWriter& rw, std::size_t maxCogs, const std::vector<SharedRef<Cog>>& cogs)
 {
     std::vector<std::string> scogs;
     scogs.reserve(cogs.size());
@@ -95,7 +95,7 @@ void NDY::writeSection_Cogs(TextResourceWriter& rw, std::size_t maxWorldCogs, co
         "######### COG placement ########"sv,
         kSectionCogs,
         kWorldCogs,
-        maxWorldCogs,
+        maxCogs,
         scogs,
         [](const auto& v) { return v; },
         "Num\tScript          Symbol values"sv

@@ -15,7 +15,7 @@
 
 
 namespace libim::content::asset {
-    static constexpr std::string_view kFileCopyright = {
+    static constexpr std::string_view kWorldFileCopyright = {
         "................................" \
         "................@...@...@...@..." \
         ".............@...@..@..@...@...." \

@@ -8,27 +8,27 @@ using namespace libim::content::asset;
 using namespace libim::content::text;
 using namespace libim::utils;
 
-static constexpr auto kWorldVertices      = "World vertices"sv;
-static constexpr auto kWorldTexVerts      = "World texture vertices"sv;
-static constexpr auto kWorldAdjoints      = "World adjoins"sv;
-static constexpr auto kWorldSurfaces      = "World surfaces"sv;
+static constexpr auto kWorldVertices   = "World vertices"sv;
+static constexpr auto kWorldTexVerts   = "World texture vertices"sv;
+static constexpr auto kWorldAdjoints   = "World adjoins"sv;
+static constexpr auto kWorldSurfaces   = "World surfaces"sv;
 
 Georesource NDY::parseSection_Georesource(TextResourceReader& rr)
 {
     Georesource res;
 
     // Read world vertices
-    res.verts = rr.readList<decltype(res.verts)>(kWorldVertices, [](auto& rr, auto /*rowIdx*/, auto& v){
+    res.vertices = rr.readList<decltype(res.vertices)>(kWorldVertices, [](auto& rr, auto /*rowIdx*/, auto& v){
         v = rr.template readVector<decltype(v)>();
     });
 
     // Read world tex vertices
-    res.texVerts = rr.readList<decltype(res.texVerts)>(kWorldTexVerts, [](auto& rr, auto /*rowIdx*/, auto& tv){
+    res.texVertices = rr.readList<decltype(res.texVertices)>(kWorldTexVerts, [](auto& rr, auto /*rowIdx*/, auto& tv){
         tv = rr.template readVector<decltype(tv)>();
     });
 
-    // Read world adjoints
-    res.adjoints = rr.readList<decltype(res.adjoints)>(kWorldAdjoints, [](auto& rr, auto /*rowIdx*/, SurfaceAdjoin& a){
+    // Read world adjoins
+    res.adjoins = rr.readList<decltype(res.adjoins)>(kWorldAdjoints, [](auto& rr, auto /*rowIdx*/, SurfaceAdjoin& a){
         a.flags     = rr.template readFlags<decltype(a.flags)>();
         auto mirror = rr.template getNumber<int32_t>();
         a.distance  = rr.template getNumber<decltype(a.distance)>();
@@ -54,8 +54,8 @@ Georesource NDY::parseSection_Georesource(TextResourceReader& rr)
         s.extraLight   = rr.template readVector<decltype(s.extraLight)>();
 
         auto numVerts = rr.template getNumber<int32_t>();
-        s.verts.resize(numVerts);
-        for(auto& v : s.verts)
+        s.vertices.resize(numVerts);
+        for(auto& v : s.vertices)
         {
              v.vertIdx = rr.template getNumber<decltype(v.vertIdx)>();
              rr.assertPunctuator(",");
@@ -96,7 +96,7 @@ void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& ge
     rw.writeSection(kSectionGeoresource, /*overline=*/ false);
 
     rw.writeCommentLine("----- Vertices Subsection -----"sv);
-    rw.writeList(kWorldVertices, geores.verts, [](auto& rw, auto idx, auto& v){
+    rw.writeList(kWorldVertices, geores.vertices, [](auto& rw, auto idx, auto& v){
         if (idx == 0)
         {
             rw.setIndentChar('\t');
@@ -112,7 +112,7 @@ void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& ge
 
     rw.setIndentChar(' ');
     rw.writeCommentLine("-- Texture Verts Subsection ---"sv);
-    rw.writeList(kWorldTexVerts, geores.texVerts, [](auto& rw, auto idx, auto& v){
+    rw.writeList(kWorldTexVerts, geores.texVertices, [](auto& rw, auto idx, auto& v){
         if (idx == 0)
         {
             rw.setIndentChar('\t');
@@ -128,7 +128,7 @@ void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& ge
 
     rw.setIndentChar(' ');
     rw.writeCommentLine("------ Adjoins Subsection -----"sv);
-    rw.writeList(kWorldAdjoints, geores.adjoints, [](auto& rw, auto idx, const SurfaceAdjoin& a) {
+    rw.writeList(kWorldAdjoints, geores.adjoins, [](auto& rw, auto idx, const SurfaceAdjoin& a) {
         if (idx == 0)
         {
             rw.setIndentChar('\t');
@@ -186,9 +186,9 @@ void NDY::writeSection_Georesource(TextResourceWriter& rw, const Georesource& ge
         rw.indent(2);
 
         // Surface verts, tex verts and verts color
-        rw.writeNumber(safe_cast<uint32_t>(s.verts.size()));
+        rw.writeNumber(safe_cast<uint32_t>(s.vertices.size()));
         rw.indent(1);
-        for(const auto& v : s.verts)
+        for(const auto& v : s.vertices)
         {
             rw.writeNumber(v.vertIdx);
             rw.write(",");

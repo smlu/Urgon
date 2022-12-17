@@ -63,15 +63,45 @@ namespace libim::content::asset {
                 {
                     case Thing::Actor:
                         thing.controlType = CndThingControlType::AI;
+                        if (!std::holds_alternative<CndActorInfo>(thing.thingInfo)) {
+                            thing.thingInfo = CndActorInfo{};
+                        }
+                        if (!std::holds_alternative<CndAIControlInfo>(thing.controlInfo)) {
+                            thing.controlInfo = CndAIControlInfo{};
+                        }
                         break;
                     case Thing::Explosion:
                         thing.controlType = CndThingControlType::Explosion;
+                        if (!std::holds_alternative<CndExplosionInfo>(thing.thingInfo)) {
+                            thing.thingInfo = CndExplosionInfo{};
+                        }
                         break;
                     case Thing::Player:
                         thing.controlType = CndThingControlType::Player;
+                        if (!std::holds_alternative<CndActorInfo>(thing.thingInfo)) {
+                            thing.thingInfo = CndActorInfo{};
+                        }
+                        break;
+                    case Thing::Weapon:
+                        if (!std::holds_alternative<CndWeaponInfo>(thing.thingInfo)) {
+                            thing.thingInfo = CndWeaponInfo{};
+                        }
                         break;
                     case Thing::Particle:
                         thing.controlType = CndThingControlType::Particle;
+                        if (!std::holds_alternative<CndParticleInfo>(thing.thingInfo)) {
+                            thing.thingInfo = CndParticleInfo{};
+                        }
+                        break;
+                    case Thing::Item:
+                        if (!std::holds_alternative<CndItemInfo>(thing.thingInfo)) {
+                            thing.thingInfo = CndItemInfo{};
+                        }
+                        break;
+                    case Thing::Hint:
+                        if (!std::holds_alternative<CndHintUserVal>(thing.thingInfo)) {
+                            thing.thingInfo = CndHintUserVal{};
+                        }
                         break;
                     case Thing::Sprite:
                     case Thing::Polyline:
@@ -88,6 +118,19 @@ namespace libim::content::asset {
             case NdyThingParam::Move:
                 if (!ndyParseMapValue(kCndThingMoveNameMap, value, thing.moveType)) {
                     throw SyntaxError("Unknown thing move type", value.location());
+                }
+                switch (thing.moveType)
+                {
+                    case CndThingMoveType::Physics:
+                        if (!std::holds_alternative<CndPhysicsInfo>(thing.moveInfo)) {
+                            thing.moveInfo = CndPhysicsInfo{};
+                        }
+                        break;
+                    case CndThingMoveType::Path:
+                        if (!std::holds_alternative<PathInfo>(thing.moveInfo)) {
+                            thing.moveInfo = PathInfo{};
+                        }
+                        break;
                 }
                 return true;
 
@@ -933,19 +976,23 @@ namespace libim::content::asset {
             }
 
             Token basetkn;
-            if (!rr.getSpaceDelimitedString(basetkn, /*throwIfEmpty=*/true)) {
+            if (!rr.getSpaceDelimitedString(basetkn, /*throwIfEmpty=*/true)) { // Must not be empty
                 throw SyntaxError("Expected base template name"sv, basetkn.location());
             }
+            const bool hasBase = !utils::iequal(basetkn.value(), "none");
 
             CndThing thing{};
             if (auto tit = templates.find(basetkn.value()); tit != templates.end()) {
                 thing = *tit;
             }
-            else if( !basetkn.value().empty() && !utils::iequal(basetkn.value(), "none"))
+            else
             {
-                auto loc = basetkn.location();
-                LOG_WARNING("%:%:%: Based-on template '%' not found, using blank!", loc.filename, loc.firstLine, loc.firstColumn, basetkn.value());
-                basetkn.setValue("");
+                if (hasBase)
+                {
+                    auto loc = basetkn.location();
+                    LOG_WARNING("%:%:%: Based-on template '%' not found, using blank!", loc.filename, loc.firstLine, loc.firstColumn, basetkn.value());
+                }
+                basetkn.setValue(""); // Reset to empty string if template has no base or base not found.
             }
 
             thing.name     = name;

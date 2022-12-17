@@ -12,12 +12,8 @@ namespace libim::content::asset {
         Flags<Sector::Flag> flags;
         LinearColor    ambientLight;
         LinearColor    extraLight;
-        LinearColorRgb tint; // tint rgb color
+        LinearColorRgb tint;  // tint rgb color
         SectorLight avgLight; // point light
-        // Vector3f avgLightPos;       // point light position
-        // LinearColor    avgLightInt; // point light intensity
-        // float avgLightFalloffMin;
-        // float avgLightFalloffMax;
         Box3f    collideBox;
         Box3f    boundBox;
         CndResourceName ambientSound; // The name of sound file

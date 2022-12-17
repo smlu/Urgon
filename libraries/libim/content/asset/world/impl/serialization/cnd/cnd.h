@@ -17,11 +17,12 @@
 #include <libim/content/asset/material/material.h>
 #include <libim/content/asset/world/georesource.h>
 #include <libim/content/asset/world/world.h>
-#include <libim/content/audio/impl/sbtrack.h>
+#include <libim/content/audio/soundbank.h>
 #include <libim/io/stream.h>
 #include <libim/math/color.h>
 #include <libim/math/vector2.h>
 #include <libim/math/vector4.h>
+#include <libim/types/flags.h>
 #include <libim/types/indexmap.h>
 
 namespace libim::content::asset {
@@ -129,14 +130,36 @@ namespace libim::content::asset {
         static CndHeader readHeader(const InputStream& istream);
 
         /**
-        * Parses sounds section.
-        * Offset of istream has to be at the beginning of sound section.
+         * Returns the offset to the sounds section.
+         *
+         * @return std::size_t
+         */
+        static std::size_t getOffset_Sounds();
+
+        /**
+        * Parses sounds section and imports sounds to soundbank.
+        * Offset of the istream has to be at the beginning of sound section.
         *
-        * @param istream     - const reference to the InputStream
-        * @param track       - const reference to the SbTrack
-        * @param nextHandle  - the nonce which is used to generate the next sound handle from.
+        * @param istream     - Const reference to the InputStream
+        * @param bank        - Reference to the SoundBank to import the sounds into.
+        * @param trackIdx    - The index of the track to import the sounds into.
+        *
+        * @throw CndError    - If the sound section contains errors or IO error occurs.
         */
-        static void parseSection_Sounds(const InputStream& istream, audio::impl::SbTrack& track, uint32_t& nextHandle);
+        static void parseSection_Sounds(const InputStream& istream, audio::SoundBank& bank, std::size_t trackIdx);
+
+        /**
+         * Reads sounds section and imports sounds to soundbank.
+         * The istream does not have to be at the beginning of the sound section.
+         *
+         * @param istream     - Const reference to the InputStream
+         * @param bank        - Reference to the SoundBank to import the sounds into.
+         * @param trackIdx    - The index of the track to import the sounds into.
+         *
+         * @throw CndError    - If the sound section contains errors or IO error occurs.
+         */
+        static void readSounds(const InputStream& istream, audio::SoundBank& bank, std::size_t trackIdx);
+        static void writeSection_Sounds(OutputStream& ostream, audio::SoundBank& bank, std::size_t trackIdx);
 
         [[nodiscard]] static std::size_t getOffset_Materials(const InputStream& istream);
         [[nodiscard]] static IndexMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.

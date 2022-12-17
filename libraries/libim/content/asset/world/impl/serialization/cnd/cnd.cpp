@@ -79,6 +79,41 @@ CndHeader CND::readHeader(const InputStream& istream)
     return cndHeader;
 }
 
+std::size_t CND::getOffset_Sounds()
+{
+    return sizeof(CndHeader);
+}
+
+void CND::parseSection_Sounds(const InputStream& istream, audio::SoundBank& bank, std::size_t trackIdx)
+{
+    try {
+        bank.importTrack(trackIdx, istream);
+    }
+    catch(const std::exception& e) {
+        throw CNDError("parseSection_Sounds",
+            "An exception was encountered while importing soundbank: "s + e.what()
+        );
+    }
+}
+
+void CND::readSounds(const InputStream& istream, audio::SoundBank& bank, std::size_t trackIdx)
+{
+    istream.seek(getOffset_Sounds());
+    CND::parseSection_Sounds(istream, bank, trackIdx);
+}
+
+void CND::writeSection_Sounds(OutputStream& ostream, audio::SoundBank& bank, std::size_t trackIdx)
+{
+    try {
+        bank.exportTrack(trackIdx, ostream);
+    }
+    catch(const std::exception& e) {
+        throw CNDError("writeSection_Sounds",
+            "An exception was encountered while exporting soundbank: "s + e.what()
+        );
+    }
+}
+
 std::size_t CND::getOffset_AIClass(const InputStream& istream, const CndHeader& header)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){

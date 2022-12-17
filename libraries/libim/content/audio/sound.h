@@ -7,112 +7,60 @@
 #include <string_view>
 
 namespace libim::content::audio {
+    class SoundBank;
+    class SoundCache;
+
+    enum class SoundHandle : uint32_t {};
 
     class Sound
     {
     public:
-        Sound() = default;
-        Sound(std::weak_ptr<ByteArray> wptrBankData, std::size_t filePathOffset, std::size_t nameOffset, std::size_t dataOffset, std::size_t dataSize);
-        Sound(Sound&&) noexcept = default;
-        Sound& operator =(Sound&&) noexcept = default;
-        Sound(const Sound&) = default;
-        Sound& operator =(const Sound&) = default;
+        Sound(Sound&&) noexcept;
+        Sound& operator =(Sound&&) noexcept;
+        Sound(const Sound&);
+        Sound& operator =(const Sound&);
 
-        std::string_view name() const;
+        std::string_view name() const; // Warning, dangling reference if underlying data is destroyed before this object.
 
-        uint32_t setHandle(uint32_t handle)
-        {
-            return handle_ = handle;
-        }
-
-        uint32_t handle() const
-        {
-            return handle_;
-        }
-
-        void setIdx(uint32_t idx)
-        {
-            idx_ = idx;
-        }
-
-        uint32_t idx() const
-        {
-            return idx_;
-        }
-
-        void setSampleRate(std::size_t rate)
-        {
-            sampleRate_ = rate;
-        }
-
-        std::size_t sampleRate() const
-        {
-            return sampleRate_;
-        }
-
-        void setBitsPerSample(std::size_t bps)
-        {
-            bitsPerSample_ = bps;
-        }
-
-        std::size_t bitsPerSample() const
-        {
-            return bitsPerSample_;
-        }
-
-        void setChannels(std::size_t num)
-        {
-            numChannels_ = num;
-        }
-
-        std::size_t channels() const
-        {
-            return numChannels_;
-        }
-
-        void setCompressed(bool bCompressed)
-        {
-            isCompressed_ = bCompressed;
-        }
-
-        bool isCompressed() const
-        {
-            return isCompressed_;
-        }
-
+        SoundHandle handle() const;
+        uint32_t idx() const;
+        std::size_t sampleRate() const;
+        std::size_t sampleBitSize() const;
+        std::size_t channels() const;
+        std::size_t dataSize() const;
+        bool isCompressed() const;
         bool isValid() const;
 
-    private:
-        std::shared_ptr<ByteArray> lockOrThrow() const;
-        bool isValid(const ByteArray& data) const;
+    protected:
+        Sound();
+        Sound(std::weak_ptr<SoundCache> wptrCacheData, std::size_t pathOffset,
+              std::size_t nameOffset, std::size_t sndDataOffset, std::size_t sndDataSize);
+
+        Sound(SoundHandle handle, uint32_t idx, uint32_t sampleRate, uint32_t sampleBitSize, uint32_t numChannels,
+              std::weak_ptr<SoundCache> wptrCacheData, std::size_t pathOffset, std::size_t nameOffset,
+              std::size_t sndDataOffset, std::size_t sndDataSize, bool isCompressed);
+
+        std::shared_ptr<SoundCache> lockOrThrow() const;
+        bool isValid(const SoundCache& data) const;
         ByteArray data() const;
 
     private:
-        uint32_t handle_  = 0;
-        uint32_t idx_ = 0;
-        std::size_t filePathOffset_;
-        std::size_t nameOffset_;
-        std::size_t dataOffset_;
-        std::size_t dataSize_;
-        std::size_t sampleRate_;
-        std::size_t bitsPerSample_;
-        std::size_t numChannels_;
-        bool isCompressed_;
-
-        std::weak_ptr<ByteArray> wptrData_;
-
-        friend void wavWrite(OutputStream& ostream, const Sound& sound);
+        friend struct SoundInfo;
+        friend struct SoundBank;
+        friend struct SoundBankTrack;
+        friend void wavWrite(OutputStream& ostream,  const Sound& sound);
         friend void wavWrite(OutputStream&& ostream, const Sound& sound);
-        friend void iwvWrite(OutputStream& ostream, const Sound& sound);
-        friend void iwvWrite(OutputStream&& ostream, const Sound& sound);
+        friend void wvWrite(OutputStream& ostream,  const Sound& sound);
+        friend void wvWrite(OutputStream&& ostream, const Sound& sound);
+
+        struct SoundData;
+        std::unique_ptr<SoundData> ptrData_;
     };
 
     void wavWrite(OutputStream& ostream, const Sound& sound);
     void wavWrite(OutputStream&& ostream, const Sound& sound);
 
-    void iwvWrite(OutputStream& ostream, const Sound& sound);
-    void iwvWrite(OutputStream&& ostream, const Sound& sound);
+    void wvWrite(OutputStream& ostream, const Sound& sound);
+    void wvWrite(OutputStream&& ostream, const Sound& sound);
 }
-
-
 #endif // LIBIM_SOUND_H

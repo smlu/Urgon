@@ -14,7 +14,7 @@ namespace libim::content::audio {
     constexpr std::array<char, 4> kWVSM = { 'W', 'V', 'S', 'M' };
     constexpr std::array<char, 6> kIndyWV = { 'I', 'N', 'D', 'Y', 'W', 'V' };
 
-    PACKED(struct IndyWVFileHeader
+    PACKED(struct IndyWVHeader
     {
         std::array<char, 6> tag = kIndyWV;
         int32_t sampleRate     = 0;
@@ -23,7 +23,7 @@ namespace libim::content::audio {
         int32_t dataSize       = 0;
         int32_t unknown        = 0;
     });
-    static_assert(sizeof(IndyWVFileHeader) == 26);
+    static_assert(sizeof(IndyWVHeader) == 26);
 
     struct VWCompressorState
     {

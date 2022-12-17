@@ -1,8 +1,9 @@
-#include "../../../../../material/texture.h"
-#include "../../../../../material/texutils.h"
 #include "../cnd.h"
-#include "../sound/cnd_sound_header.h"
 #include "cnd_mat_header.h"
+
+#include <libim/content/asset/material/texture.h>
+#include <libim/content/asset/material/texutils.h>
+#include <libim/content/audio/impl/serialization/soundbank_serializer.h>
 
 #include <cstring>
 #include <string>
@@ -12,6 +13,7 @@
 
 using namespace libim;
 using namespace libim::content::asset;
+using namespace libim::content::audio;
 using namespace libim::utils;
 using namespace std::string_literals;
 
@@ -22,15 +24,9 @@ std::size_t CND::getOffset_Materials(const InputStream& istream)
         istream.seek(off);
     });
 
-    istream.seek(sizeof(CndHeader));
-    std::size_t numSoundHeaders = istream.read<uint32_t>();
-    std::size_t sizeSoundData   = istream.read<uint32_t>();
-    constexpr std::size_t sizeNextFileIdField = sizeof(uint32_t);
-
-    return istream.tell() +
-           numSoundHeaders * sizeof(CndSoundHeader) +
-           sizeSoundData +
-           sizeNextFileIdField;
+    istream.seek(CND::getOffset_Sounds());
+    skipSerializedSoundBank(istream);
+    return istream.tell();
 }
 
 IndexMap<Material> CND::parseSection_Materials(const InputStream& istream, const CndHeader& header)

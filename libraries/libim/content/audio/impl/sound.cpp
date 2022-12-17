@@ -1,5 +1,6 @@
-#include "indywv.h"
-#include "sound_ser_helper.h"
+#include "serialization/indywv.h"
+#include "serialization/sound_ser_helper.h"
+#include "sound_data.h"
 #include "../sound.h"
 
 #include <libim/io/stream.h>
@@ -9,96 +10,146 @@ using namespace libim;
 using namespace libim::content;
 using namespace libim::content::audio;
 
-Sound::Sound(std::weak_ptr<ByteArray> wptrBankData, std::size_t filePathOffset, std::size_t nameOffset, std::size_t dataOffset, std::size_t dataSize) :
-    filePathOffset_(filePathOffset),
-    nameOffset_(nameOffset),
-    dataOffset_(dataOffset),
-    dataSize_(dataSize),
-    wptrData_(wptrBankData)
-{}
+namespace audio = libim::content::audio;
+
+Sound::Sound()
+{
+    ptrData_ = std::make_unique<Sound::SoundData>();
+}
+
+Sound::Sound(std::weak_ptr<SoundCache> wptrCacheData, std::size_t pathOffset,
+             std::size_t nameOffset, std::size_t sndDataOffset, std::size_t sndDataSize)
+    : Sound()
+{
+
+    ptrData_->wptrData   = std::move(wptrCacheData);
+    ptrData_->pathOffset = pathOffset;
+    ptrData_->nameOffset = nameOffset;
+    ptrData_->dataOffset = sndDataOffset;
+    ptrData_->dataSize   = sndDataSize;
+}
+
+Sound::Sound(SoundHandle handle, uint32_t idx, uint32_t sampleRate, uint32_t sampleBitSize, uint32_t numChannels,
+             std::weak_ptr<SoundCache> wptrCacheData, std::size_t pathOffset, std::size_t nameOffset,
+             std::size_t sndDataOffset, std::size_t sndDataSize, bool isCompressed) : Sound()
+{
+    ptrData_->handle        = handle;
+    ptrData_->idx           = idx;
+    ptrData_->sampleRate    = sampleRate;
+    ptrData_->sampleBitSize = sampleBitSize;
+    ptrData_->numChannels   = numChannels;
+    ptrData_->isCompressed  = isCompressed;
+    ptrData_->wptrData      = std::move(wptrCacheData);
+    ptrData_->pathOffset    = pathOffset;
+    ptrData_->nameOffset    = nameOffset;
+    ptrData_->dataOffset    = sndDataOffset;
+    ptrData_->dataSize      = sndDataSize;
+}
+
+Sound::Sound(Sound&& other) noexcept
+{
+    ptrData_ = std::move(other.ptrData_);
+}
+
+Sound& Sound::operator=(Sound&& rhs) noexcept
+{
+    if (&rhs != this) {
+        ptrData_ = std::move(rhs.ptrData_);
+    }
+
+    return *this;
+}
+
+Sound::Sound(const Sound& rhs)
+{
+    ptrData_ = std::make_unique<Sound::SoundData>(*rhs.ptrData_);
+}
+
+Sound& Sound::operator=(const Sound& rhs)
+{
+    if (&rhs != this) {
+        ptrData_ = std::make_unique<Sound::SoundData>(*rhs.ptrData_);
+    }
+
+    return *this;
+}
+
+SoundHandle Sound::handle() const
+{
+    return ptrData_->handle;
+}
+
+uint32_t Sound::idx() const
+{
+    return ptrData_->idx;
+}
 
 std::string_view Sound::name() const
 {
-    auto ptrData = lockOrThrow();
-    const char* pName = reinterpret_cast<char*>(&ptrData->at(nameOffset_));
-    return std::string_view(pName);
+    return ptrData_->name();
+}
+
+std::size_t Sound::sampleRate() const
+{
+    return ptrData_->sampleRate;
+}
+
+std::size_t Sound::sampleBitSize() const
+{
+    return ptrData_->sampleBitSize;
+}
+
+std::size_t Sound::channels() const
+{
+    return ptrData_->numChannels;
+}
+
+std::size_t Sound::dataSize() const
+{
+    return ptrData_->dataSize;
+}
+
+bool Sound::isCompressed() const
+{
+    return ptrData_->isCompressed;
 }
 
 bool Sound::isValid() const
 {
-    auto ptrData = wptrData_.lock();
-    return ptrData && isValid(*ptrData);
-
+    return ptrData_->isValid();
 }
 
-std::shared_ptr<ByteArray> Sound::lockOrThrow() const
+std::shared_ptr<SoundCache> Sound::lockOrThrow() const
 {
-    auto ptrData = wptrData_.lock();
-    if(!ptrData) {
-        throw std::logic_error("Dead sound object");
-    }
-    return ptrData;
+    return ptrData_->lockOrThrow();
 }
 
-bool Sound::isValid(const ByteArray& data) const
+bool Sound::isValid(const SoundCache& data) const
 {
-    return dataOffset_ + dataSize_  < data.size() &&
-        filePathOffset_ < data.size()             &&
-        filePathOffset_ <= nameOffset_            &&
-        nameOffset_    < data.size()              &&
-        sampleRate_    > 0                        &&
-        bitsPerSample_ > 0                        &&
-        numChannels_   > 0;
+    return ptrData_->isValid(data);
 }
 
 ByteArray Sound::data() const
 {
-    // Returns decompressed sound data.
-
-    ByteArray bytes;
-    auto ptrData = lockOrThrow();
-    if(!isValid(*ptrData)) {
-        return bytes;
-    }
-
-    auto itBegin = ptrData->begin() + dataOffset_; //TODO: safe cast to difference_type
-    auto itEnd = itBegin + dataSize_; //TODO: safe cast to difference_type
-    if(isCompressed_) {
-        bytes = IndyVW::inflate(InputBinaryStream(*ptrData, itBegin, itEnd));
-    }
-    else
-    {
-        bytes.reserve(dataSize_);
-        std::copy(itBegin, itEnd, std::back_inserter(bytes));
-    }
-
-    return bytes;
+    return ptrData_->data();
 }
 
-void libim::content::audio::wavWrite(OutputStream& ostream, const Sound& sound)
+void audio::wavWrite(OutputStream& ostream, const Sound& sound)
 {
-    auto data = sound.data();
-    if(data.empty() && sound.dataSize_ > 0) {
-        throw StreamError("Cannot write invalid sound to stream as WAV");
-    }
-    soundSerializeAsWAV(ostream, sound.channels(), sound.sampleRate(), sound.bitsPerSample(), std::move(data));
+    sound.ptrData_->wavWrite(ostream);
 }
 
-void libim::content::audio::wavWrite(OutputStream&& ostream, const Sound& sound)
+void audio::wavWrite(OutputStream&& ostream, const Sound& sound)
 {
-    wavWrite(ostream, sound);
+    sound.ptrData_->wavWrite(std::move(ostream));
 }
 
-void libim::content::audio::iwvWrite(OutputStream& ostream, const Sound& sound)
+void audio::wvWrite(OutputStream& ostream, const Sound& sound)
 {
-     auto ptrData = sound.lockOrThrow();
-    if(!sound.isValid(*ptrData) || !sound.isCompressed()) { // TODO: implement converting of data to indyWV format
-        throw StreamError("Cannot write invalid sound to stream as IndyWV");
-    }
-    soundSerializeAsIndyWV(ostream, sound.channels(), sound.sampleRate(), sound.bitsPerSample(), ptrData, sound.dataOffset_, sound.dataSize_);
+    sound.ptrData_->wvWrite(ostream);
 }
 
-void libim::content::audio::iwvWrite(OutputStream&& ostream, const Sound& sound)
+void audio::wvWrite(OutputStream&& ostream, const Sound& sound)
 {
-    iwvWrite(ostream, sound);
+    sound.ptrData_->wvWrite(std::move(ostream));
 }

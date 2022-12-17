@@ -19,7 +19,6 @@ namespace libim::content::audio
     constexpr static uint32_t kFmtChunkId  = makeRiffTag("fmt ");
     constexpr static uint32_t kDataChunkId = makeRiffTag("data");
 
-
     enum class AudioFormat : uint16_t
     {
         LPCM = 1
@@ -40,9 +39,11 @@ namespace libim::content::audio
          uint32_t    sampleRate;
          uint32_t    byteRate;
          uint16_t    blockAlign;
-         uint16_t    bitsPerSample;
+         uint16_t    sampleBitSize;
     };
-    static_assert( sizeof(WavFmt) - sizeof(RiffChunkHeader<kFmtChunkId>) == 16 );
+
+    constexpr inline std::size_t kWavFmtSize = 16;
+    static_assert(sizeof(WavFmt) - sizeof(RiffChunkHeader<kFmtChunkId>) == kWavFmtSize);
 
     struct WavHeader : RiffChunkHeader<kRiffChunkId>
     {
@@ -51,14 +52,28 @@ namespace libim::content::audio
     };
     static_assert( sizeof(WavHeader) - 2 * sizeof(RiffChunkHeader<kRiffChunkId>) == 20 );
 
-    struct WavDataChunk : RiffChunkHeader<kDataChunkId>
+    struct WavDataChunkHeader : RiffChunkHeader<kDataChunkId> {};
+
+    struct WavDataChunk : WavDataChunkHeader
     {
         ByteArray data;
     };
 
-    Stream& operator << (Stream& s, const WavDataChunk& chunk)
+    struct WavDataChunkView : WavDataChunkHeader
     {
-        s << static_cast<const RiffChunkHeader<kDataChunkId>&>(chunk);
+        ByteView data;
+    };
+
+    inline Stream& operator << (Stream& s, const WavDataChunkView& chunk)
+    {
+        s << static_cast<const WavDataChunkHeader&>(chunk);
+        s << chunk.data;
+        return s;
+    }
+
+    inline Stream& operator << (Stream& s, const WavDataChunk& chunk)
+    {
+        s << static_cast<const WavDataChunkHeader&>(chunk);
         s << chunk.data;
         return s;
     }

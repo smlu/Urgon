@@ -558,7 +558,7 @@ void writeSounds(const IndexMap<Sound>& sounds, const fs::path& outDir, const Ex
         }
 
         OutputFileStream ofs(outPath.append(s.name()), /*truncate=*/true);
-        iwvWrite(ofs, s);
+        wvWrite(ofs, s);
         outPath = outPath.parent_path();
 
         /* Save in WAV format */

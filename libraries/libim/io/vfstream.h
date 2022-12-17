@@ -110,7 +110,7 @@ namespace libim {
 
         bool contains(const std::filesystem::path& filePath) const noexcept
         {
-            return contains(filePath.u8string());
+            return contains(filePath.string());
         }
 
         /**
@@ -133,7 +133,7 @@ namespace libim {
 
         bool add(const std::filesystem::path& filePath, SharedRef<VirtualFile> vf)
         {
-            return add(filePath.u8string(), std::move(vf));
+            return add(filePath.string(), std::move(vf));
         }
 
         /**
@@ -152,7 +152,7 @@ namespace libim {
 
         std::optional<SharedRef<VirtualFile>> get(const std::filesystem::path& filePath) const
         {
-            return get(filePath.u8string());
+            return get(filePath.string());
         }
 
         void remove(const std::string& filePath)
@@ -162,7 +162,7 @@ namespace libim {
 
         void remove(const std::filesystem::path& filePath)
         {
-            remove(filePath.u8string());
+            remove(filePath.string());
         }
 
         std::size_t size() const

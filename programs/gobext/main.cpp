@@ -93,19 +93,19 @@ int main(int argc, const char *argv[])
         return 1;
     }
 
-    std::string outdir;
-    if(opt.hasArg(OPT_OTPUT_DIR_SHORT)){
+    fs::path outdir;
+    if (opt.hasArg(OPT_OTPUT_DIR_SHORT)) {
         outdir = opt.arg(OPT_OTPUT_DIR_SHORT);
     }
-    else if(opt.hasArg(OPT_OTPUT_DIR)){
+    else if (opt.hasArg(OPT_OTPUT_DIR)) {
         outdir = opt.arg(OPT_OTPUT_DIR);
     }
 
     bool bVerboseOutput = false;
-    if(opt.hasArg(OPT_VERBOSE_SHORT)){
+    if (opt.hasArg(OPT_VERBOSE_SHORT)) {
         bVerboseOutput = true;
     }
-    else if(opt.hasArg(OPT_VERBOSE)){
+    else if (opt.hasArg(OPT_VERBOSE)) {
         bVerboseOutput = true;
     }
 
@@ -113,10 +113,9 @@ int main(int argc, const char *argv[])
     int result = 0;
     try
     {
-
         auto vfs = gobLoad(inputFile);
 
-        outdir += (outdir.empty() ? "" : "/") + inputFile.stem().u8string() + "_GOB";
+        outdir /= inputFile.stem().string() + "_GOB";
         makePath(outdir);
 
         if(!extractGob(vfs, outdir, bVerboseOutput)) {

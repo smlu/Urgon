@@ -780,7 +780,7 @@ int execCmdExtract(const CndToolArgs& args)
         /* Extract animations, materials & sounds */
         for (const auto& cndFile : cndFiles)
         {
-            if (cndFiles.size() > 1) std::cout << "\nExtracting assets from: " << cndFile.filename().u8string() << std::endl;
+            if (cndFiles.size() > 1) std::cout << "\nExtracting assets from: " << cndFile.filename().string() << std::endl;
             auto outDir = getOptOutputDir(args, cndFile.stem());
             makePath(outDir);
             extractAssets(cndFile, outDir, opt);
@@ -1073,7 +1073,7 @@ int execSubCmdConvertToNdy(const CndToolArgs& args)
         /* Extract animations, materials & sounds */
         for (const auto& cndFile : cndFiles)
         {
-            if (cndFiles.size() > 1) std::cout << "\nConverting to NDY: " << cndFile.filename().u8string() << std::endl;
+            if (cndFiles.size() > 1) std::cout << "\nConverting to NDY: " << cndFile.filename().string() << std::endl;
             auto ndyOutDir = getOptOutputDir(args, cndFile.stem());
             makePath(ndyOutDir);
             if (convertToNdy(cndFile, vfs, ndyOutDir, eopt.verboseOutput) && bExtractAssets)
@@ -1113,7 +1113,7 @@ int execSubCmdConvertToObj(const CndToolArgs& args)
             outDir = args.arg(optOutputDir);
         }
         else {
-            outDir = getBaseName(inputFile.u8string());
+            outDir = getBaseName(inputFile.string());
         }
 
         if (!isDirPath(outDir))

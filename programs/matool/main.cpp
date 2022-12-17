@@ -260,7 +260,7 @@ Material imagesToMaterial(const std::vector<fs::path>& imgFiles, std::string mat
         try
         {
             if (!fileExists(file)) {
-                throw std::runtime_error("No such file: '" + file.u8string() + "'");
+                throw std::runtime_error("No such file: '" + file.string() + "'");
             }
 
             Texture tex;
@@ -271,7 +271,7 @@ Material imagesToMaterial(const std::vector<fs::path>& imgFiles, std::string mat
                 tex = pngLoad(InputFileStream(file));
             }
             else {
-                throw std::runtime_error("Invalid image file '" + file.u8string() + "'");
+                throw std::runtime_error("Invalid image file '" + file.string() + "'");
             }
 
             if (mipLevels != 1)
@@ -287,13 +287,13 @@ Material imagesToMaterial(const std::vector<fs::path>& imgFiles, std::string mat
             mat.addCel(std::move(tex));
         }
         catch (const StreamError& e) {
-            throw std::runtime_error("Error loading image file: '" + file.u8string() + "'");
+            throw std::runtime_error("Error loading image file: '" + file.string() + "'");
         }
         catch (const TextureError&) { // catch exception when creating tex or adding cel to material
-            throw std::runtime_error("Corrupted image: '" + file.u8string() + "'");
+            throw std::runtime_error("Corrupted image: '" + file.string() + "'");
         }
         catch (const MaterialError&) { // catch exception when creating tex or adding cel to material
-            throw std::runtime_error("Image '" + file.u8string() + "' has different resolution than the first image");
+            throw std::runtime_error("Image '" + file.string() + "' has different resolution than the first image");
         }
     }
 
@@ -346,7 +346,7 @@ int execCmdCreateBatch(const MatoolArgs& args)
                     const auto& path = entry.path();
                     if (fileExtMatch(path, kExtPng) || fileExtMatch(path, kExtPng))
                     {
-                        std::string name = path.stem().u8string();
+                        std::string name = path.stem().string();
                         if (!hasLodSeqSuf(name))
                         {
                             name = removeSeqSuffix(name);
@@ -375,7 +375,7 @@ int execCmdCreateBatch(const MatoolArgs& args)
                 {
                     const auto& path = entry.path();
                     if (fileExtMatch(path, kExtMat)) {
-                        mapMats[path.filename().u8string()] = path;
+                        mapMats[path.filename().string()] = path;
                     }
                 }
             }
@@ -503,7 +503,7 @@ int execCmdCreate(const MatoolArgs& args)
         std::cout << "Creating MAT file... " << std::flush;
         const auto mipLevels = args.hasArg(optExtractLod) ? args.uintArg(optExtractLod, 0) : 1;
         const auto bSRGBConv = !args.hasArg(optNoSRGB);
-        const auto matName   = imgFiles.begin()->filename().replace_extension(kExtMat).u8string();
+        const auto matName   = imgFiles.begin()->filename().replace_extension(kExtMat).string();
         auto mat = imagesToMaterial(imgFiles, matName, cf, safe_cast<uint32_t>(mipLevels), bSRGBConv);
 
         fs::path outPath = getOptOutput(args);
@@ -670,7 +670,7 @@ int execCmdModify(const MatoolArgs& args)
             optFormat = std::move(cf);
         }
 
-        const auto optMipLevels = args.hasArg(optExtractLod) ? std::optional<uint32_t>(args.uintArg(optExtractLod, 0)) : std::nullopt;
+        const auto optMipLevels = args.hasArg(optExtractLod) ? std::optional<uint32_t>((uint32_t)args.uintArg(optExtractLod, 0)) : std::nullopt;
         const auto bSRGBConv    = !args.hasArg(optNoSRGB);
 
         if (!optMipLevels && !optFormat)

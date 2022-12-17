@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <ios>
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -39,8 +40,10 @@ namespace libim {
     static constexpr std::size_t DOUBLE_BYTE = 8;
     static constexpr std::size_t BYTE_BIT    = CHAR_BIT;
 
-    using byte_t    = uint8_t;
-    using ByteArray = std::vector<byte_t>;
+    using byte_t          = uint8_t;
+    using ByteArray       = std::vector<byte_t>;
+    using ByteView        = std::span<const byte_t>;
+    using MutableByteView = std::span<byte_t>;
 
     template <typename T,
         typename R = std::enable_if_t<std::is_integral<T>::value,
@@ -257,7 +260,7 @@ namespace libim {
 
     inline bool makePath(const std::filesystem::path& path, bool createFile = false)
     {
-        return makePath(path.u8string(), createFile);
+        return makePath(path.string(), createFile);
     }
 
     inline bool removeFile(const std::filesystem::path& file, OptionalRef<std::error_code> ec = std::nullopt)

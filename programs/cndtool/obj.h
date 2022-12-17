@@ -119,7 +119,7 @@ namespace cndtool {
             OutputFileStream objs(objOutPath, /*truncate=*/true);
             TextResourceWriter rw(objs);
             rw.setIndentChar('\t');
-            rw.writeCommentLine("% v% OBJ file: %", kProgramName, kVersion, objOutPath.filename().u8string());
+            rw.writeCommentLine("% v% OBJ file: %", kProgramName, kVersion, objOutPath.filename().string());
             rw.writeCommentLine(kProgramUrl);
             rw.writeEol();
 
@@ -236,7 +236,7 @@ namespace cndtool {
             OutputFileStream mtls(mtlOutPath);
             TextResourceWriter rw(mtls);
             rw.setIndentChar(' ');
-            rw.writeCommentLine("% v% MTL file: %", kProgramName, kVersion, mtlOutPath.filename().u8string());
+            rw.writeCommentLine("% v% MTL file: %", kProgramName, kVersion, mtlOutPath.filename().string());
             rw.writeCommentLine(kProgramUrl);
             rw.writeCommentLine("Material Count: %", usedMats.size() + 1); // +1 = transparent img
             rw.writeEol();

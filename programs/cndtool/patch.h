@@ -17,7 +17,7 @@ using namespace libim::utils;
 namespace cndtool {
     bool patchCndMaterials(const std::filesystem::path& cndFile, const IndexMap<Material>& materials)
     {
-        const std::filesystem::path patchedCndFile = cndFile.u8string() + ".patched";
+        const std::filesystem::path patchedCndFile = cndFile.string() + ".patched";
         try
         {
             InputFileStream ifstream(cndFile);
@@ -70,7 +70,7 @@ namespace cndtool {
 
     bool patchCndAnimations(const std::filesystem::path& cndFile, const IndexMap<Animation>& animations)
     {
-        const std::filesystem::path patchedCndFile = cndFile.u8string() + ".patched";
+        const std::filesystem::path patchedCndFile = cndFile.string() + ".patched";
         try
         {
             InputFileStream ifstream(cndFile);

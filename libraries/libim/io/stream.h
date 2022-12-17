@@ -3,6 +3,8 @@
 #include "../common.h"
 #include "stremerror.h"
 #include <libim/types/sharedref.h>
+#include <libim/utils/traits.h>
+#include <libim/utils/utils.h>
 
 #include <climits>
 #include <cstdint>
@@ -90,7 +92,6 @@ namespace libim {
             return readsome(data, length);
         }
 
-
     //    template<class T>
     //    Stream& write(T&& data)
     //    {
@@ -146,7 +147,7 @@ namespace libim {
         virtual Stream& write(const Stream& istream, std::size_t offsetBegin, std::size_t offsetEnd)
         {
             if(!istream.canRead() || offsetBegin >= istream.size()){
-                throw StreamError("Can't write unreadable stream or trying to read pass the end of input stream");
+                throw StreamError("Can't write the unreadable stream or trying to read pass the end of input stream");
             }
 
             if((offsetBegin + offsetEnd) > istream.size()) {
@@ -221,10 +222,20 @@ namespace libim {
         _write(const T&, tag<T>&&) = delete;
 
         /* POD type specialization */
-        template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && !std::is_pointer_v<T>, int> = 0>
+        template<typename T,
+            std::enable_if_t<
+                std::is_trivially_copyable_v<T> &&
+                !std::is_pointer_v<T> &&
+                !utils::isStdSpan<T>,
+        int> = 0>
         T _read(tag<T>&&) const;
 
-        template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && !std::is_pointer_v<T>, int> = 0>
+        template<typename T,
+            std::enable_if_t<
+                std::is_trivially_copyable_v<T> &&
+                !std::is_pointer_v<T> &&
+                !utils::isStdSpan<T>,
+        int> = 0>
         Stream& _write(const T&, tag<T>&&);
 
         template<typename T, typename = std::enable_if_t<std::is_pointer_v<T>>>
@@ -240,6 +251,17 @@ namespace libim {
             static_assert(std::is_pointer_v<T> == false, "Pointers can't be written to stream");
             return *this;
         }
+
+        /* std::span specialization */
+        template<typename T, std::size_t Extend>
+        std::span<T, Extend> _read(tag<std::span<T, Extend>>&&)
+        {
+            static_assert(isStdSpan<T> == false, "std::span can't be read from stream");
+            return std::span<T, Extend>();
+        }
+
+        template<typename T, std::size_t Extend>
+        Stream& _write(const std::span<T, Extend> span, tag<std::span<T, Extend>>&&);
 
         /* std::unique_ptr specialization */
         template<typename T>
@@ -313,12 +335,16 @@ namespace libim {
     //    return *this;
     //}
 
-
-
     /* Specialization of template member functions */
-    template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && !std::is_pointer_v<T>, int>>
+    template<typename T,
+        std::enable_if_t<
+            std::is_trivially_copyable_v<T> &&
+            !std::is_pointer_v<T> &&
+            !utils::isStdSpan<T>,
+    int>>
     T Stream::_read(tag<T>&&) const
     {
+        //static_assert(utils::isStdSpan<T> == false, "std::span can't be read from stream");
         typename std::decay<T>::type pod{};
         auto nRead = this->readsome(reinterpret_cast<byte_t*>(std::addressof(pod)), sizeof(pod));
         if(nRead != sizeof(pod)) {
@@ -327,7 +353,12 @@ namespace libim {
         return pod;
     }
 
-    template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && !std::is_pointer_v<T>, int>>
+    template<typename T,
+        std::enable_if_t<
+            std::is_trivially_copyable_v<T> &&
+            !std::is_pointer_v<T> &&
+            !utils::isStdSpan<T>,
+    int>>
     Stream& Stream::_write(const T& pod, tag<T>&&)
     {
         auto nWritten = this->writesome(reinterpret_cast<const byte_t*>(std::addressof(pod)), sizeof(pod));
@@ -568,7 +599,20 @@ namespace libim {
         return write<uint8_t>(static_cast<uint8_t>(b));
     }
 
-    // std::uniqe_ptr
+    // std::span
+    template<typename T, std::size_t Extend>
+    Stream& Stream::_write(const std::span<T, Extend> span, tag<std::span<T, Extend>>&&)
+    {
+        const auto nWritten = this->write(span.data(), span.size());
+        if (nWritten != span.size()) {
+            throw StreamError(
+                utils::format("Could only write % of % elements from std::span to stream", nWritten, span.size())
+            );
+        }
+        return *this;
+    }
+
+    // std::unique_ptr
     template<typename T>
     std::unique_ptr<T> Stream::_read(tag<std::unique_ptr<T>>&&) const
     {

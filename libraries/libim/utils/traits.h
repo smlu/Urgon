@@ -4,6 +4,7 @@
 #include <libim/types/typemask.h>
 
 #include <array>
+#include <span>
 #include <type_traits>
 #include <vector>
 
@@ -27,7 +28,6 @@ namespace libim::utils {
                 std::void_t<decltype(std::declval<C>().push_back(typename C::value_type{}))>>
             : std::true_type{};
 
-
         template <class T, class=void>
         struct has_no_pos_insert : std::false_type{};
 
@@ -35,7 +35,6 @@ namespace libim::utils {
         struct has_no_pos_insert<C,
                 std::void_t<decltype(std::declval<C>().insert(typename C::value_type{}))>>
             : std::true_type{};
-
 
         template <class T, class=void>
         struct has_reserve : std::false_type{};
@@ -56,6 +55,12 @@ namespace libim::utils {
 
         template<typename T, std::size_t N>
         struct is_std_array<std::array<T, N>> : std::true_type {};
+
+        template<typename>
+        struct is_std_span : std::false_type {};
+
+        template<typename T, std::size_t Extent>
+        struct is_std_span<std::span<T, Extent>> : std::true_type {};
 
         template<typename>
         struct is_std_vector: std::false_type {};
@@ -141,6 +146,10 @@ namespace libim::utils {
     // Is T of type std::array<T,N>
     template<typename T>
     constexpr bool isStdArray = detail::is_std_array<T>::value;
+
+    // Is T of type std::string
+    template<typename T>
+    constexpr bool isStdSpan = detail::is_std_span<T>::value && !isStdArray<T>;
 
     // Is T of type std::string
     template<typename T>

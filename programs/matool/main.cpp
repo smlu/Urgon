@@ -54,11 +54,6 @@ constexpr static auto optForce8bpc         = "--force-8bpc"sv;
 constexpr static auto optVerbose           = "--verbose"sv;
 constexpr static auto optVerboseShort      = "-v"sv;
 
-
-[[maybe_unused]] constexpr static auto kFailed  = "FAILED"sv;
-constexpr static auto kSuccess = "SUCCESS"sv;
-
-
 const auto kEncodingToColorFormat = std::map<std::string, ColorFormat> {
     { "rgb555"     , RGB555     },
     { "rgb555be"   , RGB555be   },

@@ -18,6 +18,8 @@
 #define CMDUTILS_SETW(n, f)  std::right << std::setfill(f) << std::setw(libim::safe_cast<int>(n))
 
 namespace cmdutils {
+    constexpr inline std::string_view kFailed  = "FAILED";
+    constexpr inline std::string_view kSuccess = "SUCCESS";
 
     inline void printCommandHeader(std::string_view t = "Command", std::size_t s = 43)
     {

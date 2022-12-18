@@ -87,10 +87,6 @@ constexpr static auto optConvertToWav       = "--sound-wav"sv;
 constexpr static auto optConvertToWavShort  = "-w"sv;
 constexpr static auto optOverwriteTemplates = "--template-overwrite"sv;
 
-
-[[maybe_unused]] constexpr static auto kFailed  = "FAILED"sv;
-constexpr static auto kSuccess = "SUCCESS"sv;
-
 struct ExtractOptions final
 {
     bool verboseOutput = false;

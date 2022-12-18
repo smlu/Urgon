@@ -39,7 +39,6 @@ using namespace cndtool;
 using namespace libim;
 using namespace libim::content::audio;
 using namespace libim::content::asset;
-using namespace libim::content::asset::impl;
 using namespace libim::content::text;
 
 using namespace std::string_literals;
@@ -52,6 +51,7 @@ static constexpr auto kTmplFilename = "ijim.tpl"sv;
 static constexpr auto kExtCnd = ".cnd"sv;
 static constexpr auto kExtKey = ".key"sv;
 static constexpr auto kExtMat = ".mat"sv;
+static constexpr auto kExtNdy = ".ndy"sv;
 
 constexpr static auto cmdAdd     = "add"sv;
 constexpr static auto cmdConvert = "convert"sv;
@@ -140,27 +140,27 @@ fs::path getOptOutputDir(const CndToolArgs& args, std::optional<fs::path> optPat
     return optPath.value_or(fs::path());
 }
 
-std::vector<fs::path> getCndFilesFromPath(const fs::path path)
+std::vector<fs::path> getFilesFromPath(const fs::path path, std::string_view ext)
 {
-    std::vector<fs::path> cndFiles;
-    cndFiles.reserve(17);
+    std::vector<fs::path> files;
+    files.reserve(17);
     if (isFilePath(path)) {
-        cndFiles.push_back(path);
+        files.push_back(path);
     }
-    else // Scan folder for CND files
+    else // Scan folder for files
     {
         for (const auto& entry : fs::directory_iterator(path))
         {
             if (entry.is_regular_file())
             {
                 const auto& path = entry.path();
-                if (fileExtMatch(path, kExtCnd)) {
-                    cndFiles.push_back(path);
+                if (fileExtMatch(path, ext)) {
+                    files.push_back(path);
                 }
             }
         }
     }
-    return cndFiles;
+    return files;
 }
 
 void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
@@ -501,7 +501,6 @@ void writeMaterials(const IndexMap<Material>& materials, const fs::path& outDir,
         makePath(pngDir);
     }
 
-
     /* Save extracted materials to persistent storage */
     const bool convert = opt.mat.convertToBmp || opt.mat.convertToPng;
     if (convert && opt.mat.maxTex && *opt.mat.maxTex == 0) {
@@ -769,7 +768,7 @@ int execCmdExtract(const CndToolArgs& args)
             return 1;
         }
 
-        std::vector<fs::path> cndFiles = getCndFilesFromPath(input);
+        std::vector<fs::path> cndFiles = getFilesFromPath(input, kExtCnd);
         if (cndFiles.empty())
         {
             printError("No CND file found!\n");
@@ -821,7 +820,15 @@ int execSubCmdConvertToNdy(const CndToolArgs& args)
     try
     {
         fs::path cndPath = args.cndFile();
-        if (cndPath.empty()) {
+        if (cndPath.empty())
+        {
+            if (!args.ndyFile().empty())
+            {
+                printError("Positional argument is NDY file but CND file is required!\n");
+                return 1;
+            }
+
+            // Get folder path
             cndPath = !args.subcmd().empty() && args.positionalArgs().size() > 0
                 ? args.positionalArgs().at(0)
                 : args.positionalArgs().size() > 1
@@ -832,14 +839,25 @@ int execSubCmdConvertToNdy(const CndToolArgs& args)
         if (cndPath.empty() || !fileExists(cndPath) && !dirExists(cndPath))
         {
             printError("Invalid positional argument for input CND file path or folder path!\n");
-            printHelp(cmdExtract);
+            printHelp(cmdConvert, scmdNdy);
             return 1;
         }
 
-        std::vector<fs::path> cndFiles = getCndFilesFromPath(cndPath);
+        std::vector<fs::path> cndFiles = getFilesFromPath(cndPath, kExtCnd);
         if (cndFiles.empty())
         {
-            printError("No CND file found!\n");
+            if (isFilePath(cndPath)) {
+                printError("Positional argument is not a valid CND file!\n");
+            }
+            else {
+                printError("No CND file(s) found in specified folder!\n");
+            }
+            return 1;
+        }
+
+        if (args.positionalArgs().empty())
+        {
+            printError("Missing positional argument for COG scripts folder!\n");
             return 1;
         }
 
@@ -854,7 +872,7 @@ int execSubCmdConvertToNdy(const CndToolArgs& args)
 
         if (!isDirPath(resourceDir) || !dirExists(resourceDir))
         {
-            printError("COG resource path is not directory!\n");
+            printError("COG scripts path is not directory!\n");
             return 1;
         }
 

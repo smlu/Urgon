@@ -33,34 +33,54 @@ namespace cndtool {
             return cndfile_;
         }
 
+        const std::filesystem::path& ndyFile() const
+        {
+            return ndyfile_;
+        }
+
     private:
         void parseToken(std::size_t tokenPos, std::string_view token)
         {
-            if(libim::fileExtMatch(token, ".cnd"))
-            {
-                if(!cndfile_.empty()) {
-                    throw std::invalid_argument("CND file path already set");
-                }
-                cndfile_ = token;
-            }
-            else if(tokenPos == 1)
+            if(tokenPos == 1)
             {
                 cmd_ = token;
+                return;
             }
             else if (tokenPos == 2 &&
                     !(token.compare(0, 1, "-") == 0 || token.compare(0, 2, "--") == 0))
             {
                 scmd_ = token;
+                return;
             }
-            else {
-                CmdArgs::parseToken(tokenPos, token);
+            else if(positionalArgs().empty()) // try parsing cnd or ndy file paths
+            {
+                if(libim::fileExtMatch(token, ".cnd"))
+                {
+                    if (!cndfile_.empty()) {
+                        throw std::invalid_argument("Multiple CND file paths");
+                    }
+                    cndfile_ = token;
+                    return;
+                }
+                else if(libim::fileExtMatch(token, ".ndy"))
+                {
+                    if (!ndyfile_.empty()) {
+                        throw std::invalid_argument("Multiple NDY file paths");
+                    }
+                    ndyfile_ = token;
+                    return;
+                }
             }
+
+            // No match call default parse func
+            CmdArgs::parseToken(tokenPos, token);
         }
 
     private:
         std::string cmd_;
         std::string scmd_;
         std::filesystem::path cndfile_;
+        std::filesystem::path ndyfile_;
     };
 }
 #endif // CNDTOOL_CNDTOOLARGS_H

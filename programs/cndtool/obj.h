@@ -10,6 +10,7 @@
 #include <libim/utils/utils.h>
 
 #include "config.h"
+#include "resource.h"
 
 #include <array>
 #include <filesystem>
@@ -20,9 +21,6 @@
 #include <stdexcept>
 
 namespace cndtool {
-    constexpr std::string_view kJones3dStatic          = "jones3dstatic.cnd";
-    constexpr int32_t          kStaticIdxMask          = 0x8000;
-
     constexpr std::string_view kMtlFolder              = "mtl";
     constexpr std::string_view kMtlPngFolder           = "mtl/png";
     constexpr std::string_view kImgTransparentFileName = "transparent.png";
@@ -37,20 +35,6 @@ namespace cndtool {
                                                          4 +      // f\t\n<sp>
                                                          // <max_vert>*<vidx/uvidx/vnidx><sp>
                                                          kMaxFaceVerticies * (kVertexIdxMaxDigits + 1 + kUVIdxMaxDigits + 1 + kVertexIdxMaxDigits + 1);
-
-    inline constexpr int32_t as_static_idx(int32_t maskedIdx) {
-        return maskedIdx & ~kStaticIdxMask;
-    }
-
-    // Defines map of [index : material name] that are found in material section of jones3dstatic (cnd/ndy) file.
-    // The index is defined as idx & 0x8000. The hex value 0x8000 is mask which tells the engine to look for an asset in jones3dstatic.
-    // All material indices that are part of jones3dstatic are masked in regular cnd/ndy file.
-    static const auto kStaticMaterials = std::map<int32_t, std::string> {
-        { as_static_idx(32969), "kit_ptch_sde"            }, // 32969-> (80C9 & ~8000) 201: kit_ptch_sde.mat in jones3dstatic
-        { as_static_idx(32970), "kit_ptch_top"            }, // 32970-> (80CA & ~8000) 202: kit_ptch_top.mat in jones3dstatic
-        { as_static_idx(33092), std::string(kImgDefault)  }, // 33092-> (8144 & ~8000) 324: dflt.mat in jones3dstatic
-        { as_static_idx(33105), "vol_wall_logs_weathered" }, // 33105-> (8151 & ~8000) 337: vol_wall_logs_weathered.mat in jones3dstatic
-    };
 
     constexpr std::array<unsigned char, 334> kImgTransparentPng = {
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
@@ -80,7 +64,7 @@ namespace cndtool {
         return libim::Vector3f(v.x(), v.z(), -v.y()); // Right-hand coord sys with y as up axis.
     }
 
-    void convertCndToObj(const std::filesystem::path& inCndPath, const std::filesystem::path& outFolder, bool extractMat)
+    void convertCndToObj(const std::filesystem::path& inCndPath, const StaticResourceNames& staticResources, const std::filesystem::path& outFolder, bool extractMat)
     {
         using namespace libim;
         using namespace libim::content::asset;
@@ -96,16 +80,16 @@ namespace cndtool {
 
         // Load materials from jones3dstatic.cnd
         fs::path scndPath = inCndPath;
-        scndPath.replace_filename(kJones3dStatic);
+        scndPath.replace_filename(kDefaultStaticResourcesFilename);
         IndexMap<Material> smats;
         if (fileExists(scndPath))
         {
-            LOG_DEBUG("Loading materials from %", kJones3dStatic);
+            LOG_DEBUG("Loading materials from %", kDefaultStaticResourcesFilename);
             InputFileStream icnds(scndPath);
             smats = CND::readMaterials(icnds);
         }
         else {
-            LOG_WARNING("File % was not found. Some surfaces might have incomplete texture information.", kJones3dStatic);
+            LOG_WARNING("File % was not found. Some surfaces might have incomplete texture information.", kDefaultStaticResourcesFilename);
         }
 
         IndexMap<const Material*> usedMats;
@@ -163,7 +147,7 @@ namespace cndtool {
                     }
                     else // mat in jones3dstatic
                     {
-                        matIdx = as_static_idx(matIdx);
+                        matIdx = getStaticResourceIdx(matIdx);
                         if (matIdx < smats.size())
                         {
                             // mat is in jones3dStatic.cnd
@@ -174,13 +158,13 @@ namespace cndtool {
                         {
                             // mat is not in jones3dStatic
                             // or jones3dStatic.cnd was not found
-                            auto it = kStaticMaterials.find(matIdx);
-                            if (it != kStaticMaterials.end()) {
-                                name = it->second;
+                            if (matIdx < staticResources.materials.size()) {
+                                // TODO: Try to load mat from specified in staticResources
+                                name = getBaseName(staticResources.materials.key(matIdx));
                             }
                             else
                             {
-                                LOG_WARNING("Unknown suface % material asset from jones3dstatic at index %. Setting surface material as %.", s.id, matIdx, kImgDefault);
+                                LOG_WARNING("Unknown surface % material asset from jones3dstatic at index %. Setting surface material as %.", s.id, matIdx, kImgDefault);
                                 name = kImgDefault;
                             }
                         }

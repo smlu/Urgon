@@ -959,8 +959,12 @@ int execSubCmdConvertToObj(const CndToolArgs& args)
             return 1;
         }
 
+        // Init static resources
+        StaticResourceNames staticResources;
+        staticResources.setDefault();
+
         std::cout << "Converting level geometry to OBJ ... " << std::flush;
-        convertCndToObj(inputFile, outDir, !args.hasArg(optNoMaterials));
+        convertCndToObj(inputFile, staticResources, outDir, !args.hasArg(optNoMaterials));
         std::cout << kSuccess << std::endl;
         return 0;
     }

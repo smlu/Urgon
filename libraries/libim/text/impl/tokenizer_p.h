@@ -146,7 +146,7 @@ namespace libim::text {
 
         inline char readNextChar()
         {
-            while (!istream_.atEnd()) {
+            if (!istream_.atEnd()) {
                 return istream_.read<char>();
             }
             return ChEof;
@@ -160,6 +160,9 @@ namespace libim::text {
 
         void advance()
         {
+            if (current_ch_ == ChEof)
+                return;
+
              column_++;
              if (current_ch_ == ChEol)
              {
@@ -472,8 +475,8 @@ namespace libim::text {
 
         void skipToNextLine()
         {
-            while(current_ch_ != ChEol && !istream_.atEnd()) {
-               advance();
+            while (current_ch_ != ChEol && !istream_.atEnd()) {
+                advance();
             }
         }
 
@@ -483,18 +486,18 @@ namespace libim::text {
                 return false;
             }
 
-            if(current_ch_ == ChEof) {
+            if (current_ch_ == ChEof) {
                 return false;
             }
-            else if(report_eol_ && current_ch_ == ChEol) {
+            else if (report_eol_ && current_ch_ == ChEol) {
                 return false;
             }
-            else if(std::isspace(current_ch_))
+            else if (std::isspace(current_ch_))
             {
                 advance();
                 return true;
             }
-            else if(current_ch_ == ChComment || // Skip comment line
+            else if (current_ch_ == ChComment || // Skip comment line
                    (current_ch_ == ChComment2  && next_ch_ == ChComment2))
             {
                 skipToNextLine();
@@ -506,7 +509,7 @@ namespace libim::text {
 
         inline void skipWhitespace()
         {
-            while(skipWhitespaceStep()) {
+            while (skipWhitespaceStep()) {
                 // Repeatedly call skipWhitespaceStep() until it returns false.
                 // Returning false indicates no more whitespace to skip.
             }

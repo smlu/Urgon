@@ -120,7 +120,7 @@ bool Tokenizer::getString(Token& out, std::size_t len)
 {
     tp_->readString(out, len);
     cachedTkn_ = out;
-    return out.type() == Token::String;
+    return out.type() == Token::String && out.value().size() == len;
 }
 
 std::string_view Tokenizer::getString(std::size_t len)

@@ -25,26 +25,28 @@ namespace libim::content::asset {
         return true;
     }
 
-    void ndyParseLight(CndThing& thing, const Token& val)
+    LinearColor ndyParseLightValue( const Token& val)
     {
-        LinearColor color;
-        try{
-            color = LinearColor(val.value(), /*strict=*/true);
+        try {
+            return LinearColor(val.value(), /*strict=*/true);
         }
         catch (...)
         {
             try
             {
                 auto& loc = val.location();
-                LOG_DEBUG("%:%:%: The light param of thing '%' is not in RGBA format, trying to parse it as RGB.", loc.filename, loc.firstLine, loc.firstColumn, thing.name);
-                color = makeLinearColor(LinearColorRgb(val.value(), /*strict=*/true), 0.0f);
+                return makeLinearColor(LinearColorRgb(val.value(), /*strict=*/true), /*alpha=*/0.0f);
             }
             catch (...) {
-                LOG_WARNING("NDY: Bad light param: %s", val.value());
+                LOG_WARNING("NDY: Bad light value: %s", val.value());
                 throw SyntaxError("Bad thing light param"sv, val.location());
             }
         }
+    }
 
+    void ndyParseLightParam(CndThing& thing, const Token& val)
+    {
+        LinearColor color = ndyParseLightValue(val);
         thing.light.color = color;
         thing.light.emitColor = color;
         thing.flags |= Thing::Flag::EmitsLight;
@@ -163,7 +165,7 @@ namespace libim::content::asset {
             }
 
             case NdyThingParam::Light:
-                ndyParseLight(thing, value);
+                ndyParseLightParam(thing, value);
                 return true;
 
             case NdyThingParam::SoundClass:
@@ -296,7 +298,6 @@ namespace libim::content::asset {
         }
 
         CndActorInfo& actorInfo = std::get<CndActorInfo>(thing.thingInfo);
-
         switch (param)
         {
             case NdyThingParam::TypeFlags:
@@ -417,7 +418,7 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::LightIntensity: // head light
-                actorInfo.lightIntensity = makeLinearColor(LinearColorRgb(value.value(), /*strict=*/true), 0.0f); // Note: alpha aka light range only set for minecar.
+                actorInfo.lightIntensity = ndyParseLightValue(value); // Hack by default NDY allows only RGB but we try to parse it as RGBA, to allow min/max range to be set //makeLinearColor(LinearColorRgb(value.value(), /*strict=*/true), 0.0f);
                 thing.flags |= Thing::Flag::EmitsLight;
                 return true;
 

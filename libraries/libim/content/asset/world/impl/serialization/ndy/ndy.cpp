@@ -1,13 +1,13 @@
 #include "ndy.h"
 #include "../world_ser_common.h"
 #include <libim/content/text/impl/text_resource_literals.h>
+#include <libim/text/impl/schars.h>
 
 using namespace libim;
 using namespace libim::content::asset;
 using namespace libim::content::audio;
 using namespace libim::content::text;
 using namespace libim::utils;
-
 
 static constexpr std::size_t kFileVersion                   = 3;
 static constexpr float       kDefaultHorizonPixels          = 768.f;
@@ -39,11 +39,20 @@ static constexpr auto kPvsSize           = "PVS size:"sv;
 
 bool NDY::parseSection_Copyright(TextResourceReader& rr)
 {
-    const std::size_t nLines    = kWorldFileCopyright.size() / kCopyrightLineWidth;
-    const std::size_t nReadLen  = kWorldFileCopyright.size() + nLines;
-    std::string copyright(rr.getString(nReadLen));
+    constexpr auto stripEol = [](std::string& str){
+        constexpr auto isEol = [](unsigned char c){ return c == ChCr || c == ChEol; };
+        str.erase(std::remove_if(str.begin(), str.end(), isEol), str.end());
+    };
 
-    copyright.erase(std::remove(copyright.begin(), copyright.end(), '\n'), copyright.end());
+    std::string copyright;
+    const std::size_t nSize  = kWorldFileCopyright.size();
+    do
+    {
+        auto nReadLen = nSize - copyright.size();
+        copyright += rr.getString(nReadLen);
+        stripEol(copyright);
+    } while (copyright.size() < nSize);
+
     return copyright == kWorldFileCopyright;
 }
 

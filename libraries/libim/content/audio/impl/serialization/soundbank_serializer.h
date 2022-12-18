@@ -4,6 +4,7 @@
 #include "../sbtrack.h"
 #include "../sound_data.h"
 
+#include <libim/common.h>
 #include <libim/content/audio/soundbank_error.h>
 #include <libim/log/log.h>
 #include <libim/io/stream.h>
@@ -51,7 +52,11 @@ namespace libim::content::audio {
             for (const auto& snd : track.sounds)
             {
                 SoundInfo sndInfo = snd;
-                sndInfo.bankIdx   = safe_cast<decltype(sndInfo.bankIdx)>(trackIdx);
+                if (track.isStatic) {
+                    sndInfo.idx = makeStaticResourceIdx(sndInfo.idx); // required by the engine. dumb, dumb, dumb...
+                }
+
+                sndInfo.bankIdx = safe_cast<decltype(sndInfo.bankIdx)>(trackIdx);
                 sndInfos.push_back(std::move(sndInfo));
             }
 

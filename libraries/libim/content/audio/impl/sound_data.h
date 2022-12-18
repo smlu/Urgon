@@ -41,7 +41,7 @@ namespace libim::content::audio
         bool isValid(const SoundCache& data) const
         {
             return
-                dataOffset + dataSize  <= data.size() &&
+                dataOffset + dataSize  <= data.size()  &&
                 pathOffset    < data.size()            &&
                 pathOffset    <= nameOffset            &&
                 nameOffset    < data.size()            &&
@@ -87,7 +87,7 @@ namespace libim::content::audio
         void wavWrite(OutputStream& ostream) const
         {
             auto data = this->data(); // Note, data is returned as decompressed data.
-            if(data.empty() && dataSize > 0) {
+            if (data.empty() && dataSize > 0) {
                 throw StreamError("Cannot write invalid sound to stream in WAV format");
             }
             audio::wavWrite(ostream, numChannels, sampleRate, sampleBitSize, data);
@@ -100,14 +100,15 @@ namespace libim::content::audio
 
         void wvWrite(OutputStream& ostream) const
         {
-             // TODO: implement converting of data to indyWV format
-            if (!isCompressed) {
-                throw StreamError("Cannot write uncompressed sound to stream in WV format");
+            auto ptrData = lockOrThrow();
+            if (!isValid(*ptrData)) {
+                throw StreamError("Cannot write invalid sound to stream in WV format");
             }
 
-            auto ptrData = lockOrThrow();
-            if(!isValid(*ptrData)) {
-                throw StreamError("Cannot write invalid sound to stream in WV format");
+            if (!isCompressed) { // TODO: implement converting of data to indyWV format
+                throw StreamError(
+                    utils::format("Cannot write uncompressed sound '%' to stream in WV format", name())
+                );
             }
             audio::wvWrite(ostream, numChannels, sampleRate, sampleBitSize, ptrData->getDataView(dataOffset, dataSize));
         }

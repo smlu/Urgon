@@ -17,19 +17,10 @@
 #include <memory>
 
 namespace libim::content::audio {
-    template<typename ExceptionT = SoundBankError, typename... Args>
-    inline const void check(bool pred, const char* message,  Args&&... args)
-    {
-        if(!pred)
-        {
-            using namespace libim::utils;
-            auto msg = format(message, std::forward<Args>(args)...);
-            throw ExceptionT(msg);
-        }
-    };
 
     struct SoundBankTrack
     {
+        bool isStatic = false;
         IndexMap<Sound> sounds;
         std::shared_ptr<SoundCache> data;
 
@@ -39,22 +30,23 @@ namespace libim::content::audio {
 
         Sound& addSound(const SoundInfo& sndInfo)
         {
-            check(sndInfo.pathOffset + SoundCache::kMaxStringLen <= data->size(),
+            using namespace utils;
+            check<SoundBankError>(sndInfo.pathOffset + SoundCache::kMaxStringLen <= data->size(),
                 "Sound path offset out of bounds (offset=%, size=%, data_size=%)",
                  sndInfo.pathOffset, SoundCache::kMaxStringLen, data->size()
             );
-            check(sndInfo.nameOffset + SoundCache::kMaxStringLen <= data->size(),
+            check<SoundBankError>(sndInfo.nameOffset + SoundCache::kMaxStringLen <= data->size(),
                 "Sound name offset out of bounds (offset=%, size=%, data_size=%)",
                  sndInfo.nameOffset, SoundCache::kMaxStringLen, data->size()
             );
-            check(sndInfo.dataOffset + sndInfo.dataSize <= data->size(),
+            check<SoundBankError>(sndInfo.dataOffset + sndInfo.dataSize <= data->size(),
                 "Sound data offset out of bounds (offset=%, size=%, data_size=%)",
                  sndInfo.dataOffset, sndInfo.dataSize, data->size()
             );
 
             Sound snd (
                 sndInfo.hSnd,
-                sndInfo.idx,
+                safe_cast<uint32_t>(sounds.size()), // should be safe to not copy the over sndInfo.idx
                 sndInfo.sampleRate,
                 sndInfo.sampleBitSize,
                 sndInfo.numChannels,

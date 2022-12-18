@@ -44,7 +44,6 @@ namespace libim::content::audio {
             if (offset + size > usedSize_) {
                 throw std::out_of_range("SoundCache::getDataView: Requested data offset is out of range.");
             }
-
             const byte_t* pBegin = data_.data() + offset;
             return ByteView(pBegin, pBegin + size);
         }
@@ -62,7 +61,6 @@ namespace libim::content::audio {
             if (offset + len > usedSize_) {
                 throw std::out_of_range("SoundCache::getString: Requested string offset and size is out of range.");
             }
-
             const char* pBegin = reinterpret_cast<const char*>(data_.data()) + offset;
             return std::string_view(pBegin, len);
         }
@@ -120,7 +118,6 @@ namespace libim::content::audio {
             if (offset + size > usedSize_) {
                 return false;
             }
-
             std::memcpy(data, data_.data() + offset, size);
             return true;
         }

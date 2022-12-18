@@ -95,7 +95,7 @@ bool SoundBank::importTrack(std::size_t trackIdx, InputStream&& istream)
 
 bool SoundBank::exportTrack(std::size_t trackIdx, OutputStream& ostream) const
 {
-    LOG_DEBUG("SoundBank: Exporting sound track % to stream: %", trackIdx, ostream.name());
+    LOG_DEBUG("SoundBank: Exporting track % to stream: %", trackIdx, ostream.name());
     if (trackIdx >= ptrImpl_->tracks.size()) {
         throw SoundBankError("Sound track index out of range!");
     }
@@ -119,4 +119,11 @@ bool SoundBank::exportTrack(std::size_t trackIdx, OutputStream& ostream) const
 bool SoundBank::exportTrack(std::size_t trackIdx, OutputStream&& ostream) const
 {
     return exportTrack(trackIdx, ostream);
+}
+void SoundBank::setStaticTrack(std::size_t trackIdx, bool isStatic)
+{
+    if (trackIdx >= ptrImpl_->tracks.size()) {
+        throw SoundBankError("Sound track index out of range!");
+    }
+    ptrImpl_->tracks.at(trackIdx).isStatic = isStatic;
 }

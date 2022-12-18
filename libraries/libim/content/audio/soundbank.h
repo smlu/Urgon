@@ -96,6 +96,8 @@ namespace libim::content::audio
          */
         bool exportTrack(std::size_t trackIdx, OutputStream&& ostream) const;
 
+        void setStaticTrack(std::size_t trackIdx, bool isStatic);
+
     private:
         struct SoundBankImpl;
         std::unique_ptr<SoundBankImpl> ptrImpl_;

@@ -11,7 +11,7 @@
 #include <string_view>
 #include <variant>
 
-namespace libim::content::asset::impl {
+namespace libim::content::asset {
     [[nodiscard]] inline bool is_op_assign(const libim::text::Token& t)
     {
         using namespace std::string_view_literals;

@@ -3,7 +3,9 @@
 #include "../../cogscript.h"
 #include <libim/text/tokenizer.h>
 
-namespace libim::content::asset::impl {
-    CogScript parseCogScript(text::Tokenizer& tok, bool parseSymDescription);
+namespace libim::content::asset {
+
+    std::string_view cogGetSymbolTypeName(CogSymbol::Type type);
+    CogScript cogParseScript(text::Tokenizer& tok, bool parseSymDescription);
 }
 #endif // LIBIM_PARRSER_H

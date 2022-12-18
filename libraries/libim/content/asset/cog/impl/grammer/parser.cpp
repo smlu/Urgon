@@ -7,6 +7,7 @@
 #include <libim/types/typemask.h>
 #include <libim/utils/utils.h>
 #include <libim/types/flags.h>
+#include <libim/types/string_map.h>
 
 #include <filesystem>
 #include <string_view>
@@ -14,14 +15,13 @@
 
 using namespace libim;
 using namespace libim::content::asset;
-using namespace libim::content::asset::impl;
 using namespace libim::text;
 using namespace libim::utils;
 using namespace std::string_view_literals;
 
 // TODO: Define table to store state of global variables: global0-15
 
-static const std::unordered_map<std::string_view, CogSymbol::Type> kSymbolNameMap {
+static const StringMap<std::string_view, CogSymbol::Type> kSymbolNameMap {
     { "int"sv     , CogSymbol::Int      },
     { "flex"sv    , CogSymbol::Flex     },
     { "float"sv   , CogSymbol::Flex     },
@@ -56,8 +56,7 @@ static const std::unordered_map<CogSymbol::Type, std::string_view> kSymbolTypeMa
     { CogSymbol::Message , "message"sv  }
 };
 
-
-static const std::unordered_map<std::string_view, CogMessageType> kMessageNameMap {
+static const StringMap<std::string_view, CogMessageType> kMessageNameMap {
     { "activate"   , CogMessageType::Activate    },
     { "activated"  , CogMessageType::Activated   },
     { "removed"    , CogMessageType::Removed     },
@@ -74,7 +73,7 @@ static const std::unordered_map<std::string_view, CogMessageType> kMessageNameMa
     { "pulse"      , CogMessageType::Pulse       },
     { "touched"    , CogMessageType::Touched     },
     { "created"    , CogMessageType::Created     },
-    { "loading"    , CogMessageType::Loading     },  // Send After the world is loaded up, when the value of each symbol in cog script is being initialized.
+    { "loading"    , CogMessageType::Loading     },  // Send after the world is loaded up, when the value of each symbol in cog script is being initialized.
     { "selected"   , CogMessageType::Selected    },
     { "deselected" , CogMessageType::Deselected  },
     { "aim"        , CogMessageType::Aim         },
@@ -111,7 +110,10 @@ static const std::unordered_map<std::string_view, CogMessageType> kMessageNameMa
 
 // TODO: Parse cog script using parse context and write all parsing warning & errors there instead of logging and throwing an exception.
 
-
+std::string_view libim::content::asset::cogGetSymbolTypeName(CogSymbol::Type type)
+{
+    return kSymbolTypeMap.at(type);
+}
 
 void parseSectionFlags(Tokenizer& tok, CogScript& script)
 {
@@ -127,7 +129,8 @@ void parseSectionFlags(Tokenizer& tok, CogScript& script)
             if(!is_op_assign(tok.getNextToken()))
             {
                 auto loc = tok.currentToken().location();
-                LOG_ERROR("CogScript %:%:%: Expected assignment operator found '%'", loc.filename, loc.firstLine, loc.firstColumn, tok.currentToken().value());
+                LOG_ERROR("CogScript %:%:%: Expected assignment operator found '%'",
+                    loc.filename, loc.firstLine, loc.firstColumn, tok.currentToken().value());
                 throw SyntaxError("Invalid syntax in cog script", loc);
             }
 
@@ -145,7 +148,8 @@ CogSymbol::Type getSymbolType(Tokenizer& tok)
     if(it == kSymbolNameMap.end())
     {
         auto loc = tok.currentToken().location();
-        LOG_ERROR("CogScript %:%:%: Unknown symbol type '%'", loc.filename, loc.firstLine, loc.firstColumn, tok.currentToken().value());
+        LOG_ERROR("CogScript %:%:%: Unknown symbol type '%'",
+            loc.filename, loc.firstLine, loc.firstColumn, tok.currentToken().value());
         throw SyntaxError("Unknown symbol type", loc);
     }
     return it->second;
@@ -181,7 +185,8 @@ CogSymbolValue parseAssignment(Tokenizer& tok, CogSymbol::Type type)
     if(!is_op_assign(t))
     {
         const auto& loc = t.location();
-        LOG_ERROR("CogScript %:%:%: Expected assignment operator found '%'", loc.filename, loc.firstLine, loc.firstColumn, t.value());
+        LOG_ERROR("CogScript %:%:%: Expected assignment operator found '%'",
+            loc.filename, loc.firstLine, loc.firstColumn, t.value());
         throw SyntaxError("Invalid value syntax in cog script", loc);
     }
 
@@ -199,7 +204,8 @@ CogSymbolValue parseAssignment(Tokenizer& tok, CogSymbol::Type type)
                 if(t.type() == Token::FloatNumber)
                 {
                     auto loc = t.location();
-                    LOG_WARNING("CogScript %:%:%: Expected integer value found float '%', truncating to integer", loc.filename, loc.firstLine, loc.firstColumn, t.value());
+                    LOG_WARNING("CogScript %:%:%: Expected integer value found float '%', truncating to integer",
+                        loc.filename, loc.firstLine, loc.firstColumn, t.value());
                 }
                 return t.getNumber<int32_t>();
             }
@@ -210,7 +216,8 @@ CogSymbolValue parseAssignment(Tokenizer& tok, CogSymbol::Type type)
         else
         {
             auto loc = t.location();
-            LOG_ERROR("CogScript %:%:%: Expected numeric value found '%'", loc.filename, loc.firstLine, loc.firstColumn, t.value());
+            LOG_ERROR("CogScript %:%:%: Expected numeric value found '%'",
+                loc.filename, loc.firstLine, loc.firstColumn, t.value());
             throw SyntaxError("Invalid value syntax in cog script", loc);
         }
     }
@@ -236,7 +243,8 @@ void parseSymbolInitValue(Tokenizer& tok, CogSymbol& sym)
         }
         else
         {
-            LOG_ERROR("CogScript %:%:%: Invalid initialization value '%' for symbol '%' of type '%'", loc.filename, loc.firstLine, loc.firstColumn, tok.currentToken().value(), sym.name, kSymbolTypeMap.at(sym.type));
+            LOG_ERROR("CogScript %:%:%: Invalid initialization value '%' for symbol '%' of type '%'",
+                loc.filename, loc.firstLine, loc.firstColumn, tok.currentToken().value(), sym.name, cogGetSymbolTypeName(sym.type));
             throw SyntaxError("Invalid symbol initialization value", loc);
         }
     }
@@ -256,7 +264,8 @@ void parseSymbolAttribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
         if(!is_op_assign(tok.getNextToken()))
         {
             auto loc = t.location();
-            LOG_ERROR("CogScript %:%:%: Expected assignment operator after attr 'desc' found '%'", loc.filename, loc.firstLine, loc.firstColumn, t.value());
+            LOG_ERROR("CogScript %:%:%: Expected assignment operator after attr 'desc' found '%'",
+                loc.filename, loc.firstLine, loc.firstColumn, t.value());
             throw SyntaxError("Invalid syntax in cog script", loc);
         }
 
@@ -275,14 +284,16 @@ void parseSymbolAttribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
         if(is_primitive_type(sym.type))
         {
             auto loc = t.location();
-            LOG_ERROR("CogScript %:%:%: primitive type can't have attr 'linkId' assigned to.", loc.filename, loc.firstLine, loc.firstColumn);
+            LOG_ERROR("CogScript %:%:%: primitive type can't have attr 'linkId' assigned to.",
+                loc.filename, loc.firstLine, loc.firstColumn);
             throw SyntaxError("Invalid syntax in cog script", loc);
         }
 
         if(!is_op_assign(tok.peekNextToken()))
         {
             auto loc = t.location();
-            LOG_ERROR("CogScript %:%:%: Expected assignment operator after attr 'linkId' found '%'.", loc.filename, loc.firstLine, loc.firstColumn, t.value());
+            LOG_ERROR("CogScript %:%:%: Expected assignment operator after attr 'linkId' found '%'.",
+                loc.filename, loc.firstLine, loc.firstColumn, t.value());
             throw SyntaxError("Invalid syntax in cog script", loc);
         }
 
@@ -290,7 +301,8 @@ void parseSymbolAttribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
         if(!std::holds_alternative<int32_t>(v))
         {
             auto loc = t.location();
-            LOG_ERROR("CogScript %:%:%: Invalid linkId value '%'.", loc.filename, loc.firstLine, loc.firstColumn, t.value());
+            LOG_ERROR("CogScript %:%:%: Invalid linkId value '%'.",
+                loc.filename, loc.firstLine, loc.firstColumn, t.value());
             throw SyntaxError("Invalid attr value", loc);
         }
 
@@ -307,7 +319,8 @@ void parseSymbolAttribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
                 if(!std::holds_alternative<int32_t>(v))
                 {
                     auto loc = t.location();
-                    LOG_ERROR("CogScript %:%:%: Invalid mask value '%'", loc.filename, loc.firstLine, loc.firstColumn, t.value());
+                    LOG_ERROR("CogScript %:%:%: Invalid mask value '%'",
+                        loc.filename, loc.firstLine, loc.firstColumn, t.value());
                     throw SyntaxError("Invalid attr value", loc);
                 }
 
@@ -316,13 +329,15 @@ void parseSymbolAttribute(Tokenizer& tok, CogSymbol& sym, bool parse_desc)
             else
             {
                 auto loc = t.location();
-                LOG_WARNING("CogScript %:%:%: Expected assignment operator after attr 'mask' found '%'. Attribute ignored.", loc.filename, loc.firstLine, loc.firstColumn, tok.peekNextToken().value());
+                LOG_WARNING("CogScript %:%:%: Expected assignment operator after attr 'mask' found '%'. Attribute ignored.",
+                    loc.filename, loc.firstLine, loc.firstColumn, tok.peekNextToken().value());
             }
         }
         else
         {
             auto loc = t.location();
-            LOG_WARNING("CogScript %:%:%: Invalid attribute 'mask' for primitive symbol '%'. Attribute ignored.", loc.filename, loc.firstLine, loc.firstColumn, sym.name);
+            LOG_WARNING("CogScript %:%:%: Invalid attribute 'mask' for primitive symbol '%'. Attribute ignored.",
+                loc.filename, loc.firstLine, loc.firstColumn, sym.name);
             skipAssignment(tok, Token::HexInteger);
         }
     }
@@ -431,7 +446,8 @@ void parseSymbol(Tokenizer& tok, CogScript& script, bool parse_desc)
             throw SyntaxError("Cog script syntax error, too many duplicated symbol names", loc);
         }
 
-        LOG_WARNING("CogScript %:%:%: Found duplicated symbol '%', inserting into symbol map as '%'", loc.filename, loc.firstLine, loc.firstColumn, sym.name, sname);
+        LOG_WARNING("CogScript %:%:%: Found duplicated symbol '%', inserting into symbol map as '%'",
+            loc.filename, loc.firstLine, loc.firstColumn, sym.name, sname);
         script.symbols.pushBack(sname, std::move(sym));
     }
 }
@@ -446,7 +462,8 @@ void parseSectionSymbols(Tokenizer& tok, CogScript& script, bool parse_descripti
     if(!iequal(t.value(), "symbols"sv))
     {
         auto loc = t.location();
-        LOG_ERROR("CogScript %:%:%: Expected section 'symbols' found '%'", loc.filename, loc.firstLine, loc.firstColumn, t.value());
+        LOG_ERROR("CogScript %:%:%: Expected section 'symbols' found '%'",
+            loc.filename, loc.firstLine, loc.firstColumn, t.value());
         throw SyntaxError("Invalid cog script section", loc);
     }
 
@@ -460,7 +477,8 @@ void parseSectionSymbols(Tokenizer& tok, CogScript& script, bool parse_descripti
         else if(t.type() == Token::EndOfFile)
         {
             auto loc = tok.currentToken().location();
-            LOG_ERROR("CogScript %:%:%: Unexpected end of file in symbols section", loc.filename, loc.firstLine, loc.firstColumn);
+            LOG_ERROR("CogScript %:%:%: Unexpected end of file in symbols section",
+                loc.filename, loc.firstLine, loc.firstColumn);
             throw SyntaxError("Unexpected end of file in cog script", loc);
         }
         else if(t.type() == Token::Identifier)
@@ -472,7 +490,8 @@ void parseSectionSymbols(Tokenizer& tok, CogScript& script, bool parse_descripti
         else
         {
             auto loc = tok.currentToken().location();
-            LOG_ERROR("CogScript %:%:%: Expected a symbol type found '%'", loc.filename, loc.firstLine, loc.firstColumn, tok.currentToken().value());
+            LOG_ERROR("CogScript %:%:%: Expected a symbol type found '%'",
+                loc.filename, loc.firstLine, loc.firstColumn, tok.currentToken().value());
             throw SyntaxError("Invalid symbol type", loc);
         }
     }
@@ -480,7 +499,7 @@ void parseSectionSymbols(Tokenizer& tok, CogScript& script, bool parse_descripti
     tok.getNextToken();
 }
 
-CogScript libim::content::asset::impl::parseCogScript(Tokenizer& tok, bool parseSymDescription)
+CogScript libim::content::asset::cogParseScript(Tokenizer& tok, bool parseSymDescription)
 {
     CogScript script;
     script.setName(tok.istream().name());

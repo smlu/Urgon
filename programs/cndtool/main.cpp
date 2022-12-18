@@ -86,6 +86,7 @@ constexpr static auto optVerbose            = "--verbose"sv;
 constexpr static auto optVerboseShort       = "-v"sv;
 constexpr static auto optConvertToWav       = "--sound-wav"sv;
 constexpr static auto optConvertToWavShort  = "-w"sv;
+constexpr static auto optExportSoundbank    = "--soundbank"sv;
 constexpr static auto optOverwriteTemplates = "--template-overwrite"sv;
 
 struct ExtractOptions final
@@ -97,7 +98,7 @@ struct ExtractOptions final
 
     struct
     {
-        bool extract = false;
+        bool extract      = false;
         bool convertToBmp = false;
         bool convertToPng = false;
         std::optional<uint64_t> maxTex;
@@ -106,8 +107,9 @@ struct ExtractOptions final
 
     struct
     {
-        bool extract = false;
-        bool convertToWav = false;
+        bool extract         = false;
+        bool convertToWav    = false;
+        bool exportSoundbank = false;
     } sound;
 
     struct
@@ -231,13 +233,19 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
         printOption( optMaxTex             , ""                   , "Max number of images to convert from each material file."              );
         printOption( ""                    , ""                   , "By default all are converted."                                         );
         printOption( optExtractLod         , ""                   , "Extract also MipMap LOD images when converting material file.\n"       );
-        printOption( optConvertToWav       , optConvertToWavShort , "Convert extracted IndyWV sound assets to WAV format.\n"                );
+
+        printOption( optConvertToWav       , optConvertToWavShort , "Convert extracted IndyWV sound assets to WAV format."                  );
+        printOption( optExportSoundbank    , ""                   , "Export sounbank track to file.\n"                                      );
+
+
         printOption( optOverwriteTemplates , ""                   , "Overwrite any existing Thing templates."                               );
         printOption( ""                    , ""                   , "By default only new templates are written if ijim.tpl file exists.\n"  );
+
         printOption( optNoAnimations       , ""                   , "Don't extract animation assets."                                       );
         printOption( optNoMaterials        , ""                   , "Don't extract material assets."                                        );
         printOption( optNoSounds           , ""                   , "Don't extract sound assets."                                           );
         printOption( optNoTemplates        , ""                   , "Don't extract Thing templates.\n"                                      );
+
         printOption( optOutputDir          , optOutputDirShort    , "Output folder."                                                        );
         printOption( optVerbose            , optVerboseShort      , "Verbose printout to the console."                                      );
     }
@@ -656,10 +664,23 @@ std::size_t extractSounds(const InputStream& istream, const fs::path& outDir, co
 
     if (!opt.verboseOutput) printProgress("Extracting sounds... ", 0, 1);
 
-    SoundBank sb(2);
-    sb.importTrack(0, istream);
-    auto& sounds = sb.getTrack(0);
+    // Parse sounds
+    const auto header = CND::readHeader(istream);
+    const std::size_t sbtIdx = (header.state & CndWorldState::Static)
+        ? kSoundbankStaticTrackIdx
+        : kSoundbankNormalTrackIdx;
 
+    SoundBank sb(sbtIdx + 1);
+    CND::readSounds(istream, sb, sbtIdx); // Import to correct track idx so the original soundbank num is preserved
+
+    if (opt.sound.exportSoundbank)
+    {
+        auto bankPath = outDir / (getBaseName(istream.name()) + "_soundbank.bin");
+        LOG_DEBUG("Exporting soundbank track % to file: %", sbtIdx, bankPath);
+        sb.exportTrack(sbtIdx, OutputFileStream(bankPath, /*truncate=*/true));
+    }
+
+    auto& sounds = sb.getTrack(sbtIdx);
     if (!sounds.isEmpty())
     {
         if (opt.verboseOutput) {
@@ -682,7 +703,7 @@ std::size_t extractTemplates(const InputStream& istream, const fs::path& outDir,
     std::size_t numWritten = 0;
     if (!templates.isEmpty())
     {
-        if (!opt.verboseOutput) std::cout << "Extracting templates... ";
+        if (!opt.verboseOutput) std::cout << "\rExtracting templates... " << std::flush;
         numWritten = writeTemplates(templates, outDir, opt);
         if (!opt.verboseOutput) std::cout << "\rExtracting templates... " << kSuccess << std::endl;
     }
@@ -764,8 +785,9 @@ int execCmdExtract(const CndToolArgs& args)
         opt.mat.convertToPng   = args.hasArg(optConvertToPngShort) || args.hasArg(optConvertToPng);
         opt.mat.convertMipMap  = args.hasArg(optExtractLod);
 
-        opt.sound.extract      = !args.hasArg(optNoSounds);
-        opt.sound.convertToWav = args.hasArg(optConvertToWavShort) || args.hasArg(optConvertToWav);
+        opt.sound.extract         = !args.hasArg(optNoSounds);
+        opt.sound.convertToWav    = args.hasArg(optConvertToWavShort) || args.hasArg(optConvertToWav);
+        opt.sound.exportSoundbank = args.hasArg(optExportSoundbank);
 
         opt.templates.extract   = !args.hasArg(optNoTemplates);
         opt.templates.overwrite = args.hasArg(optOverwriteTemplates);

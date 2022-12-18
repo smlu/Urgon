@@ -13,12 +13,14 @@
 #include <libim/utils/utils.h>
 
 namespace cndtool {
+    constexpr inline std::size_t kSoundbankStaticTrackIdx = 0;
+    constexpr inline std::size_t kSoundbankNormalTrackIdx = 1;
+
     [[nodiscard]] libim::IndexMap<libim::SharedRef<libim::content::asset::CogScript>> loadCogScripts(const libim::VirtualFileSystem& vfs, const std::vector<std::string>& scripts, bool bFixCogScripts)
     {
         using namespace libim;
         using namespace libim::content::asset;
         namespace fs = std::filesystem;
-
 
         IndexMap<SharedRef<CogScript>> stable;
         stable.reserve(scripts.size());

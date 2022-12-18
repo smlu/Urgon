@@ -450,11 +450,12 @@ void CND::writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<C
 
             for(const CogSymbol& s : c->script->symbols)
             {
-                if(s.isLocal ||
-                !s.vtable.contains(c->vtid)) {
+                if (s.isLocal
+                || s.type == CogSymbol::Message) {
                     continue;
                 }
 
+                const CogSymbolValue& svalue = s.valueOrDefault(c->vtid);
                 cogvalue_visitor([&](auto&& s) {
                     using ST = decltype(s);
                     if constexpr(std::is_same_v<std::string_view, std::decay_t<ST>>) {
@@ -463,7 +464,7 @@ void CND::writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<C
                     else {
                         cogvals.push_back(std::forward<ST>(s));
                     }
-                }, s.vtable.at(c->vtid));
+                }, svalue);
             }
         }
 

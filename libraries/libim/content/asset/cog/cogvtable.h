@@ -63,6 +63,18 @@ namespace libim::content::asset {
         {
             return count(to_key(id)) > 0;
         }
+
+    private:
+        friend class CogSymbol;
+        base_::iterator find(Id vtid)
+        {
+            return base_::find(to_key(vtid));
+        }
+
+        base_::const_iterator find(Id vtid) const
+        {
+            return base_::find(to_key(vtid));
+        }
     };
 }
 #endif // LIBIM_COGVTABLE_H

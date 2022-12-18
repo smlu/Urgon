@@ -19,6 +19,8 @@ std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextR
             rr.setReportEol(reol);
         });
 
+        rr.setReportEol(true); // Require EOL after each row. This will make sure any unset symbols are initialized with default values
+
         /* Get script */
         auto scriptName = rr.getSpaceDelimitedString();
         auto sit = scripts.find(scriptName);
@@ -48,8 +50,8 @@ std::pair<std::size_t, std::vector<SharedRef<Cog>>> NDY::parseSection_Cogs(TextR
                 if(!s.hasDefaultValue())
                 {
                     const auto& loc = rr.currentToken().location();
-                    LOG_WARNING("NDY::ParseSection_Cogs(): Reached end of line while parsing file:'%', script:'%', symbol:'%' [LOC %:%]",
-                        loc.filename, scriptName, s.name, loc.lastLine, loc.firstColumn);
+                    LOG_WARNING("%:%:%: Reached end of line while trying to parse value for symbol:'%' of a script:'%'",
+                        loc.filename, loc.lastLine, loc.firstColumn, s.name, scriptName);
                 }
 
                break;
@@ -73,11 +75,12 @@ void NDY::writeSection_Cogs(TextResourceWriter& rw, std::size_t maxCogs, const s
         cogvals.reserve(c->name().size() + c->script->symbols.size() * 64);
         for(const auto& s : c->script->symbols)
         {
-            if(s.isLocal ||
-               !s.vtable.contains(c->vtid)) {
+            if (s.isLocal
+            || s.type == CogSymbol::Message) {
                 continue;
             }
 
+            const CogSymbolValue& svalue = s.valueOrDefault(c->vtid);
             cogvalue_visitor([&](const std::string_view s) {
                 if(s.empty()) return;
 
@@ -85,7 +88,7 @@ void NDY::writeSection_Cogs(TextResourceWriter& rw, std::size_t maxCogs, const s
                 std::string sval(s.size() + 1, delim);
                 std::copy(s.begin(), s.end(), sval.begin() + 1);
                 cogvals += std::move(sval);
-            }, s.vtable.at(c->vtid));
+            }, svalue);
         }
 
         scogs.push_back(c->name() + cogvals);

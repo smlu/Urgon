@@ -7,6 +7,7 @@
 #include "cogvtable.h"
 #include "../thing/thing.h"
 #include <libim/types/typemask.h>
+#include <libim/utils/utils.h>
 
 namespace libim::content::asset {
 
@@ -58,6 +59,27 @@ namespace libim::content::asset {
         bool hasDefaultValue() const
         {
             return vtable.hasDefault();
+        }
+
+        CogSymbolValue& valueOrDefault(CogVTable::Id vtid)
+        {
+            const auto& val = const_cast<const CogSymbol*>(this)->valueOrDefault(vtid);
+            return const_cast<CogSymbolValue&>(val);
+        }
+
+        const CogSymbolValue& valueOrDefault(CogVTable::Id vtid) const
+        {
+            if (auto it = vtable.find(vtid); it != vtable.end()) {
+                return it->second;
+            }
+            else if (hasDefaultValue()) {
+                return defaultValue();
+            }
+            else {
+                throw std::runtime_error(
+                    utils::format("No value assigned to the COG symbol '%' at vtid: %", name, utils::to_underlying(vtid))
+                );
+            }
         }
     };
 }

@@ -10,6 +10,8 @@
 #include "stream.h"
 #include "vfstream.h"
 
+#include <libim/utils/utils.h>
+
 namespace libim {
 
     struct VfsError : public std::runtime_error {
@@ -70,7 +72,7 @@ namespace libim {
         {
             auto optfs = findFile(filePath);
             if (!optfs) {
-                throw VfsError("File doesn't exist");
+                throw VfsError(utils::format("File not found: %", filePath));
             }
             return optfs.value();
         }

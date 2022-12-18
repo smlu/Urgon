@@ -134,7 +134,7 @@ void Tokenizer::assertIdentifier(std::string_view id)
     getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::Identifier || !utils::iequal(cachedTkn_.value(), id))
     {
-        LOG_DEBUG("assertIdentifier: Expected '%', found '%' as type: %", id, cachedTkn_.value(), cachedTkn_.stringType());
+        LOG_VERBOSE("assertIdentifier: Expected '%', found '%' as type: %", id, cachedTkn_.value(), cachedTkn_.stringType());
         throw SyntaxError("Expected identifier"sv, cachedTkn_.location());
     }
 }
@@ -144,7 +144,7 @@ void Tokenizer::assertPunctuator(std::string_view punc)
     getNextToken(cachedTkn_);
     if(cachedTkn_.type() != Token::Punctuator || cachedTkn_.value() != punc)
     {
-        LOG_DEBUG("assertPunctuator: Expected '%', found '%' as type: %", punc, cachedTkn_.value(), cachedTkn_.stringType());
+        LOG_VERBOSE("assertPunctuator: Expected '%', found '%' as type: %", punc, cachedTkn_.value(), cachedTkn_.stringType());
         throw SyntaxError("Expected punctuator"sv, cachedTkn_.location());
     }
 }

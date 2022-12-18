@@ -24,6 +24,12 @@ namespace cndtool {
         using namespace libim::content::asset;
         using namespace libim::content::audio;
 
+    /**
+     * Loads CND file from path and converts it to NDY file format
+     */
+    bool convertCndToNdy(const fs::path& cndPath, const VirtualFileSystem& vfs, const fs::path& outDir, bool verbose)
+    {
+        using namespace cmdutils;
         fs::path ndyPath;
         try
         {
@@ -185,7 +191,8 @@ namespace cndtool {
         catch (const std::exception& e)
         {
             std::cerr << std::endl;
-            printError("%", e.what());
+            printError(e.what());
+            deleteFile(ndyPath);
             return false;
         }
     }

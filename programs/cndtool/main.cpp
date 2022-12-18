@@ -913,7 +913,7 @@ int execSubCmdConvertToNdy(const CndToolArgs& args)
             if (cndFiles.size() > 1) std::cout << "\nConverting to NDY: " << cndFile.filename().string() << std::endl;
             auto ndyOutDir = getOptOutputDir(args, cndFile.stem());
             makePath(ndyOutDir);
-            if (convertToNdy(cndFile, vfs, ndyOutDir, eopt.verboseOutput) && bExtractAssets)
+            if (convertCndToNdy(cndFile, vfs, ndyOutDir, eopt.verboseOutput) && bExtractAssets)
             {
                 LOG_DEBUG("Extracting assets key:% mat:% sound:%", eopt.key.extract, eopt.mat.extract, eopt.sound.extract);
                 extractAssets(cndFile, ndyOutDir, eopt);

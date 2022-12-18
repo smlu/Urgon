@@ -131,6 +131,10 @@ namespace libim {
 
         virtual Stream& write(const ByteArray& data)
         {
+            if (data.empty()) {
+                return *this;
+            }
+
             auto nWritten = write(&data[0], data.size());
             if(nWritten != data.size()) {
                 throw StreamError("Failed to write data to stream");
@@ -167,6 +171,9 @@ namespace libim {
 
         virtual std::size_t write(const byte_t* data, const std::size_t length)
         {
+            if (length == 0) {
+                return 0;
+            }
             return writesome(data, length);
         }
 

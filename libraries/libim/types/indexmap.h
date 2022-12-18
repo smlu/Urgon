@@ -114,6 +114,23 @@ namespace libim {
             return *this;
         }
 
+        IndexMap(std::initializer_list<std::pair<key_type, value_type>> ilist)
+        {
+            for (auto&& [key, value] : ilist) {
+                pushBack(std::move(key), std::move(value));
+            }
+            return *this;
+        }
+
+        IndexMap& operator = (std::initializer_list<std::pair<key_type, value_type>> ilist)
+        {
+            clear();
+            for (auto&& [key, value] : ilist) {
+                pushBack(std::move(key), std::move(value));
+            }
+            return *this;
+        }
+
         iterator begin() noexcept
         {
             return iterator(std::begin(data_));
@@ -173,36 +190,97 @@ namespace libim {
             return const_iterator(std::crend(data_));
         }
 
-        reference at(key_const_reference key)
+        /**
+         * Returns the pair of key and associated value at specified index.
+         *
+         * @param idx - The index of the element.
+         * @return std::pair of key and associated value.
+         * @throw std::out_of_range if the index is out of range.
+         */
+        const ContainerElement& at(Idx idx) const
+        {
+            return *index_.at(idx);
+        }
+
+        /**
+         * Returns a reference to the value at specified key.
+         *
+         * @param key - The key of the element.
+         * @return A reference to the value.
+         * @throw std::out_of_range if the key is not found.
+         */
+        reference value(key_const_reference key)
         {
             return map_.at(key)->second;
         }
 
-        const_reference at(key_const_reference key) const
+        /**
+         * Returns a const reference to the value at specified key.
+         *
+         * @param key - The key of the element.
+         * @return A const reference to the value.
+         * @throw std::out_of_range if the key is not found.
+         */
+        const_reference value(key_const_reference key) const
         {
             return map_.at(key)->second;
         }
 
-        reference at(Idx idx)
+        /**
+         * Returns a reference to the value at specified index.
+         *
+         * @param idx - The index of the element.
+         * @return A reference to the value.
+         * @throw std::out_of_range if the index is out of range.
+         */
+        reference value(Idx idx)
         {
             return index_.at(idx)->second;
         }
 
-        const_reference at(Idx idx) const
+        /**
+         * Returns a const reference to the value at specified index.
+         *
+         * @param idx - The index of the element.
+         * @return A const reference to the value.
+         * @throw std::out_of_range if the index is out of range.
+         */
+        const_reference value(Idx idx) const
         {
             return index_.at(idx)->second;
         }
 
+        /**
+         * Returns a reference to the value at specified index.
+         *
+         * @param idx - The index of the element.
+         * @return A reference to the value.
+         * @throw std::out_of_range if the index is out of range.
+         */
         reference operator[](Idx idx)
         {
             return index_.at(idx)->second;
         }
 
+        /**
+         * Returns a const reference to the value at specified index.
+         *
+         * @param idx - The index of the element.
+         * @return A const reference to the value.
+         * @throw std::out_of_range if the index is out of range.
+         */
         const_reference operator[](Idx idx) const
         {
             return index_.at(idx)->second;
         }
 
+        /**
+         * Returns a reference to the value that is mapped to a key.
+         * If the key is not mapped, a new element is created.
+         *
+         * @param key - The const reference key to mapped element.
+         * @return A reference to the mapped element.
+         */
         reference operator[](key_const_reference key)
         {
             auto it = map_.find(key);
@@ -212,6 +290,13 @@ namespace libim {
             return it->second->second;
         }
 
+        /**
+         * Returns a reference to the value that is mapped to a key.
+         * If the key is not mapped, a new element is created.
+         *
+         * @param key - The r-value key to mapped element.
+         * @return A reference to the mapped element.
+         */
         template<typename = std::enable_if_t<!isStringKey>>
         reference operator[](key_rvalue_reference key)
         {
@@ -222,6 +307,13 @@ namespace libim {
             return it->second->second;
         }
 
+        /**
+         * Returns a const reference to the value that is mapped to a key.
+         *
+         * @param key - The key to mapped element.
+         * @return A const reference to the mapped element.
+         * @throw std::out_of_range if the key is not mapped.
+         */
         const_reference operator[](key_const_reference key) const
         {
             auto it = map_.find(key);
@@ -231,6 +323,12 @@ namespace libim {
             return it->second;
         }
 
+        /**
+         * Returns iterator to the element at specified key or end() iterator if not found.
+         *
+         * @param key - The key to mapped element.
+         * @return Iterator to the element of found key or end() iterator if not found.
+         */
         iterator find(key_const_reference key)
         {
             auto it = map_.find(key);
@@ -240,6 +338,12 @@ namespace libim {
             return it->second;
         }
 
+        /**
+         * Returns const iterator to the element at specified key or end() iterator if not found.
+         *
+         * @param key - The key to mapped element.
+         * @return Const iterator to the element of found key or end() iterator if not found.
+         */
         const_iterator find(key_const_reference key) const
         {
             auto it = map_.find(key);
@@ -269,24 +373,83 @@ namespace libim {
             return data_.back().data;
         }
 
+        /**
+         * Returns the const reference to the key at the given index.
+         * @param idx The index of the element.
+         * @return The const reference key at the given index.
+         *
+         * @throw std::out_of_range if the index is out of range.
+         */
+        template<typename = std::enable_if_t<!isStringKey>>
+        const key_type& key(Idx idx) const
+        {
+            return index_.at(idx)->first;
+        }
+
+        template<typename = std::enable_if_t<isStringKey>>
+        key_type key(Idx idx) const
+        {
+            return index_.at(idx)->first;
+        }
+
+        /**
+         * Constructs value at place in the container and inserts it at the specified position mapped by key.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param pos   - The position iterator to insert the element. If pos is invalid, the element is inserted at the end.
+         * @param key   - The key to mapped element.
+         * @param args  - The arguments to construct the value.
+         * @return std::pair<reference, bool>
+         */
         template< class... Args >
         std::pair<reference, bool> emplace(const_iterator pos, key_type key, Args&&... args)
         {
             return insert(pos, std::move(key), T{ std::forward<Args>(args)... });
         }
 
+        /**
+         * Inserts a new element at the specified position.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param pos   - The position iterator to insert the element. If pos is invalid, the element is inserted at the end.
+         * @param key   - The key to mapped element.
+         * @param value - The value to insert.
+         * @return std::pair<iterator, bool>
+         */
         std::pair<iterator, bool> insert(const_iterator pos, key_type key, const T& value)
         {
             auto iidx = getItrIdx(pos);
             return insert(iidx, std::move(key), value);
         }
 
+        /**
+         * Inserts a new element at the specified position.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param pos   - The position iterator to insert the element. If pos is invalid, the element is inserted at the end.
+         * @param key   - The key to mapped element.
+         * @param value - The R-value reference to value to insert.
+         * @return std::pair<iterator, bool>
+         */
         std::pair<iterator, bool> insert(const_iterator pos, key_type key, T&& value)
         {
             auto iidx = getItrIdx(pos);
             return insert(iidx, std::move(key), std::move(value));
         }
 
+        /**
+         * Inserts a new element at the specified position.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param pos   - The position to insert the element. If pos is invalid, the element is inserted at the end.
+         * @param key   - The key to mapped element.
+         * @param value - The value to insert.
+         * @return std::pair<iterator, bool>
+         */
         std::pair<iterator, bool> insert(Idx pos, key_type key, const T& value)
         {
             auto mapIt = map_.find(key);
@@ -314,6 +477,16 @@ namespace libim {
             return { it, true };
         }
 
+        /**
+         * Inserts a new element at the specified position.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param pos   - The position to insert the element. If pos is invalid, the element is inserted at the end.
+         * @param key   - The key to mapped element.
+         * @param value - The R-value reference to value to insert.
+         * @return std::pair<iterator, bool>
+         */
         std::pair<iterator, bool> insert(Idx pos, key_type key, T&& value)
         {
             auto mapIt = map_.find(key);
@@ -341,48 +514,118 @@ namespace libim {
             return { it, true };
         }
 
+        /**
+         * Constructs value at place in the container and inserts it at the front mapped by the key.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param key   - The key to mapped element.
+         * @param value - The value to insert.
+         * @return std::pair<iterator, bool>
+         */
         template< class... Args >
         std::pair<iterator, bool> emplaceFront(key_type key, Args&&... args)
         {
             return pushFront(std::move(key), T{ std::forward<Args>(args)... });
         }
 
+        /**
+         * Inserts a new element at the front.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param key   - The key to mapped element.
+         * @param value - The value to insert.
+         * @return std::pair<iterator, bool>
+         */
         std::pair<iterator, bool> pushFront(key_type key, const T& value)
         {
             return insert(0, std::move(key), value);
         }
 
+        /**
+         * Inserts a new element at the front.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param key   - The key to mapped element.
+         * @param value - The R-value reference to value to insert.
+         * @return std::pair<iterator, bool>
+         */
         std::pair<iterator, bool> pushFront(key_type key, T&& value)
         {
             return insert(0, std::move(key), std::move(value));
         }
 
+        /**
+         * Constructs value at place in the container and inserts it at the end, mapped by key.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param key   - The key to mapped element.
+         * @param value - The value to insert.
+         * @return std::pair<iterator, bool>
+         */
         template< class... Args >
         std::pair<iterator, bool> emplaceBack(key_type key, Args&&... args)
         {
             return pushBack(std::move(key), T{ std::forward<Args>(args)... });
         }
 
+        /**
+         * Inserts a new element at the end.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param key   - The key to mapped element.
+         * @param value - The value to insert.
+         * @return std::pair<iterator, bool>
+         */
         std::pair<iterator, bool> pushBack(key_type key, const T& value)
         {
             return insert(size(), std::move(key), value);
         }
 
+        /**
+         * Inserts a new element at the end.
+         * If the key already exists the element is not inserted. In this case the iterator
+         * to the mapped element is returned and the bool is set to false.
+         *
+         * @param key   - The key to mapped element.
+         * @param value - The R-value reference to value to insert.
+         * @return std::pair<iterator, bool>
+         */
         std::pair<iterator, bool> pushBack(key_type key, T&& value)
         {
             return insert(size(), std::move(key), std::move(value));
         }
 
+        /**
+         * Removes the element at pos.
+         *
+         * @param pos       - The position of the element to remove.
+         * @return iterator - An iterator to the element that followed the removed element.
+         */
         iterator erase(const_iterator pos)
         {
             return eraseByIdx(getItrIdx(pos));
         }
 
+        /**
+         * Removes the element at pos.
+         *
+         * @param pos - The position of the element to remove.
+         */
         void erase(Idx pos)
         {
             eraseByIdx(pos);
         }
 
+        /**
+         * Removes the element at key.
+         *
+         * @param key - The key of the element to remove.
+         */
         void erase(key_const_reference key)
         {
             auto mapIt = map_.find(key);
@@ -393,6 +636,9 @@ namespace libim {
             }
         }
 
+        /**
+         * Removes all elements in the container.
+         */
         inline void clear() noexcept
         {
             data_.clear();
@@ -400,31 +646,56 @@ namespace libim {
             map_.clear();
         }
 
+        /**
+         * Checks if the element at given key exists.
+         * @param key - The key to check.
+         * @return True if the element exists, false otherwise.
+         */
         inline bool contains(key_const_reference key) const
         {
             return map_.count(key) > 0;
         }
 
+        /**
+         * Checks if the container is empty.
+         * @return True if the container is empty, false otherwise.
+         */
         inline bool isEmpty() const
         {
             return data_.empty();
         }
 
+        /**
+         * Returns the number of elements in the container.
+         * @return The number of elements in the container.
+         */
         inline size_type size() const
         {
             return data_.size();
         }
 
+        /**
+         * Returns the underlying container which can be iterated over to access the key-value pairs.
+         * @return The underlying container.
+         */
         inline const ContainerType& container() const // !< returns list of ContainerElements
         {
             return data_;
         }
 
+        /**
+         * Reserves capacity for n elements.
+         * @param n - The number of elements to reserve capacity for.
+         */
         void reserve(size_type n)
         {
             map_.reserve(n);
         }
 
+        /**
+         * Swaps the contents of the container with those of other.
+         * @param other - The container to swap contents with.
+         */
         void swap(IndexMap& other) noexcept
         {
             data_.swap(other.data_);

@@ -828,7 +828,7 @@ namespace libim::content::asset {
     {
         OptionalRef<const CndThing> baseTemplate;
         if(templates.contains(t.baseName)) {
-            baseTemplate = templates.at(t.baseName);
+            baseTemplate = templates.value(t.baseName);
         }
 
         if(bTemplateThing && !t.pyrOrient.isZero()) {

@@ -157,7 +157,7 @@ namespace cndtool {
                     std::string name;
                     const Material* pMat = nullptr;
                     if (matIdx < mats.size()) {
-                        const auto& mat = mats.at(matIdx);
+                        const auto& mat = mats.value(matIdx);
                         name = fs::path(mat.name()).stem().string();
                         pMat = &mat;
                     }
@@ -167,7 +167,7 @@ namespace cndtool {
                         if (matIdx < smats.size())
                         {
                             // mat is in jones3dStatic.cnd
-                            pMat = &smats.at(matIdx);
+                            pMat = &smats.value(matIdx);
                             name = fs::path(pMat->name()).stem().string();
                         }
                         else

@@ -990,7 +990,7 @@ int execCmdList(const CndToolArgs& args)
 
     auto printList = [](const auto& l) {
         for(std::size_t i = 0; i < l.size(); i++) {
-            std::cout << "  " << i << ": " << l.at(i).name() << std::endl;
+            std::cout << "  " << i << ": " << l.value(i).name() << std::endl;
         }
         std::cout << std::endl;
     };

@@ -52,7 +52,7 @@ namespace libim::utils {
             return std::string(str, end);
         }
 
-        // Note, in case of strncpy_s d_size must be for 1 greater
+        // Note, d_size must be for 1 greater
         // than src.size() to include null termination
         inline bool strcpy(char* dest, std::size_t d_size, const std::string_view src)
         {
@@ -486,7 +486,26 @@ namespace libim::utils {
             throw std::ios_base::failure("invalid numeric conversion from string"sv);
         }
         return num;
-     }
+    }
+
+    /**
+     * Checks if the predicate is true, if not throws an exception.
+     * @tparam ExceptionT - type of exception to throw. By default it is std::runtime_error.
+     * @tparam Args       - types of arguments.
+     * @param pred        - predicate to check.
+     * @param message     - message to throw.
+     * @param args        - arguments to format message.
+     */
+    template<typename ExceptionT = std::runtime_error, typename... Args>
+    inline const void check(bool pred, const char* message,  Args&&... args)
+    {
+        if(!pred)
+        {
+            using namespace libim::utils;
+            auto msg = utils::format(message, std::forward<Args>(args)...);
+            throw ExceptionT(msg);
+        }
+    };
 }
 
 #endif // LIBIM_UTILS_H

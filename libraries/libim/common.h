@@ -40,6 +40,8 @@ namespace libim {
     static constexpr std::size_t DOUBLE_BYTE = 8;
     static constexpr std::size_t BYTE_BIT    = CHAR_BIT;
 
+    constexpr inline uint32_t kStaticResourceIndexMask = 0x8000;
+
     using byte_t          = uint8_t;
     using ByteArray       = std::vector<byte_t>;
     using ByteView        = std::span<const byte_t>;
@@ -58,7 +60,19 @@ namespace libim {
         return bits / BYTE_BIT;
     }
 
-    static std::vector<std::string> splitString(const std::string& string, const std::string& delim)
+    constexpr inline bool isStaticResource(const uint32_t idx) {
+        return (idx & kStaticResourceIndexMask) != 0;
+    }
+
+    constexpr inline uint32_t getStaticResourceIdx(const uint32_t idx) {
+        return idx & ~kStaticResourceIndexMask;
+    }
+
+    constexpr inline uint32_t makeStaticResourceIdx(const uint32_t idx) {
+        return idx | kStaticResourceIndexMask;
+    }
+
+    static std::vector<std::string> splitString(const std::string_view string, const std::string_view delim)
     {
         std::vector<std::string> tokens;
 
@@ -67,13 +81,13 @@ namespace libim {
 
         while ((pos = string.find(delim, prevPos)) != std::string::npos)
         {
-            std::string token = string.substr(prevPos, pos - prevPos);
+            std::string token = std::string(string.substr(prevPos, pos - prevPos));
             tokens.emplace_back(std::move(token));
             prevPos = ++pos;
         }
 
         if(prevPos < string.size()) {
-            tokens.push_back(string.substr(prevPos));
+            tokens.push_back(std::string(string.substr(prevPos)));
         }
 
         return tokens;
@@ -102,27 +116,28 @@ namespace libim {
     #endif
     }
 
-    inline bool isNativePath(const std::string& path)
+    inline bool isNativePath(const std::string_view path)
     {
         return path.find(noneNativePathSeparator()) == std::string::npos;
     }
 
-    inline std::string getNativePath(std::string path)
+    inline std::string getNativePath(const std::string_view path)
     {
+        std::string nativePath(path);
         std::replace_if
         (
-            path.begin(),
-            path.end(),
+            nativePath.begin(),
+            nativePath.end(),
             [](char ch) { return ch == noneNativePathSeparator(); },
             pathSeparator()
         );
 
-        return path;
+        return nativePath;
     }
 
-    inline std::string getFilename(const std::string& path)
+    inline std::string getFilename(const std::string_view path)
     {
-        std::string name = path;
+        std::string name(path);
         if(!isNativePath(name)) {
             name = getNativePath(name);
         }
@@ -135,7 +150,7 @@ namespace libim {
         return name;
     }
 
-    inline std::string getBaseName(const std::string& path)
+    inline std::string getBaseName(const std::string_view path)
     {
         std::string name = getFilename(path);
 
@@ -147,14 +162,14 @@ namespace libim {
         return name;
     }
 
-    inline std::string getFileExtension(const std::string& path)
+    inline std::string getFileExtension(const std::string_view path)
     {
         size_t dotPos = path.find_last_of(".");
         if (dotPos == std::string::npos) {
             return "";
         }
 
-        return  path.substr(dotPos + 1);
+        return  std::string(path.substr(dotPos + 1));
     }
 
     inline bool fileExtMatch(const std::filesystem::path& path, std::string_view ext, bool icase = true)
@@ -181,18 +196,18 @@ namespace libim {
         return is_regular_file(path) || path.has_extension();
     }
 
-    inline bool isFilePath(const std::string& path, OptionalRef<std::error_code> ec)
+    inline bool isFilePath(const std::string_view path, OptionalRef<std::error_code> ec)
     {
         return isFilePath(std::filesystem::path(path), ec);
     }
 
-    inline bool fileExists(const std::filesystem::path& filePath)
+    inline bool fileExists(const std::filesystem::path& path)
     {
-        if(filePath.empty() || !isFilePath(filePath)) {
+        if(path.empty() || !isFilePath(path)) {
             return false;
         }
 
-        return std::filesystem::exists(filePath);
+        return std::filesystem::exists(path);
     }
 
     inline bool isDirPath(const std::filesystem::path& path, OptionalRef<std::error_code> ec = std::nullopt)
@@ -204,7 +219,7 @@ namespace libim {
         return is_directory(path) || !isFilePath(path);
     }
 
-    inline bool isDirPath(const std::string& path, OptionalRef<std::error_code> ec)
+    inline bool isDirPath(const std::string_view path, OptionalRef<std::error_code> ec)
     {
         return isDirPath(std::filesystem::path(path), ec);
     }

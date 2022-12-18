@@ -65,29 +65,34 @@ constexpr static auto scmdMaterial  = "material"sv;
 constexpr static auto scmdNdy       = "ndy"sv;
 constexpr static auto scmdObj       = "obj"sv;
 
-constexpr static auto optAnimations         = "--key"sv;
-constexpr static auto optExtractAsBmp       = "--mat-bmp"sv;
-constexpr static auto optExtractAsBmpShort  = "-b"sv;
-constexpr static auto optExtractLod         = "--mat-mipmap"sv;
-constexpr static auto optMaxTex             = "--mat-max-tex"sv;
-constexpr static auto optMaterials          = "--mat"sv;
-constexpr static auto optNoAnimations       = "--no-key"sv;
+constexpr static auto optAnimations            = "--key"sv;
+constexpr static auto optExtractAsBmp          = "--mat-bmp"sv;
+constexpr static auto optExtractAsBmpShort     = "-b"sv;
+constexpr static auto optExtractLod            = "--mat-mipmap"sv;
+constexpr static auto optMaxTex                = "--mat-max-tex"sv;
+constexpr static auto optMaterials             = "--mat"sv;
+constexpr static auto optNoAnimations          = "--no-key"sv;
 constexpr static auto optNoMaterials        = "--no-mat"sv;
-constexpr static auto optNoSounds           = "--no-sound"sv;
-constexpr static auto optNoTemplates        = "--no-template"sv;
-constexpr static auto optOutputDir          = "--output-dir"sv;
-constexpr static auto optOutputDirShort     = "-o"sv;
-constexpr static auto optConvertToPng       = "--mat-png"sv;
-constexpr static auto optConvertToPngShort  = "-p"sv;
-constexpr static auto optReplace            = "--replace"sv;
-constexpr static auto optReplaceShort       = "-r"sv;
-constexpr static auto optSounds             = "--sound"sv;
-constexpr static auto optVerbose            = "--verbose"sv;
-constexpr static auto optVerboseShort       = "-v"sv;
-constexpr static auto optConvertToWav       = "--sound-wav"sv;
+constexpr static auto optNoMaterials           = "--no-mat"sv;
+constexpr static auto optNoSounds              = "--no-sound"sv;
+constexpr static auto optNoTemplates           = "--no-template"sv;
+constexpr static auto optOutputDir             = "--output-dir"sv;
+constexpr static auto optOutputDirShort        = "-o"sv;
+constexpr static auto optConvertToPng          = "--mat-png"sv;
+constexpr static auto optConvertToPngShort     = "-p"sv;
+constexpr static auto optReplace               = "--replace"sv;
+constexpr static auto optReplaceShort          = "-r"sv;
+constexpr static auto optSounds                = "--sound"sv;
+constexpr static auto optSoundStartHandle      = "--sound-handle"sv;
+constexpr static auto optSoundStartHandleShort = "-h"sv;
 constexpr static auto optConvertToWavShort  = "-w"sv;
 constexpr static auto optExportSoundbank    = "--soundbank"sv;
-constexpr static auto optOverwriteTemplates = "--template-overwrite"sv;
+constexpr static auto optVerbose               = "--verbose"sv;
+constexpr static auto optVerboseShort          = "-v"sv;
+constexpr static auto optConvertToWav          = "--sound-wav"sv;
+constexpr static auto optConvertToWavShort     = "-w"sv;
+constexpr static auto optExportSoundbank       = "--soundbank"sv;
+constexpr static auto optOverwriteTemplates    = "--template-overwrite"sv;
 
 struct ExtractOptions final
 {
@@ -228,26 +233,25 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
         std::cout << "Extract animation [KEY], material [MAT], sound [IndyWV] and Thing template assets from CND level file(s)." << std::endl << std::endl;
         std::cout << "  Usage: cndtool extract [options] <cnd-file-path|cnd-folder>" << std::endl << std::endl;
         printOptionHeader();
-        printOption( optExtractAsBmp       , optExtractAsBmpShort , "Convert extracted material assets to BMP format."                      );
-        printOption( optConvertToPng       , optConvertToPngShort , "Convert extracted material assets to PNG format."                      );
-        printOption( optMaxTex             , ""                   , "Max number of images to convert from each material file."              );
-        printOption( ""                    , ""                   , "By default all are converted."                                         );
-        printOption( optExtractLod         , ""                   , "Extract also MipMap LOD images when converting material file.\n"       );
+        printOption( optExtractAsBmp       , optExtractAsBmpShort , "Convert extracted material assets to BMP format."                            );
+        printOption( optConvertToPng       , optConvertToPngShort , "Convert extracted material assets to PNG format."                            );
+        printOption( optMaxTex             , ""                   , "Max number of images to convert from each material file."                    );
+        printOption( ""                    , ""                   , "By default all are converted."                                               );
+        printOption( optExtractLod         , ""                   , "Extract also MipMap LOD images when converting material file.\n"             );
 
-        printOption( optConvertToWav       , optConvertToWavShort , "Convert extracted IndyWV sound assets to WAV format."                  );
-        printOption( optExportSoundbank    , ""                   , "Export sounbank track to file.\n"                                      );
+        printOption( optConvertToWav       , optConvertToWavShort , "If extracted sound is in IndyWV compressed format convert it to WAV format." );
+        printOption( optExportSoundbank    , ""                   , "Export soundbank track to file.\n"                                            );
 
+        printOption( optOverwriteTemplates , ""                   , "Overwrite any existing Thing templates."                                     );
+        printOption( ""                    , ""                   , "By default only new templates are written if ijim.tpl file exists.\n"        );
 
-        printOption( optOverwriteTemplates , ""                   , "Overwrite any existing Thing templates."                               );
-        printOption( ""                    , ""                   , "By default only new templates are written if ijim.tpl file exists.\n"  );
+        printOption( optNoAnimations       , ""                   , "Don't extract animation assets."                                             );
+        printOption( optNoMaterials        , ""                   , "Don't extract material assets."                                              );
+        printOption( optNoSounds           , ""                   , "Don't extract sound assets."                                                 );
+        printOption( optNoTemplates        , ""                   , "Don't extract Thing templates.\n"                                            );
 
-        printOption( optNoAnimations       , ""                   , "Don't extract animation assets."                                       );
-        printOption( optNoMaterials        , ""                   , "Don't extract material assets."                                        );
-        printOption( optNoSounds           , ""                   , "Don't extract sound assets."                                           );
-        printOption( optNoTemplates        , ""                   , "Don't extract Thing templates.\n"                                      );
-
-        printOption( optOutputDir          , optOutputDirShort    , "Output folder."                                                        );
-        printOption( optVerbose            , optVerboseShort      , "Verbose printout to the console."                                      );
+        printOption( optOutputDir          , optOutputDirShort    , "Output folder."                                                              );
+        printOption( optVerbose            , optVerboseShort      , "Verbose printout to the console."                                            );
     }
     else if (cmd == cmdList)
     {
@@ -561,12 +565,15 @@ void writeSounds(const IndexMap<Sound>& sounds, const fs::path& outDir, const Ex
             printProgress("Extracting sounds... ", idx + 1, sounds.size());
         }
 
-        OutputFileStream ofs(outPath.append(s.name()), /*truncate=*/true);
-        wvWrite(ofs, s);
-        outPath = outPath.parent_path();
+        if (s.isCompressed())
+        {
+            OutputFileStream ofs(outPath.append(s.name()), /*truncate=*/true);
+            wvWrite(ofs, s);
+            outPath = outPath.parent_path();
+        }
 
         /* Save in WAV format */
-        if (opt.sound.convertToWav)
+        if (!s.isCompressed() || opt.sound.convertToWav)
         {
             OutputFileStream ofs(wavDir.append(s.name()), /*truncate=*/true);
             wavWrite(ofs, s);
@@ -665,11 +672,10 @@ std::size_t extractSounds(const InputStream& istream, const fs::path& outDir, co
 
     // Parse sounds
     const auto header = CND::readHeader(istream);
-    const std::size_t sbtIdx = (header.state & CndWorldState::Static)
-        ? kSoundbankStaticTrackIdx
-        : kSoundbankNormalTrackIdx;
+    const std::size_t sbtIdx = getSoundBankTrackIdx(header.state & CndWorldState::Static);
 
     SoundBank sb(sbtIdx + 1);
+    sb.setStaticTrack(sbtIdx, header.state & CndWorldState::Static); // Never forget this or the exported track sounds will have incorrect indices.
     CND::readSounds(istream, sb, sbtIdx); // Import to correct track idx so the original soundbank num is preserved
 
     if (opt.sound.exportSoundbank)

@@ -3,9 +3,13 @@
 #include <exception>
 #include <filesystem>
 
+#include <libim/content/asset/animation/animation.h>
 #include <libim/content/asset/cog/cog.h>
 #include <libim/content/asset/cog/cogscript.h>
 #include <libim/content/asset/cog/impl/grammer/parse_utils.h>
+#include <libim/content/asset/cog/impl/grammer/parser.h>
+#include <libim/content/audio/soundbank.h>
+
 #include <libim/io/vfs.h>
 #include <libim/log/log.h>
 #include <libim/types/indexmap.h>
@@ -31,6 +35,14 @@ namespace cndtool {
     constexpr static std::string_view kSoundDir1     = "sound";
     constexpr static std::string_view kSoundDir2     = "wv";
     constexpr static std::string_view kSoundDir3     = "wav";
+
+    constexpr inline std::size_t getSoundBankTrackIdx(const bool isStatic) {
+        return isStatic ? kSoundbankStaticTrackIdx : kSoundbankNormalTrackIdx;
+    }
+
+    constexpr inline SoundHandle getDefaultStartSoundHandle(const bool isStatic) {
+        return isStatic ? SoundHandle(0) : kDefaultStartSoundHandle;
+    }
 
     SharedRef<InputStream> searchFile(const VirtualFileSystem& vfs, const std::vector<fs::path>& folders, std::string_view filename)
     {

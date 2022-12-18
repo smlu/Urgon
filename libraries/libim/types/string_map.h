@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <map>
+#include <set>
 #include <string_view>
 #include <type_traits>
 
@@ -40,5 +41,15 @@ namespace libim{
     template<typename StrT, typename ValueT, typename PredT = StringCaseInsensitiveLess,
         typename = std::enable_if_t<std::is_convertible_v<StrT, std::string_view>>>
     using StringMap = std::map<StrT, ValueT, PredT>;
+
+    /**
+     * A std::set alias for string which uses a case-insensitive string for key.
+     *
+     * @tparam KeyT   - The key type. Must be convertible to std::string_view.
+     * @tparam PredT  - The predicate type. By default, CaseInsensitiveLess is used.
+     */
+    template<typename KeyT = std::string, typename PredT = StringCaseInsensitiveLess,
+        typename = std::enable_if_t<std::is_convertible_v<KeyT, std::string_view>>>
+    using StringSet = std::set<KeyT, PredT>;
 }
 #endif // LIBIM_STRING_MAP_H

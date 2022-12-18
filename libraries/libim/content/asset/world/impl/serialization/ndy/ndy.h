@@ -70,8 +70,8 @@ namespace libim::content::asset {
 
         /* Parse/Write for section AIClass */
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
-                    parseSection_AIClass(text::TextResourceReader& rr); // Returns pair of max no. of world ai classes and the list of ai file names
-        static void writeSection_AIClass(text::TextResourceWriter& rw, std::size_t maxAIClasses, const std::vector<std::string>& aiclasses);
+                    parseSection_AIClasses(text::TextResourceReader& rr); // Returns pair of max no. of world ai classes and the list of ai file names
+        static void writeSection_AIClasses(text::TextResourceWriter& rw, std::size_t maxAIClasses, const std::vector<std::string>& aiclasses);
 
         /* Parse/Write for section Models */
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
@@ -89,15 +89,15 @@ namespace libim::content::asset {
         static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxKeyframes, const std::vector<std::string>& keyframes);
         static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxKeyframes, const IndexMap<Animation>& keyframes);
 
-        /* Parse/Write for section AnimClass */
+        /* Parse/Write for section AnimClasses */
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
-                    parseSection_AnimClass(text::TextResourceReader& rr); // Returns pair of max no. of world puppets and the list of pup file names
-        static void writeSection_AnimClass(text::TextResourceWriter& rw, std::size_t maxAnimClasses, const std::vector<std::string>& puppets);
+                    parseSection_AnimClasses(text::TextResourceReader& rr); // Returns pair of max no. of world puppets and the list of pup file names
+        static void writeSection_AnimClasses(text::TextResourceWriter& rw, std::size_t maxAnimClasses, const std::vector<std::string>& puppets);
 
         /* Parse/Write for section SoundClass */
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
-                    parseSection_SoundClass(text::TextResourceReader& rr); // Returns pair of max no. of world sound classes and the list of snd file names
-        static void writeSection_SoundClass(text::TextResourceWriter& rw, std::size_t maxSoundClasses, const std::vector<std::string>& sndclasses);
+                    parseSection_SoundClasses(text::TextResourceReader& rr); // Returns pair of max no. of world sound classes and the list of snd file names
+        static void writeSection_SoundClasses(text::TextResourceWriter& rw, std::size_t maxSoundClasses, const std::vector<std::string>& sndclasses);
 
         /* Parse/Write for section CogScripts */
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>

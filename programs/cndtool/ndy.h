@@ -27,7 +27,7 @@ namespace cndtool {
         fs::path ndyPath;
         try
         {
-            constexpr std::size_t total = 32;
+            constexpr std::size_t total = 31;
             constexpr auto progressTitle = "Converting to NDY ... "sv;
             std::size_t progress = 0;
             if (!verbose) printProgress(progressTitle, progress++, total);
@@ -55,7 +55,7 @@ namespace cndtool {
             if (!verbose) printProgress(progressTitle, progress++, total);
 
             LOG_DEBUG("Parsing CND section 'AIClasses' at offset: %", utils::to_string<16>(icnds.tell()));
-            auto aiclasses = CND::parseSection_AIClass(icnds, header);
+            auto aiclasses = CND::parseSection_AIClasses(icnds, header);
             if (!verbose) printProgress(progressTitle, progress++, total);
 
             LOG_DEBUG("Parsing CND section 'Models' at offset: %", utils::to_string<16>(icnds.tell()));
@@ -71,25 +71,25 @@ namespace cndtool {
             if (!verbose) printProgress(progressTitle, progress++, total);
 
             LOG_DEBUG("Parsing CND section 'AnimClass' at offset: %", utils::to_string<16>(icnds.tell()));
-            auto pupNames = CND::parseSection_AnimClass(icnds, header);
+            auto pupNames = CND::parseSection_AnimClasses(icnds, header);
             if (!verbose) printProgress(progressTitle, progress++, total);
 
             LOG_DEBUG("Parsing CND section 'SoundClass' at offset: %", utils::to_string<16>(icnds.tell()));
-            auto sndNames = CND::parseSection_SoundClass(icnds, header);
+            auto sndNames = CND::parseSection_SoundClasses(icnds, header);
             if (!verbose) printProgress(progressTitle, progress++, total);
 
-            LOG_DEBUG("Parsing CND section 'CogScripts' at offset: %", utils::to_string<16>(icnds.tell()));
+            LOG_DEBUG("Parsing CND section 'COGScripts' at offset: %", utils::to_string<16>(icnds.tell()));
             auto cogScriptNames = CND::parseSection_CogScripts(icnds, header);
 
             LOG_DEBUG("Loading % cog scripts from VFS ...", utils::to_string(cogScriptNames.size()));
             auto scripts = loadCogScripts(vfs, cogScriptNames, /*bFixCogScripts=*/true);
             if (!verbose) printProgress(progressTitle, progress++, total);
 
-            LOG_DEBUG("Parsing CND section 'Cogs' at offset: %", utils::to_string<16>(icnds.tell()));
+            LOG_DEBUG("Parsing CND section 'COGs' at offset: %", utils::to_string<16>(icnds.tell()));
             auto cogs = CND::parseSection_Cogs(icnds, header, scripts);
 
             LOG_DEBUG("Verifying init symbol values for % COGs ...", utils::to_string(cogs.size()));
-            verifyCogsNonLocalRawInitValues(cogs);
+            verifyCogs(cogs);
             if (!verbose) printProgress(progressTitle, progress++, total);
 
             LOG_DEBUG("Parsing CND section 'Templates' at offset: %", utils::to_string<16>(icnds.tell()));
@@ -138,7 +138,7 @@ namespace cndtool {
             if (!verbose) printProgress(progressTitle, progress++, total);
 
             LOG_DEBUG("Writing NDY section 'AIClass' at offset: %", utils::to_string<16>(osndy.tell()));
-            NDY::writeSection_AIClass(ndytw, header.sizeAIClasses, aiclasses);
+            NDY::writeSection_AIClasses(ndytw, header.sizeAIClasses, aiclasses);
             if (!verbose) printProgress(progressTitle, progress++, total);
 
             LOG_DEBUG("Writing NDY section 'Models' at offset: %", utils::to_string<16>(osndy.tell()));
@@ -154,18 +154,18 @@ namespace cndtool {
             if (!verbose) printProgress(progressTitle, progress++, total);
 
             LOG_DEBUG("Writing NDY section 'AnimClass' at offset: %", utils::to_string<16>(osndy.tell()));
-            NDY::writeSection_AnimClass(ndytw, header.sizePuppets, pupNames);
+            NDY::writeSection_AnimClasses(ndytw, header.sizePuppets, pupNames);
             if (!verbose) printProgress(progressTitle, progress++, total);
 
             LOG_DEBUG("Writing NDY section 'SoundClass' at offset: %", utils::to_string<16>(osndy.tell()));
-            NDY::writeSection_SoundClass(ndytw, header.sizeSoundClasses, sndNames);
+            NDY::writeSection_SoundClasses(ndytw, header.sizeSoundClasses, sndNames);
             if (!verbose) printProgress(progressTitle, progress++, total);
 
-            LOG_DEBUG("Writing NDY section 'CogScripts' at offset: %", utils::to_string<16>(osndy.tell()));
+            LOG_DEBUG("Writing NDY section 'COGScripts' at offset: %", utils::to_string<16>(osndy.tell()));
             NDY::writeSection_CogScripts(ndytw, header.sizeCogScripts, cogScriptNames);
             if (!verbose) printProgress(progressTitle, progress++, total);
 
-            LOG_DEBUG("Writing NDY section 'Cogs' at offset: %", utils::to_string<16>(osndy.tell()));
+            LOG_DEBUG("Writing NDY section 'COGs' at offset: %", utils::to_string<16>(osndy.tell()));
             NDY::writeSection_Cogs(ndytw, header.sizeCogs, cogs);
             if (!verbose) printProgress(progressTitle, progress++, total);
 

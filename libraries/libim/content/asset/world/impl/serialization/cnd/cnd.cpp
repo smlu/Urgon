@@ -19,9 +19,6 @@ using namespace libim::content::asset;
 using namespace libim::utils;
 using namespace std::string_literals;
 
-static constexpr uint32_t kCndFileVersion = 3;
-
-
 std::vector<std::string> readResourceList(const InputStream& istream, std::size_t size)
 {
     auto rlist = istream.read<std::vector<CndResourceName>>(size);
@@ -114,7 +111,7 @@ void CND::writeSection_Sounds(OutputStream& ostream, audio::SoundBank& bank, std
     }
 }
 
-std::size_t CND::getOffset_AIClass(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_AIClasses(const InputStream& istream, const CndHeader& header)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
@@ -129,34 +126,34 @@ std::size_t CND::getOffset_AIClass(const InputStream& istream, const CndHeader& 
     return istream.tell() + vecBuffSize * sizeof(uint32_t);
 }
 
-std::vector<std::string> CND::parseSection_AIClass(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_AIClasses(const InputStream& istream, const CndHeader& header)
 {
     try {
         return readResourceList(istream, header.numAIClasses);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
-        throw CNDError("parseSection_AIClass",
+        throw CNDError("parseSection_AIClasses",
             "An exception was encountered while parsing section 'AIClass': "s + e.what()
         );
     }
 }
 
-std::vector<std::string> CND::readAIClass(const InputStream& istream)
+std::vector<std::string> CND::readAIClasses(const InputStream& istream)
 {
     auto header = readHeader(istream);
-    istream.seek(getOffset_AIClass(istream, header));
-    return parseSection_AIClass(istream, header);
+    istream.seek(getOffset_AIClasses(istream, header));
+    return parseSection_AIClasses(istream, header);
 }
 
-void CND::writeSection_AIClass(OutputStream& ostream, const std::vector<std::string>& aiclasses)
+void CND::writeSection_AIClasses(OutputStream& ostream, const std::vector<std::string>& aiclasses)
 {
     try {
         writeResourceList(ostream, aiclasses);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
-        throw CNDError("writeSection_AIClass",
+        throw CNDError("writeSection_AIClasses",
             "An exception was encountered while writing section 'AIClass': "s + e.what()
         );
     }
@@ -164,7 +161,7 @@ void CND::writeSection_AIClass(OutputStream& ostream, const std::vector<std::str
 
 std::size_t CND::getOffset_Models(const InputStream& istream, const CndHeader& header)
 {
-    return getOffset_AIClass(istream, header) + header.numAIClasses * sizeof(CndResourceName);
+    return getOffset_AIClasses(istream, header) + header.numAIClasses * sizeof(CndResourceName);
 }
 
 std::vector<std::string> CND::parseSection_Models(const InputStream& istream, const CndHeader& header)
@@ -238,7 +235,7 @@ void CND::writeSection_Sprites(OutputStream& ostream, const std::vector<std::str
     }
 }
 
-std::size_t CND::getOffset_AnimClass(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_AnimClasses(const InputStream& istream, const CndHeader& header)
 {
     AT_SCOPE_EXIT([ &istream, off = istream.tell() ](){
         istream.seek(off);
@@ -254,72 +251,72 @@ std::size_t CND::getOffset_AnimClass(const InputStream& istream, const CndHeader
            sizeof(KeyNodeEntry) * aSizes.at(2);
 }
 
-std::vector<std::string> CND::parseSection_AnimClass(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_AnimClasses(const InputStream& istream, const CndHeader& header)
 {
     try {
         return readResourceList(istream, header.numPuppets);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
-        throw CNDError("parseSection_AnimClass",
+        throw CNDError("parseSection_AnimClasses",
             "An exception was encountered while parsing section 'AnimClass': "s + e.what()
         );
     }
 }
 
-std::vector<std::string> CND::readAnimClass(const InputStream& istream)
+std::vector<std::string> CND::readAnimClasses(const InputStream& istream)
 {
     auto header = readHeader(istream);
-    istream.seek(getOffset_AnimClass(istream, header));
-    return parseSection_AnimClass(istream, header);
+    istream.seek(getOffset_AnimClasses(istream, header));
+    return parseSection_AnimClasses(istream, header);
 }
 
-void CND::writeSection_AnimClass(OutputStream& ostream, const std::vector<std::string>& animclasses)
+void CND::writeSection_AnimClasses(OutputStream& ostream, const std::vector<std::string>& animclasses)
 {
     try {
         writeResourceList(ostream, animclasses);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
-        throw CNDError("writeSection_AnimClass",
+        throw CNDError("writeSection_AnimClasses",
             "An exception was encountered while writing section 'AnimClass': "s + e.what()
         );
     }
 }
 
-std::size_t CND::getOffset_SoundClass(const InputStream& istream, const CndHeader& header)
+std::size_t CND::getOffset_SoundClasses(const InputStream& istream, const CndHeader& header)
 {
-    return getOffset_AnimClass(istream, header) + sizeof(CndResourceName) * header.numPuppets;
+    return getOffset_AnimClasses(istream, header) + sizeof(CndResourceName) * header.numPuppets;
 }
 
-std::vector<std::string> CND::parseSection_SoundClass(const InputStream& istream, const CndHeader& header)
+std::vector<std::string> CND::parseSection_SoundClasses(const InputStream& istream, const CndHeader& header)
 {
     try {
         return readResourceList(istream, header.numSoundClasses);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
-        throw CNDError("parseSection_SoundClass",
+        throw CNDError("parseSection_SoundClasses",
             "An exception was encountered while parsing section 'SoundClass': "s + e.what()
         );
     }
 }
 
-std::vector<std::string> CND::readSoundClass(const InputStream& istream)
+std::vector<std::string> CND::readSoundClasses(const InputStream& istream)
 {
     auto header = readHeader(istream);
-    istream.seek(getOffset_SoundClass(istream, header));
-    return parseSection_SoundClass(istream, header);
+    istream.seek(getOffset_SoundClasses(istream, header));
+    return parseSection_SoundClasses(istream, header);
 }
 
-void CND::writeSection_SoundClass(OutputStream& ostream, const std::vector<std::string>& sndclasses)
+void CND::writeSection_SoundClasses(OutputStream& ostream, const std::vector<std::string>& sndclasses)
 {
     try {
         writeResourceList(ostream, sndclasses);
     }
     catch (const CNDError&) { throw; }
     catch(const std::exception& e) {
-        throw CNDError("writeSection_SoundClass",
+        throw CNDError("writeSection_SoundClasses",
             "An exception was encountered while writing section 'SoundClass': "s + e.what()
         );
     }
@@ -327,7 +324,7 @@ void CND::writeSection_SoundClass(OutputStream& ostream, const std::vector<std::
 
 std::size_t CND::getOffset_CogScripts(const InputStream& istream, const CndHeader& header)
 {
-    return getOffset_SoundClass(istream, header) + sizeof(CndResourceName) * header.numSoundClasses;
+    return getOffset_SoundClasses(istream, header) + sizeof(CndResourceName) * header.numSoundClasses;
 }
 
 std::vector<std::string> CND::parseSection_CogScripts(const InputStream& istream, const CndHeader& header)

@@ -198,12 +198,12 @@ void NDY::writeSection_Materials(TextResourceWriter& rw, const IndexMap<Material
 }
 
 std::pair<std::size_t, std::vector<std::string>>
-NDY::parseSection_AIClass(TextResourceReader& rr)
+NDY::parseSection_AIClasses(TextResourceReader& rr)
 {
     return parseResourceSection<true>(rr, kWorldAIClasses);
 }
 
-void NDY::writeSection_AIClass(TextResourceWriter& rw, std::size_t maxAIClasses, const std::vector<std::string>& aiclasses)
+void NDY::writeSection_AIClasses(TextResourceWriter& rw, std::size_t maxAIClasses, const std::vector<std::string>& aiclasses)
 {
     writeResourceSection<true>(rw,
         "######### AI Classes ###########"sv,
@@ -282,12 +282,12 @@ void NDY::writeSection_Keyframes(TextResourceWriter &rw, std::size_t maxKeyframe
 }
 
 std::pair<std::size_t, std::vector<std::string>>
-NDY::parseSection_AnimClass(TextResourceReader& rr)
+NDY::parseSection_AnimClasses(TextResourceReader& rr)
 {
     return parseResourceSection<true>(rr, kWorldPuppets);
 }
 
-void NDY::writeSection_AnimClass(TextResourceWriter &rw, std::size_t maxAnimClasses, const std::vector<std::string>& puppets)
+void NDY::writeSection_AnimClasses(TextResourceWriter &rw, std::size_t maxAnimClasses, const std::vector<std::string>& puppets)
 {
     writeResourceSection<true>(rw,
         "###### Animation Classes #######"sv,
@@ -300,12 +300,12 @@ void NDY::writeSection_AnimClass(TextResourceWriter &rw, std::size_t maxAnimClas
 }
 
 std::pair<std::size_t, std::vector<std::string>>
-NDY::parseSection_SoundClass(TextResourceReader& rr)
+NDY::parseSection_SoundClasses(TextResourceReader& rr)
 {
     return parseResourceSection<true>(rr, kWorldSoundClasses);
 }
 
-void NDY::writeSection_SoundClass(TextResourceWriter &rw, std::size_t maxSoundClasses, const std::vector<std::string>& sndclasses)
+void NDY::writeSection_SoundClasses(TextResourceWriter &rw, std::size_t maxSoundClasses, const std::vector<std::string>& sndclasses)
 {
     writeResourceSection<true>(rw,
         "######### Sound Classes ########"sv,

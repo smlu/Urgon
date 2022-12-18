@@ -26,6 +26,9 @@
 #include <libim/types/indexmap.h>
 
 namespace libim::content::asset {
+
+    inline constexpr uint32_t kCndFileVersion = 3;
+
     /** Represents internal world state*/
     enum class CndWorldState : uint32_t
     {
@@ -176,10 +179,10 @@ namespace libim::content::asset {
         [[nodiscard]] static std::vector<Sector> readSectors(const InputStream& istream);
         static void writeSection_Sectors(OutputStream& ostream, const std::vector<Sector>& sectors);
 
-        [[nodiscard]] static std::size_t getOffset_AIClass(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<std::string> parseSection_AIClass(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<std::string> readAIClass(const InputStream& istream);
-        static void writeSection_AIClass(OutputStream& ostream, const std::vector<std::string>& aiclasses);
+        [[nodiscard]] static std::size_t getOffset_AIClasses(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> parseSection_AIClasses(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> readAIClasses(const InputStream& istream);
+        static void writeSection_AIClasses(OutputStream& ostream, const std::vector<std::string>& aiclasses);
 
         [[nodiscard]] static std::size_t getOffset_Models(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static std::vector<std::string> parseSection_Models(const InputStream& istream, const CndHeader& header);
@@ -196,15 +199,15 @@ namespace libim::content::asset {
         [[nodiscard]] static IndexMap<Animation> readKeyframes(const InputStream& istream);
         static void writeSection_Keyframes(OutputStream& ostream, const IndexMap<Animation>& animations);
 
-        [[nodiscard]] static std::size_t getOffset_AnimClass(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<std::string> parseSection_AnimClass(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<std::string> readAnimClass(const InputStream& istream);
-        static void writeSection_AnimClass(OutputStream& ostream, const std::vector<std::string>& animclasses);
+        [[nodiscard]] static std::size_t getOffset_AnimClasses(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> parseSection_AnimClasses(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> readAnimClasses(const InputStream& istream);
+        static void writeSection_AnimClasses(OutputStream& ostream, const std::vector<std::string>& animclasses);
 
-        [[nodiscard]] static std::size_t getOffset_SoundClass(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<std::string> parseSection_SoundClass(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<std::string> readSoundClass(const InputStream& istream);
-        static void writeSection_SoundClass(OutputStream& ostream, const std::vector<std::string>& sndclasses);
+        [[nodiscard]] static std::size_t getOffset_SoundClasses(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> parseSection_SoundClasses(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static std::vector<std::string> readSoundClasses(const InputStream& istream);
+        static void writeSection_SoundClasses(OutputStream& ostream, const std::vector<std::string>& sndclasses);
 
         [[nodiscard]] static std::size_t getOffset_CogScripts(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static std::vector<std::string> parseSection_CogScripts(const InputStream& istream, const CndHeader& header);

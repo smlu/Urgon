@@ -325,10 +325,16 @@ namespace libim::content::text {
 
             while(!isAtEnd())
             {
+                if (currentLocation().firstColumn != 1) {
+                    skipToNextLine();
+                }
+
                 if constexpr (hasRowIdxs)
                 {
-                    [[maybe_unused]] const auto rrowIdx = readRowIdx();
-                    assert(rowIdx == rrowIdx && "rowIdx == rrowIdx!");
+                    const auto rrowIdx = readRowIdx();
+                    if (rowIdx != rrowIdx ) {
+                        LOG_VERBOSE("Parsed list row index % doesn't match current row index %", rrowIdx, rowIdx);
+                    }
                 }
 
                 if constexpr(!hasListSize && utils::has_mf_capacity<Container>)

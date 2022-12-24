@@ -227,7 +227,6 @@ namespace libim::content::asset {
     >;
 
 
-
     struct CndThing final : CndThingHeader {
         CndThingControlInfo controlInfo;
         CndThingMoveInfo    moveInfo;
@@ -235,6 +234,36 @@ namespace libim::content::asset {
 
         inline void reset() {
             *this = CndThing{};
+        }
+
+        void init()
+        {
+            switch (type)
+            {
+                case Thing::Actor:
+                case Thing::Player:
+                {
+                    if (!std::holds_alternative<CndActorInfo>(thingInfo)) {
+                        thingInfo = CndActorInfo{};
+                    }
+
+                    CndActorInfo& actorInfo = std::get<CndActorInfo>(thingInfo);
+                    if (actorInfo.voiceColor.top.isZero()) {
+                        actorInfo.voiceColor.top = {{-1.0f, -1.0f, -1.0f, -1.0f}}; // Same as in original engine. Init. like this will make sure the RGBA don't get clamped to 0.0f
+                    }
+                }
+                break;
+            default:
+                break;
+            }
+
+            if (controlType == CndThingControlType::AI)
+            {
+                const auto* aici = std::get_if<CndAIControlInfo>(&controlInfo);
+                if (!aici || aici->aiFileName.isEmpty()) {
+                    controlType = CndThingControlType::Plot;
+                }
+            }
         }
     };
 

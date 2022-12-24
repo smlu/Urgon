@@ -972,7 +972,11 @@ namespace libim::content::asset {
         try
         {
             auto name = CndResourceName(rr.getSpaceDelimitedString(/*throwIfEmpty=*/true)); // Has to construct a new string or basetkn will overwrite it.
-            if (auto tit = templates.find(name); tit != templates.end()) {
+            if (auto tit = templates.find(name); tit != templates.end())
+            {
+                auto loc = rr.currentLocation();
+                LOG_DEBUG("%:%:%: Found existing template '%', skipping...", loc.filename, loc.firstLine, loc.firstColumn, name);
+                rr.skipToNextLine();
                 return *tit;
             }
 
@@ -1036,6 +1040,11 @@ namespace libim::content::asset {
             thing.pyrOrient = rr.readVector<FRotator>(/*strict=*/false);
             thing.sectorNum = rr.getNumber<decltype(thing.sectorNum)>();
 
+            // Init thing before parsing params
+            // [Same logics in the engine]
+            thing.init();
+
+            // Parse any additional params
             ndyParseThingParams(rr, thing);
             return thing;
         }

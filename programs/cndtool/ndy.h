@@ -4,25 +4,134 @@
 
 #include <cmdutils/cmdutils.h>
 
+#include <libim/common.h>
+#include <libim/content/asset/world/georesource.h>
+#include <libim/content/asset/world/sector.h>
+#include <libim/content/asset/world/impl/serialization/cnd/thing/cnd_thing.h>
 #include <libim/content/asset/world/impl/serialization/ndy/ndy.h>
 #include <libim/content/asset/world/impl/serialization/ndy/thing/ndy_thing_oser.h>
 #include <libim/content/audio/soundbank.h>
+#include <libim/content/text/text_resource_writer.h>
+#include <libim/content/text/text_resource_reader.h>
+#include <libim/content/text/impl/text_resource_literals.h>
 #include <libim/io/filestream.h>
 #include <libim/io/vfs.h>
 #include <libim/log/log.h>
+#include <libim/utils/utils.h>
 
 #include <exception>
 #include <filesystem>
+#include <vector>
 
 namespace cndtool {
     namespace fs = std::filesystem;
+    using namespace libim;
+    using namespace libim::content::asset;
+    using namespace libim::content::audio;
+    using namespace libim::content::text;
+    using namespace libim::utils;
 
-    bool convertToNdy(const fs::path& cndPath, const libim::VirtualFileSystem& vfs, const fs::path& outDir, bool verbose)
+    struct NdyWorld
     {
-        using namespace cmdutils;
-        using namespace libim;
-        using namespace libim::content::asset;
-        using namespace libim::content::audio;
+        CndHeader header;
+        std::pair<std::size_t, std::vector<std::string>> sounds;
+        std::pair<std::size_t, std::vector<std::string>> materials;
+        Georesource georesource;
+        std::vector<Sector> sectors;
+        std::pair<std::size_t, std::vector<std::string>> aiClasses;
+        std::pair<std::size_t, std::vector<std::string>> models;
+        std::pair<std::size_t, std::vector<std::string>> sprites;
+        std::pair<std::size_t, std::vector<std::string>> keyframes;
+        std::pair<std::size_t, std::vector<std::string>> animClasses;
+        std::pair<std::size_t, std::vector<std::string>> soundClasses;
+        std::pair<std::size_t, std::vector<std::string>> cogScripts;
+        std::pair<std::size_t, std::vector<SharedRef<Cog>>> cogs;
+        std::pair<std::size_t, IndexMap<CndThing>> templates;
+        std::vector<CndThing> things;
+        ByteArray pvs;
+    };
+
+     /**
+     * Verifies that the normal world contains all required data. Throws exception if not.
+     * Note, function expects StaticResourceNames to be already initialized when the function is called.
+     */
+    void checkNdyWorld(const NdyWorld& world, const StaticResourceNames& staticResources)
+    {
+        using namespace libim::utils;
+        check(world.sounds.second.size()       <= kStaticResourceIndexMask , "Too many sounds in the list, max=%!"        , kStaticResourceIndexMask);
+        check(world.materials.second.size()    <= kStaticResourceIndexMask , "Too many materials in the list, max=%!"     , kStaticResourceIndexMask);
+        check(world.aiClasses.second.size()    <= kStaticResourceIndexMask , "Too many ai classes in the list, max=%!"    , kStaticResourceIndexMask);
+        check(world.models.second.size()       <= kStaticResourceIndexMask , "Too many models in the list, max=%!"        , kStaticResourceIndexMask);
+        check(world.sprites.second.size()      <= kStaticResourceIndexMask , "Too many sprites in the list, max=%!"       , kStaticResourceIndexMask);
+        check(world.keyframes.second.size()    <= kStaticResourceIndexMask , "Too many keyframes in the list, max=%!"     , kStaticResourceIndexMask);
+        check(world.animClasses.second.size()  <= kStaticResourceIndexMask , "Too many anim classes in the list, max=%!"  , kStaticResourceIndexMask);
+        check(world.soundClasses.second.size() <= kStaticResourceIndexMask , "Too many sound classes in the list, max=%!" , kStaticResourceIndexMask);
+        check(world.cogScripts.second.size()   <= kStaticResourceIndexMask , "Too many cog scripts in the list, max=%!"   , kStaticResourceIndexMask);
+        check(world.cogs.second.size()         <= kStaticResourceIndexMask , "Too many cogs in the list, max=%!"          , kStaticResourceIndexMask);
+        check(world.templates.second.size()    <= kMaxTemplates            , "Too many templates in the list, max=%!"     , kMaxTemplates);
+        check(world.things.size()              <= kMaxThings               , "Too many things in the list, max=%!"        , kMaxThings);
+
+        check(world.georesource.adjoins.size()     > 0 , "Georesource section is missing adjoins!");
+        check(world.georesource.surfaces.size()    > 0 , "Georesource section is missing surfaces!");
+        check(world.georesource.vertices.size()    > 0 , "Georesource section is missing vertices!");
+        check(world.georesource.texVertices.size() > 0 , "Georesource section is missing texture vertices!");
+
+        check(world.sectors.size() > 0 , "Sector section is empty!");
+        check(world.things.size()  > 0 , "Thing section is empty!");
+
+        // Check surface indices are in bounds
+        for (std::size_t i = 0; i < world.georesource.surfaces.size(); i++)
+        {
+            const Surface& surf = world.georesource.surfaces[i];
+            if (int32_t matIdx = surf.matIdx.value_or(-1); matIdx > -1)
+            {
+                // Check mat index is in bounds
+                if (isStaticResource(matIdx)) {
+                    check(getStaticResourceIdx(matIdx) < staticResources.materials.size(),
+                        "The static material index % of surface % is out of bounds (size=%)!",
+                        getStaticResourceIdx(matIdx), i, staticResources.materials.size()
+                    );
+                }
+                else
+                {
+                    check(matIdx< world.materials.second.size(),
+                        "The material index % of surface % is out of bounds (size=%)!",
+                        matIdx, i, world.materials.second.size()
+                    );
+                }
+            }
+
+            // Check surface adjoin index
+            if (surf.adjoinIdx.has_value())
+            {
+                check(surf.adjoinIdx.value() < world.georesource.adjoins.size(),
+                    "The adjoin index % of surface % is out of bounds (size=%)!",
+                    surf.adjoinIdx.value(), i, world.georesource.adjoins.size()
+                );
+            }
+
+            // Check surface vertices
+            check(surf.vecIntensities.size() == surf.vertices.size(),
+                "The number of vertex intensities % of surface % does not match the number of surface vertices %!",
+                surf.vecIntensities.size(), i, surf.vertices.size()
+            );
+
+            for (const auto& vert : surf.vertices)
+            {
+                // Check vertex indices are in bounds
+                check(vert.vertIdx < world.georesource.vertices.size(),
+                    "The vertex index % of surface % is out of bounds (size=%)!",
+                    vert.vertIdx, i, world.georesource.vertices.size()
+                );
+
+                // Check texture vertex indices are in bounds
+                check(!vert.uvIdx.has_value() || vert.uvIdx.value() < world.georesource.texVertices.size(),
+                    "The texture vertex index % of surface % is out of bounds (size=%)!",
+                    vert.uvIdx.value(), i, world.georesource.texVertices.size()
+                );
+            }
+        }
+    }
 
     /**
      * Loads CND file from path and converts it to NDY file format
@@ -195,6 +304,120 @@ namespace cndtool {
             deleteFile(ndyPath);
             return false;
         }
+    }
+
+    void ndyParseSection(std::string_view section, TextResourceReader& rr, const VirtualFileSystem& vfs, NdyWorld& world)
+    {
+        try
+        {
+            LOG_DEBUG("Parsing NDY section: %", section);
+            if (iequal(section, NDY::kSectionCopyright))
+            {
+                if (!NDY::parseSection_Copyright(rr)) {
+                    throw std::runtime_error("Invalid NDY file copyright!");
+                }
+            }
+            else if (iequal(section, NDY::kSectionHeader)) {
+                world.header = NDY::parseSection_Header(rr);
+            }
+            else if (iequal(section, NDY::kSectionSounds)) {
+                world.sounds = NDY::parseSection_Sounds(rr);
+            }
+            else if (iequal(section,NDY::kSectionMaterials)) {
+                world.materials = NDY::parseSection_Materials(rr);
+            }
+            else if (iequal(section, NDY::kSectionGeoresource)) {
+                world.georesource = NDY::parseSection_Georesource(rr);
+            }
+            else if (iequal(section, NDY::kSectionSectors)) {
+                world.sectors = NDY::parseSection_Sectors(rr);
+            }
+            else if (iequal(section, NDY::kSectionAIClass)) {
+                world.aiClasses = NDY::parseSection_AIClasses(rr);
+            }
+            else if (iequal(section, NDY::kSectionModels)) {
+                world.models = NDY::parseSection_Models(rr);
+            }
+            else if (iequal(section, NDY::kSectionSprites)) {
+                world.sprites = NDY::parseSection_Sprites(rr);
+            }
+            else if (iequal(section, NDY::kSectionKeyframes)) {
+                world.keyframes = NDY::parseSection_Keyframes(rr);
+            }
+            else if (iequal(section, NDY::kSectionAnimClass)) {
+                world.animClasses = NDY::parseSection_AnimClasses(rr);
+            }
+            else if (iequal(section, NDY::kSectionSoundClass)) {
+                world.soundClasses = NDY::parseSection_SoundClasses(rr);
+            }
+            else if (iequal(section,  NDY::kSectionCogScripts)) {
+                world.cogScripts = NDY::parseSection_CogScripts(rr);
+            }
+            else if (iequal(section, NDY::kSectionCogs))
+            {
+                // Load scripts from files
+                auto scripts = loadCogScripts(vfs, world.cogScripts.second, /*bFixCogScripts=*/true);
+                world.cogs = NDY::parseSection_Cogs(rr, scripts);
+                verifyCogs(world.cogs.second);
+            }
+            else if (iequal(section, NDY::kSectionTemplates)) {
+                world.templates = NDY::parseSection_Templates(rr);
+            }
+            else if (iequal(section, NDY::kSectionThings)) {
+                world.things = NDY::parseSection_Things(rr, world.templates.second);
+            }
+            else if (iequal(section, NDY::kSectionPVS)) {
+                world.pvs = NDY::parseSection_PVS(rr, world.sectors);
+            }
+            else
+            {
+                auto loc = rr.currentLocation();
+                LOG_INFO("%:%:%: Skipping unknown section '%'", loc.filename, loc.firstLine, loc.firstColumn, section);
+            }
+        }
+        catch (const SyntaxError& e)
+        {
+            auto loc = e.location();
+            throw std::runtime_error(
+                utils::format("%:%:%: Syntax error encountered while parsing NDY section '%': %", loc.filename, loc.firstLine, loc.firstColumn, section, e.what())
+            );
+        }
+        catch (const std::exception& e)
+        {
+            auto loc = rr.currentLocation();
+            throw std::runtime_error(
+                utils::format("%:%:%: An exception encountered while parsing NDY section '%': %", loc.filename, loc.firstLine, loc.firstColumn, section, e.what())
+            );
+        }
+    }
+
+    NdyWorld ndyReadFile(const fs::path& ndyPath, const VirtualFileSystem& vfs)
+    {
+        InputFileStream ndyStream(ndyPath);
+        TextResourceReader ndytrr(ndyStream);
+
+        NdyWorld world{};
+
+        AT_SCOPE_EXIT([&ndytrr, reol = ndytrr.reportEol()]{
+            ndytrr.setReportEol(reol);
+        });
+        ndytrr.setReportEol(false);
+
+        Token tkn;
+        std::string section; // having this here avoids deallocation of the string on each iteration
+        while (ndytrr.peekNextToken(tkn))
+        {
+            if (!iequal(tkn.value(), kResName_Section))
+            {
+                ndytrr.skipNextToken();
+                continue;
+            }
+
+            section = std::string(ndytrr.readSection());
+            ndyParseSection(section, ndytrr, vfs, world);
+        }
+
+        return world;
     }
 }
 

@@ -32,6 +32,10 @@ namespace cndtool {
     constexpr inline std::size_t kSoundbankStaticTrackIdx  = 0;
     constexpr inline std::size_t kSoundbankNormalTrackIdx  = 1;
 
+    // limits
+    constexpr inline std::size_t kMaxTemplates = 1024;
+    constexpr inline std::size_t kMaxThings    = 2304;
+
     constexpr static std::string_view kAnimationDir1 = "3do/key";
     constexpr static std::string_view kAnimationDir2 = "key";
     constexpr static std::string_view kCogScriptDir  = "cog";
@@ -151,6 +155,22 @@ namespace cndtool {
             }
         }
     }
+
+    template<typename SetT>
+    void filterStringList(std::vector<std::string>& list, const SetT& filter)
+    {
+        if (filter.size() == 0) {
+            return;
+        }
+
+        list.erase(
+            std::remove_if(list.begin(), list.end(), [&filter](const auto& str) {
+                return filter.contains(str);
+            }),
+            list.end()
+        );
+    }
+
     struct StaticResourceNames
     {
         std::string filename; //The name of the file containing the static resource names

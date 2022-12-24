@@ -29,10 +29,10 @@
 #include <libim/types/safe_cast.h>
 
 #include "config.h"
+#include "cnd.h"
 #include "cndtoolargs.h"
 #include "ndy.h"
 #include "obj.h"
-#include "patch.h"
 
 using namespace cmdutils;
 using namespace cndtool;
@@ -62,6 +62,7 @@ constexpr static auto cmdHelp    = "help"sv;
 
 constexpr static auto scmdAnimation = "animation"sv;
 constexpr static auto scmdMaterial  = "material"sv;
+constexpr static auto scmdCnd       = "cnd"sv;
 constexpr static auto scmdNdy       = "ndy"sv;
 constexpr static auto scmdObj       = "obj"sv;
 
@@ -72,7 +73,7 @@ constexpr static auto optExtractLod            = "--mat-mipmap"sv;
 constexpr static auto optMaxTex                = "--mat-max-tex"sv;
 constexpr static auto optMaterials             = "--mat"sv;
 constexpr static auto optNoAnimations          = "--no-key"sv;
-constexpr static auto optNoMaterials        = "--no-mat"sv;
+constexpr static auto optNoCleanup             = "--no-cleanup"sv;
 constexpr static auto optNoMaterials           = "--no-mat"sv;
 constexpr static auto optNoSounds              = "--no-sound"sv;
 constexpr static auto optNoTemplates           = "--no-template"sv;
@@ -85,8 +86,8 @@ constexpr static auto optReplaceShort          = "-r"sv;
 constexpr static auto optSounds                = "--sound"sv;
 constexpr static auto optSoundStartHandle      = "--sound-handle"sv;
 constexpr static auto optSoundStartHandleShort = "-h"sv;
-constexpr static auto optConvertToWavShort  = "-w"sv;
-constexpr static auto optExportSoundbank    = "--soundbank"sv;
+constexpr static auto optStatic                = "--static"sv;
+constexpr static auto optStrict                = "--strict"sv;
 constexpr static auto optVerbose               = "--verbose"sv;
 constexpr static auto optVerboseShort          = "-v"sv;
 constexpr static auto optConvertToWav          = "--sound-wav"sv;
@@ -199,7 +200,26 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
     }
     else if (cmd == cmdConvert)
     {
-        if (subcmd == scmdNdy)
+        if (subcmd == scmdCnd)
+        {
+            std::cout << "Convert NDY level file(s) to CND file format." << std::endl << std::endl;
+            std::cout << "  Usage: cndtool convert cnd [options] <ndy-file-path|ndy-folder> <game-assets-folder>" << std::endl << std::endl;
+            printOptionHeader();
+            printOption( optSoundStartHandle , optSoundStartHandleShort , "Start sound handle."                                                       );
+            printOption( ""                  , ""                       , "By default 349 for normal and 0 for static CND file.\n"                    );
+
+            printOption( optNoCleanup        , ""                       , "Don't remove static game assets from jones3dstatic."                       );
+            printOption( ""                  , ""                       , utils::format("Has no effect if % is set.\n", optStatic)                    );
+
+            printOption( optStatic           , ""                       , "NDY file is static file, i.e. game assets container (jones3dstatic.cnd)."  );
+            printOption( ""                  , ""                       , "This option is not supported for batch mode.\n"                            );
+
+            printOption( optStrict           , ""                       , "Verify all required sections are set and valid.\n"                         );
+
+            printOption( optOutputDir        , optOutputDirShort        , "Output folder"                                                             );
+            printOption( optVerbose          , optVerboseShort          , "Verbose printout to the console"                                           );
+        }
+        else if (subcmd == scmdNdy)
         {
             std::cout << "Convert CND level file(s) to NDY file format." << std::endl << std::endl;
             std::cout << "  Usage: cndtool convert ndy [options] <cnd-file-path|cnd-folder> <cog-scripts-folder>" << std::endl << std::endl;
@@ -224,6 +244,7 @@ void printHelp(std::string_view cmd = "sv", std::string_view subcmd = ""sv)
             std::cout << "Convert CND level file to another format." << std::endl << std::endl;
             std::cout << "  Usage: cndtool convert <sub-command> " << std::endl << std::endl;
             printSubCommandHeader();
+            printSubCommand( scmdCnd, "Convert NDY to CND file format." );
             printSubCommand( scmdNdy, "Convert CND to NDY file format." );
             printSubCommand( scmdObj, "Extract level geometry and convert to Wavefront OBJ file format." );
         }
@@ -821,6 +842,127 @@ int execCmdExtract(const CndToolArgs& args)
     }
 }
 
+int execSubCmdConvertToCnd(const CndToolArgs& args)
+{
+    try
+    {
+        // Get NDY file path or folder path
+        fs::path ndyPath = args.ndyFile();
+        if (ndyPath.empty())
+        {
+            if (!args.cndFile().empty())
+            {
+                printError("Positional argument is CND file but NDY file is required!\n");
+                return 1;
+            }
+
+            // Get folder
+            ndyPath = !args.subcmd().empty() && args.positionalArgs().size() > 0
+                ? args.positionalArgs().at(0)
+                : args.positionalArgs().size() > 1
+                    ? args.positionalArgs().at(1)
+                    : fs::path();
+
+        }
+
+        if (ndyPath.empty() || !fileExists(ndyPath) && !dirExists(ndyPath))
+        {
+            printError("Invalid positional argument for input NDY file path or folder path!\n");
+            printHelp(cmdConvert, scmdCnd);
+            return 1;
+        }
+
+        std::vector<fs::path> ndyFiles = getFilesFromPath(ndyPath, kExtNdy);
+        if (ndyFiles.empty())
+        {
+            if (fileExists(ndyPath)) {
+                printError("Positional argument is not a valid NDY file!\n");
+            }
+            else {
+                printError("No NDY file(s) found in specified folder!\n");
+            }
+            return 1;
+        }
+
+        if (args.positionalArgs().empty())
+        {
+            printError("Missing positional argument for game assets folder!\n");
+            return 1;
+        }
+
+        fs::path resourceDir = args.positionalArgs().at(0);
+        if (args.ndyFile().empty()) {
+            resourceDir = !args.subcmd().empty() && args.positionalArgs().size() > 1
+                ? args.positionalArgs().at(1)
+                : args.positionalArgs().size() > 2
+                    ? args.positionalArgs().at(2)
+                    : fs::path();
+        }
+
+        if (!isDirPath(resourceDir) || !dirExists(resourceDir))
+        {
+            printError("Game assets path is not directory!\n");
+            return 1;
+        }
+
+        if (!isDirPath(getOptOutputDir(args)))
+        {
+            printError("Output path is not directory!\n");
+            return 1;
+        }
+
+        VirtualFileSystem vfs;
+        vfs.addSysFolder(resourceDir);
+        if (!vfs.tryLoadGobContainer(resourceDir / "cd1.gob")) {
+            vfs.tryLoadGobContainer(resourceDir / "Resource\\cd1.gob");
+        }
+
+        if (!vfs.tryLoadGobContainer(resourceDir / "cd2.gob")) {
+            vfs.tryLoadGobContainer(resourceDir / "Resource\\cd2.gob");
+        }
+
+        const bool staticCnd = args.hasArg(optStatic);
+        if (ndyFiles.size() > 1 && staticCnd)
+        {
+            printError("Option '%' can't be used in batch mode!", optStatic);
+            return 1;
+        }
+
+        const bool verify  = args.hasArg(optStrict);
+        const bool cleanUp = !args.hasArg(optNoCleanup);
+
+        SoundHandle sndStartHandle = getDefaultStartSoundHandle(staticCnd);
+        if (args.hasArg(optSoundStartHandle)){
+            sndStartHandle = SoundHandle(args.uintArg(optSoundStartHandle));
+        }
+        else if (args.hasArg(optSoundStartHandleShort)){
+            sndStartHandle = SoundHandle(args.uintArg(optSoundStartHandleShort));
+        }
+
+        // Init static resources
+        StaticResourceNames staticResources;
+        staticResources.setDefault();
+
+        /* Extract animations, materials & sounds */
+        for (const auto& ndyFile : ndyFiles)
+        {
+            if (ndyFiles.size() > 1) std::cout << "\nConverting to CND: " << ndyFile.filename().string() << std::endl;
+            auto ndyOutDir = getOptOutputDir(args, ndyFile.stem());
+            makePath(ndyOutDir);
+            convertNdyToCnd(ndyFile, vfs, staticResources, ndyOutDir, sndStartHandle, staticCnd, verify, cleanUp, hasOptVerbose(args));
+        }
+
+        return 0;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << std::endl;
+        printError("Failed to convert NDY file(s) to CND format!");
+        std::cerr << "       Reason: " << e.what() << std::endl;
+        return 1;
+    }
+}
+
 int execSubCmdConvertToNdy(const CndToolArgs& args)
 {
     try
@@ -981,7 +1123,10 @@ int execSubCmdConvertToObj(const CndToolArgs& args)
 
 int execCmdConvert(std::string_view scmd, const CndToolArgs& args)
 {
-    if (scmd == scmdNdy) {
+    if (scmd == scmdCnd) {
+        return execSubCmdConvertToCnd(args);
+    }
+    else if (scmd == scmdNdy) {
         return execSubCmdConvertToNdy(args);
     }
     else if (scmd == scmdObj) {

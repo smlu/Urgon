@@ -1,7 +1,7 @@
 project(
     ${PM_CNDTOOL}
     LANGUAGES CXX
-    VERSION 0.6.0
+    VERSION 0.7.0
     HOMEPAGE_URL ${CMAKE_PROJECT_HOMEPAGE_URL}
 )
 
@@ -11,8 +11,11 @@ set(CNDTOOL_SRC_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/config.h"
     "cndtoolargs.h"
     "main.cpp"
+    "cnd.h"
+    "ndy.h"
     "obj.h"
-    "patch.h"
+    "resource.h"
+
 )
 
 add_executable( ${PROJECT_NAME}

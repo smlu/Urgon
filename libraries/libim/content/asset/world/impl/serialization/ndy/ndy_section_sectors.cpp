@@ -30,7 +30,6 @@ static constexpr auto kVertices        = "VERTICES"sv;
 static constexpr auto kSurfaces        = "SURFACES"sv;
 
 
-
 std::vector<Sector> NDY::parseSection_Sectors(TextResourceReader& rr)
 {
     return rr.readList<std::vector<Sector>, /*hasRowIdxs=*/false>(kWorldSectors, [](TextResourceReader& rr, auto rowIdx, Sector& s){
@@ -38,7 +37,7 @@ std::vector<Sector> NDY::parseSection_Sectors(TextResourceReader& rr)
         [[maybe_unused]] auto sidx = rr.readKey<std::size_t>(kSector); // discard sector number
         assert(sidx == s.id && "ParseSection_Sectors: sidx == s.id");
 
-        s.flags = rr.readKey<decltype(s.flags)>(kFlags);
+        s.flags        = rr.readKey<decltype(s.flags)>(kFlags);
         s.ambientLight = makeLinearColor(rr.readKey<LinearColorRgb>(kAmbientLight), 1.0f);
         s.extraLight   = makeLinearColor(rr.readKey<LinearColorRgb>(kExtraLight), 1.0f);
 

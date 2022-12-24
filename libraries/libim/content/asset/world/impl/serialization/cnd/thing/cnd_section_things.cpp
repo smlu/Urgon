@@ -347,11 +347,8 @@ void writeThingList(OutputStream& ostream, const Container& c, const IndexMap<Cn
             hit->rdThingFilename = CndResourceName{}; // Empty string
         }
 
-        // Remove 3DO model, sprite or particle filename
-        // if it's the same as the template
-        if (hit->rdThingType == CndRdThingType::RdModel ||
-            hit->rdThingType == CndRdThingType::RdSprite ||
-            hit->rdThingType == CndRdThingType::RdParticle) {
+        // Remove 3DO model if it's the same as the template
+        if (hit->rdThingType == CndRdThingType::RdModel) {
             if (pTemplate && pTemplate->rdThingFilename == hit->rdThingFilename) {
                 hit->rdThingFilename = CndResourceName{}; // Empty string
             }

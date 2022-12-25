@@ -1,5 +1,5 @@
 set(PNG_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libpng/" "${CMAKE_CURRENT_BINARY_DIR}/libpng/"  CACHE PATH "Path to png.h folder")
-set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/zlib/zlib" CACHE PATH "Path to zlib.h folder")
+set(ZLIB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/zlib/zlib" CACHE PATH "Path to zlib.h folder")
 
 #libpng
 set(PNG_SHARED OFF CACHE BOOL "Build shared lib")

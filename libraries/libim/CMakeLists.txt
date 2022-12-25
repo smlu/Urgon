@@ -25,7 +25,7 @@ add_library(${PROJECT_NAME} STATIC
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC "../")
-target_include_directories(${PROJECT_NAME} PUBLIC ${ZLIB_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${ZLIB_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PNG_INCLUDE_DIR})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX  "")

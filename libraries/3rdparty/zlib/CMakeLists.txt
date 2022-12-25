@@ -3,9 +3,9 @@
 cmake_minimum_required(VERSION 3.0.0)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
-project(zlib LANGUAGES C VERSION 1.2.11)
+project(zlib LANGUAGES C VERSION 1.2.13)
 
-set(VERSION "1.2.11")
+set(VERSION "1.2.13")
 set(ZLIB_SRC zlib)
 set(CMAKE_CURRENT_SOURCE_DIR ${ZLIB_SRC})
 

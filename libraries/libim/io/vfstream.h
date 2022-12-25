@@ -74,7 +74,7 @@ namespace libim {
             return nRead;
         }
 
-        virtual std::size_t writesome(const byte_t* data, std::size_t length) override
+        virtual std::size_t writesome(const byte_t*, std::size_t) override
         {
             throw VirtualFileError("Can't write into virtual file");
         }

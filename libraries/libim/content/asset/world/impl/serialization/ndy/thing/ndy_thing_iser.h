@@ -6,6 +6,7 @@
 #include "../../world_ser_common.h"
 
 #include <libim/types/optref.h>
+#include <libim/types/safe_cast.h>
 #include <libim/utils/traits.h>
 
 #include <map>
@@ -32,9 +33,7 @@ namespace libim::content::asset {
         }
         catch (...)
         {
-            try
-            {
-                auto& loc = val.location();
+            try {
                 return makeLinearColor(LinearColorRgb(val.value(), /*strict=*/true), /*alpha=*/0.0f);
             }
             catch (...) {
@@ -109,6 +108,9 @@ namespace libim::content::asset {
                     case Thing::Polyline:
                         thing.controlType = CndThingControlType::Plot;
                         break;
+
+                    default: // No extra handling for Free, Camera, Ghost, Debris, Corpse
+                        break;
                 }
                 return true;
 
@@ -132,6 +134,8 @@ namespace libim::content::asset {
                         if (!std::holds_alternative<PathInfo>(thing.moveInfo)) {
                             thing.moveInfo = PathInfo{};
                         }
+                        break;
+                    default: // skip none
                         break;
                 }
                 return true;
@@ -176,13 +180,13 @@ namespace libim::content::asset {
                 thing.rdThingType     = CndRdThingType::RdModel;
                 thing.rdThingFilename = CndResourceName(value.value());
 
-                if (thing.collide.unkWidth == 0.0 )
+                if (thing.collide.unkWidth == 0.0f )
                 {
                     thing.collide.collideWidth = thing.collide.movesize;
                     thing.collide.unkWidth     = thing.collide.movesize;
                 }
 
-                if (thing.collide.unkHeight == 0.0 )
+                if (thing.collide.unkHeight == 0.0f )
                 {
                     thing.collide.collideWidth = thing.collide.movesize;
                     thing.collide.unkHeight    = thing.collide.movesize;
@@ -227,7 +231,7 @@ namespace libim::content::asset {
                 {
                     value.setType(Token::FloatNumber); // force float token
                     auto movesize = value.getNumber<decltype(thing.collide.movesize)>();
-                    if (movesize < 0.0) {
+                    if (movesize < 0.0f) {
                         throw SyntaxError("Bad movesize value"sv, value.location());
                     }
                     thing.collide.movesize = movesize;
@@ -247,7 +251,7 @@ namespace libim::content::asset {
                 static_assert(std::is_same_v<CndHintUserVal, float>);
                 value.setType(Token::FloatNumber); // force float token
                 auto userval = value.getNumber<CndHintUserVal>();
-                if (userval < 0.0) {
+                if (userval < 0.0f) {
                     throw SyntaxError("Bad user value"sv, value.location());
                 }
                 thing.thingInfo = userval;
@@ -258,7 +262,7 @@ namespace libim::content::asset {
             {
                 value.setType(Token::FloatNumber); // force float token
                 auto height = value.getNumber<decltype(thing.collide.collideHeight)>();
-                if (height < 0.0) {
+                if (height < 0.0f) {
                     throw SyntaxError("Bad collheight value"sv, value.location());
                 }
                 thing.collide.collideHeight = height;
@@ -270,7 +274,7 @@ namespace libim::content::asset {
             {
                 value.setType(Token::FloatNumber); // force float token
                 auto width = value.getNumber<decltype(thing.collide.collideWidth)>();
-                if (width < 0.0) {
+                if (width < 0.0f) {
                     throw SyntaxError("Bad collwidth value"sv, value.location());
                 }
                 thing.collide.collideWidth = width;
@@ -309,7 +313,7 @@ namespace libim::content::asset {
             {
                 value.setType(Token::FloatNumber); // force float token
                 auto health = value.getNumber<decltype(actorInfo.health)>();
-                if (health < 0.0) {
+                if (health < 0.0f) {
                     throw SyntaxError("Bad actor health value"sv, value.location());
                 }
 
@@ -324,7 +328,7 @@ namespace libim::content::asset {
             {
                 value.setType(Token::FloatNumber); // force float token
                 auto maxThrust = value.getNumber<decltype(actorInfo.maxThrust)>();
-                if (maxThrust < 0.0) {
+                if (maxThrust < 0.0f) {
                     throw SyntaxError("Bad actor maxthrust value"sv, value.location());
                 }
                 actorInfo.maxThrust = maxThrust;
@@ -335,7 +339,7 @@ namespace libim::content::asset {
             {
                 value.setType(Token::FloatNumber); // force float token
                 auto maxRotThrust = value.getNumber<decltype(actorInfo.maxRotThrust)>();
-                if (maxRotThrust < 0.0) {
+                if (maxRotThrust < 0.0f) {
                     throw SyntaxError("Bad actor maxrotthrust value"sv, value.location());
                 }
                 actorInfo.maxRotThrust = maxRotThrust;
@@ -346,7 +350,7 @@ namespace libim::content::asset {
             {
                 value.setType(Token::FloatNumber); // force float token
                 auto maxHeadVelocity = value.getNumber<decltype(actorInfo.maxHeadVelocity)>();
-                if (maxHeadVelocity < 0.0) {
+                if (maxHeadVelocity < 0.0f) {
                     throw SyntaxError("Bad actor maxheadvel value"sv, value.location());
                 }
                 actorInfo.maxHeadVelocity = maxHeadVelocity;
@@ -357,7 +361,7 @@ namespace libim::content::asset {
             {
                 value.setType(Token::FloatNumber); // force float token
                 auto maxHeadYaw = value.getNumber<decltype(actorInfo.maxHeadYaw)>();
-                if (maxHeadYaw < 0.0) {
+                if (maxHeadYaw < 0.0f) {
                     throw SyntaxError("Bad actor maxheadyaw value"sv, value.location());
                 }
                 actorInfo.maxHeadYaw = maxHeadYaw;
@@ -368,7 +372,7 @@ namespace libim::content::asset {
             {
                 value.setType(Token::FloatNumber); // force float token
                 auto jumpSpeed = value.getNumber<decltype(actorInfo.jumpSpeed)>();
-                if (jumpSpeed < 0.0) {
+                if (jumpSpeed < 0.0f) {
                     throw SyntaxError("Bad actor jumpspeed value"sv, value.location());
                 }
                 actorInfo.jumpSpeed = jumpSpeed;
@@ -387,7 +391,7 @@ namespace libim::content::asset {
             {
                 value.setType(Token::FloatNumber); // force float token
                 auto maxHealth = value.getNumber<decltype(actorInfo.maxHealth)>();
-                if (maxHealth < 0.0) {
+                if (maxHealth < 0.0f) {
                     throw SyntaxError("Bad actor maxhealth value"sv, value.location());
                 }
                 actorInfo.maxHealth = maxHealth;
@@ -482,6 +486,9 @@ namespace libim::content::asset {
                 value.setType(Token::FloatNumber); // force float token
                 weaponInfo.rate = value.getNumber<decltype(weaponInfo.rate)>();
                 return true;
+
+            default:
+                break;
         }
         return false; // param not parsed
     }
@@ -506,6 +513,9 @@ namespace libim::content::asset {
                 value.setType(Token::FloatNumber); // force float token
                 itemInfo.secRespawnInterval = value.getNumber<decltype(itemInfo.secRespawnInterval)>();
                 return true;
+
+            default:
+                break;
         }
         return false; // param not parsed
     }
@@ -610,6 +620,9 @@ namespace libim::content::asset {
             case NdyThingParam::SpriteEnd:
                 explosionInfo.spriteEndPos = Vector3f(value.value(), /*strict=*/true);
                 return true;
+
+            default:
+                break;
         }
 
         return false; // param not parsed
@@ -698,6 +711,9 @@ namespace libim::content::asset {
                     throw SyntaxError("Bad particle yawrange value"sv, value.location());
                 }
                 return true;
+
+            default:
+                break;
         }
 
         return false; // param not parsed
@@ -814,11 +830,14 @@ namespace libim::content::asset {
                 physicsInfo.orientSpeed = orientSpeed;
                 return true;
             }
+
             case NdyThingParam::Buoyancy:
                 value.setType(Token::FloatNumber); // force float token
                 physicsInfo.buoyancy = value.getNumber<decltype(physicsInfo.buoyancy)>();
                 return true;
 
+            default:
+                break;
         }
 
         return false; // param not parsed
@@ -840,7 +859,7 @@ namespace libim::content::asset {
                     throw SyntaxError("Multiple numframes arguments found."sv, value.location());
                 }
                 value.setType(Token::Integer); // force integer token
-                pathInfo.pathFrames.reserve(value.getNumber<int>());
+                pathInfo.pathFrames.reserve(safe_cast<std::size_t>(value.getNumber<int>()));
                 return true;
 
             case NdyThingParam::Frame:
@@ -851,6 +870,9 @@ namespace libim::content::asset {
                 }
                 pathInfo.pathFrames.push_back(PathFrame(value.value()));
                 return true;
+
+            default:
+                break;
         }
 
         return false; // param not parsed
@@ -872,7 +894,7 @@ namespace libim::content::asset {
                     throw SyntaxError("Multiple AI numframes arguments found."sv, value.location());
                 }
                 value.setType(Token::Integer); // force integer token
-                aiInfo.pathFrames.reserve(value.getNumber<int>());
+                aiInfo.pathFrames.reserve(safe_cast<std::size_t>(value.getNumber<int>()));
                 return true;
 
             case NdyThingParam::Frame:
@@ -883,6 +905,9 @@ namespace libim::content::asset {
                 }
                 aiInfo.pathFrames.push_back(Vector3f(value.value(), /*strict=*/true));
                 return true;
+
+            default:
+                break;
         }
 
         return false; // param not parsed
@@ -928,6 +953,8 @@ namespace libim::content::asset {
                             break;
                         case Thing::Particle:
                             parsed = ndyParseParticleParam(it->second, vt, thing);
+                            break;
+                        default: // not extra parsing for : Free, Camera, Cog, Ghost, Debris, Corpse, Hint, Sprite, Polyline
                             break;
                     }
                 }

@@ -7,6 +7,7 @@
 #include "../../world_ser_common.h"
 #include "cnd_thing.h"
 
+#include <libim/types/safe_cast.h>
 #include <libim/utils/utils.h>
 
 using namespace libim;
@@ -282,7 +283,7 @@ void parseThingList(const InputStream& istream, std::size_t numThings, const Ind
             }
 
             if (aicit->numPathFrames > 0) {
-                aipfit = utils::copy(aipfit, aicit->numPathFrames, ai.pathFrames);
+                aipfit = utils::copy(aipfit, safe_cast<std::size_t>(aicit->numPathFrames), ai.pathFrames);
             }
 
             // Advance to next AIControlInfo

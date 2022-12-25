@@ -1,5 +1,6 @@
 #ifndef LIBIM_BINARYSTREAM_IMPL
 #define LIBIM_BINARYSTREAM_IMPL
+#include <libim/types/safe_cast.h>
 #include <libim/utils/traits.h>
 
 #include <functional>
@@ -121,7 +122,7 @@ namespace libim
     template<typename T, typename Iterator>
     std::size_t BinaryStream<T, Iterator>::size() const
     {
-        return std::distance(begin_, end_);
+        return safe_cast<std::size_t>(std::distance(begin_, end_));
     }
 
     template<typename T, typename Iterator>
@@ -149,7 +150,7 @@ namespace libim
     template<typename T, typename Iterator>
     std::size_t BinaryStream<T, Iterator>::tell() const
     {
-        return std::distance(begin_, pos_);
+        return safe_cast<std::size_t>(std::distance(begin_, pos_));
     }
 
     template<typename T, typename Iterator>

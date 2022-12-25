@@ -82,7 +82,7 @@ namespace libim::content::audio {
                 return *it;
             }
 
-            std::size_t numChannels, sampleRate,
+            uint32_t numChannels, sampleRate,
                         sampleBitSize, dataSize = 0;
             auto sndType = parseWavHeader(istream, numChannels, sampleRate, sampleBitSize, dataSize);
             if (sndType == SoundFormatType::Unknown) {
@@ -102,7 +102,7 @@ namespace libim::content::audio {
             });
 
             nameOffset += pathOffset;
-            const auto soundIdx = sounds.size();
+            const auto soundIdx = safe_cast<uint32_t>(sounds.size());
             const bool isCompressed = sndType == SoundFormatType::IndyWV;
 
             Sound snd(
@@ -111,7 +111,6 @@ namespace libim::content::audio {
                 sampleRate,
                 sampleBitSize,
                 numChannels,
-
                 data,
                 pathOffset,
                 nameOffset,

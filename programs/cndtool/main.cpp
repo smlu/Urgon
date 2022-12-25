@@ -624,7 +624,7 @@ std::size_t writeTemplates(const IndexMap<CndThing>& templates, const fs::path& 
     }
 
     std::size_t newTemplates = 0;
-    for (const auto [key, tmpl] : templates.container())
+    for (const auto& [key, tmpl] : templates.container())
     {
         if (!outTemplates.contains(key) || opt.templates.overwrite)
          {
@@ -776,13 +776,13 @@ int execCmdExtract(const CndToolArgs& args)
         fs::path input = args.cndFile();
         if (input.empty()) {
             input = !args.subcmd().empty()
-                ? args.subcmd()
+                ? fs::path(args.subcmd())
                 : !args.positionalArgs().empty()
-                    ? args.positionalArgs().at(0)
+                    ? fs::path(args.positionalArgs().at(0))
                     : fs::path();
         }
 
-        if (input.empty() || !fileExists(input) && !dirExists(input))
+        if (input.empty() || (!fileExists(input) && !dirExists(input)))
         {
             printError("Invalid positional argument for input CND file path or folder path!\n");
             printHelp(cmdExtract);
@@ -858,14 +858,14 @@ int execSubCmdConvertToCnd(const CndToolArgs& args)
 
             // Get folder
             ndyPath = !args.subcmd().empty() && args.positionalArgs().size() > 0
-                ? args.positionalArgs().at(0)
+                ? fs::path(args.positionalArgs().at(0))
                 : args.positionalArgs().size() > 1
-                    ? args.positionalArgs().at(1)
+                    ? fs::path(args.positionalArgs().at(1))
                     : fs::path();
 
         }
 
-        if (ndyPath.empty() || !fileExists(ndyPath) && !dirExists(ndyPath))
+        if (ndyPath.empty() || (!fileExists(ndyPath) && !dirExists(ndyPath)))
         {
             printError("Invalid positional argument for input NDY file path or folder path!\n");
             printHelp(cmdConvert, scmdCnd);
@@ -893,9 +893,9 @@ int execSubCmdConvertToCnd(const CndToolArgs& args)
         fs::path resourceDir = args.positionalArgs().at(0);
         if (args.ndyFile().empty()) {
             resourceDir = !args.subcmd().empty() && args.positionalArgs().size() > 1
-                ? args.positionalArgs().at(1)
+                ? fs::path(args.positionalArgs().at(1))
                 : args.positionalArgs().size() > 2
-                    ? args.positionalArgs().at(2)
+                    ? fs::path(args.positionalArgs().at(2))
                     : fs::path();
         }
 
@@ -914,11 +914,11 @@ int execSubCmdConvertToCnd(const CndToolArgs& args)
         VirtualFileSystem vfs;
         vfs.addSysFolder(resourceDir);
         if (!vfs.tryLoadGobContainer(resourceDir / "cd1.gob")) {
-            vfs.tryLoadGobContainer(resourceDir / "Resource\\cd1.gob");
+            vfs.tryLoadGobContainer(resourceDir / "Resource" / "cd1.gob");
         }
 
         if (!vfs.tryLoadGobContainer(resourceDir / "cd2.gob")) {
-            vfs.tryLoadGobContainer(resourceDir / "Resource\\cd2.gob");
+            vfs.tryLoadGobContainer(resourceDir / "Resource" / "cd2.gob");
         }
 
         const bool staticCnd = args.hasArg(optStatic);
@@ -978,13 +978,13 @@ int execSubCmdConvertToNdy(const CndToolArgs& args)
 
             // Get folder path
             cndPath = !args.subcmd().empty() && args.positionalArgs().size() > 0
-                ? args.positionalArgs().at(0)
+                ? fs::path(args.positionalArgs().at(0))
                 : args.positionalArgs().size() > 1
-                    ? args.positionalArgs().at(1)
+                    ? fs::path(args.positionalArgs().at(1))
                     : fs::path();
         }
 
-        if (cndPath.empty() || !fileExists(cndPath) && !dirExists(cndPath))
+        if (cndPath.empty() || (!fileExists(cndPath) && !dirExists(cndPath)))
         {
             printError("Invalid positional argument for input CND file path or folder path!\n");
             printHelp(cmdConvert, scmdNdy);
@@ -1012,9 +1012,9 @@ int execSubCmdConvertToNdy(const CndToolArgs& args)
         fs::path resourceDir = args.positionalArgs().at(0);
         if (args.cndFile().empty()) {
             resourceDir = !args.subcmd().empty() && args.positionalArgs().size() > 1
-                ? args.positionalArgs().at(1)
+                ? fs::path(args.positionalArgs().at(1))
                 : args.positionalArgs().size() > 2
-                    ? args.positionalArgs().at(2)
+                    ? fs::path(args.positionalArgs().at(2))
                     : fs::path();
         }
 
@@ -1033,11 +1033,11 @@ int execSubCmdConvertToNdy(const CndToolArgs& args)
         VirtualFileSystem vfs;
         vfs.addSysFolder(resourceDir);
         if (!vfs.tryLoadGobContainer(resourceDir / "cd1.gob")) {
-            vfs.tryLoadGobContainer(resourceDir / "Resource\\cd1.gob");
+            vfs.tryLoadGobContainer(resourceDir / "Resource" / "cd1.gob");
         }
 
         if (!vfs.tryLoadGobContainer(resourceDir / "cd2.gob")) {
-            vfs.tryLoadGobContainer(resourceDir / "Resource\\cd2.gob");
+            vfs.tryLoadGobContainer(resourceDir / "Resource" / "cd2.gob");
         }
 
         ExtractOptions eopt;

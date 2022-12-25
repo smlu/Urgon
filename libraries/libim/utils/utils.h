@@ -318,8 +318,9 @@ namespace libim::utils {
     [[nodiscard]] inline bool iends_with(const std::string& s, std::string_view x)
     {
         auto it = x.begin();
+        using it_diff_t = typename std::iterator_traits<decltype(s.begin())>::difference_type;
         return s.size() >= x.size() &&
-            std::all_of(std::next(s.begin(), s.size() - x.size()), s.end(),
+            std::all_of(std::next(s.begin(), safe_cast<it_diff_t>(s.size() - x.size())), s.end(),
                 [&it](const char & c){
                     return ::tolower(c) == ::tolower(*(it++));
             });
@@ -482,8 +483,7 @@ namespace libim::utils {
         DT num;
         if(!to_number(strnum, num, base))
         {
-            using namespace std::string_view_literals;
-            throw std::ios_base::failure("invalid numeric conversion from string"sv);
+            throw std::ios_base::failure("invalid numeric conversion from string");
         }
         return num;
     }
@@ -497,7 +497,7 @@ namespace libim::utils {
      * @param args        - arguments to format message.
      */
     template<typename ExceptionT = std::runtime_error, typename... Args>
-    inline const void check(bool pred, const char* message,  Args&&... args)
+    inline void check(bool pred, const char* message,  Args&&... args)
     {
         if(!pred)
         {
@@ -505,7 +505,7 @@ namespace libim::utils {
             auto msg = utils::format(message, std::forward<Args>(args)...);
             throw ExceptionT(msg);
         }
-    };
+    }
 }
 
 #endif // LIBIM_UTILS_H

@@ -7,9 +7,9 @@
 #include <libim/io/binarystream.h>
 #include <libim/io/stream.h>
 #include <libim/math/abstract_vector.h>
+#include <libim/types/flags.h>
 #include <libim/utils/traits.h>
 #include <libim/utils/utils.h>
-#include <libim/types/flags.h>
 
 #include <array>
 #include <cmath>
@@ -147,7 +147,20 @@ namespace libim::content::text {
                 std::ostringstream ss;
                 ss << commentChar() << spaceChar();
                 utils::ssprintf(ss, comment, std::forward<Args&&>(args)...);
+
+            #if defined(__GNUC__) && __GNUC__  < 11
+                // This is hack to get pointer to the underlying buffer and avoid copying.
+                using ostrbuf = std::basic_stringbuf<std::ostringstream::char_type,
+                    std::ostringstream::traits_type, std::ostringstream::allocator_type>;
+                struct ssb : public ostrbuf{
+                    char* pbase() const { return ostrbuf::pbase(); }
+                };
+                const auto s = ss.tellp();
+                ostream_ << std::string_view(reinterpret_cast<const ssb*>(ss.rdbuf())->pbase(), s);
+            #else 
                 ostream_ << ss.view();
+            #endif
+                
                 writeEol();
             }
             return *this;

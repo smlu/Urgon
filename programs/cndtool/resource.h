@@ -133,7 +133,7 @@ namespace cndtool {
                     continue;
                 }
 
-                const auto getValue = [&]() -> const CogSymbolValue&
+                const auto getValue = [](const auto& cog, auto cidx, const auto& sym) -> const CogSymbolValue&
                 {
                     try {
                         return sym.valueOrDefault(cog->vtid);
@@ -145,7 +145,7 @@ namespace cndtool {
                     }
                 };
 
-                if (!is_valid_raw_init_value(sym.type, getValue())) {
+                if (!is_valid_raw_init_value(sym.type, getValue(cog, cidx, sym))) {
                     throw std::runtime_error(
                         utils::format("COG at index % has invalid value for non-local symbol '%' of type %",
                             cidx, sym.name, cogGetSymbolTypeName(sym.type)

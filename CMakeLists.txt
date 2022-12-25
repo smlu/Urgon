@@ -37,9 +37,9 @@ if(WIN32)
             -fvisibility=hidden
             -fPIC
             -pipe
-            "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion;-Wsign-conversion>"
+            "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion;-Wsign-conversion;-Wno-unused-function>"
         )
-        add_link_options("$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-static>")
+        add_link_options("$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-static;-s>")
     else(MSVC)
         if(MSVC_VERSION LESS 1914 AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
             message(FATAL_ERROR "Only Visual Studio 2017 version 15.7 or newer is supported!")
@@ -67,9 +67,9 @@ elseif(NOT WIN32)
         -fPIC
         -pipe
         "$<$<CXX_COMPILER_ID:Clang>:-Waddress-of-temporary;-Wthread-safety>"
-        "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion;-Wsign-conversion>"
+        "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion;-Wsign-conversion;-Wno-unused-function>"
     )
-    add_link_options("$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-static>")
+    add_link_options("$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-static;-s>")
 endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")

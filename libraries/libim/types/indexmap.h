@@ -119,7 +119,6 @@ namespace libim {
             for (auto&& [key, value] : ilist) {
                 pushBack(std::move(key), std::move(value));
             }
-            return *this;
         }
 
         IndexMap& operator = (std::initializer_list<std::pair<key_type, value_type>> ilist)
@@ -297,7 +296,7 @@ namespace libim {
          * @param key - The r-value key to mapped element.
          * @return A reference to the mapped element.
          */
-        template<typename = std::enable_if_t<!isStringKey>>
+        template<typename K = KeyT, typename = std::enable_if_t<!utils::isStdString<K>>>
         reference operator[](key_rvalue_reference key)
         {
             auto it = map_.find(key);
@@ -380,7 +379,7 @@ namespace libim {
          *
          * @throw std::out_of_range if the index is out of range.
          */
-        template<typename = std::enable_if_t<!isStringKey>>
+        template<typename K = KeyT, typename = std::enable_if_t<!utils::isStdString<K>>>
         const key_type& key(Idx idx) const
         {
             return index_.at(idx)->first;
@@ -461,8 +460,9 @@ namespace libim {
                 pos = isEmpty() ? 0 : size();
             }
 
+            using it_diff_t = typename std::iterator_traits<decltype(index_.begin())>::difference_type;
             auto it = data_.end();
-            auto iit = index_.begin() + pos;
+            auto iit = index_.begin() + safe_cast<it_diff_t>(pos);
             if (iit != index_.end()) {
                 it = data_.insert(*iit, { moveOrConstructKey(key), value });
             }
@@ -498,8 +498,9 @@ namespace libim {
                 pos = isEmpty() ? 0 : size();
             }
 
+            using it_diff_t = typename std::iterator_traits<decltype(index_.begin())>::difference_type;
             auto it  = data_.end();
-            auto iit = index_.begin() + pos;
+            auto iit = index_.begin() + safe_cast<it_diff_t>(pos);
             if (iit != index_.end()) {
                 it = data_.insert(*iit, { moveOrConstructKey(key), std::move(value) });
             }
@@ -718,7 +719,7 @@ namespace libim {
 
         Idx getItrIdx(typename ContainerType::const_iterator itr) const
         {
-            return std::distance(data_.begin(), itr);
+            return safe_cast<Idx>(std::distance(data_.begin(), itr));
         }
 
         iterator eraseByIdx(Idx idx)
@@ -726,9 +727,10 @@ namespace libim {
             auto it = end();
             if (idx < index_.size())
             {
+                using it_diff_t = typename std::iterator_traits<decltype(index_.begin())>::difference_type;
                 it = index_.at(idx);
                 map_.erase(it.it_->first);
-                index_.erase(index_.begin() + idx);
+                index_.erase(index_.begin() + safe_cast<it_diff_t>(idx));
                 it = data_.erase(it.it_);
             }
 

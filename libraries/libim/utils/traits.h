@@ -4,6 +4,7 @@
 #include <libim/types/typemask.h>
 
 #include <array>
+#include <memory>
 #include <span>
 #include <type_traits>
 #include <vector>
@@ -26,6 +27,14 @@ namespace libim::utils {
         template <class C>
         struct has_push_back<C,
                 std::void_t<decltype(std::declval<C>().push_back(typename C::value_type{}))>>
+            : std::true_type{};
+            
+        template <class T, class=void>
+        struct has_pushBack : std::false_type{};
+
+        template <class C>
+        struct has_pushBack<C,
+                std::void_t<decltype(std::declval<C>().pushBack(typename C::value_type{}))>>
             : std::true_type{};
 
         template <class T, class=void>
@@ -97,9 +106,8 @@ namespace libim::utils {
         template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
     }
 
-
-    // Poor man's concepts
-
+    /* Poor man's concepts */
+    
     template <class Container>
     using requires_container = std::void_t<
         decltype(std::declval<Container const>().size()),
@@ -118,6 +126,10 @@ namespace libim::utils {
     // Does C have member function 'push_back'
     template<typename C>
     constexpr bool has_mf_push_back = detail::has_push_back<C>::value;
+    
+    // Does C have member function 'pushBack'
+    template<typename C>
+    constexpr bool has_mf_pushBack = detail::has_pushBack<C>::value;
 
     // Does C have no positional member function 'insert'
     template<typename C>
@@ -126,6 +138,14 @@ namespace libim::utils {
     // Does C have member function 'reserve'
     template<typename C>
     constexpr bool has_mf_reserve = detail::has_reserve<C>::value;
+    
+    // Is T of type Flags
+    template<typename T>
+    constexpr bool isFlags = detail::is_flags<T>::value;
+    
+     // Is T of type TypeMask
+    template<typename T>
+    constexpr bool isTypeMask = detail::is_typemask<T>::value;
 
      // is T of type enum or Flags or TypeMask
     template<typename T>
@@ -135,9 +155,6 @@ namespace libim::utils {
     template<typename T>
     constexpr bool isNumericStdArray = detail::is_numeric_std_array<T>::value;
 
-    // Is T of type Flags
-    template<typename T>
-    constexpr bool isFlags = detail::is_flags<T>::value;
 
     // Is T std::shared_ptr type
     template<typename T>
@@ -159,13 +176,8 @@ namespace libim::utils {
     template<typename T>
     constexpr bool isStdVector = detail::is_std_vector<T>::value;
 
-    // Is T of type TypeMask
-    template<typename T>
-    constexpr bool isTypeMask = detail::is_typemask<T>::value;
-
     /* Utility type traits */
     template<typename T>
     constexpr std::size_t arraySize = detail::array_size<T>::size;
-
 }
 #endif // LIBIM_TRAITS_H

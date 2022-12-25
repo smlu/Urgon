@@ -16,7 +16,6 @@
 #include <libim/content/asset/cog/cogscript.h>
 #include <libim/content/asset/material/material.h>
 #include <libim/content/asset/world/georesource.h>
-#include <libim/content/asset/world/world.h>
 #include <libim/content/audio/soundbank.h>
 #include <libim/io/stream.h>
 #include <libim/math/color.h>
@@ -51,7 +50,12 @@ namespace libim::content::asset {
         Vector2f horizonSkyOffset; // x,y
         Vector2f ceilingSkyOffset; // x,y
         std::array<float, 4> lodDistances; // list of distances to change level of detail
-        World::Fog fog;
+        struct {
+            int32_t enabled;
+            LinearColor color;
+            float startDepth;
+            float endDepth;
+        } fog;
 
         uint32_t numSounds;
 

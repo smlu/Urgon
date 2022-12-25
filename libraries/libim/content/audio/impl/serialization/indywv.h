@@ -17,11 +17,11 @@ namespace libim::content::audio {
     PACKED(struct IndyWVHeader
     {
         std::array<char, 6> tag = kIndyWV;
-        int32_t sampleRate     = 0;
-        int32_t sampleBitSize  = 0;
-        int32_t numChannels    = 0;
-        int32_t dataSize       = 0;
-        int32_t unknown        = 0;
+        uint32_t sampleRate     = 0;
+        uint32_t sampleBitSize  = 0;
+        uint32_t numChannels    = 0;
+        uint32_t dataSize       = 0;
+        int32_t unknown         = 0;
     });
     static_assert(sizeof(IndyWVHeader) == 26);
 
@@ -35,6 +35,12 @@ namespace libim::content::audio {
 
     struct IndyVW
     {
+        static uint16_t swap16(uint16_t x) // TODO: move to utils
+        {
+            uint16_t hi = (x & 0xff00) >> 8;
+            uint16_t lo = (x & 0xff);
+            return static_cast<uint16_t>(lo << 8) | hi;
+        }
         static int16_t swap16(int16_t x) // TODO: move to utils
         {
             int16_t hi = (x & 0xff00) >> 8;
@@ -104,15 +110,15 @@ namespace libim::content::audio {
 
             [[maybe_unused]]auto compressedSize = swap16(istream.read<uint16_t>()); // Note, big endian size
             const byte_t  se  = istream.read<byte_t>(); // sample expander
-            const int16_t sel = se >> 4;
-            const int16_t ser = se & 0xF;
+            const int sel = se >> 4;
+            const int ser = se & 0xF;
 
-            auto getChannelSample = [&](int16_t expander) -> int16_t
+            auto getChannelSample = [&](int expander) -> uint16_t
             {
-                int16_t val = istream.read<byte_t>();
+                uint16_t val = istream.read<byte_t>();
                 if(val == 0x80)
                 {
-                    auto s = istream.read<int16_t>();
+                    auto s = istream.read<uint16_t>();
                     val = swap16(s);
                 }
                 else {

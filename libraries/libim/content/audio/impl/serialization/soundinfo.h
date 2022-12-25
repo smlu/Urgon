@@ -26,14 +26,14 @@ namespace libim::content::audio {
         SoundInfo(const Sound::SoundData& sound)
         {
             hSnd          = sound.handle;
-            pathOffset    = sound.pathOffset;
-            nameOffset    = sound.nameOffset;
-            dataOffset    = sound.dataOffset;
+            pathOffset    = safe_cast<uint32_t>(sound.pathOffset);
+            nameOffset    = safe_cast<uint32_t>(sound.nameOffset);
+            dataOffset    = safe_cast<uint32_t>(sound.dataOffset);
             pLipSyncData  = 0;
             sampleRate    = sound.sampleRate;
             sampleBitSize = sound.sampleBitSize;
             numChannels   = sound.numChannels;
-            dataSize      = sound.dataSize;
+            dataSize      = safe_cast<uint32_t>(sound.dataSize);
             bCompressed   = sound.isCompressed;
             idx           = sound.idx;
         }

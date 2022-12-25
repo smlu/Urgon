@@ -8,7 +8,7 @@
 
 namespace libim::content::audio {
     class SoundBank;
-    class SoundCache;
+    struct SoundCache;
 
     enum class SoundHandle : uint32_t {};
 
@@ -45,8 +45,8 @@ namespace libim::content::audio {
         ByteArray data() const;
 
     private:
+        friend class SoundBank;
         friend struct SoundInfo;
-        friend struct SoundBank;
         friend struct SoundBankTrack;
         friend void wavWrite(OutputStream& ostream,  const Sound& sound);
         friend void wavWrite(OutputStream&& ostream, const Sound& sound);

@@ -53,7 +53,7 @@ namespace libim {
             constexpr static inline T1 cast(T2 value)
             {
                 // assuring a positive input, we can safely cast it into its unsigned type and check the numeric limits.
-                using UnsignedFrom = typename std::make_unsigned<T2>::type;
+                using UnsignedFrom = typename std::make_unsigned_t<T2>;
                 return value >= 0 &&
                     static_cast<UnsignedFrom>(value) >= std::numeric_limits<T1>::min() &&
                     static_cast<UnsignedFrom>(value) <= std::numeric_limits<T1>::max() ?
@@ -83,10 +83,10 @@ namespace libim {
     */
     template <typename T1, typename T2>
     [[nodiscard]] constexpr inline auto safe_cast(T2 value) ->
-        typename std::enable_if<
-            std::is_integral<T2>::value &&
-            std::is_integral<T1>::value, T1
-        >::type
+        typename std::enable_if_t<
+            std::is_integral_v<T2> &&
+            std::is_integral_v<T1>, T1
+        >
     {
         return details::safe_cast_impl<
             std::numeric_limits<T2>::is_signed,

@@ -263,7 +263,7 @@ namespace libim {
         template<typename T, std::size_t Extend>
         std::span<T, Extend> _read(tag<std::span<T, Extend>>&&)
         {
-            static_assert(isStdSpan<T> == false, "std::span can't be read from stream");
+            static_assert(utils::isStdSpan<T> == false, "std::span can't be read from stream");
             return std::span<T, Extend>();
         }
 

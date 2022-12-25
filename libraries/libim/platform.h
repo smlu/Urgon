@@ -4,9 +4,11 @@
 
 #ifdef __APPLE__
 #   include "TargetConditionals.h"
-#elif defined(_WIN32) || defined(__MINGW32__)
-#   define NOMINMAX
-#   include <Windows.h>
+#elif defined(WIN32) || defined(_WIN32)
+#   ifndef NOMINMAX
+#       define NOMINMAX
+#   endif
+#   include <windows.h>
 #   undef NOMINMAX
 #endif
 
@@ -41,7 +43,7 @@ namespace libim {
 #       define LIBIM_OS_IOS 1
         inline constexpr auto platformOS = PlatformOS::iOS;
 #   endif
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(__MINGW32__)
 #   define LIBIM_OS_WINDOWS 1
     inline constexpr auto platformOS = PlatformOS::Windows;
 #elif defined(__linux__)

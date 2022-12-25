@@ -83,7 +83,7 @@ namespace cndtool {
         for (std::size_t i = 0; i < world.georesource.surfaces.size(); i++)
         {
             const Surface& surf = world.georesource.surfaces[i];
-            if (int32_t matIdx = surf.matIdx.value_or(-1); matIdx > -1)
+            if (int32_t matIdx = fromOptionalIdx(surf.matIdx); matIdx > -1)
             {
                 // Check mat index is in bounds
                 if (isStaticResource(matIdx)) {
@@ -94,7 +94,7 @@ namespace cndtool {
                 }
                 else
                 {
-                    check(matIdx< world.materials.second.size(),
+                    check(matIdx < world.materials.second.size(),
                         "The material index % of surface % is out of bounds (size=%)!",
                         matIdx, i, world.materials.second.size()
                     );

@@ -80,7 +80,11 @@ namespace libim::content::audio {
                 throw std::out_of_range("SoundCache::getString: Requested string offset is out of range.");
             }
             const char* pBegin = reinterpret_cast<const char*>(data_.data()) + offset;
+        #if defined(__STDC_LIB_EXT1__) || defined(_MSC_VER)
             std::size_t sLen = strnlen_s(pBegin, kMaxStringLen);
+        #else
+            std::size_t sLen = strnlen(pBegin, kMaxStringLen);
+        #endif
             if (offset + sLen > usedSize_) {
                 sLen = usedSize_ - offset; // TODO: maybe some warning?
             }
@@ -209,7 +213,7 @@ namespace libim::content::audio {
             }
 
             return write(requiredSize, [&string](byte_t* pOut, std::size_t size) {
-                std::memcpy(pOut, reinterpret_cast<const byte*>(string.data()), string.size());
+                std::memcpy(pOut, reinterpret_cast<const byte_t*>(string.data()), string.size());
                 pOut[size - 1] = '\0'; // ensure null termination
                 return size;
             });

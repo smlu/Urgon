@@ -2,7 +2,7 @@
 #define LIBIM_SOUND_SER_HELPER_H
 #include "wav.h"
 #include "indywv.h"
-#include "../sound.h"
+#include "../../sound.h"
 
 #include <libim/common.h>
 #include <libim/io/stream.h>
@@ -16,7 +16,7 @@ namespace libim::content::audio {
         Unknown
     };
 
-    static SoundFormatType parseWavHeader(const InputStream& istream, std::size_t& numChannels, std::size_t& sampleRate, std::size_t& sampleBitSize, std::size_t& dataSize)
+    static SoundFormatType parseWavHeader(const InputStream& istream, uint32_t& numChannels, uint32_t& sampleRate, uint32_t& sampleBitSize, uint32_t& dataSize)
     {
         if (istream.peek<decltype(kRiffChunkId)> () == kRiffChunkId) // parse wav header
         {

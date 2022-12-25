@@ -251,7 +251,7 @@ namespace cndtool {
             // Write transparent & default image to mat folder if it doesn't exists
             writeImage(kImgTransparentFileName, kImgTransparentPng);
 
-            for (const auto [name, mat] : usedMats.container())
+            for (const auto& [name, mat] : usedMats.container())
             {
                 //const auto name = fs::path(name).stem().string();
                 if (extractMat)

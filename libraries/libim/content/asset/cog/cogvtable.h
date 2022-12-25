@@ -65,7 +65,7 @@ namespace libim::content::asset {
         }
 
     private:
-        friend class CogSymbol;
+        friend struct CogSymbol;
         base_::iterator find(Id vtid)
         {
             return base_::find(to_key(vtid));

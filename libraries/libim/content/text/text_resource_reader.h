@@ -23,6 +23,21 @@ namespace libim::content::text {
 
     class TextResourceReader final : public Tokenizer
     {
+        private:
+        template <typename Container>
+        static void DefaultListInserter(Container& c, typename Container::value_type&& v)
+        {
+            if constexpr(utils::has_mf_push_back<Container>) {
+                c.push_back(std::move(v));
+            }
+            else if constexpr(utils::has_mf_pushBack<Container>) {
+                c.push_back(std::move(v));
+            }
+            else {
+                c.insert(std::move(v));
+            }
+        }
+        
     public:
         using Tokenizer::Tokenizer;
 
@@ -275,9 +290,9 @@ namespace libim::content::text {
                  bool hasRowIdxs  = true,
                  bool hasListSize = true,
                  typename ReadRowFunc,
-                 typename InsertFunc = decltype(DefaultListInserter<Container>),
+                 typename InsertFunc,
                  typename = utils::requires_container<Container>>
-        Container readList(std::string_view expectedName, ReadRowFunc&& readRow, InsertFunc&& insert  = DefaultListInserter<Container>)
+        Container readList(std::string_view expectedName, ReadRowFunc&& readRow, InsertFunc&& insert)
         {
             static_assert(std::is_default_constructible_v<Container>, "Container must be default constructible!");
 
@@ -358,6 +373,18 @@ namespace libim::content::text {
 
             return container;
         }
+        
+        template<typename Container,
+                 bool hasRowIdxs  = true,
+                 bool hasListSize = true,
+                 typename ReadRowFunc,
+                 typename = utils::requires_container<Container>>
+        Container readList(std::string_view expectedName, ReadRowFunc&& readRow)
+        {
+            return readList<Container, hasRowIdxs, hasListSize, ReadRowFunc>(
+                expectedName,  std::forward<ReadRowFunc>(readRow), DefaultListInserter<Container>
+            );
+        }
 
         /**
          * Reads a size-less string list of values from the stream.
@@ -379,11 +406,23 @@ namespace libim::content::text {
         template<typename Container,
                  bool hasRowIdxs = true,
                  typename ReadRowFunc,
-                 typename InsertFunc = decltype(DefaultListInserter<Container>),
+                 typename InsertFunc,
+                 typename = std::enable_if<std::is_function_v<ReadRowFunc>>,
                  class = utils::requires_container<Container>>
-        Container readList(ReadRowFunc&& readRow, InsertFunc&& insert = DefaultListInserter<Container>) {
-            return readList<Container, hasRowIdxs, /*hasListSize*/false>(
+        Container readList(ReadRowFunc&& readRow, InsertFunc&& insert) {
+            return readList<Container, hasRowIdxs, /*hasListSize*/false, ReadRowFunc>(
                 "", std::forward<ReadRowFunc>(readRow), std::forward<InsertFunc>(insert)
+            );
+        }
+        
+        template<typename Container,
+                 bool hasRowIdxs = true,
+                 typename ReadRowFunc,
+                 typename = std::enable_if<std::is_function_v<ReadRowFunc>>,
+                 class = utils::requires_container<Container>>
+        Container readList(ReadRowFunc&& readRow) {
+            return readList<Container, hasRowIdxs, /*hasListSize*/false, ReadRowFunc>(
+                "", std::forward<ReadRowFunc>(readRow), DefaultListInserter<Container>
             );
         }
 
@@ -401,7 +440,7 @@ namespace libim::content::text {
         {
             static_assert(std::is_arithmetic_v<DT>, "T must be an arithmetic type!");
             return readArray<DT, S>([](auto, auto& rr) {
-                return rr.getNumber<DT>();
+                return rr.template getNumber<DT>();
             });
         }
 
@@ -482,18 +521,6 @@ namespace libim::content::text {
          * @throw SyntaxError - If section line in stream is not in correct format.
         */
         std::string_view readSection();
-
-    private:
-        template <typename Container>
-        static void DefaultListInserter(Container& c, typename Container::value_type&& v)
-        {
-            if constexpr(utils::has_mf_push_back<Container>) {
-                c.push_back(std::move(v));
-            }
-            else {
-                insert(c, std::move(v));
-            }
-        }
     };
 }
 

@@ -2,6 +2,7 @@
 #define LIBIM_TEXTURE_VIEW_H
 #include <cmath>
 #include <cstdint>
+#include <iterator>
 #include <memory>
 #include <optional>
 
@@ -12,6 +13,7 @@
 #include <libim/common.h>
 #include <libim/io/stream.h>
 #include <libim/math/math.h>
+#include <libim/types/safe_cast.h>
 
 namespace libim::content::asset{
     class TextureView final
@@ -119,7 +121,8 @@ namespace libim::content::asset{
          */
         Pixdata::const_iterator end() const
         {
-            return std::next(itFirst_, size());
+            using it_diff_t = typename std::iterator_traits<decltype(itFirst_)>::difference_type;
+            return std::next(itFirst_, safe_cast<it_diff_t>(size()));
         }
 
         /** Returns Pixdata iterator to the end of last mipmap texture pixel data. */
@@ -135,7 +138,9 @@ namespace libim::content::asset{
          */
         PixdataPtr pixdata() const
         {
-            return makePixdataPtr(itFirst_, std::next(itFirst_, size()));
+            using it_diff_t = typename std::iterator_traits<decltype(itFirst_)>::difference_type;
+            auto texSize = safe_cast<it_diff_t>(size());
+            return makePixdataPtr(itFirst_, std::next(itFirst_, texSize));
         }
 
         /**

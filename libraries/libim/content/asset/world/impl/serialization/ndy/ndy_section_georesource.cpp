@@ -53,7 +53,10 @@ Georesource NDY::parseSection_Georesource(TextResourceReader& rr)
         s.adjoinIdx    = makeOptionalIdx(adjoinIdx);
         s.extraLight   = rr.template readVector<decltype(s.extraLight)>();
 
-        auto numVerts = rr.template getNumber<int32_t>();
+        auto numVerts = static_cast<std::size_t>(
+            rr.template getNumber<int32_t>()
+        );
+
         s.vertices.resize(numVerts);
         for(auto& v : s.vertices)
         {

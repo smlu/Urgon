@@ -150,7 +150,7 @@ namespace cndtool {
             cleanUp = cleanUp && !staticCnd;
             verify  = verify  && !staticCnd;
 
-            const std::size_t total = (cleanUp ? 21 : 20) + (verify ? 1 : 0);
+            const std::size_t total = (cleanUp ? 21U : 20U) + (verify ? 1U : 0U);
             constexpr auto progressTitle = "Converting to CND ... "sv;
             std::size_t progress = 0;
             if (!verbose) printProgress(progressTitle, progress++, total);
@@ -206,7 +206,7 @@ namespace cndtool {
                     auto newMats = world.materials.second;
                     for (auto& surf : world.georesource.surfaces)
                     {
-                        int32_t matIdx = surf.matIdx.value_or(-1);
+                        int32_t matIdx = fromOptionalIdx(surf.matIdx);
                         if (matIdx > -1 && !isStaticResource(matIdx))
                         {
                             if (auto sit = staticResources.materials.find(oldMats[matIdx]);

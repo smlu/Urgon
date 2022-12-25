@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include <libim/math/math.h>
+#include <libim/types/safe_cast.h>
 #include <libim/utils/utils.h>
 
 namespace libim {
@@ -91,10 +92,11 @@ namespace libim {
         constexpr typename base_type::size_type size() const noexcept
         {
             /* Note the size can't be cached because it changes the interface struct which is then not plain char[] anymore */
-            std::size_t size = 0;
+            using st = typename base_type::size_type;
+            st size = 0;
             const char* pNullCh = std::char_traits<char>::find(this->data(), N, '\0');
             if (pNullCh) {
-                size = pNullCh - this->data();
+                size = safe_cast<st>(pNullCh - this->data());
             };
             return size;
         }

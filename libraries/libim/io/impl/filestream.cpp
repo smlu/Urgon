@@ -12,20 +12,21 @@
 #include <iterator>
 
 #ifdef LIBIM_OS_WINDOWS
-#include <windows.h>
-#include <locale>
-#include <codecvt>
-#include <string>
+# include <windows.h>
+# include <locale>
+# include <codecvt>
+# include <string>
 # ifdef LIBIM_PLATFORM_64BIT
-  typedef int64_t ssize_t;
+    typedef int64_t ssize_t;
 # else
-  typedef int32_t ssize_t;
+    typedef int32_t ssize_t;
 # endif
 #else
 # include <assert.h>
 # include <cstring>
 # include <errno.h>
 # include <fcntl.h>
+# include <string.h>
 # include <sys/mman.h>
 # include <sys/stat.h>
 # include <sys/types.h>
@@ -42,26 +43,23 @@ constexpr std::size_t kBufferSize = 4096;
 std::string getLastErrorAsString()
 {
     std::string message;
+#ifdef LIBIM_OS_WINDOWS
+    //Get the error message, if any.
+    DWORD errorMessageID = ::GetLastError();
+    if(errorMessageID == 0)
+        return std::string(); //No error message has been recorded
 
-    if constexpr (platformOS == PlatformOS::Windows)
-    {
-        //Get the error message, if any.
-        DWORD errorMessageID = ::GetLastError();
-        if(errorMessageID == 0)
-            return std::string(); //No error message has been recorded
+    LPSTR messageBuffer = nullptr;
+    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                    nullptr, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPSTR>(&messageBuffer), 0, nullptr);
 
-        LPSTR messageBuffer = nullptr;
-        size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                     nullptr, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPSTR>(&messageBuffer), 0, nullptr);
+    message = std::string(messageBuffer, size);
 
-        message = std::string(messageBuffer, size);
-
-        //Free the buffer.
-        LocalFree(messageBuffer);
-    }
-    else {
-        message = strerror(errno);
-    }
+    //Free the buffer.
+    LocalFree(messageBuffer);
+#else
+    message = strerror(errno);
+#endif
     return message;
 }
 

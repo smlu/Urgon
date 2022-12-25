@@ -65,7 +65,7 @@ namespace libim {
         using BinaryStream<const T, ConstIterator>::write;
     };
 
-    template<typename T, typename Iterator = T::iterator>
+    template<typename T, typename Iterator = typename T::iterator>
     class OutputBinaryStream final : public OutputStream, public BinaryStream<T, Iterator>
     {
     public:

@@ -62,3 +62,4 @@ To edit `MAT` texture files use gimp plugin: [**gimp-ijim**](https://github.com/
   cmake --build build
   <i>Note: On Windows, when using <b>VisualStudio</b> to configure cmake you can
         open generated <b>*.sln</b> project in VisualStudio and compile it there.</i></pre>
+

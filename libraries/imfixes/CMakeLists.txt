@@ -1,7 +1,7 @@
 project(
     ${PM_IMFIXES}
     LANGUAGES CXX
-    VERSION 0.1.0
+    VERSION 0.1.1
 )
 
 file(GLOB_RECURSE

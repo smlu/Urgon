@@ -15,7 +15,6 @@ set(CNDTOOL_SRC_FILES
     "ndy.h"
     "obj.h"
     "resource.h"
-
 )
 
 add_executable( ${PROJECT_NAME}

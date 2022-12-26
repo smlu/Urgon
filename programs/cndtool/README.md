@@ -1,6 +1,6 @@
 # Command-line tool for CND level file
 **cndtool** is a multi-purpose tool for compact game level files (`.cnd`).
-The tool can list, extract, add, replace, or remove game assets stored in a `CND` file. It can also extract and convert level geometry resources (level surface vertices and surface UV texture vertices) to [Wavefront OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) file format.
+The tool can list, extract, add, replace, or remove game assets stored in a `CND` file. Convert CND file format to [NDY level format](https://github.com/Jones3D-The-Infernal-Engine/Documentation/blob/main/ndy.md) and vice versa. It can also extract and convert level geometry (level surface vertices and surface UV texture vertices) to [Wavefront OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) file format.
 
 ## Usage
 ```

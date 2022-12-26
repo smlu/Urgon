@@ -1,21 +1,31 @@
 # Indiana Jones and the Infernal Machine Mod Tools
-This repository contains command command-line tools: [**gobext**](programs/gobext), [**cndtool**](programs/cndtool) and [**matool**](programs/matool) for extracting and modifying game assets of the game Indiana Jones and the Infernal Machine.
-Tools can be downloaded from [Releases](https://github.com/smlu/ProjectMarduk/releases) page.
+Repository contains command command-line tools: [**gobext**](programs/gobext), [**cndtool**](programs/cndtool) and [**matool**](programs/matool) for extracting and modifying game assets of the game Indiana Jones and the Infernal Machine.  
 
-If you need tools to edit `3DO` models and `KEY` animations use blender add-on: [blender-ijim](https://github.com/smlu/blender-ijim).  
-To edit `MAT` texture files use gimp plugin: [gimp-ijim](https://github.com/smlu/gimp-ijim).
+**The latest tools can be downloaded from [RELEASES](https://github.com/smlu/Urgon/releases) page.**
+
+If you need tool to edit `3DO` models and `KEY` animations use blender add-on: [**blender-sith**](https://github.com/smlu/blender-sith).  
+To edit `MAT` texture files use gimp plugin: [**gimp-ijim**](https://github.com/smlu/gimp-ijim).
 
 <img src="docs/images/cyn.png" alt="Canyonlands opened in Blender" width="600"/>  
 
 *(Canyonlands imported into Blender)*
 
 ## Content
+  ### Docs
+  Documentation folder which contains basic info about the tools.
+  More documentation for the game can be found at: https://github.com/Jones3D-The-Infernal-Engine/Documentation
+
   ### Libraries
-  - [**libim**](libraries/libim) - C++ library for parsing and writing game resources (CND, GOB, MAT, KEY).
+  - [**libim**](libraries/libim) - C++ library for parsing and writing game resources (CND/NDY, GOB, MAT, KEY).
 
   ### Programs
-  - [**cndtool**](programs/cndtool) - A multi-purpose command-line tool for CND level files. It can add, extract or replace `animation`/`texture`/`sound` game assets. Tool can also extract and convert the level geometry to [Wavefront OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) file format.  
-  For more info see [README](programs/cndtool/README.md).
+  - [**cndtool**](programs/cndtool) - A multi-purpose tool for compact game level files (`.cnd`).  
+    For more info see [README](programs/cndtool/README.md).  
+
+    The cndtool can:
+       - add, extract, list replace and remove game assets stored in `CND` file(s). 
+       - convert CND file format to [NDY level format](https://github.com/Jones3D-The-Infernal-Engine/Documentation/blob/main/ndy.md) and vice versa.
+       - extract and convert level geometry (level surface vertices and surface UV texture vertices) to [Wavefront OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) file format.
 
   - [**gobext**](programs/gobext) - A command-line tool for extracting all game resource files (e.g.: models, scripts, level files etc..) from `*.gob` files.  
   For more info see [README](programs/gobext/README.md).
@@ -28,16 +38,16 @@ To edit `MAT` texture files use gimp plugin: [gimp-ijim](https://github.com/smlu
 ### Prerequisites
   - [**git**](https://git-scm.com/) scm
   - [**CMake**](https://cmake.org/download/) >= 3.15
-  - **C++17** supported compiler (gcc, clang, VisualStudio)
+  - **C++20** supported compiler (gcc, clang, VisualStudio)
 
 ### Configure and Build
   1. Clone repository and dependencies:  
   ```
-     git clone -b develop --recursive https://github.com/smlu/ProjectMarduk
+     git clone --recursive https://github.com/smlu/Urgon.git
   ```
-  2. Move into directory `ProjectMarduk`:
+  2. Move into directory `Urgon`:
   ```
-     cd ProjectMarduk
+     cd Urgon
   ```
   3. Make subdirectory `build`: 
   ```

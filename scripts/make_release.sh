@@ -1,9 +1,9 @@
 #!/bin/bash
 
-URL=https://github.com/smlu/ProjectMarduk.git 
+URL=https://github.com/smlu/Urgon.git 
 BRANCH=develop
 
-SOURCE_DIR="ProjectMarduk"
+SOURCE_DIR="Urgon"
 
 BUILD_DIR="$SOURCE_DIR/build"
 WIN32="$BUILD_DIR/windows/x86"
@@ -63,8 +63,6 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 tar -czf "$OUTDIR/linux-x86-64.tar.gz" -C "$UBUNTU64/bin/" cndtool gobext matool > /dev/null
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
-
 echo "sha256 windows-x86.zip: $(sha256sum $OUTDIR/windows-x86.zip | awk '{ print $1 }')"
 echo "sha256 windows-x86-64.zip: $(sha256sum $OUTDIR/windows-x86-64.zip | awk '{ print $1 }')"
 echo "sha256 linux-x86-64.tar.gz: $(sha256sum $OUTDIR/linux-x86-64.tar.gz | awk '{ print $1 }')"
-

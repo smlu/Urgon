@@ -1,10 +1,10 @@
 cmake_minimum_required (VERSION 3.15 FATAL_ERROR)
 project(
-    ProjectMarduk
+    Urgon
     LANGUAGES CXX
-    VERSION 0.9.99.99
+    VERSION 0.10.0
 
-    HOMEPAGE_URL  "https://github.com/smlu/ProjectMarduk"
+    HOMEPAGE_URL  "https://github.com/smlu/Urgon"
 )
 
 # Global constants

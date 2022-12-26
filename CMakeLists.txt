@@ -39,7 +39,7 @@ if(WIN32)
             -pipe
             "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wconversion;-Wsign-conversion;-Wno-unused-function>"
         )
-        add_link_options("$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-static;-s>")
+        add_link_options("$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:-Wl,--no-insert-timestamp;-static;-s>")
     else(MSVC)
         if(MSVC_VERSION LESS 1914 AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
             message(FATAL_ERROR "Only Visual Studio 2017 version 15.7 or newer is supported!")
@@ -53,6 +53,7 @@ if(WIN32)
             /sdl
             "$<$<NOT:$<CXX_COMPILER_ID:Clang>>:/MP>"
         )
+        add_link_options("/Brepro")
     endif()
 elseif(NOT WIN32)
     add_compile_options(

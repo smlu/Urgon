@@ -7,6 +7,9 @@ cmake_install.cmake
 install_manifest.txt
 CTestTestfile.cmake
 
+# Dolphin
+.directory
+
 # Compiled Object files
 *.slo
 *.lo
@@ -36,5 +39,10 @@ CTestTestfile.cmake
 *.exe
 
 # QtCreator
-CMakeLists.txt.user*
+*.user*
 *.autosave
+
+# Visual Studio
+.vs
+.vscode
+CMakeSettings.json

@@ -1,0 +1,226 @@
+#ifndef LIBIM_BINARYSTREAM_IMPL
+#define LIBIM_BINARYSTREAM_IMPL
+#include <libim/types/safe_cast.h>
+#include <libim/utils/traits.h>
+
+#include <functional>
+#include <iterator>
+#include <type_traits>
+
+namespace libim
+{
+    namespace detail {
+        template<class Container>
+        struct WriteIterator : public std::back_insert_iterator<Container>
+        {
+            using UIterType =  typename Container::iterator;
+            using BaseType = std::back_insert_iterator<Container>;
+
+            WriteIterator(Container& c, typename Container::iterator i) :
+                BaseType(c),
+                iter_(i)
+            {}
+
+            UIterType underlyingIterator() const
+            {
+                return iter_;
+            }
+
+            constexpr operator UIterType() const
+            {
+                return underlyingIterator();
+            }
+
+            WriteIterator& operator=(const typename Container::value_type& val)
+            {
+                if(iter_ == BaseType::container->end())
+                {
+                    BaseType::operator=(val);
+                    iter_ = BaseType::container->end();
+                }
+                else {
+                    *iter_++ = val;
+                }
+                return *this;
+            }
+
+            WriteIterator& operator=(typename Container::value_type&& val)
+            {
+                if(iter_ == BaseType::container->end())
+                {
+                    BaseType::operator=(std::move(val));
+                    iter_ = BaseType::container->end();
+                }
+                else {
+                    *iter_++ = std::move(val);
+                }
+                return *this;
+            }
+
+            // Override parent methods to return reference to to this class object
+            WriteIterator& operator*()
+            {
+                // pretend to return designated value
+                return (*this);
+            }
+
+            WriteIterator& operator++()
+            {
+                // pretend to preincrement
+                return (*this);
+            }
+
+            WriteIterator operator++(int)
+            {
+                // pretend to postincrement
+                return (*this);
+            }
+
+        protected:
+            UIterType iter_;
+        };
+
+        template<class Container>
+        WriteIterator<Container> MakeWriteIterator(Container& c, typename Container::iterator i)
+        {
+            return WriteIterator(c, i);
+        }
+    }
+
+    template<typename T, typename Iterator>
+    BinaryStream<T, Iterator>::BinaryStream(T& data) :
+        BinaryStream(data, std::begin(data), std::end(data))
+    {}
+
+    template<typename T, typename Iterator>
+    BinaryStream<T, Iterator>::BinaryStream(T& data, std::size_t size) :
+        BinaryStream(data,  std::begin(data),  std::begin(data) + size)
+    {}
+
+    template<typename T, typename Iterator>
+    BinaryStream<T, Iterator>::BinaryStream(T& data, Iterator first, Iterator last) :
+        data_(data),
+        begin_(first),
+        end_(last),
+        pos_(first)
+    {
+        static_assert(!std::is_const_v<T> || (std::is_same_v<Iterator, decltype(std::cbegin(std::declval<T>()))>),
+            "Iterator type must be of a 'const iterator' type");
+    }
+
+    template<typename T, typename Iterator>
+    BinaryStream<T, Iterator>::~BinaryStream() {}
+
+
+    template<typename T, typename Iterator>
+    void BinaryStream<T, Iterator>::seek(std::size_t position) const
+    {
+        pos_ = begin_;
+        std::advance(pos_, position);
+    }
+
+    template<typename T, typename Iterator>
+    std::size_t BinaryStream<T, Iterator>::size() const
+    {
+        return safe_cast<std::size_t>(std::distance(begin_, end_));
+    }
+
+    template<typename T, typename Iterator>
+    std::size_t BinaryStream<T, Iterator>::capacity() const
+    {
+        if constexpr(utils::has_mf_capacity<T>) {
+            return data_.capacity();
+        }
+        else {
+            return data_.size();
+        }
+    }
+
+    template<typename T, typename Iterator>
+    void BinaryStream<T, Iterator>::reserve(std::size_t size)
+    {
+        if constexpr(utils::has_mf_reserve<T>) {
+            resize(size, [](T& c, std::size_t s) { c.reserve(s); });
+        }
+        else if (data_.size() < size){
+            resize(size, std::mem_fn(&T::resize));
+        }
+    }
+
+    template<typename T, typename Iterator>
+    std::size_t BinaryStream<T, Iterator>::tell() const
+    {
+        return safe_cast<std::size_t>(std::distance(begin_, pos_));
+    }
+
+    template<typename T, typename Iterator>
+    bool BinaryStream<T, Iterator>::canRead() const
+    {
+        return true;
+    }
+
+    template<typename T, typename Iterator>
+    bool BinaryStream<T, Iterator>::canWrite() const
+    {
+        return !std::is_const_v<T>;
+    }
+
+    template<typename T, typename Iterator>
+    std::size_t BinaryStream<T, Iterator>::readsome(byte_t* data, std::size_t length) const
+    {
+        auto itrend = pos_;
+        std::advance(itrend, length);
+        std::copy(pos_, itrend, data);
+        pos_ = itrend;
+        return length;
+    }
+
+    template<typename T, typename Iterator>
+    std::size_t BinaryStream<T, Iterator>::writesome(const byte_t* data, std::size_t length)
+    {
+        if constexpr (std::is_const_v<T>) {
+            throw StreamError("Cannot write to read-only stream");
+        }
+        else
+        {
+            reserve(tell() + length);
+            const auto nBegin = std::distance(std::begin(data_), begin_);
+            const auto nEnd = std::distance(begin_, end_);
+
+            pos_ = std::copy(data, data + length, detail::MakeWriteIterator(data_, pos_));
+
+            begin_ = std::begin(data_);
+            std::advance(begin_, nBegin);
+
+            end_ = begin_;
+            std::advance(end_, nEnd);
+
+            if(std::distance(begin_, end_) < std::distance(begin_, pos_)) {
+                end_ = pos_;
+            }
+
+            return length;
+        }
+    }
+
+    template<typename T, typename Iterator>
+    template<typename MemFp>
+    void BinaryStream<T, Iterator>::resize(std::size_t size, MemFp&& res_func)
+    {
+        const auto nBegin = std::distance(std::begin(data_), begin_);
+        const auto nEnd = std::distance(begin_, end_);
+        const auto nPos = std::distance(begin_, pos_);
+
+        res_func(data_, size);
+
+        begin_ = std::begin(data_);
+        std::advance(begin_, nBegin);
+
+        end_ = begin_;
+        std::advance(end_, nEnd);
+
+        pos_ = begin_;
+        std::advance(pos_, nPos);
+    }
+}
+#endif // LIBIM_BINARYSTREAM_IMPL

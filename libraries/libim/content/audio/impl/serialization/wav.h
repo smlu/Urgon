@@ -1,0 +1,82 @@
+#ifndef LIBIM_WAV_H
+#define LIBIM_WAV_H
+#include <libim/common.h>
+#include <libim/io/stream.h>
+#include <cstdint>
+
+namespace libim::content::audio
+{
+    template<std::size_t N>
+    constexpr uint32_t makeRiffTag(const char (&tag)[N])
+    {
+        static_assert(N == 5, "tag len == 5");
+        int32_t ntag = (tag[3] << 24) | (tag[2] << 16) | (tag[1] << 8) | (tag[0]);
+        return static_cast<uint32_t>(ntag);
+    }
+
+    constexpr static uint32_t kRiffChunkId = makeRiffTag("RIFF");
+    constexpr static uint32_t kWavFormatId = makeRiffTag("WAVE");
+    constexpr static uint32_t kFmtChunkId  = makeRiffTag("fmt ");
+    constexpr static uint32_t kDataChunkId = makeRiffTag("data");
+
+    enum class AudioFormat : uint16_t
+    {
+        LPCM = 1
+    };
+
+    template<uint32_t Tag>
+    struct RiffChunkHeader
+    {
+        uint32_t tag = Tag;
+        uint32_t size;
+    };
+    static_assert( sizeof(RiffChunkHeader<0>) == 8 );
+
+    struct WavFmt : RiffChunkHeader<kFmtChunkId>
+    {
+         AudioFormat audioFormat;
+         uint16_t    numChannels;
+         uint32_t    sampleRate;
+         uint32_t    byteRate;
+         uint16_t    blockAlign;
+         uint16_t    sampleBitSize;
+    };
+
+    constexpr inline std::size_t kWavFmtSize = 16;
+    static_assert(sizeof(WavFmt) - sizeof(RiffChunkHeader<kFmtChunkId>) == kWavFmtSize);
+
+    struct WavHeader : RiffChunkHeader<kRiffChunkId>
+    {
+        uint32_t format = kWavFormatId;
+        WavFmt fmt;
+    };
+    static_assert( sizeof(WavHeader) - 2 * sizeof(RiffChunkHeader<kRiffChunkId>) == 20 );
+
+    struct WavDataChunkHeader : RiffChunkHeader<kDataChunkId> {};
+
+    struct WavDataChunk : WavDataChunkHeader
+    {
+        ByteArray data;
+    };
+
+    struct WavDataChunkView : WavDataChunkHeader
+    {
+        ByteView data;
+    };
+
+    inline Stream& operator << (Stream& s, const WavDataChunkView& chunk)
+    {
+        s << static_cast<const WavDataChunkHeader&>(chunk);
+        s << chunk.data;
+        return s;
+    }
+
+    inline Stream& operator << (Stream& s, const WavDataChunk& chunk)
+    {
+        s << static_cast<const WavDataChunkHeader&>(chunk);
+        s << chunk.data;
+        return s;
+    }
+}
+
+#endif // LIBIM_WAV_H

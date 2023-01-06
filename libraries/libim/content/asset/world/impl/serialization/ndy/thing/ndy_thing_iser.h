@@ -26,7 +26,7 @@ namespace libim::content::asset {
         return true;
     }
 
-    LinearColor ndyParseLightValue( const Token& val)
+    LinearColor ndyParseLightValue( const Token& val, float defaultAlpha = 0.0f)
     {
         try {
             return LinearColor(val.value(), /*strict=*/true);
@@ -34,7 +34,7 @@ namespace libim::content::asset {
         catch (...)
         {
             try {
-                return makeLinearColor(LinearColorRgb(val.value(), /*strict=*/true), /*alpha=*/0.0f);
+                return makeLinearColor(LinearColorRgb(val.value(), /*strict=*/true), defaultAlpha);
             }
             catch (...) {
                 LOG_WARNING("NDY: Bad light value: %s", val.value());
@@ -422,9 +422,12 @@ namespace libim::content::asset {
                 return true;
 
             case NdyThingParam::LightIntensity: // head light
-                actorInfo.lightIntensity = ndyParseLightValue(value); // Hack by default NDY allows only RGB but we try to parse it as RGBA, to allow min/max range to be set //makeLinearColor(LinearColorRgb(value.value(), /*strict=*/true), 0.0f);
+            {
+                constexpr float dfltAlpha = 1.34550338e-36f; // The jones3d engine looks like having troubles issues when alpha is 0.0f, and uses this value instead for zero.
+                actorInfo.lightIntensity = ndyParseLightValue(value, dfltAlpha); // Hack by default NDY allows only RGB but we try to parse it as RGBA, to allow min/max range to be set
                 thing.flags |= Thing::Flag::EmitsLight;
                 return true;
+            }
 
             case NdyThingParam::VoiceColor:
                 actorInfo.voiceColor = GradientColor(value.value());

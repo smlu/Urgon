@@ -1,7 +1,7 @@
 #!/bin/bash
 
 URL=https://github.com/smlu/Urgon.git 
-BRANCH=develop
+BRANCH=master
 
 SOURCE_DIR="Urgon"
 
@@ -22,12 +22,21 @@ if [ -d $SOURCE_DIR ]
 then
     pushd .
     cd $SOURCE_DIR
+    git checkout $BRANCH || exit 1
     git pull || exit 1
     popd
 else
     git clone $URL -b $BRANCH --recursive $SOURCE_DIR || exit 1
 fi
 
+# Checkout to latest tag
+pushd .
+cd $SOURCE_DIR
+git fetch --tags || exit 1
+latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
+git checkout $latestTag || exit 1
+git show -s
+popd
 
 rm -rf $BUILD_DIR
 
@@ -54,13 +63,13 @@ cmake --build $UBUNTU64 -- -j8
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # Compress and print hashes
-zip -9jq "$OUTDIR/windows-x86.zip" "$WIN32/bin/cndtool.exe" "$WIN32/bin/gobext.exe" "$WIN32/bin/matool.exe"
+zip -9Xjq "$OUTDIR/windows-x86.zip" "$WIN32/bin/cndtool.exe" "$WIN32/bin/gobext.exe" "$WIN32/bin/matool.exe"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
-zip -9jq "$OUTDIR/windows-x86-64.zip" "$WIN64/bin/cndtool.exe" "$WIN64/bin/gobext.exe" "$WIN64/bin/matool.exe"
+zip -9Xjq "$OUTDIR/windows-x86-64.zip" "$WIN64/bin/cndtool.exe" "$WIN64/bin/gobext.exe" "$WIN64/bin/matool.exe"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
-tar -czf "$OUTDIR/linux-x86-64.tar.gz" -C "$UBUNTU64/bin/" cndtool gobext matool > /dev/null
+tar -czf "$OUTDIR/linux-x86-64.tar.gz" -C "$UBUNTU64/bin/" cndtool gobext matool | gzip -n > /dev/null
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 echo "sha256 windows-x86.zip: $(sha256sum $OUTDIR/windows-x86.zip | awk '{ print $1 }')"

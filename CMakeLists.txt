@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.15 FATAL_ERROR)
 project(
     Urgon
     LANGUAGES CXX
-    VERSION 0.10.0
+    VERSION 0.10.1
 
     HOMEPAGE_URL  "https://github.com/smlu/Urgon"
 )

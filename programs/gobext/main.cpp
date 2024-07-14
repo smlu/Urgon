@@ -115,7 +115,10 @@ int main(int argc, const char *argv[])
     {
         auto vfs = gobLoad(inputFile);
 
-        outdir /= inputFile.stem().string() + "_GOB";
+        if (outdir == "")
+        {
+            outdir /= inputFile.stem().string() + "_GOB";
+        }
         makePath(outdir);
 
         if(!extractGob(vfs, outdir, bVerboseOutput)) {

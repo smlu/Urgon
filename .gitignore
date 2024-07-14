@@ -46,3 +46,4 @@ CTestTestfile.cmake
 .vs
 .vscode
 CMakeSettings.json
+out

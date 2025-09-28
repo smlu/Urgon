@@ -19,7 +19,7 @@ namespace libim {
     /** A case-insensitive string hash function. */
     struct StringCaseInsensitiveHash
     {
-        size_t operator()(std::string_view val) const
+        size_t operator()(const std::string_view val) const
         {
             // FNV-1a hash function
             // TODO: Use faster hash function for smaller strings with better avalanche effect.
@@ -46,53 +46,43 @@ namespace libim {
      * Hash table which elements are ordered by insertion and mapped to the key.
      * Each element can be retrieved by the key or by the index.
      *
-     * @tparam T        - The value type.
-     * @tparam KeyT     - The key type. By default std::string.
-     * @tparam Hash     - The hash function type. By default, StringCaseInsensitiveHash is used if KeyT is std::string, else std::hash<KeyT>.
-     * @tparam KeyEqual - The key equality function type. By default, StringCaseInsensitiveEqual is used if KeyT is std::string, else std::equal_to<KeyT>.
+     * @tparam KeyT       - The key type.
+     * @tparam T          - The value type.
+     * @tparam LookupKeyT - The lookup key type (should be compatible with KeyT).
+     * @tparam Hash       - The hash function type.
+     * @tparam KeyEqual   - The key equality function type..
      */
-    template<typename T,
-        typename KeyT = std::string,
-        typename Hash = std::conditional_t<utils::isStdString<KeyT>, StringCaseInsensitiveHash, std::hash<KeyT>>,
-        typename KeyEqual = std::conditional_t<utils::isStdString<KeyT>, StringCaseInsensitiveEqual, std::equal_to<KeyT>>
+    template< typename KeyT, typename T,
+        typename LookupKeyT = const KeyT&,
+        typename MapKeyT    = std::reference_wrapper<const KeyT>,
+        typename Hash       = std::hash<LookupKeyT>,
+        typename KeyEqual   = std::equal_to<LookupKeyT>
     >
     class IndexMap
     {
-        static_assert(std::is_same_v<KeyT, std::string_view> == false,
-            "std::string_view is not supported as a key type. Use std::string instead.");
-
         template<typename, typename>
         class IndexMapIterator;
         template<typename, typename> friend class IndexMapIterator;
 
-        static constexpr bool isStringKey = utils::isStdString<KeyT>;
-
-        // Helper types to store std::string in std::unordered_map as std::string_view
-        using MapKey = std::conditional_t<isStringKey,
-            std::string_view, std::reference_wrapper<const KeyT>
-        >;
-        using UnderlyingMapKeyT =
-            std::conditional_t<isStringKey, std::string_view, KeyT>;
-
     public:
         using size_type = std::size_t;
-        using Idx = size_type;
+        using idx_t       = size_type;
 
         using ContainerElement = std::pair<KeyT, T>;
-        using ContainerType = std::list<ContainerElement>;
+        using ContainerType    = std::list<ContainerElement>;
 
-        using key_type = UnderlyingMapKeyT;
-        using key_reference = std::conditional_t<isStringKey, key_type, key_type&>;
-        using key_const_reference  = const key_reference;
-        using key_rvalue_reference = std::conditional_t<isStringKey, key_type, key_type&&>;
+        using key_type             = KeyT;
+        using key_reference        = key_type&;
+        using key_const_reference  = const key_type&;
+        using key_rvalue_reference = key_type&&;
 
-        using value_type = T;
-        using reference = value_type&;
-        using const_reference =  const value_type&;
+        using value_type      = T;
+        using reference       = value_type&;
+        using const_reference = const value_type&;
 
-        using iterator = IndexMapIterator<T, typename ContainerType::iterator>;
-        using const_iterator = IndexMapIterator<T, typename ContainerType::const_iterator>;
-        using reverse_iterator = std::reverse_iterator<iterator>;
+        using iterator               = IndexMapIterator<T, typename ContainerType::iterator>;
+        using const_iterator         = IndexMapIterator<T, typename ContainerType::const_iterator>;
+        using reverse_iterator       = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         IndexMap() = default;
@@ -196,7 +186,7 @@ namespace libim {
          * @return std::pair of key and associated value.
          * @throw std::out_of_range if the index is out of range.
          */
-        const ContainerElement& at(Idx idx) const
+        const ContainerElement& at(idx_t idx) const
         {
             return *index_.at(idx);
         }
@@ -232,7 +222,7 @@ namespace libim {
          * @return A reference to the value.
          * @throw std::out_of_range if the index is out of range.
          */
-        reference value(Idx idx)
+        reference value(idx_t idx)
         {
             return index_.at(idx)->second;
         }
@@ -244,7 +234,7 @@ namespace libim {
          * @return A const reference to the value.
          * @throw std::out_of_range if the index is out of range.
          */
-        const_reference value(Idx idx) const
+        const_reference value(idx_t idx) const
         {
             return index_.at(idx)->second;
         }
@@ -256,7 +246,7 @@ namespace libim {
          * @return A reference to the value.
          * @throw std::out_of_range if the index is out of range.
          */
-        reference operator[](Idx idx)
+        reference operator[](idx_t idx)
         {
             return index_.at(idx)->second;
         }
@@ -268,7 +258,7 @@ namespace libim {
          * @return A const reference to the value.
          * @throw std::out_of_range if the index is out of range.
          */
-        const_reference operator[](Idx idx) const
+        const_reference operator[](idx_t idx) const
         {
             return index_.at(idx)->second;
         }
@@ -296,7 +286,6 @@ namespace libim {
          * @param key - The r-value key to mapped element.
          * @return A reference to the mapped element.
          */
-        template<typename K = KeyT, typename = std::enable_if_t<!utils::isStdString<K>>>
         reference operator[](key_rvalue_reference key)
         {
             auto it = map_.find(key);
@@ -313,7 +302,7 @@ namespace libim {
          * @return A const reference to the mapped element.
          * @throw std::out_of_range if the key is not mapped.
          */
-        const_reference operator[](key_const_reference key) const
+        const_reference operator[](const LookupKeyT key) const
         {
             auto it = map_.find(key);
             if (it == map_.end()) {
@@ -328,7 +317,7 @@ namespace libim {
          * @param key - The key to mapped element.
          * @return Iterator to the element of found key or end() iterator if not found.
          */
-        iterator find(key_const_reference key)
+        iterator find(LookupKeyT key)
         {
             auto it = map_.find(key);
             if (it == map_.end()) {
@@ -343,7 +332,7 @@ namespace libim {
          * @param key - The key to mapped element.
          * @return Const iterator to the element of found key or end() iterator if not found.
          */
-        const_iterator find(key_const_reference key) const
+        const_iterator find(LookupKeyT key) const
         {
             auto it = map_.find(key);
             if (it == map_.end()) {
@@ -379,14 +368,7 @@ namespace libim {
          *
          * @throw std::out_of_range if the index is out of range.
          */
-        template<typename K = KeyT, typename = std::enable_if_t<!utils::isStdString<K>>>
-        const key_type& key(Idx idx) const
-        {
-            return index_.at(idx)->first;
-        }
-
-        template<typename = std::enable_if_t<isStringKey>>
-        key_type key(Idx idx) const
+        key_const_reference key(idx_t idx) const
         {
             return index_.at(idx)->first;
         }
@@ -449,7 +431,7 @@ namespace libim {
          * @param value - The value to insert.
          * @return std::pair<iterator, bool>
          */
-        std::pair<iterator, bool> insert(Idx pos, key_type key, const T& value)
+        std::pair<iterator, bool> insert(idx_t pos, key_type key, const T& value)
         {
             auto mapIt = map_.find(key);
             if (mapIt != map_.end()) {
@@ -461,20 +443,21 @@ namespace libim {
             }
 
             using it_diff_t = typename std::iterator_traits<decltype(index_.begin())>::difference_type;
-            auto it = data_.end();
+            auto dit = data_.end();
             auto iit = index_.begin() + safe_cast<it_diff_t>(pos);
             if (iit != index_.end()) {
-                it = data_.insert(*iit, { moveOrConstructKey(key), value });
+                dit = data_.insert(*iit, { moveOrConstructKey(std::move(key)), value });
             }
             else
             {
-                data_.push_back({ moveOrConstructKey(key), value });
-                it = --data_.end();
+                data_.push_back({ moveOrConstructKey(std::move(key)), value });
+                dit = --data_.end();
             }
 
-            map_[crefOrKey(it->first)] = it;
-            index_.insert(iit, it);
-            return { it, true };
+            //map_[crefOrKey(dit->first)] = dit;
+            map_[(dit->first)] = dit;
+            index_.insert(iit, dit);
+            return { dit, true };
         }
 
         /**
@@ -487,7 +470,7 @@ namespace libim {
          * @param value - The R-value reference to value to insert.
          * @return std::pair<iterator, bool>
          */
-        std::pair<iterator, bool> insert(Idx pos, key_type key, T&& value)
+        std::pair<iterator, bool> insert(idx_t pos, key_type key, T&& value)
         {
             auto mapIt = map_.find(key);
             if (mapIt != map_.end()) {
@@ -499,20 +482,21 @@ namespace libim {
             }
 
             using it_diff_t = typename std::iterator_traits<decltype(index_.begin())>::difference_type;
-            auto it  = data_.end();
+            auto dit = data_.end();
             auto iit = index_.begin() + safe_cast<it_diff_t>(pos);
             if (iit != index_.end()) {
-                it = data_.insert(*iit, { moveOrConstructKey(key), std::move(value) });
+                dit = data_.insert(*iit, { moveOrConstructKey(std::move(key)), std::move(value) });
             }
             else
             {
-                data_.push_back({ moveOrConstructKey(key), std::move(value) });
-                it = --data_.end();
+                data_.push_back({ moveOrConstructKey(std::move(key)), std::move(value) });
+                dit = --data_.end();
             }
 
-            map_[crefOrKey(it->first)] = it;
-            index_.insert(iit, it);
-            return { it, true };
+            //map_[crefOrKey(dit->first)] = dit;
+            map_[(dit->first)] = dit;
+            index_.insert(iit, dit);
+            return { dit, true };
         }
 
         /**
@@ -617,7 +601,7 @@ namespace libim {
          *
          * @param pos - The position of the element to remove.
          */
-        void erase(Idx pos)
+        void erase(idx_t pos)
         {
             eraseByIdx(pos);
         }
@@ -707,22 +691,20 @@ namespace libim {
     private:
         static inline auto crefOrKey(key_const_reference key)
         {
-            if constexpr (isStringKey) return key;
-            else return std::cref(key);
+           return std::cref(key);
         }
 
         static inline auto moveOrConstructKey(key_rvalue_reference key)
         {
-            if constexpr (isStringKey) return std::string(key);
-            else return std::move(key);
+            return std::move(key);
         }
 
-        Idx getItrIdx(typename ContainerType::const_iterator itr) const
+        idx_t getItrIdx(typename ContainerType::const_iterator itr) const
         {
-            return safe_cast<Idx>(std::distance(data_.begin(), itr));
+            return safe_cast<idx_t>(std::distance(data_.begin(), itr));
         }
 
-        iterator eraseByIdx(Idx idx)
+        iterator eraseByIdx(idx_t idx)
         {
             auto it = end();
             if (idx < index_.size())
@@ -744,7 +726,8 @@ namespace libim {
             map_.reserve(data_.size());
             for(auto it = data_.begin(); it != data_.end(); it++)
             {
-                map_[crefOrKey(it->first)] = it;
+                //map_[crefOrKey(it->first)] = it;
+                map_[(it->first)] = it;
                 index_.push_back(it);
             }
         }
@@ -753,7 +736,7 @@ namespace libim {
         // TODO: When moved to C++20 refactor MapType to directly support std::string_view
         using IndexType = std::deque<typename ContainerType::iterator>;
         using MapType = std::unordered_map<
-            MapKey,
+            MapKeyT,
             typename ContainerType::iterator,
             Hash,
             KeyEqual
@@ -764,10 +747,9 @@ namespace libim {
         MapType map_;
     };
 
-
-    template<typename T,typename KeyT, typename Hash, typename KeyEqual>
+    template<typename T,typename KeyT, typename LookupKeyT, typename MapKeyT, typename Hash, typename KeyEqual>
     template <typename ValueT, typename ContainerIterator>
-    class IndexMap<T, KeyT, Hash, KeyEqual>::IndexMapIterator
+    class IndexMap<T, KeyT, LookupKeyT, MapKeyT, Hash, KeyEqual>::IndexMapIterator
     {
         using IterTraits = std::iterator_traits<ContainerIterator>;
         ContainerIterator it_;
@@ -777,15 +759,15 @@ namespace libim {
             return it_;
         }
 
-        friend class IndexMap<T, KeyT>;
+        friend class IndexMap<T, KeyT, LookupKeyT, MapKeyT, Hash, KeyEqual>;
         IndexMapIterator(ContainerIterator it) : it_(it) {}
 
     public:
         using iterator_category = typename IterTraits::iterator_category;
-        using value_type = ValueT;
-        using difference_type = typename IterTraits::difference_type;
-        using pointer = std::conditional_t<std::is_const_v<typename IterTraits::pointer>, const value_type*, value_type*>;
-        using reference = std::conditional_t<std::is_const_v<typename IterTraits::reference>, const value_type, value_type>&;
+        using value_type        = ValueT;
+        using difference_type   = typename IterTraits::difference_type;
+        using pointer           = std::conditional_t<std::is_const_v<typename IterTraits::pointer>, const value_type*, value_type*>;
+        using reference         = std::conditional_t<std::is_const_v<typename IterTraits::reference>, const value_type, value_type>&;
 
         template<typename U, typename W>
         IndexMapIterator(IndexMapIterator<U, W> other) : it_(other.it_)
@@ -880,5 +862,17 @@ namespace libim {
             return it_ >= rhs.it_;
         }
     };
+
+    // Case-insensitive string key UniqueTable
+    template<typename T>
+    using Table = IndexMap<std::string, T, std::string_view,  std::string_view,
+         std::hash<std::string_view>, std::equal_to<std::string_view>
+    >;
+
+    // Case sensitive string key UniqueTable
+    template<typename T>
+    using UniqueTable = IndexMap<std::string, T, std::string_view,  std::string_view,
+        StringCaseInsensitiveHash, StringCaseInsensitiveEqual
+    >;
 }
 #endif // LIBIM_INDEXMAP_H

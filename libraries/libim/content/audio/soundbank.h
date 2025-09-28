@@ -28,14 +28,14 @@ namespace libim::content::audio
         void setHandleSeed(SoundHandle seed);
 
         /**
-         * Returns IndexMap of sounds in track.
+         * Returns UniqueTable of sounds in track.
          *
          * @param trackIdx - Track index.
-         * @return Reference to IndexMap of track sounds.
+         * @return Reference to UniqueTable of track sounds.
          *
          * @throw SoundBankError - If trackIdx is out of range.
          */
-        const IndexMap<Sound>& getTrack(std::size_t trackIdx) const;
+        const UniqueTable<Sound>& getTrack(std::size_t trackIdx) const;
 
         /**
          * Loads sound from stream to track.

@@ -155,7 +155,7 @@ void NDY::writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxSound
     );
 }
 
-void NDY::writeSection_Sounds(TextResourceWriter& rw, std::size_t maxSounds, const IndexMap<Sound>& track)
+void NDY::writeSection_Sounds(TextResourceWriter& rw, std::size_t maxSounds, const UniqueTable<Sound>& track)
 {
     writeResourceSection<false>(rw,
         "#### Sound information  #####"sv,
@@ -185,7 +185,7 @@ void NDY::writeSection_Materials(text::TextResourceWriter& rw, const std::vector
     );
 }
 
-void NDY::writeSection_Materials(TextResourceWriter& rw, const IndexMap<Material>& materials)
+void NDY::writeSection_Materials(TextResourceWriter& rw, const Table<Material>& materials)
 {
     writeResourceSection<true>(rw,
         "##### Material information #####"sv,
@@ -269,7 +269,7 @@ void NDY::writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxKe
     );
 }
 
-void NDY::writeSection_Keyframes(TextResourceWriter &rw, std::size_t maxKeyframes, const IndexMap<Animation>& keyframes)
+void NDY::writeSection_Keyframes(TextResourceWriter &rw, std::size_t maxKeyframes, const UniqueTable<Animation>& keyframes)
 {
     writeResourceSection<true>(rw,
         "##### Keyframe information #####"sv,

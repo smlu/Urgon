@@ -997,7 +997,7 @@ namespace libim::content::asset {
         }
     }
 
-    CndThing ndyParseTemplate(TextResourceReader& rr, const IndexMap<CndThing>& templates)
+    CndThing ndyParseTemplate(TextResourceReader& rr, const UniqueTable<CndThing>& templates)
     {
         try
         {
@@ -1049,7 +1049,7 @@ namespace libim::content::asset {
         }
     }
 
-    CndThing ndyParseThing(TextResourceReader& rr, const IndexMap<CndThing>& templates)
+    CndThing ndyParseThing(TextResourceReader& rr, const UniqueTable<CndThing>& templates)
     {
         try
         {

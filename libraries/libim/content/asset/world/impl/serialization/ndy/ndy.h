@@ -6,8 +6,8 @@
 #include <libim/content/asset/cog/cog.h>
 #include <libim/content/asset/cog/cogscript.h>
 #include <libim/content/asset/material/material.h>
-#include <libim/content/asset/world/sector.h>
 #include <libim/content/asset/world/georesource.h>
+#include <libim/content/asset/world/sector.h>
 #include <libim/content/audio/sound.h>
 #include <libim/content/text/text_resource_reader.h>
 #include <libim/content/text/text_resource_writer.h>
@@ -52,13 +52,13 @@ namespace libim::content::asset {
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Sounds(text::TextResourceReader& rr); // Returns pair of max no. of world sounds and the list of wav file names
         static void writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxSounds, const std::vector<std::string>& sounds);
-        static void writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxSounds, const IndexMap<audio::Sound>& track);
+        static void writeSection_Sounds(text::TextResourceWriter& rw, std::size_t maxSounds, const UniqueTable<audio::Sound>& track);
 
         /* Parse/Write for section Materials */
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Materials(text::TextResourceReader& rr); // Returns pair of max no. of world materials and the list of mat file names
         static void writeSection_Materials(text::TextResourceWriter& rw, const std::vector<std::string>& materials);
-        static void writeSection_Materials(text::TextResourceWriter& rw, const IndexMap<Material>& materials);
+        static void writeSection_Materials(text::TextResourceWriter& rw, const Table<Material>& materials);
 
         /* Parse/Write for section Georesource */
         [[nodiscard]] static Georesource parseSection_Georesource(text::TextResourceReader& rr);
@@ -87,7 +87,7 @@ namespace libim::content::asset {
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
                     parseSection_Keyframes(text::TextResourceReader& rr); // Returns pair of max no. of world keyframes and the list of key file names
         static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxKeyframes, const std::vector<std::string>& keyframes);
-        static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxKeyframes, const IndexMap<Animation>& keyframes);
+        static void writeSection_Keyframes(text::TextResourceWriter& rw, std::size_t maxKeyframes, const UniqueTable<Animation>& keyframes);
 
         /* Parse/Write for section AnimClasses */
         [[nodiscard]] static std::pair<std::size_t, std::vector<std::string>>
@@ -106,21 +106,21 @@ namespace libim::content::asset {
 
         /* Parse/Write for section Cogs */
         [[nodiscard]] static std::pair<std::size_t, std::vector<SharedRef<Cog>>>
-                    parseSection_Cogs(text::TextResourceReader& rr, const IndexMap<SharedRef<CogScript>>& scripts); // Returns pair of max no. of world cogs and list of world cogs
+                    parseSection_Cogs(text::TextResourceReader& rr, const UniqueTable<SharedRef<CogScript>>& scripts); // Returns pair of max no. of world cogs and list of world cogs
         static void writeSection_Cogs(text::TextResourceWriter& rw, std::size_t maxCogs, const std::vector<SharedRef<Cog>>& cogs);
 
         /* Parse/Write for section Templates */
-        [[nodiscard]] static IndexMap<CndThing> parseTemplateList(text::TextResourceReader& rr);
-        [[nodiscard]] static IndexMap<CndThing> parseTemplateList(text::TextResourceReader&& rr);
+        [[nodiscard]] static UniqueTable<CndThing> parseTemplateList(text::TextResourceReader& rr);
+        [[nodiscard]] static UniqueTable<CndThing> parseTemplateList(text::TextResourceReader&& rr);
 
-        [[nodiscard]] static std::pair<std::size_t, IndexMap<CndThing>>
+        [[nodiscard]] static std::pair<std::size_t, UniqueTable<CndThing>>
         parseSection_Templates(text::TextResourceReader& rr);
 
-        static void writeSection_Templates(text::TextResourceWriter& rw, std::size_t maxTemplates, const IndexMap<CndThing>& templates);
+        static void writeSection_Templates(text::TextResourceWriter& rw, std::size_t maxTemplates, const UniqueTable<CndThing>& templates);
 
         /* Parse/Write for section Things */
-        [[nodiscard]] static std::vector<CndThing> parseSection_Things(text::TextResourceReader& r, const IndexMap<CndThing>& templates);
-        static void writeSection_Things(text::TextResourceWriter& rw, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates);
+        [[nodiscard]] static std::vector<CndThing> parseSection_Things(text::TextResourceReader& r, const UniqueTable<CndThing>& templates);
+        static void writeSection_Things(text::TextResourceWriter& rw, const std::vector<CndThing>& things, const UniqueTable<CndThing>& templates);
 
         /* Parse/Write for section PVS */
         /* Note: Section PVS is optional and it doesn't need to be written. */

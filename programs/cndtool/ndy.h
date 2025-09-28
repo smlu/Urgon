@@ -46,7 +46,7 @@ namespace cndtool {
         std::pair<std::size_t, std::vector<std::string>> soundClasses;
         std::pair<std::size_t, std::vector<std::string>> cogScripts;
         std::pair<std::size_t, std::vector<SharedRef<Cog>>> cogs;
-        std::pair<std::size_t, IndexMap<CndThing>> templates;
+        std::pair<std::size_t, UniqueTable<CndThing>> templates;
         std::vector<CndThing> things;
         ByteArray pvs;
     };

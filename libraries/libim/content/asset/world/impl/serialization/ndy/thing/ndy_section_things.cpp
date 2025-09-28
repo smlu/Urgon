@@ -18,9 +18,9 @@ using namespace std::string_view_literals;
 static constexpr auto kWorldTemplates = "World templates"sv;
 static constexpr auto kWorldThings    = "World things"sv;
 
-IndexMap<CndThing> NDY::parseTemplateList(text::TextResourceReader& rr)
+UniqueTable<CndThing> NDY::parseTemplateList(text::TextResourceReader& rr)
 {
-    return rr.readList<IndexMap<CndThing>, /*hasRowIdxs=*/false>(
+    return rr.readList<UniqueTable<CndThing>, /*hasRowIdxs=*/false>(
         [](TextResourceReader& rr, const auto& templates, auto rowIdx, CndThing& t) {
             t = ndyParseTemplate(rr, templates);
         },
@@ -29,12 +29,12 @@ IndexMap<CndThing> NDY::parseTemplateList(text::TextResourceReader& rr)
     });
 }
 
-IndexMap<CndThing> NDY::parseTemplateList(text::TextResourceReader&& rr)
+UniqueTable<CndThing> NDY::parseTemplateList(text::TextResourceReader&& rr)
 {
     return parseTemplateList(rr);
 }
 
-std::pair<std::size_t, IndexMap<CndThing>>
+std::pair<std::size_t, UniqueTable<CndThing>>
 NDY::parseSection_Templates(text::TextResourceReader& rr)
 {
     const std::size_t sizeTemplates = rr.readKey<std::size_t>(kWorldTemplates);
@@ -45,7 +45,7 @@ NDY::parseSection_Templates(text::TextResourceReader& rr)
     return { sizeTemplates, templates };
 }
 
-void NDY::writeSection_Templates(TextResourceWriter& rw, std::size_t maxTemplates, const IndexMap<CndThing>& templates)
+void NDY::writeSection_Templates(TextResourceWriter& rw, std::size_t maxTemplates, const UniqueTable<CndThing>& templates)
 {
     rw.writeLine("##### Templates information ####"sv);
     rw.writeSection(kSectionTemplates, /*overline=*/ false);
@@ -61,7 +61,7 @@ void NDY::writeSection_Templates(TextResourceWriter& rw, std::size_t maxTemplate
     rw.writeEol();
 }
 
-std::vector<CndThing> NDY::parseSection_Things(text::TextResourceReader& rr, const IndexMap<CndThing>& templates)
+std::vector<CndThing> NDY::parseSection_Things(text::TextResourceReader& rr, const UniqueTable<CndThing>& templates)
 {
     const std::size_t sizeThings = rr.readKey<std::size_t>(kWorldThings);
     auto things = rr.readList<std::vector<CndThing>, /*hasRowIdxs*/false>( // Note, row idx are read by ndyParseThing
@@ -82,7 +82,7 @@ std::vector<CndThing> NDY::parseSection_Things(text::TextResourceReader& rr, con
     return things;
 }
 
-void NDY::writeSection_Things(TextResourceWriter& rw, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates)
+void NDY::writeSection_Things(TextResourceWriter& rw, const std::vector<CndThing>& things, const UniqueTable<CndThing>& templates)
 {
     rw.writeLine("##### Things information ####"sv);
     rw.writeSection(kSectionThings, /*overline=*/ false);

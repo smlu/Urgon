@@ -25,11 +25,11 @@ std::size_t CND::getOffset_Keyframes(const InputStream& istream, const CndHeader
     return getOffset_Sprites(istream, header) + header.numSprites * sizeof(CndResourceName);
 }
 
-IndexMap<Animation> CND::parseSection_Keyframes(const InputStream& istream, const CndHeader& header)
+UniqueTable<Animation> CND::parseSection_Keyframes(const InputStream& istream, const CndHeader& header)
 {
     try
     {
-        IndexMap<Animation>  animations;
+        UniqueTable<Animation>  animations;
 
         /* Return if no materials are present in file*/
         if(header.numKeyframes < 1)
@@ -93,7 +93,7 @@ IndexMap<Animation> CND::parseSection_Keyframes(const InputStream& istream, cons
     }
 }
 
-IndexMap<Animation> CND::readKeyframes(const InputStream& istream)
+UniqueTable<Animation> CND::readKeyframes(const InputStream& istream)
 {
     auto cndHeader = readHeader(istream);
 
@@ -109,7 +109,7 @@ IndexMap<Animation> CND::readKeyframes(const InputStream& istream)
     return parseSection_Keyframes(istream, cndHeader);
 }
 
-void CND::writeSection_Keyframes(OutputStream& ostream, const IndexMap<Animation>& animations)
+void CND::writeSection_Keyframes(OutputStream& ostream, const UniqueTable<Animation>& animations)
 {
     try
     {

@@ -471,7 +471,7 @@ int execCmdAdd(std::string_view scmd, const CndToolArgs& args)
     return 1;
 }
 
-void writeAnimations(const IndexMap<Animation>& animations, const fs::path& outDir, const std::string& cndName, const ExtractOptions& opt)
+void writeAnimations(const UniqueTable<Animation>& animations, const fs::path& outDir, const std::string& cndName, const ExtractOptions& opt)
 {
     if (animations.isEmpty()) return;
 
@@ -505,7 +505,7 @@ void writeAnimations(const IndexMap<Animation>& animations, const fs::path& outD
     if (!opt.verboseOutput) std::cout << "\rExtracting animations... " << kSuccess << std::endl;
 }
 
-void writeMaterials(const IndexMap<Material>& materials, const fs::path& outDir, const ExtractOptions& opt)
+void writeMaterials(const Table<Material>& materials, const fs::path& outDir, const ExtractOptions& opt)
 {
     if (materials.isEmpty()) return;
 
@@ -562,7 +562,7 @@ void writeMaterials(const IndexMap<Material>& materials, const fs::path& outDir,
     if (!opt.verboseOutput) std::cout << "\rExtracting materials... " << kSuccess << std::endl;
 }
 
-void writeSounds(const IndexMap<Sound>& sounds, const fs::path& outDir, const ExtractOptions& opt)
+void writeSounds(const UniqueTable<Sound>& sounds, const fs::path& outDir, const ExtractOptions& opt)
 {
     if (sounds.isEmpty()) return;
     if (!opt.verboseOutput) printProgress("Extracting sounds... ", 0, 1);
@@ -605,7 +605,7 @@ void writeSounds(const IndexMap<Sound>& sounds, const fs::path& outDir, const Ex
     if (!opt.verboseOutput) std::cout << "\rExtracting sounds... " << kSuccess << std::endl;
 }
 
-std::size_t writeTemplates(const IndexMap<CndThing>& templates, const fs::path& outDir, const ExtractOptions& opt)
+std::size_t writeTemplates(const UniqueTable<CndThing>& templates, const fs::path& outDir, const ExtractOptions& opt)
 {
     if (templates.isEmpty()) return 0;
 
@@ -613,7 +613,7 @@ std::size_t writeTemplates(const IndexMap<CndThing>& templates, const fs::path& 
     const auto outPath = outDir / kTmplFilename;
 
     // Read any existing template file
-    IndexMap<CndThing> outTemplates;
+    UniqueTable<CndThing> outTemplates;
     if (fileExists(outPath))
     {
         LOG_DEBUG("Found existing file: % , reading existing template(s) ...", outPath);

@@ -64,9 +64,9 @@ namespace cndtool {
         return vfs.getFile(filename);
     }
 
-    IndexMap<Animation> loadAnimations(const VirtualFileSystem& vfs, const std::vector<std::string>& animFilenames)
+    UniqueTable<Animation> loadAnimations(const VirtualFileSystem& vfs, const std::vector<std::string>& animFilenames)
     {
-        IndexMap<Animation> animations;
+        UniqueTable<Animation> animations;
         for (const auto& animFilename : animFilenames)
         {
 
@@ -77,9 +77,9 @@ namespace cndtool {
         return animations;
     }
 
-    [[nodiscard]] IndexMap<Material> loadMaterials(const VirtualFileSystem& vfs, const std::vector<std::string>& materialFilenames)
+    [[nodiscard]] Table<Material> loadMaterials(const VirtualFileSystem& vfs, const std::vector<std::string>& materialFilenames)
     {
-        IndexMap<Material> materials;
+        Table<Material> materials;
         for (const auto& matFilename : materialFilenames)
         {
             auto file = searchFile(vfs, { kMaterialDir }, matFilename);
@@ -98,13 +98,13 @@ namespace cndtool {
         }
     }
 
-    [[nodiscard]] libim::IndexMap<SharedRef<CogScript>> loadCogScripts(const VirtualFileSystem& vfs, const std::vector<std::string>& scripts, bool bFixCogScripts)
+    [[nodiscard]] libim::UniqueTable<SharedRef<CogScript>> loadCogScripts(const VirtualFileSystem& vfs, const std::vector<std::string>& scripts, bool bFixCogScripts)
     {
         using namespace libim;
         using namespace libim::content::asset;
         namespace fs = std::filesystem;
 
-        IndexMap<SharedRef<CogScript>> stable;
+        UniqueTable<SharedRef<CogScript>> stable;
         stable.reserve(scripts.size());
 
         for(const auto& sname : scripts)
@@ -179,7 +179,7 @@ namespace cndtool {
         StringSet<> sounds;
         StringSet<> scripts;
         StringSet<> sprites;
-        IndexMap<uint32_t> materials;
+        UniqueTable<uint32_t> materials;
 
         void setDefault()
         {

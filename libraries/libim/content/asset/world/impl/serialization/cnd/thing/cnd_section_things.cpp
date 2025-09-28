@@ -48,7 +48,7 @@ using namespace std::string_view_literals;
 //    vs.getNext();
 
 
-[[nodiscard]] inline const CndThing* getBaseTemplate(std::string_view name, const IndexMap<CndThing>& templates)
+[[nodiscard]] inline const CndThing* getBaseTemplate(std::string_view name, const UniqueTable<CndThing>& templates)
 {
     if (name.empty() || iequal(name, "none"sv)) {
         return nullptr;
@@ -94,7 +94,7 @@ void thingAndBaseInfo(CndThing& thing, const CndThing* base, SetterT&& setter)
 
 
 template<typename Lambda>
-void parseThingList(const InputStream& istream, std::size_t numThings, const IndexMap<CndThing>& templates, Lambda&& insertThing)
+void parseThingList(const InputStream& istream, std::size_t numThings, const UniqueTable<CndThing>& templates, Lambda&& insertThing)
 {
     static_assert(sizeof(PathFrame) == 24);
 
@@ -307,7 +307,7 @@ void parseThingList(const InputStream& istream, std::size_t numThings, const Ind
 }
 
 template<typename Container>
-void writeThingList(OutputStream& ostream, const Container& c, const IndexMap<CndThing>& templates)
+void writeThingList(OutputStream& ostream, const Container& c, const UniqueTable<CndThing>& templates)
 {
     std::vector<CndThingHeader> headers(std::size(c));
     auto hit = headers.begin();
@@ -529,11 +529,11 @@ std::size_t CND::getOffset_Templates(const InputStream& istream, const CndHeader
            aSizes.at(1) * sizeof(CndResourceName);
 }
 
-IndexMap<CndThing> CND::parseSection_Templates(const InputStream& istream, const CndHeader& header)
+UniqueTable<CndThing> CND::parseSection_Templates(const InputStream& istream, const CndHeader& header)
 {
     try
     {
-        IndexMap<CndThing> templates;
+        UniqueTable<CndThing> templates;
         templates.reserve(header.numThingTemplates);
         parseThingList(istream, header.numThingTemplates, templates, [&](CndThing&& t){
             world_ser_assert(templates.pushBack(t.name, std::move(t)).second,
@@ -550,14 +550,14 @@ IndexMap<CndThing> CND::parseSection_Templates(const InputStream& istream, const
     }
 }
 
-IndexMap<CndThing> CND::readTemplates(const InputStream& istream)
+UniqueTable<CndThing> CND::readTemplates(const InputStream& istream)
 {
     auto header = readHeader(istream);
     istream.seek(getOffset_Templates(istream, header));
     return parseSection_Templates(istream, header);
 }
 
-void CND::writeSection_Templates(OutputStream& ostream, const IndexMap<CndThing>& templates)
+void CND::writeSection_Templates(OutputStream& ostream, const UniqueTable<CndThing>& templates)
 {
     try {
         writeThingList(ostream, templates, templates);
@@ -601,7 +601,7 @@ std::size_t CND::getOffset_Things(const InputStream& istream, const CndHeader& h
     return istream.tell();
 }
 
-std::vector<CndThing> CND::parseSection_Things(const InputStream& istream, const CndHeader& header, const IndexMap<CndThing>& templates)
+std::vector<CndThing> CND::parseSection_Things(const InputStream& istream, const CndHeader& header, const UniqueTable<CndThing>& templates)
 {
     try
     {
@@ -620,14 +620,14 @@ std::vector<CndThing> CND::parseSection_Things(const InputStream& istream, const
     }
 }
 
-std::vector<CndThing> CND::readThings(const InputStream& istream, const IndexMap<CndThing>& templates)
+std::vector<CndThing> CND::readThings(const InputStream& istream, const UniqueTable<CndThing>& templates)
 {
     auto header = readHeader(istream);
     istream.seek(getOffset_Things(istream, header));
     return parseSection_Things(istream, header, templates);
 }
 
-void CND::writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates)
+void CND::writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things, const UniqueTable<CndThing>& templates)
 {
     try {
         writeThingList(ostream, things, templates);

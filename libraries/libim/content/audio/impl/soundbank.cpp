@@ -1,8 +1,8 @@
 #include "../soundbank.h"
 #include "../soundbank_error.h"
 #include "sbtrack.h"
-#include "sound_data.h"
 #include "serialization/soundbank_serializer.h"
+#include "sound_data.h"
 
 #include <libim/common.h>
 #include <libim/content/asset/world/impl/serialization/cnd/cnd.h>
@@ -51,7 +51,7 @@ void SoundBank::setHandleSeed(SoundHandle seed)
     ptrImpl_->nextHandle = seed;
 }
 
-const IndexMap<Sound>& SoundBank::getTrack(std::size_t trackIdx) const
+const UniqueTable<Sound>& SoundBank::getTrack(std::size_t trackIdx) const
 {
     if (trackIdx >= ptrImpl_->tracks.size()) {
         throw SoundBankError("trackIdx out of range!");

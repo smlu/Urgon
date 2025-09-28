@@ -29,9 +29,9 @@ std::size_t CND::getOffset_Materials(const InputStream& istream)
     return istream.tell();
 }
 
-IndexMap<Material> CND::parseSection_Materials(const InputStream& istream, const CndHeader& header)
+Table<Material> CND::parseSection_Materials(const InputStream& istream, const CndHeader& header)
 {
-    IndexMap<Material> materials;
+    Table<Material> materials;
     try
     {
         /* Return if no materials are present in file*/
@@ -93,7 +93,12 @@ IndexMap<Material> CND::parseSection_Materials(const InputStream& istream, const
             /* Init new material */
             Material mat(matHeader.name);
             mat.setCells(std::move(textures));
-            materials.pushBack(matHeader.name, std::move(mat));
+
+                       if ( mat.name() == "olv_Wall_Facade_B.mat" )
+            {
+                int aa = 0;
+            }
+                       materials.pushBack(matHeader.name, std::move(mat)); 
         }
 
         if (itBuffer != vecPixdataBuff.cend()) {
@@ -106,19 +111,19 @@ IndexMap<Material> CND::parseSection_Materials(const InputStream& istream, const
     catch (const std::exception& e)
     {
         throw CNDError("parseSection_Materials",
-            "An exception was encountered while parsing secion 'Materials': "s + e.what()
+            "An exception was encountered while parsing section 'Materials': "s + e.what()
         );
     }
 }
 
-IndexMap<Material> CND::readMaterials(const InputStream& istream)
+Table<Material> CND::readMaterials(const InputStream& istream)
 {
     auto cndHeader = readHeader(istream);
     istream.seek(getOffset_Materials(istream));
     return parseSection_Materials(istream, cndHeader);
 }
 
-void CND::writeSection_Materials(OutputStream& ostream, const IndexMap<Material>& materials)
+void CND::writeSection_Materials(OutputStream& ostream, const Table<Material>& materials)
 {
     try
     {
@@ -138,7 +143,7 @@ void CND::writeSection_Materials(OutputStream& ostream, const IndexMap<Material>
             h.width        = mat.width();
             h.height       = mat.height();
             h.colorInfo    = mat.format();
-            h.celCount = safe_cast<decltype(h.celCount)>(mat.cells().size());
+            h.celCount     = safe_cast<decltype(h.celCount)>(mat.cells().size());
             h.mipLevels    = safe_cast<decltype(h.mipLevels)>(mat.cells().at(0).mipLevels());
             cndHeaders.push_back(h);
 
@@ -154,7 +159,7 @@ void CND::writeSection_Materials(OutputStream& ostream, const IndexMap<Material>
         /* Write material headers */
         ostream.write(cndHeaders);
 
-        /* Write pixeldata buffer of all materials to stream */
+        /* Write pixel data buffer of all materials to stream */
         ostream.write(pixdataBuf);
     }
     catch (const CNDError&) { throw; }

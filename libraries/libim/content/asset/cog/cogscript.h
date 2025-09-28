@@ -1,8 +1,8 @@
 #ifndef LIBIM_COGSCRIPT_H
 #define LIBIM_COGSCRIPT_H
+#include "../asset.h"
 #include "cogsymbol.h"
 #include "cogvtable.h"
-#include "../asset.h"
 
 #include <libim/io/stream.h>
 #include <libim/types/flags.h>
@@ -30,7 +30,7 @@ namespace libim::content::asset {
         };
 
         Flags<Flag> flags;
-        IndexMap<CogSymbol> symbols;
+        UniqueTable<CogSymbol> symbols;
 
         CogVTable::Id getNextVTableId() const
         {

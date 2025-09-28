@@ -366,7 +366,7 @@ std::size_t CND::getOffset_Cogs(const InputStream& istream, const CndHeader& hea
     return getOffset_CogScripts(istream, header) + sizeof(CndResourceName) * header.numCogScripts;
 }
 
-std::vector<SharedRef<Cog>> CND::parseSection_Cogs(const InputStream& istream, const CndHeader& header, const IndexMap<SharedRef<CogScript>>& scripts)
+std::vector<SharedRef<Cog>> CND::parseSection_Cogs(const InputStream& istream, const CndHeader& header, const UniqueTable<SharedRef<CogScript>>& scripts)
 {
     try
     {
@@ -425,7 +425,7 @@ std::vector<SharedRef<Cog>> CND::parseSection_Cogs(const InputStream& istream, c
     }
 }
 
-std::vector<SharedRef<Cog>> CND::readCogs(const InputStream& istream, const IndexMap<SharedRef<CogScript>>& scripts)
+std::vector<SharedRef<Cog>> CND::readCogs(const InputStream& istream, const UniqueTable<SharedRef<CogScript>>& scripts)
 {
     auto header = readHeader(istream);
     istream.seek(getOffset_Cogs(istream, header));

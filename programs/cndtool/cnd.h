@@ -6,8 +6,8 @@
 #include <cmdutils/cmdutils.h>
 
 #include <libim/content/asset/material/material.h>
-#include <libim/content/asset/world/impl/serialization/cnd/cnd.h>
 #include <libim/content/asset/world/impl/serialization/cnd/animation/cnd_key_structs.h>
+#include <libim/content/asset/world/impl/serialization/cnd/cnd.h>
 #include <libim/content/asset/world/impl/serialization/cnd/material/cnd_mat_header.h>
 #include <libim/content/audio/soundbank.h>
 
@@ -27,7 +27,7 @@ namespace cndtool {
     using namespace libim::content::audio;
     using namespace libim::utils;
 
-    bool patchCndMaterials(const fs::path& cndFile, const IndexMap<Material>& materials)
+    bool patchCndMaterials(const fs::path& cndFile, const Table<Material>& materials)
     {
         const fs::path patchedCndFile = cndFile.string() + ".patched";
         try
@@ -80,7 +80,7 @@ namespace cndtool {
         }
     }
 
-    bool patchCndAnimations(const fs::path& cndFile, const IndexMap<Animation>& animations)
+    bool patchCndAnimations(const fs::path& cndFile, const UniqueTable<Animation>& animations)
     {
         const fs::path patchedCndFile = cndFile.string() + ".patched";
         try

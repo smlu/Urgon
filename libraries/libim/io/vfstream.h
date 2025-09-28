@@ -90,7 +90,7 @@ namespace libim {
     class VfContainer
     {
     public:
-        using MapType = IndexMap<SharedRef<VirtualFile>>;
+        using MapType = UniqueTable<SharedRef<VirtualFile>>;
         using ConstIterator = typename MapType::ContainerType::const_iterator;
 
         ConstIterator begin() const
@@ -119,7 +119,7 @@ namespace libim {
          * @param filePath - the file path of the virtual file
          * @param vf       - virtual file to add
          * @return true if file was added to container,
-         *         otherwise false mening the file with the same path already exists.
+         *         otherwise false meaning the file with the same path already exists.
          */
         bool add(const std::string& filePath, SharedRef<VirtualFile> vf)
         {

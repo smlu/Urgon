@@ -1,19 +1,19 @@
 project(
     ${PM_LIBIM}
     LANGUAGES CXX
-    VERSION 0.9.1
+    VERSION 0.10.0
 )
 
 # LibIM source
 file(GLOB_RECURSE
   LIBIM_HEADER_FILES
-  "*.h"
+  *.h
   [FOLLOW_SYMLINKS]
 )
 
 file(GLOB_RECURSE
   LIBIM_SRC_FILES
-  "*.cpp"
+  *.cpp
   [FOLLOW_SYMLINKS]
 )
 
@@ -42,3 +42,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   ZLIB::ZLIB
   PNG::PNG
 )
+
+# Organize source files in Visual Studio
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${LIBIM_SRC_FILES} ${LIBIM_HEADER_FILES})

@@ -168,10 +168,14 @@ namespace libim::content::asset {
         static void readSounds(const InputStream& istream, audio::SoundBank& bank, std::size_t trackIdx);
         static void writeSection_Sounds(OutputStream& ostream, audio::SoundBank& bank, std::size_t trackIdx);
 
+        // Note: There's a logical bug in 09_olv.cnd where mixed case 'olv_Wall_Facade_B.mat' is in list twice. 
+        //       We have to use case-sensitive map  here to allow both entries, otherwise second entry would not be inserted
+        //       and level surface index would be wrong from that point on.
+        //       There might be more of these cases in other CND files.
         [[nodiscard]] static std::size_t getOffset_Materials(const InputStream& istream);
-        [[nodiscard]] static IndexMap<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.
-        [[nodiscard]] static IndexMap<Material> readMaterials(const InputStream& istream);
-        static void writeSection_Materials(OutputStream& ostream, const IndexMap<Material>& materials);
+        [[nodiscard]] static Table<Material> parseSection_Materials(const InputStream& istream, const CndHeader& header); // Reads materials section. Offset of istream hast to be at beginning of material section.
+        [[nodiscard]] static Table<Material> readMaterials(const InputStream& istream);
+        static void writeSection_Materials(OutputStream& ostream, const Table<Material>& materials);
 
         [[nodiscard]] static std::size_t getOffset_Georesource(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static Georesource parseSection_Georesource(const InputStream& istream, const CndHeader& cndHeader);
@@ -199,9 +203,9 @@ namespace libim::content::asset {
         static void writeSection_Sprites(OutputStream& ostream, const std::vector<std::string>& sprites);
 
         [[nodiscard]] static std::size_t getOffset_Keyframes(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static IndexMap<Animation> parseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
-        [[nodiscard]] static IndexMap<Animation> readKeyframes(const InputStream& istream);
-        static void writeSection_Keyframes(OutputStream& ostream, const IndexMap<Animation>& animations);
+        [[nodiscard]] static UniqueTable<Animation> parseSection_Keyframes(const InputStream& istream, const CndHeader& header); // Reads keyframes section. Offset of istream hast to be at beginning of keyframe section.
+        [[nodiscard]] static UniqueTable<Animation> readKeyframes(const InputStream& istream);
+        static void writeSection_Keyframes(OutputStream& ostream, const UniqueTable<Animation>& animations);
 
         [[nodiscard]] static std::size_t getOffset_AnimClasses(const InputStream& istream, const CndHeader& header);
         [[nodiscard]] static std::vector<std::string> parseSection_AnimClasses(const InputStream& istream, const CndHeader& header);
@@ -219,19 +223,19 @@ namespace libim::content::asset {
         static void writeSection_CogScripts(OutputStream& ostream, const std::vector<std::string>& scripts);
 
         [[nodiscard]] static std::size_t getOffset_Cogs(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<SharedRef<Cog>> parseSection_Cogs(const InputStream& istream, const CndHeader& header, const IndexMap<SharedRef<CogScript>>& scripts);
-        [[nodiscard]] static std::vector<SharedRef<Cog>> readCogs(const InputStream& istream, const IndexMap<SharedRef<CogScript>>& scripts);
+        [[nodiscard]] static std::vector<SharedRef<Cog>> parseSection_Cogs(const InputStream& istream, const CndHeader& header, const UniqueTable<SharedRef<CogScript>>& scripts);
+        [[nodiscard]] static std::vector<SharedRef<Cog>> readCogs(const InputStream& istream, const UniqueTable<SharedRef<CogScript>>& scripts);
         static void writeSection_Cogs(OutputStream& ostream, const std::vector<SharedRef<Cog>>& cogs);
 
         [[nodiscard]] static std::size_t getOffset_Templates(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static IndexMap<CndThing> parseSection_Templates(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static IndexMap<CndThing> readTemplates(const InputStream& istream);
-        static void writeSection_Templates(OutputStream& ostream, const IndexMap<CndThing>& templates);
+        [[nodiscard]] static UniqueTable<CndThing> parseSection_Templates(const InputStream& istream, const CndHeader& header);
+        [[nodiscard]] static UniqueTable<CndThing> readTemplates(const InputStream& istream);
+        static void writeSection_Templates(OutputStream& ostream, const UniqueTable<CndThing>& templates);
 
         [[nodiscard]] static std::size_t getOffset_Things(const InputStream& istream, const CndHeader& header);
-        [[nodiscard]] static std::vector<CndThing> parseSection_Things(const InputStream& istream, const CndHeader& header, const IndexMap<CndThing>& templates);
-        [[nodiscard]] static std::vector<CndThing> readThings(const InputStream& istream, const IndexMap<CndThing>& templates);
-        static void writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things, const IndexMap<CndThing>& templates);
+        [[nodiscard]] static std::vector<CndThing> parseSection_Things(const InputStream& istream, const CndHeader& header, const UniqueTable<CndThing>& templates);
+        [[nodiscard]] static std::vector<CndThing> readThings(const InputStream& istream, const UniqueTable<CndThing>& templates);
+        static void writeSection_Things(OutputStream& ostream, const std::vector<CndThing>& things, const UniqueTable<CndThing>& templates);
 
         // Note: Section PVS is optional and it doesn't need to be written but performance will be degraded.
         //       Also if this section is not written, the sectors in sector section should have pvsIdx member set to -1

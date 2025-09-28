@@ -824,7 +824,7 @@ namespace libim::content::asset {
         rw.write(base.empty() ? kNone : base, /*fieldWidth=*/18);
     }
 
-    static void writeThingParams(TextResourceWriter& rw, const CndThing& t, const IndexMap<CndThing>& templates, bool bTemplateThing = false)
+    static void writeThingParams(TextResourceWriter& rw, const CndThing& t, const UniqueTable<CndThing>& templates, bool bTemplateThing = false)
     {
         OptionalRef<const CndThing> baseTemplate;
         if(templates.contains(t.baseName)) {
@@ -860,7 +860,7 @@ namespace libim::content::asset {
         ndyWriteThingControlInfo(rw, t, baseTemplate);
     }
 
-    inline void writeTemplateParams(TextResourceWriter& rw, const CndThing& t, const IndexMap<CndThing>& templates)
+    inline void writeTemplateParams(TextResourceWriter& rw, const CndThing& t, const UniqueTable<CndThing>& templates)
     {
         writeThingParams(rw, t, templates, true);
     }
@@ -875,7 +875,7 @@ namespace libim::content::asset {
      * @param writeEnd - If true, writes template list header.
      */
     template<bool writeEnd = true>
-    void writeTemplateList(TextResourceWriter& rw, const IndexMap<CndThing>& templates, bool writeHeader = false)
+    void writeTemplateList(TextResourceWriter& rw, const UniqueTable<CndThing>& templates, bool writeHeader = false)
     {
         rw.writeList<writeEnd>(templates, [&](auto& rw, auto idx, const CndThing& t) {
             if(writeHeader && idx == 0) {
@@ -888,7 +888,7 @@ namespace libim::content::asset {
     }
 
     template<bool writeEnd = true>
-    void writeTemplateList(TextResourceWriter&& rw, const IndexMap<CndThing>& templates, bool writeHeader = false)
+    void writeTemplateList(TextResourceWriter&& rw, const UniqueTable<CndThing>& templates, bool writeHeader = false)
     {
         writeTemplateList<writeEnd>(rw, templates, writeHeader);
     }

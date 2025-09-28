@@ -21,7 +21,7 @@ namespace libim::content::audio {
     struct SoundBankTrack
     {
         bool isStatic = false;
-        IndexMap<Sound> sounds;
+        UniqueTable<Sound> sounds;
         std::shared_ptr<SoundCache> data;
 
         SoundBankTrack() :

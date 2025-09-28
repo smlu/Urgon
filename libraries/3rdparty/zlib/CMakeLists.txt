@@ -3,11 +3,12 @@
 cmake_minimum_required(VERSION 3.0.0)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
-project(zlib LANGUAGES C VERSION 1.2.13)
+project(zlib LANGUAGES C VERSION 1.3.1)
 
-set(VERSION "1.2.13")
+set(VERSION "1.3.1")
 set(ZLIB_SRC zlib)
-set(CMAKE_CURRENT_SOURCE_DIR ${ZLIB_SRC})
+# Don't modify CMAKE_CURRENT_SOURCE_DIR - use ZLIB_SOURCE_DIR instead
+set(ZLIB_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${ZLIB_SRC})
 
 option(ASM686 "Enable building i686 assembly implementation")
 option(AMD64 "Enable building amd64 assembly implementation")
@@ -67,7 +68,7 @@ if(MSVC)
     set(CMAKE_DEBUG_POSTFIX "d")
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    include_directories(${ZLIB_SOURCE_DIR})
 endif()
 
 if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
@@ -83,11 +84,11 @@ if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
 endif()
 
 set(ZLIB_PC ${CMAKE_CURRENT_BINARY_DIR}/zlib.pc)
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/zlib.pc.cmakein
+configure_file( ${ZLIB_SOURCE_DIR}/zlib.pc.cmakein
 		${ZLIB_PC} @ONLY)
-configure_file(	${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein
+configure_file(	${ZLIB_SOURCE_DIR}/zconf.h.cmakein
 		${CMAKE_CURRENT_BINARY_DIR}/zconf.h @ONLY)
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+# Remove global include_directories - use target_include_directories instead
 
 
 #============================================================================
@@ -96,37 +97,37 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR})
 
 set(ZLIB_PUBLIC_HDRS
     ${CMAKE_CURRENT_BINARY_DIR}/zconf.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/zlib.h
+    ${ZLIB_SOURCE_DIR}/zlib.h
 )
 
 set(ZLIB_PRIVATE_HDRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/crc32.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/deflate.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/gzguts.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/inffast.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/inffixed.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/inflate.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/inftrees.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/trees.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/zutil.h
+    ${ZLIB_SOURCE_DIR}/crc32.h
+    ${ZLIB_SOURCE_DIR}/deflate.h
+    ${ZLIB_SOURCE_DIR}/gzguts.h
+    ${ZLIB_SOURCE_DIR}/inffast.h
+    ${ZLIB_SOURCE_DIR}/inffixed.h
+    ${ZLIB_SOURCE_DIR}/inflate.h
+    ${ZLIB_SOURCE_DIR}/inftrees.h
+    ${ZLIB_SOURCE_DIR}/trees.h
+    ${ZLIB_SOURCE_DIR}/zutil.h
 )
 
 set(ZLIB_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/adler32.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/compress.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/crc32.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/deflate.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/gzclose.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/gzlib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/gzread.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/gzwrite.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/inflate.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/infback.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/inftrees.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/inffast.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/trees.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/uncompr.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/zutil.c
+    ${ZLIB_SOURCE_DIR}/adler32.c
+    ${ZLIB_SOURCE_DIR}/compress.c
+    ${ZLIB_SOURCE_DIR}/crc32.c
+    ${ZLIB_SOURCE_DIR}/deflate.c
+    ${ZLIB_SOURCE_DIR}/gzclose.c
+    ${ZLIB_SOURCE_DIR}/gzlib.c
+    ${ZLIB_SOURCE_DIR}/gzread.c
+    ${ZLIB_SOURCE_DIR}/gzwrite.c
+    ${ZLIB_SOURCE_DIR}/inflate.c
+    ${ZLIB_SOURCE_DIR}/infback.c
+    ${ZLIB_SOURCE_DIR}/inftrees.c
+    ${ZLIB_SOURCE_DIR}/inffast.c
+    ${ZLIB_SOURCE_DIR}/trees.c
+    ${ZLIB_SOURCE_DIR}/uncompr.c
+    ${ZLIB_SOURCE_DIR}/zutil.c
 )
 
 if(NOT MINGW)
@@ -169,7 +170,7 @@ if(MSVC)
 endif()
 
 # parse the full version number from zlib.h and include in ZLIB_FULL_VERSION
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/zlib.h _zlib_h_contents)
+file(READ ${ZLIB_SOURCE_DIR}/zlib.h _zlib_h_contents)
 string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
     "\\1" ZLIB_FULL_VERSION ${_zlib_h_contents})
 
@@ -191,19 +192,54 @@ endif(MINGW)
 
 add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 
+# Set the include directories for the target using absolute paths
+target_include_directories(zlibstatic PUBLIC
+    $<BUILD_INTERFACE:${ZLIB_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
 
+# Create an alias for the standard ZLIB::ZLIB target that many projects expect
+add_library(ZLIB::ZLIB ALIAS zlibstatic)
 
 if(UNIX)
     # On unix-like platforms the library is almost always called libz
    set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME z)
 endif()
 
+# Export variables for parent scope and cache for libpng to find
+set(ZLIB_LIBRARY zlibstatic CACHE INTERNAL "Zlib library target")
+set(ZLIB_LIBRARIES zlibstatic CACHE INTERNAL "Zlib libraries")
+set(ZLIB_INCLUDE_DIRS "${ZLIB_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}" CACHE INTERNAL "Zlib include directories")
+set(ZLIB_INCLUDE_DIR "${ZLIB_SOURCE_DIR}" CACHE INTERNAL "Zlib include directory")
+set(ZLIB_ROOT "${ZLIB_SOURCE_DIR}" CACHE INTERNAL "Zlib root directory")
+set(ZLIB_FOUND TRUE CACHE INTERNAL "Zlib found flag")
+set(ZLIB_VERSION_STRING "${ZLIB_FULL_VERSION}" CACHE INTERNAL "Zlib version string")
+
+# Also set them in parent scope
+set(ZLIB_LIBRARY zlibstatic PARENT_SCOPE)
+set(ZLIB_LIBRARIES zlibstatic PARENT_SCOPE)
+set(ZLIB_INCLUDE_DIRS "${ZLIB_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}" PARENT_SCOPE)
+set(ZLIB_INCLUDE_DIR "${ZLIB_SOURCE_DIR}" PARENT_SCOPE)
+set(ZLIB_ROOT "${ZLIB_SOURCE_DIR}" PARENT_SCOPE)
+set(ZLIB_FOUND TRUE PARENT_SCOPE)
+set(ZLIB_VERSION_STRING "${ZLIB_FULL_VERSION}" PARENT_SCOPE)
+
+# Install the library with export
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     install(TARGETS zlibstatic
+        EXPORT ZlibTargets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+    
+    # Install the export set
+    install(EXPORT ZlibTargets
+        FILE ZlibTargets.cmake
+        NAMESPACE ZLIB::
+        DESTINATION "${INSTALL_LIB_DIR}/cmake/zlib")
 endif()
+
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
 endif()
@@ -213,4 +249,3 @@ endif()
 if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
 endif()
-

@@ -16,32 +16,6 @@
 
 namespace libim {
 
-    /** A case-insensitive string hash function. */
-    struct StringCaseInsensitiveHash
-    {
-        size_t operator()(const std::string_view val) const
-        {
-            // FNV-1a hash function
-            // TODO: Use faster hash function for smaller strings with better avalanche effect.
-            //       Check MurmurHash3, CityHash....
-            #if defined(LIBIM_PLATFORM_64BIT)
-                static constexpr size_t fnvOffsetBasis = 14695981039346656037ULL;
-                static constexpr size_t fnvPrime       = 1099511628211ULL;
-            #else
-                static constexpr size_t fnvOffsetBasis = 2166136261U;
-                static constexpr size_t fnvPrime       = 16777619U;
-            #endif
-
-            std::size_t hash = fnvOffsetBasis;
-            for (auto c : val)
-            {
-                hash ^= static_cast<std::size_t>(std::tolower(c));
-                hash *= fnvPrime;
-            }
-            return hash;
-        }
-    };
-
     /**
      * Hash table which elements are ordered by insertion and mapped to the key.
      * Each element can be retrieved by the key or by the index.
